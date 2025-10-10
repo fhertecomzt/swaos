@@ -1,0 +1,294 @@
+.container_dashboard_tablas h3 {
+  /*Titulo de las tablas*/
+  color: #7c52f0;
+  padding: 10px;
+  width: 97%;
+  margin: auto;
+}
+table {
+  background-color: rgb(230, 230, 230);
+  border-collapse: collapse;
+  text-align: left;
+  padding: 10px;
+  margin: auto;
+  margin-left: 10px;
+  min-width: 97%;
+}
+thead {
+  background-color: #7c52f0;
+  color: white;
+}
+thead tr th {
+  border: 1px solid #aab7b8;
+  vertical-align: top;
+}
+th,
+td {
+  padding: 5px;
+}
+tbody tr td {
+  border: 1px solid #aab7b8;
+  padding: 0.8rem;
+}
+tr:nth-child(even) {
+  background-color: #c5c5c5;
+}
+tr:hover td {
+  background-color: #6d73e4;
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  transition: all 0.3s ease-in;
+}
+td img {
+  border-radius: 10px;
+}
+
+.tbl button {
+  display: inline-block;
+  border: none;
+  margin: 0 auto;
+  padding: 0.4rem;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+}
+/*Campos multilinea*/
+.inputmulticod {
+  height: 30px;
+  font-weight: 600;
+  width: 100px;
+}
+.inputmultiname {
+  height: 30px;
+  font-weight: 600;
+  width: 149px;
+}
+.inputmultidesc {
+  height: 30px;
+  font-weight: 600;
+  width: 85px;
+}
+.selecmulti {
+  height: 30px;
+  font-weight: 600;
+  width: 20px;
+}
+.inputmultiprecio {
+  height: 30px;
+  font-weight: 600;
+  width: 60px;
+}
+/*Campo imagen*/
+
+.file-upload-wrapper {
+  position: relative; /* Para posicionar el input encima */
+  overflow: hidden; /* Ocultar el input que sobresale */
+  display: inline-block; /* Para que ocupe solo el ancho necesario */
+}
+
+.file-upload-button {
+  background-color: #4caf50; /* Ejemplo de color de fondo */
+  color: white;
+  padding: 5px 2px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.file-upload-text {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 10px;
+  color: #13942b;
+}
+
+.file-upload-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0; /* Hacerlo completamente transparente */
+  width: 50%;
+  height: 50%;
+  cursor: pointer;
+}
+
+/* Opcional: Estilos al pasar el ratón por el botón */
+.file-upload-button:hover {
+  background-color: #45a049;
+}
+
+/* Botones de acciones */
+.eliminarfila {
+  background: none;
+  color: #ff0000;
+}
+.eliminarfila:hover {
+  background-color: #ffffff;
+  scale: 1.05;
+}
+
+/*alertas bajo stock*/
+.bajo-stock {
+  /*background-color: #ffe0b2 !important; /* Un color amarillo claro para indicar precaución */
+  /* O */
+  background-color: #f2737f !important; /* Un color rojo claro para indicar peligro */
+  /*color: #333 !important; /* Asegurar que el texto sea legible */
+}
+
+.bajo-stock td {
+  font-weight: bold !important; /* Opcional: hacer el texto más visible */
+  color: #ffffff !important; /* Asegurar que el texto sea legible */
+
+}
+
+
+.editar,
+.editarRol,
+.editarUser,
+.editarUserSup,
+.editarCat,
+.editarMarca,
+.editarTiposervicio,
+.editarEstadoservicio,
+.editarMpago,
+.editarImpuesto,
+.editarCliente,
+.editarProveedor,
+.editarProducto {
+  color: #002cee;
+  background: none;
+}
+.editar:hover,
+.editarRol:hover,
+.editarUser:hover,
+.editarUserSup:hover,
+.editarCat:hover,
+.editarMarca:hover,
+.editarTiposervicio:hover,
+.editarEstadoservicio:hover,
+.editarMpago:hover,
+.editarImpuesto:hover,
+.editarCliente:hover,
+.editarProveedor:hover,
+.editarProducto:hover {
+  background-color: #f2ff00;
+  scale: 1.05;
+}
+.eliminar,
+.eliminarRol,
+.eliminarUser,
+.eliminarUserSup,
+.eliminarCat,
+.eliminarMarca,
+.eliminarTiposervicio,
+.eliminarEstadoservicio,
+.eliminarMpago,
+.eliminarImpuesto,
+.eliminarCliente,
+.eliminarProveedor,
+.eliminarProducto {
+  background: none;
+  color: #ff0000;
+}
+.eliminar:hover,
+.eliminarRol:hover,
+.eliminarUser:hover,
+.eliminarUserSup:hover,
+.eliminarCat:hover,
+.eliminarMarca:hover,
+.eliminarTiposervicio:hover,
+.eliminarEstadoservicio:hover,
+.eliminarMpago:hover,
+.eliminarImpuesto:hover,
+.eliminarCliente:hover,
+.eliminarProveedor:hover,
+.eliminarProducto:hover {
+  background-color: #ffffff;
+  scale: 1.05;
+}
+
+#limpiar-busqueda {
+  padding: 5px 10px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 21px;
+  margin-top: 15px;
+  width: 30px;
+}
+
+#limpiar-busqueda:hover {
+  background-color: #d32f2f;
+}
+/*Estados activos o inactivos*/
+.tbl .btn-success {
+  background-color: #0aa629;
+  border-radius: 5px;
+  color: white;
+  padding: 5px 9px;
+}
+
+.tbl .btn-danger {
+  background-color: #ff5722;
+  border-radius: 5px;
+  color: white;
+  padding: 5px;
+}
+
+.darkmode thead {
+  background-color: #4b455f;
+  color: #c6c6c6;
+}
+.darkmode table {
+  background-color: #1f2937;
+}
+.darkmode td {
+  color: #dfe1e3;
+}
+.darkmode tr:nth-child(even) {
+  background-color: #374151;
+}
+
+/*Moviles Tablets, celulares****************************/
+@media (max-width: 768px) {
+  .containerr {
+    padding: 10px;
+    width: 100%;
+  }
+  .container_dashboard_tablas {
+    width: 95%;
+  }
+
+  thead {
+    display: none;
+  }
+  tr,
+  td {
+    display: block;
+    width: 100%;
+  }
+  tr {
+    margin-bottom: 1rem;
+  }
+  tbody tr td {
+    text-align: right;
+    position: relative;
+  }
+  .tbl td::before {
+    content: attr(data-lable);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    text-align: left;
+    padding-left: 1.2rem;
+  }
+  .btn-success,
+  .btn-danger {
+    border-radius: 5px !important;
+  }
+}
+@media only screen and (max-width: 576px) {
+}

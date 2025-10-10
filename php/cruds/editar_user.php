@@ -1,0 +1,167 @@
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+include "../conexion.php";
+
+// Inicializamos la respuesta
+$response = ["success" => false, "message" => ""];
+
+// Verificamos que el método sea POST
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  $idusuario = $_POST["editar-idusuario"] ?? null;
+  $usuario = $_POST["usuario"] ?? null;
+  $nombre = $_POST["nombre"] ?? null;
+  $papellido = $_POST["papellido"] ?? null;
+  $sapellido = $_POST["sapellido"] ?? null;
+  $rol = $_POST["rol"] ?? null;
+  $password1 = $_POST["password1"] ?? null;
+  $tienda = $_POST["tienda"] ?? null;
+  // Imagen
+  $imagen = $_FILES["imagen"]["name"] ?? null;
+  $imagenTmp = $_FILES["imagen"]["tmp_name"] ?? null;
+
+  $comision = $_POST["comision"] ?? null;
+  $estatus = $_POST["estatus"] ?? null;
+
+  // Sanitización y validación de datos
+  $idusuario = filter_var($idusuario, FILTER_SANITIZE_NUMBER_INT);
+  if (!$idusuario || !filter_var($idusuario, FILTER_VALIDATE_INT)) {
+    $response["message"] = "El ID del usuario es inválido.";
+    echo json_encode($response);
+    exit;
+  }
+
+  // Verificar si $rol es un ID o un nombre
+  if (!is_numeric($rol)) {
+    // Buscar el ID del rol por nombre
+    $consulta_rol = $dbh->prepare("SELECT idrol FROM roles WHERE nomrol = ?");
+    $consulta_rol->execute([$rol]);
+    $rol_data = $consulta_rol->fetch(PDO::FETCH_ASSOC);
+
+    if ($rol_data) {
+      $rol = $rol_data['idrol'];
+    } else {
+      // Manejar el error si no se encuentra el rol
+      echo json_encode(['success' => false, 'message' => 'Rol no encontrado.']);
+      exit;
+    }
+  }
+
+  // Verificar si $tienda es un ID o un nombre
+  if (!is_numeric($tienda)) {
+    // Buscar el ID del tienda por nombre
+    $consulta_tienda = $dbh->prepare("SELECT idtienda FROM tiendas WHERE nomtienda = ?");
+    $consulta_tienda->execute([$tienda]);
+    $tienda_data = $consulta_tienda->fetch(PDO::FETCH_ASSOC);
+
+    if ($tienda_data) {
+      $tienda = $tienda_data['idtienda'];
+    } else {
+      // Manejar el error si no se encuentra el tienda
+      echo json_encode(['success' => false, 'message' => 'tienda no encontrado.']);
+      exit;
+    }
+  }
+
+  try {
+    // Obtener el usuario actual para verificar la contraseña y la imagen
+    $stmt = $dbh->prepare("SELECT password1, imagen FROM usuarios WHERE idusuario = :idusuario");
+    $stmt->execute([":idusuario" => $idusuario]);
+    $usuarioActual = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Verificar si hay una nueva contraseña
+    if (!empty($password1)) {
+      // Encriptar la contraseña
+      $passwordHash = password_hash($password1, PASSWORD_BCRYPT);
+    } else {
+      // Mantener la contraseña actual
+      $passwordHash = $usuarioActual["password1"];
+    }
+
+    // Manejo de la imagen
+    $rutaImagen = "";
+    if (!empty($_FILES['imagen']['name'])) {
+      $directorioImagen = __DIR__ . "../../../imgs/users/";
+      $rutaDestino = $directorioImagen . basename($_FILES['imagen']['name']);
+
+      if (!is_writable($directorioImagen)) {
+        throw new Exception("No se puede escribir en la carpeta imgs/users/");
+      }
+
+      // Validación del tipo de archivo
+      $tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!in_array($_FILES['imagen']['type'], $tiposPermitidos)) {
+        throw new Exception("Tipo de archivo no permitido. Solo se permiten JPEG, PNG y GIF.");
+      }
+
+      // Validación del tamaño del archivo (en bytes)
+      $tamanoMaximo = 2 * 1024 * 1024; // 2 MB
+      if ($_FILES['imagen']['size'] > $tamanoMaximo) {
+        throw new Exception("El tamaño del archivo excede el límite permitido (2 MB).");
+      }
+
+      $nombreImagen = uniqid() . '-' . basename($_FILES['imagen']['name']);
+      $rutaCompleta = $directorioImagen . $nombreImagen;
+      $rutaImagen = "../imgs/users/" . $nombreImagen;
+
+      // Mover el archivo subido
+      if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaCompleta)) {
+        throw new Exception("Error al subir la imagen.");
+      }
+    } else {
+      $rutaImagen = $usuarioActual["imagen"];
+    }
+
+    // Preparar la consulta SQL
+    $stmt = $dbh->prepare(
+      "UPDATE usuarios 
+             SET usuario = :usuario,
+                 nombre = :nombre,
+                 appaterno = :appaterno,
+                 apmaterno = :apmaterno,
+                 idrol = :idrol,
+                 password1 = :password1,
+                 sucursales_id = :sucursales_id,
+                 imagen = :imagen,
+                 comision = :comision,
+                 estatus = :estatus
+            WHERE idusuario = :idusuario"
+    );
+
+    // Ejecutar la consulta con los parámetros
+    $stmt->execute([
+      ":usuario" => $usuario,
+      ":nombre" => $nombre,
+      ":appaterno" => $papellido,
+      ":apmaterno" => $sapellido,
+      ":idrol" => $rol,
+      ":password1" => $passwordHash,
+      ":sucursales_id" => $tienda,
+      ":imagen" => $rutaImagen,
+      ":comision" => $comision,
+      ":estatus" => $estatus,
+      ":idusuario" => $idusuario
+    ]);
+
+    // Verificamos si hubo una actualización
+    if ($stmt->rowCount() > 0) {
+      $response["success"] = true;
+      $response["message"] = "Usuario actualizado correctamente.";
+    } else {
+      $response["message"] = "No se realizaron cambios en el Usuario.";
+    }
+  } catch (PDOException $e) {
+    $response["message"] = "Error de base de datos: " . $e->getMessage();
+    error_log("Error de base de datos en editar_user.php: " . $e->getMessage());
+  } catch (Exception $e) {
+    $response["message"] = "Error: " . $e->getMessage();
+    error_log("Error en editar_user.php: " . $e->getMessage());
+  }
+} else {
+  $response["message"] = "Método no permitido.";
+}
+
+header("Content-Type: application/json");
+echo json_encode($response);

@@ -1,0 +1,127 @@
+/*Dashboard*/
+.container_dashboard {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 7px 7px rgba(0, 0, 0, 0.5);
+  left: 16px;
+  min-height: 80vh;
+  position: absolute;
+  transition: 0.4s;
+  width: calc(100% - 30px);
+}
+
+/*Cards*/
+.cards {
+  display: grid;
+  grid-gap: 30px;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 20px; 
+  position: relative;
+  width: 100%;
+}
+.cards .card {
+  position: relative;
+  background: #daf3ff;
+  padding: 30px;
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: 0.4s;
+}
+.cards .card:hover {
+  background: #5ac8ff;
+}
+.cards .card .card-numeros {
+  position: relative;
+  font-weight: 700;
+  font-size: 2.5rem;
+  color: #9316c0;
+}
+.cards .card .card-nombre {
+  color: #a586ae;
+  font-size: 1.1em;
+  margin-top: 5px;
+  margin-right: 80px;
+}
+.cards .card .card-icono {
+  font-size: 3.5em;
+  color: #a586ae;
+}
+.cards .card:hover .card-numeros,
+.cards .card:hover .card-nombre,
+.cards .card:hover .card-icono {
+  color: #daf3ff;
+}
+
+/* Estilos cuando el modo oscuro está activado */
+
+.darkmode .container_dashboard {
+  background: #2f2f31 !important;
+}
+.darkmode .cards {
+  color: white !important;
+}
+
+.darkmode .card {
+  background: #444446 !important;
+}
+.darkmode .cards .card:hover {
+  background: rgb(41, 102, 128) !important;  
+}
+.darkmode .cards .card:hover .card-numeros,
+.darkmode .cards .card:hover .card-nombre,
+.darkmode .cards .card:hover .card-icono {
+  color: #3ca2fb;
+}
+
+@media (max-width: 1450px) {
+  .cards {
+    grid-template-columns: repeat(
+      3,
+      1fr
+    ); /* Ajustar el ancho para pantallas pequeñas */
+  }
+}
+@media (max-width: 1234px) {
+  .cards {
+    grid-template-columns: repeat(
+      2,
+      1fr
+    ); /* Ajustar el ancho para pantallas pequeñas */
+  }
+}
+@media (max-width: 935px) {
+  .cards {
+    grid-template-columns: repeat(
+      1,
+      1fr
+    ); /* Ajustar el ancho para pantallas pequeñas */
+  }
+}
+
+/*Moviles Tablets, celulares*/
+@media (max-width: 768px) {
+  .container_dashboard {
+    height: 85%;
+    width: calc(100% - 30px);
+  }
+}
+
+@media only screen and (max-width: 576px) {
+  .container_dashboard {
+    height: 80%;
+    margin-top: 20px;
+    padding: 0px;
+    width: calc(100% - 31px);
+  }
+  .cards {
+    grid-template-columns: repeat(
+      1,
+      1fr
+    ); /* Ajustar el ancho para pantallas pequeñas */
+    grid-gap: 10px;
+    padding: 20px;
+  }
+}
