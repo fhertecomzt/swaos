@@ -6820,7 +6820,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "limpiar-busquedaEstadoservicio"
       ); // Botón dinámico
       const filas = document.querySelectorAll(
-        "#tabla-Estadoservicios tbody tr"
+        "#tabla-estadoservicio tbody tr"
       );
       const mensajeVacio = document.getElementById("mensaje-vacio");
 
@@ -6866,7 +6866,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const filas = document.querySelectorAll(
-        "#tabla-estadoservicios tbody tr"
+        "#tabla-estadoservicio tbody tr"
       );
       filas.forEach((fila) => {
         fila.style.display = ""; // Mostrar todas las filas
@@ -6973,7 +6973,7 @@ function cargarestadoserviciosScroll() {
     .then((response) => response.json())
     .then((data) => {
       if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-estadoservicios tbody");
+        const tbody = document.querySelector("#tabla-estadoservicio tbody");
         data.forEach((rol) => {
           const row = document.createElement("tr");
           row.innerHTML = `
