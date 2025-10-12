@@ -7025,7 +7025,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Reiniciando scroll y cargando roles en tipo de servicios.php");
 
     //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A tipo de servicios.php
-    iniciarScrollRoles();
+    iniciarScrollEstadoservicios();
   }
 });
 
