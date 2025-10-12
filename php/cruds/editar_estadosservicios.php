@@ -9,7 +9,7 @@ $response = ["success" => false, "message" => ""];
 // Verificamos que el método sea POST
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $idestadoservicio = $_POST["editar-idestadoservicio"] ?? null;
-  $estadoservicio = $_POST["estado_servicio"] ?? null;
+  $estadoservicio = $_POST["estadoservicio"] ?? null;
   $descripcion = $_POST["desc_servicio"] ?? null;
   $estatus = $_POST["estatus"] ?? null;
 
@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Preparar la consulta SQL
     $stmt = $dbh->prepare(
       "UPDATE estadosservicios 
-         SET estado_servicio = :estadoservicio, 
+         SET estado_servicio = :estado_servicio, 
              desc_estado_servicio = :descripcion,
              estatus = :estatus
        WHERE id_estado_servicio = :id"

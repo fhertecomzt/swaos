@@ -16,21 +16,21 @@ $estadosservicios = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalEstadoservicio('crear-modalEstadoservicio')">Nuevo</button>
-    <label class="buscarlabel" for="buscarboxmarca">Buscar:</label>
-    <input class="buscar--box" id="buscarboxmarca" type="search" placeholder="Qué estas buscando?" autocomplete="off">
+    <label class="buscarlabel" for="buscarboxEstadoservicios">Buscar:</label>
+    <input class="buscar--box" id="buscarboxEstadoservicios" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 
     <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroMarca">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroMarca" onchange="cargarMarcasFiltradas()" style="width: 100px;">
+    <label class="buscarlabel" for="estatusFiltroEstadoservicios">Filtrar por Estatus:</label>
+    <select class="buscar--box" id="estatusFiltroEstadoservicios" onchange="cargarestadoserviciosFiltrados()" style="width: 100px;">
         <option value="">Todos</option>
         <option value="Activo">Activo</option>
         <option value="Inactivo">Inactivo</option>
     </select>
 </div>
 
-<div class="container_dashboard_tablas" id="marcas">
+<div class="container_dashboard_tablas" id="estadoservicio">
     <h3>Lista de Estados de servicio</h3>
-    <div id="scroll-containerEstadoservicio" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerEstadoservicios" style="height: 65vh; overflow-y: auto; position: relative;">
         <table class="tbl" id="tabla-estadoservicio">
             <thead>
                 <tr>

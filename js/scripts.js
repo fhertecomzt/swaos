@@ -6251,7 +6251,7 @@ const observerTiposervicios = new MutationObserver(() => {
   );
   if (tiposerviciosSeccion) {
     observerTiposervicios.disconnect();
-    iniciarScrollRoles();
+    iniciarScrollTiposervicios();
   }
 });
 
@@ -6263,7 +6263,7 @@ if (Tiposervicios) {
   });
 }
 
-//Llamar estatus de servicio
+//Llamar estado de servicio
 document
   .getElementById("estatusservicios-link")
   .addEventListener("click", function (event) {
@@ -6647,7 +6647,7 @@ async function validarFormularioEdicionEstadoservicio(formulario) {
   }
 }
 // Enviar formulario de edición Estadoservicios
-function enviarFormularioEdicionTiposervicio(formulario) {
+function enviarFormularioEdicionEstadoservicio(formulario) {
   if (!formulario) {
     console.error("El formulario no se encontró.");
     return;
@@ -6671,8 +6671,8 @@ function enviarFormularioEdicionTiposervicio(formulario) {
           timerProgressBar: true,
         });
         // Actualizar la fila de la tabla sin recargar
-        actualizarFilaTablaTiposervicio(formData);
-        cerrarModal("editar-modalTiposervicio");
+        actualizarFilaTablaEstadoservicio(formData);
+        cerrarModal("editar-modalEstadoservicio");
       } else {
         Swal.fire({
           title: "Error!",
@@ -6685,23 +6685,25 @@ function enviarFormularioEdicionTiposervicio(formulario) {
       }
     })
     .catch((error) => {
-      console.error("Error al actualizar Tipo de servicio:", error);
+      console.error("Error al actualizar Estado de servicio:", error);
       mostrarAlerta(
         "error",
         "Error",
-        "Ocurrió un problema al actualizar la Tipo de servicio."
+        "Ocurrió un problema al actualizar la Estado de servicio."
       );
     });
 }
 // Actualizar fila de la tabla Estadoservicios
-function actualizarFilaTablaTiposervicio(formData) {
+function actualizarFilaTablaEstadoservicio(formData) {
   const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idtiposervicio")}"]`)
+    .querySelector(
+      `button[data-id="${formData.get("editar-idestadoservicio")}"]`
+    )
     .closest("tr");
-  console.log(formData.get("editar-idtiposervicio"));
+  console.log(formData.get("editar-idestadoservicio"));
   if (fila) {
-    fila.cells[0].textContent = formData.get("tiposervicio");
-    fila.cells[1].textContent = formData.get("desc_servicios");
+    fila.cells[0].textContent = formData.get("estadoservicio");
+    fila.cells[1].textContent = formData.get("desc_servicio");
     // Determinar clases y texto del botón
     const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
     const claseBtn =
@@ -6714,7 +6716,7 @@ function actualizarFilaTablaTiposervicio(formData) {
 }
 // Eliminar Estado de servicios*****************
 document.addEventListener("click", function (event) {
-  if (event.target.classList.contains("eliminarEstadoservicios")) {
+  if (event.target.classList.contains("eliminarEstadoservicio")) {
     const id = event.target.dataset.id;
 
     Swal.fire({
@@ -6729,7 +6731,7 @@ document.addEventListener("click", function (event) {
     }).then((result) => {
       if (result.isConfirmed) {
         // Realizar la solicitud para eliminar
-        fetch(`cruds/eliminar_Estadoservicios.php?id=${id}`, { method: "POST" })
+        fetch(`cruds/eliminar_estadoservicio.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
@@ -6796,7 +6798,7 @@ document.addEventListener("DOMContentLoaded", function () {
     buscarBox.addEventListener("input", function () {
       const filtro = buscarBox.value.toLowerCase();
       const filas = document.querySelectorAll(
-        "#tabla-Estadoservicios tbody tr"
+        "#tabla-estadoservicio tbody tr"
       );
 
       filas.forEach((fila) => {
@@ -6864,7 +6866,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       const filas = document.querySelectorAll(
-        "#tabla-Estadoservicios tbody tr"
+        "#tabla-estadoservicios tbody tr"
       );
       filas.forEach((fila) => {
         fila.style.display = ""; // Mostrar todas las filas
@@ -6899,7 +6901,7 @@ function cargarestadoserviciosFiltrados() {
 
 //Función para actualizar la tabla con las tiendas filtradas
 function actualizarTablaEstadoservicios(estadoservicios) {
-  let tbody = document.getElementById("Estadoservicios-lista");
+  let tbody = document.getElementById("estadoservicios-lista");
   tbody.innerHTML = ""; // Limpiar la tabla
 
   if (estadoservicios.length === 0) {
@@ -6950,7 +6952,7 @@ function cargarestadoservicios() {
     .catch((error) => console.error("Error al cargar tipo servicios:", error));
 }
 
-/* ------------------------ SCROLL INFINITO Estadoservicios------------------------*/
+/* ----------------- SCROLL INFINITO Estado de servicios------------------------*/
 
 function cargarestadoserviciosScroll() {
   if (cargando) return;
@@ -6958,7 +6960,7 @@ function cargarestadoserviciosScroll() {
 
   // Obtener el filtro actual para que el scroll también lo respete
   const estatusFiltroEstadoservicios = document
-    .getElementById("estatusFiltroEstadoservicio")
+    .getElementById("estatusFiltroEstadoservicios")
     .value.trim()
     .toLowerCase();
   let url = `cruds/cargar_estadosservicios_scroll.php?page=${pagina}`;
@@ -6971,7 +6973,7 @@ function cargarestadoserviciosScroll() {
     .then((response) => response.json())
     .then((data) => {
       if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-Estadoservicios tbody");
+        const tbody = document.querySelector("#tabla-estadoservicios tbody");
         data.forEach((rol) => {
           const row = document.createElement("tr");
           row.innerHTML = `
@@ -6986,12 +6988,12 @@ function cargarestadoserviciosScroll() {
               </button>
             </td>
             <td data-lable="Editar">
-              <button title="Editar" class="editarRol fa-solid fa-pen-to-square" data-id="${
+              <button title="Editar" class="editarEstadoservicio fa-solid fa-pen-to-square" data-id="${
                 estadosservicios.id_estado_servicio
               }"></button>
             </td>
         <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminarRol fa-solid fa-trash" data-id="${
+        <button title="Eliminar" class="eliminarEstadoservicio fa-solid fa-trash" data-id="${
           estadosservicios.id_estado_servicio
         }"></button>
       </td>
@@ -7065,7 +7067,7 @@ if (Estadoservicios) {
   });
 }
 
-// Llamar Metodos de pago*****************************************************************************
+// Llamar Metodos de pago *****************************************************
 document
   .getElementById("mpagos-link")
   .addEventListener("click", function (event) {
