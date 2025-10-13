@@ -686,7 +686,7 @@ function enviarFormularioEdicion(formulario) {
         cerrarModal("editar-modal");
       } else {
         Swal.fire({
-          title: "Error",
+          title: "Atención",
           text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
           icon: "error",
           showConfirmButton: false,
@@ -1461,7 +1461,7 @@ function enviarFormularioEdicionRol(formulario) {
         cerrarModal("editar-modalRol");
       } else {
         Swal.fire({
-          title: "Error",
+          title: "Atención",
           text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
           icon: "error",
           showConfirmButton: false,
@@ -2437,7 +2437,7 @@ function enviarFormularioEdicionUsuario(formularioUsuario) {
         cerrarModalUser("editar-modalUser");
       } else {
         Swal.fire({
-          title: "¡Error!",
+          title: "Atención",
           text: data.message || "No hubo cambios en el registro.",
           icon: "warning",
           showConfirmButton: false,
@@ -3499,7 +3499,7 @@ function enviarFormularioEdicionProducto(formulario) {
         cerrarModalProducto("editar-modalProducto");
       } else {
         Swal.fire({
-          title: "¡Error!",
+          title: "Atención",
           text: data.message || "No se realizaron cambios en el Producto.",
           icon: "warning",
           showConfirmButton: false,
@@ -4325,7 +4325,7 @@ function enviarFormularioEdicionCat(formulario) {
         cerrarModal("editar-modalCat");
       } else {
         Swal.fire({
-          title: "Error!",
+          title: "Atención",
           text: data.message, // Usar el mensaje del backend no hubo cambios
           icon: "warning",
           showConfirmButton: false,
@@ -5089,7 +5089,7 @@ function enviarFormularioEdicionMarca(formulario) {
         cerrarModal("editar-modalMarca");
       } else {
         Swal.fire({
-          title: "Error!",
+          title: "Atención",
           text: data.message, // Usar el mensaje del backend editar sin cambios marca
           icon: "warning",
           showConfirmButton: false,
@@ -5434,7 +5434,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Reiniciando scroll y cargando marcas en marcas.php");
 
     //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A marcas.php
-    iniciarScrollRoles();
+    iniciarScrollMarcas();
   }
 });
 
@@ -5879,7 +5879,7 @@ function enviarFormularioEdicionTiposervicio(formulario) {
         cerrarModal("editar-modalTiposervicio");
       } else {
         Swal.fire({
-          title: "Error!",
+          title: "Atención",
           text: data.message, // Usar el mensaje del backend no hubo cambios
           icon: "warning",
           showConfirmButton: false,
@@ -6675,7 +6675,7 @@ function enviarFormularioEdicionEstadoservicio(formulario) {
         cerrarModal("editar-modalEstadoservicio");
       } else {
         Swal.fire({
-          title: "Error!",
+          title: "Atención",
           text: data.message, // Usar el mensaje del backend no hubo cambios
           icon: "warning",
           showConfirmButton: false,
@@ -7076,13 +7076,14 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+        cargarMpagosFiltrados();
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-//Crear Mpagos***************
+//Crear Métodos de pagos ****************************
 function abrirModalMpago(id) {
   document.getElementById(id).style.display = "flex";
 }
@@ -7114,11 +7115,24 @@ function procesarFormularioMpago(event, tipo) {
           // Crear una nueva fila
           const newRow = document.createElement("tr");
           newRow.innerHTML = `
-            <td>${data.mpago.nombre}</td>
-            <td>${data.mpago.descripcion}</td>
-            <td>
-              <button title="Editar" class="editarMpago fa-solid fa-pen-to-square" data-id="${data.mpago.id}"></button>
-              <button title="Eliminar" class="eliminarMpago fa-solid fa-trash" data-id="${data.mpago.id}"></button>
+            <td data-lable="Nombre:">${data.mpago.nombre}</td>
+            <td data-lable="Descripción:">${data.mpago.descripcion}</td>
+            <td data-lable="Estatus:">
+              <button class="btn ${
+                data.mpago.estatus == 0 ? "btn-success" : "btn-danger"
+              }">
+              ${data.mpago.estatus == 0 ? "Activo" : "Inactivo"}
+              </button>
+            </td>
+            <td data-lable="Editar:">
+              <button title="Editar" class="editarMpago fa-solid fa-pen-to-square" data-id="${
+                data.mpago.id
+              }"></button>
+              </td>
+              <td data-lable="Eliminar:">
+              <button title="Eliminar" class="eliminarMpago fa-solid fa-trash" data-id="${
+                data.mpago.id
+              }"></button>
             </td>
           `;
 
@@ -7131,6 +7145,9 @@ function procesarFormularioMpago(event, tipo) {
           title: "¡Éxito!",
           text: data.message, // Usar el mensaje del backend
           icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
         });
       } else {
         // Mostrar un mensaje de error específico del backend
@@ -7191,7 +7208,10 @@ function validarFormularioMpago(event) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     return;
   }
@@ -7204,6 +7224,9 @@ function validarFormularioMpago(event) {
           title: "Error",
           text: "El nombre ya existe. Por favor, elige otro.",
           icon: "error",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
         });
       } else {
         // Si no hay errores, enviar el formulario
@@ -7231,7 +7254,14 @@ function verificarDuplicadoMpago(mpago) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre ya existe.");
+                Swal.fire({
+                  title: "Error",
+                  text: data.message || "El nombre de ya existe.", // Mostrar el mensaje específico si existe
+                  icon: "warning",
+                  showConfirmButton: false,
+                  timer: 1500,
+                  timerProgressBar: true,
+                });
       }
       return data.existe;
     })
@@ -7240,7 +7270,7 @@ function verificarDuplicadoMpago(mpago) {
       return true; // Asume duplicado en caso de error
     });
 }
-//Editar Mpagos************************************************************
+//Editar Metodos de pago ******************************************************
 document.addEventListener("DOMContentLoaded", function () {
   // Escuchar clic en el botón de editar
   document.addEventListener("click", function (event) {
@@ -7255,9 +7285,9 @@ document.addEventListener("DOMContentLoaded", function () {
           if (data.success) {
             const formularioMpago = document.getElementById("form-editarMpago");
             if (formularioMpago) {
-              const campos = ["idmpago", "mpago", "desc_mpago"];
+              const campos = ["idmpago", "mpago", "desc_mpago", "estatus"];
               campos.forEach((campo) => {
-                //console.log(`Asignando ${campo}:`, data.mpago[campo]);
+              //  console.log(`Asignando ${campo}:`, data.mpago[campo]);
                 formularioMpago[`editar-${campo}`].value =
                   data.mpago[campo] || "";
               });
@@ -7306,7 +7336,14 @@ function verificarDuplicadoEditarMpago(mpago, id = 0) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre ya existe.");
+                Swal.fire({
+                  title: "Error",
+                  text: data.message || "El nombre del método de pago ya existe.", // Mostrar el mensaje específico si existe
+                  icon: "warning",
+                  showConfirmButton: false,
+                  timer: 1500,
+                  timerProgressBar: true,
+                });
       }
       return data.existe;
     })
@@ -7361,7 +7398,10 @@ async function validarFormularioEdicionMpago(formulario) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     if (primerError) primerError.focus(); // Enfocar el primer campo con error
     return;
@@ -7406,19 +7446,25 @@ function enviarFormularioEdicionMpago(formulario) {
     .then((data) => {
       //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
-        mostrarAlerta(
-          "success",
-          "¡Éxito!",
-          data.message || "Actualizada correctamente."
-        );
+        Swal.fire({
+          title: "Actualizado",
+          text: data.message || "Sé realizaron cambios.", // Mostrar el mensaje específico si existe
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
         actualizarFilaTablaMpago(formData);
         cerrarModal("editar-modalMpago");
       } else {
-        mostrarAlerta(
-          "error",
-          "Error",
-          data.message || "No se pudo actualizar."
-        );
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "No se realizaron cambios.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
     })
     .catch((error) => {
@@ -7435,9 +7481,18 @@ function actualizarFilaTablaMpago(formData) {
   if (fila) {
     fila.cells[0].textContent = formData.get("mpago");
     fila.cells[1].textContent = formData.get("desc_mpago");
+    
+    // Determinar clases y texto del botón
+    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
+    const claseBtn =
+      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
+
+    // Insertar el botón en la celda
+    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
+    cargarMpagosFiltrados();
   }
 }
-// Eliminar Mpagos*****************************
+// Eliminar Método de pagos*****************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarMpago")) {
     const id = event.target.dataset.id;
@@ -7459,11 +7514,14 @@ document.addEventListener("click", function (event) {
           .then((data) => {
             if (data.success) {
               //alert("Registro eliminado correctamente");
-              Swal.fire(
-                "¡Eliminado!",
-                "El registro ha sido eliminado correctamente.",
-                "success"
-              );
+          Swal.fire({
+            title: "Eliminado",
+            text: data.message || "El registro se ha eliminado correctamente.", // Mostrar el mensaje específico si existe
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+          });
               // Remover la fila de la tabla
               event.target.closest("tr").remove();
             } else {
@@ -7588,6 +7646,190 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+//Función para filtrar metodos de pago desde el servidor *******************************
+function cargarMpagosFiltrados() {
+  const estatusFiltro = document
+    .getElementById("estatusFiltroMpago")
+    .value.trim()
+    .toLowerCase();
+
+  if (!estatusFiltro) {
+    cargarMpagos(); // Si el usuario selecciona "Todos", cargamos las primeras 10 normales
+    return;
+  }
+  //console.log("Cargando mpags filtrados del servidor:", estatusFiltroMpago);
+
+  fetch(`cruds/cargar_mpagos.php?estatus=${estatusFiltro}`)
+    .then((response) => response.json())
+    .then((data) => {
+       //console.log("Filtrados: ",data);
+      actualizarTablaMpagos(data);
+    })
+    .catch((error) =>
+      console.error("Error al cargar métodos de pago filtrados:", error)
+    );
+}
+
+//Función para actualizar la tabla con las métodos filtradas
+function actualizarTablaMpagos(metodos) {
+  let tbody = document.getElementById("mpagos-lista");
+  tbody.innerHTML = ""; // Limpiar la tabla
+
+  if (mpagos.length === 0) {
+    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron métodos de pago</td></tr>`;
+    return;
+  }
+  //LIMPIAR LA TABLA antes de agregar nuevos métodos
+  tbody.innerHTML = "";
+
+  metodos.forEach((mpagos) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td data-lable="Nombre:">${mpagos.nombre_metpago}</td>
+      <td data-lable="Descripción:">${mpagos.desc_metpago}</td>
+
+      <td data-lable="Estatus">
+        <button class="btn ${
+          mpagos.estatus == 0 ? "btn-success" : "btn-danger"
+        }">
+          ${mpagos.estatus == 0 ? "Activo" : "Inactivo"}
+        </button>
+      </td>
+      <td data-lable="Editar:">
+        <button title="Editar" class="editarMpago fa-solid fa-pen-to-square" data-id="${
+          mpagos.id_metpago
+        }"></button>
+        </td>
+        <td data-lable="Eliminar:">
+        <button title="Eliminar" class="eliminarMpago fa-solid fa-trash" data-id="${
+          mpagos.id_metpago
+        }"></button>
+      </td>
+    `;
+    tbody.appendChild(fila);
+  });
+}
+
+//Función para cargar los primeros 10 marcas por defecto
+function cargarMpagos() {
+  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
+  cargando = false; //Asegurar que el scroll pueda volver a activarse
+
+  fetch("cruds/cargar_mpagos.php?limit=10&offset=0")
+    .then((response) => response.json())
+    .then((data) => {
+      actualizarTablaMpagos(data);
+    })
+    .catch((error) => console.error("Error al cargar métodos de pago:", error));
+}
+
+/* ------------------------ SCROLL INFINITO Mpagos------------------------*/
+
+function cargarMpagosScroll() {
+  if (cargando) return;
+  cargando = true;
+
+  // Obtener el filtro actual para que el scroll también lo respete
+  const estatusFiltroMpago = document
+    .getElementById("estatusFiltroMpago")
+    .value.trim()
+    .toLowerCase();
+  let url = `cruds/cargar_mpagos_scroll.php?page=${pagina}`;
+
+  if (estatusFiltroMpago !== "") {
+    url += `&estatus=${estatusFiltroMpago}`; // Enviar el filtro al servidor
+  }
+
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.length > 0) {
+        const tbody = document.querySelector("#tabla-mpagos tbody");
+        data.forEach((rol) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td data-lable="Nombre:">${mpagos.nombre}</td>
+            <td data-lable="Descripción:">${mpagos.descripcion}</td>
+            
+            <td data-lable="Estatus:">
+              <button class="btn ${
+                mpagos.estatus == 0 ? "btn-success" : "btn-danger"
+              }">
+                ${mpagos.estatus == 0 ? "Activo" : "Inactivo"}
+              </button>
+            </td>
+            <td data-lable="Editar">
+              <button title="Editar" class="editarMpago fa-solid fa-pen-to-square" data-id="${
+                mpagos.id_mpago
+              }"></button>
+            </td>
+        <td data-lable="Eliminar">
+        <button title="Eliminar" class="eliminarMpago fa-solid fa-trash" data-id="${
+          rol.id_mpago
+        }"></button>
+      </td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        pagina++; // Aumentamos la página
+        cargando = false;
+      } else {
+        Swal.fire({
+          title: "No hay más Métodos de pago.",
+          icon: "info",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+    })
+    .catch((error) => console.error("Error al cargar marcas:", error));
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.location.pathname.includes("mpagos.php")) {
+    pagina = 2; //  Reiniciar paginación
+    cargando = false; // Permitir cargar más métodos de pago
+    console.log("Reiniciando scroll y cargando métodos de pago en marcas.php");
+
+    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A métodos de pago mpagos.php
+    iniciarScrollRoles();
+  }
+});
+
+function iniciarScrollMpagos() {
+  const scrollContainer = document.getElementById("scroll-containerMpag");
+  if (!scrollContainer) return;
+
+  scrollContainer.addEventListener("scroll", () => {
+    if (
+      scrollContainer.scrollTop + scrollContainer.clientHeight >=
+        scrollContainer.scrollHeight - 10 &&
+      !cargando
+    ) {
+      //console.log(" Scroll detectado, cargando más Marcas...");
+      cargarMpagosScroll();
+    }
+  });
+
+  //console.log(" Scroll infinito reactivado en Marcas.php");
+}
+
+const observerMpagos = new MutationObserver(() => {
+  const containerMpag = document.getElementById("scroll-containerMpag");
+  if (containerMpag) {
+    observerMpagos.disconnect();
+    iniciarScrollMpagos();
+  }
+});
+
+const Mpagos = document.getElementById("content-area");
+if (Mpagos) {
+  observerMpagos.observe(Mpagos, { childList: true, subtree: true });
+}
+
+
 // Llamar Impuestos***************************************************
 document
   .getElementById("impuestos-link")

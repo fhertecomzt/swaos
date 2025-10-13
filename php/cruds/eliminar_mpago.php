@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id'])) {
 
   try {
     // Preparar la consulta para eliminar el registro
-    $stmt = $dbh->prepare("DELETE FROM mpagos WHERE idmpago = :id");
+    $stmt = $dbh->prepare("DELETE FROM metodosdepago WHERE id_metpago = :id");
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
     // Ejecutar la consulta

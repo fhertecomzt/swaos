@@ -9,7 +9,7 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
 
   try {
     // Consulta segura con consulta preparada
-    $stmt = $dbh->prepare("SELECT * FROM mpagos WHERE idmpago = ?");
+    $stmt = $dbh->prepare("SELECT * FROM metodosdepago WHERE id_metpago = ?");
     $stmt->execute([$idmpago]);
     $mpago = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -17,9 +17,10 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
       // Sanitizar datos antes de enviarlos en la respuesta (Llenar campos)
       $response["success"] = true;
       $response["mpago"] = [
-        "idmpago" => htmlspecialchars($mpago["idmpago"]),
-        "mpago" => htmlspecialchars($mpago["nommpago"]),
-        "desc_mpago" => htmlspecialchars($mpago["descmpago"])
+        "idmpago" => htmlspecialchars($mpago["id_metpago"]),
+        "mpago" => htmlspecialchars($mpago["nombre_metpago"]),
+        "desc_mpago" => htmlspecialchars($mpago["desc_metpago"]),
+        "estatus" => htmlspecialchars($mpago["estatus"])
       ];
     } else {
       $response["message"] = "No sé a encontrado.";

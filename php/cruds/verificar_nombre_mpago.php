@@ -21,12 +21,12 @@ try {
 
     // Si se proporciona un ID (edición), excluir ese registro de la validación
     if ($id > 0) {
-      $query = "SELECT COUNT(*) FROM mpagos WHERE nommpago = ? AND idmpago != ?";
+      $query = "SELECT COUNT(*) FROM metodosdepago WHERE nombre_metpago = ? AND id_metpago != ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$mpago, $id]);
     } else {
       // Si no hay ID, es un registro nuevo
-      $query = "SELECT COUNT(*) FROM mpagos WHERE nommpago = ?";
+      $query = "SELECT COUNT(*) FROM metodosdepago WHERE nombre_metpago = ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$mpago]);
     }

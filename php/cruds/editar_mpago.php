@@ -11,21 +11,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $idmpago = $_POST["editar-idmpago"] ?? null;
   $mpago = $_POST["mpago"] ?? null;
   $descripcion = $_POST["desc_mpago"] ?? null;
+  $estatus = $_POST["estatus"] ?? null;
 
   try {
     // Preparar la consulta SQL
     $stmt = $dbh->prepare(
-      "UPDATE mpagos 
-         SET nommpago = :mpago, 
-             descmpago = :descripcion 
-       WHERE idmpago = :id"
+      "UPDATE metodosdepago
+         SET nombre_metpago = :mpago, 
+             desc_metpago = :descripcion,
+             estatus = :estatus
+       WHERE id_metpago = :id"
     );
 
     // Ejecutar la consulta con los parámetros
     $stmt->execute([
       ":mpago" => $mpago,
       ":descripcion" => $descripcion,
-      ":id" => $idmpago
+      ":id" => $idmpago,
+      ":estatus" => $estatus
     ]);
 
     // Verificamos si hubo una actualización

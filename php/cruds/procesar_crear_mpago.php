@@ -11,12 +11,12 @@ if (
   // Sanitización básica
   $mpago = htmlspecialchars($_POST['mpago']);
   $desc_mpago = htmlspecialchars($_POST['desc_mpago']);
+  $estatus = htmlspecialchars($_POST['estatus']);
 
   // Ejecutar la inserción
   try {
-    $stmt = $dbh->prepare("INSERT INTO mpagos (nommpago, descmpago) 
-                               VALUES (?, ?)");
-    $stmt->execute([$mpago, $desc_mpago]);
+    $stmt = $dbh->prepare("INSERT INTO metodosdepago (nombre_metpago, desc_metpago, estatus) VALUES (?, ?, ?)");
+    $stmt->execute([$mpago, $desc_mpago, $estatus]);
 
     $lastId = $dbh->lastInsertId();
 
@@ -25,7 +25,8 @@ if (
     $response["mpago"] = [
       "id" => $lastId,
       "nombre" => $mpago,
-      "descripcion" => $desc_mpago
+      "descripcion" => $desc_mpago,
+      "estatus" => $estatus
     ];
   } catch (PDOException $e) {
     // Respuesta genérica en caso de error
