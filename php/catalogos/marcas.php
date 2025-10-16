@@ -30,7 +30,7 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca, desc_marca, est
 
 <div class="container_dashboard_tablas" id="marcas">
     <h3>Lista de marcas</h3>
-    <div id="scroll-containerCat" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerMarca" style="height: 65vh; overflow-y: auto; position: relative;">
         <table class="tbl" id="tabla-marcas">
             <thead>
                 <tr>
@@ -124,8 +124,8 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca, desc_marca, est
                     </div>
 
                     <button type="submit">Actualizar</button>
-                    <span class="cancelarModal" onclick="cerrarModalMarca('editar-modalMarca')" type=" submit">Cancelar</
-                            </form>
+                    <span class="cancelarModal" onclick="cerrarModalMarca('editar-modalMarca')" type=" submit">Cancelar</span>
+                </form>
             </div>
         </div>
     </div>

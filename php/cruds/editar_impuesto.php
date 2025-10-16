@@ -11,13 +11,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $idimpuesto = $_POST["editar-idimpuesto"] ?? null;
   $impuesto = $_POST["impuesto"] ?? null;
   $tasa = $_POST["tasa"] ?? null;
+  $estatus = $_POST["estatus"] ?? null;
 
   try {
     // Preparar la consulta SQL
     $stmt = $dbh->prepare(
       "UPDATE impuestos 
          SET nomimpuesto = :impuesto, 
-             tasa = :tasa 
+             tasa = :tasa,
+             estatus = :estatus
        WHERE idimpuesto = :id"
     );
 
@@ -25,7 +27,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute([
       ":impuesto" => $impuesto,
       ":tasa" => $tasa,
-      ":id" => $idimpuesto
+      ":id" => $idimpuesto,
+      ":estatus" => $estatus
     ]);
 
     // Verificamos si hubo una actualización

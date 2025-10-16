@@ -6797,9 +6797,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function agregarEventoBuscarEstadoservicios(buscarBox) {
     buscarBox.addEventListener("input", function () {
       const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll(
-        "#tabla-estadoservicio tbody tr"
-      );
+      const filas = document.querySelectorAll("#tabla-estadoservicio tbody tr");
 
       filas.forEach((fila) => {
         const textoFila = fila.textContent.toLowerCase();
@@ -6819,9 +6817,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const limpiarBusquedaEstadoservicio = document.getElementById(
         "limpiar-busquedaEstadoservicio"
       ); // Botón dinámico
-      const filas = document.querySelectorAll(
-        "#tabla-estadoservicio tbody tr"
-      );
+      const filas = document.querySelectorAll("#tabla-estadoservicio tbody tr");
       const mensajeVacio = document.getElementById("mensaje-vacio");
 
       let coincidencias = 0; // Contador de filas visibles
@@ -6865,9 +6861,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      const filas = document.querySelectorAll(
-        "#tabla-estadoservicio tbody tr"
-      );
+      const filas = document.querySelectorAll("#tabla-estadoservicio tbody tr");
       filas.forEach((fila) => {
         fila.style.display = ""; // Mostrar todas las filas
       });
@@ -7254,14 +7248,14 @@ function verificarDuplicadoMpago(mpago) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-                Swal.fire({
-                  title: "Error",
-                  text: data.message || "El nombre de ya existe.", // Mostrar el mensaje específico si existe
-                  icon: "warning",
-                  showConfirmButton: false,
-                  timer: 1500,
-                  timerProgressBar: true,
-                });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "El nombre de ya existe.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
       return data.existe;
     })
@@ -7287,7 +7281,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (formularioMpago) {
               const campos = ["idmpago", "mpago", "desc_mpago", "estatus"];
               campos.forEach((campo) => {
-              //  console.log(`Asignando ${campo}:`, data.mpago[campo]);
+                //  console.log(`Asignando ${campo}:`, data.mpago[campo]);
                 formularioMpago[`editar-${campo}`].value =
                   data.mpago[campo] || "";
               });
@@ -7336,14 +7330,14 @@ function verificarDuplicadoEditarMpago(mpago, id = 0) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-                Swal.fire({
-                  title: "Error",
-                  text: data.message || "El nombre del método de pago ya existe.", // Mostrar el mensaje específico si existe
-                  icon: "warning",
-                  showConfirmButton: false,
-                  timer: 1500,
-                  timerProgressBar: true,
-                });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "El nombre del método de pago ya existe.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
       return data.existe;
     })
@@ -7481,7 +7475,7 @@ function actualizarFilaTablaMpago(formData) {
   if (fila) {
     fila.cells[0].textContent = formData.get("mpago");
     fila.cells[1].textContent = formData.get("desc_mpago");
-    
+
     // Determinar clases y texto del botón
     const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
     const claseBtn =
@@ -7514,14 +7508,15 @@ document.addEventListener("click", function (event) {
           .then((data) => {
             if (data.success) {
               //alert("Registro eliminado correctamente");
-          Swal.fire({
-            title: "Eliminado",
-            text: data.message || "El registro se ha eliminado correctamente.", // Mostrar el mensaje específico si existe
-            icon: "success",
-            showConfirmButton: false,
-            timer: 1500,
-            timerProgressBar: true,
-          });
+              Swal.fire({
+                title: "Eliminado",
+                text:
+                  data.message || "El registro se ha eliminado correctamente.", // Mostrar el mensaje específico si existe
+                icon: "success",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+              });
               // Remover la fila de la tabla
               event.target.closest("tr").remove();
             } else {
@@ -7662,7 +7657,7 @@ function cargarMpagosFiltrados() {
   fetch(`cruds/cargar_mpagos.php?estatus=${estatusFiltro}`)
     .then((response) => response.json())
     .then((data) => {
-       //console.log("Filtrados: ",data);
+      //console.log("Filtrados: ",data);
       actualizarTablaMpagos(data);
     })
     .catch((error) =>
@@ -7829,7 +7824,6 @@ if (Mpagos) {
   observerMpagos.observe(Mpagos, { childList: true, subtree: true });
 }
 
-
 // Llamar Impuestos***************************************************
 document
   .getElementById("impuestos-link")
@@ -7839,13 +7833,14 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+        //cargarMarcasFiltradas();
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-//Crear Impuestos***************
+//Crear Impuestos ***************************************
 function abrirModalImpuesto(id) {
   document.getElementById(id).style.display = "flex";
 }
@@ -7877,11 +7872,24 @@ function procesarFormularioImpuesto(event, tipo) {
           // Crear una nueva fila
           const newRow = document.createElement("tr");
           newRow.innerHTML = `
-            <td>${data.impuesto.nombre}</td>
-            <td>${data.impuesto.tasa}</td>
-            <td>
-              <button title="Editar" class="editarImpuesto fa-solid fa-pen-to-square" data-id="${data.impuesto.id}"></button>
-              <button title="Eliminar" class="eliminarImpuesto fa-solid fa-trash" data-id="${data.impuesto.id}"></button>
+            <td data-lable="Nombre:">${data.impuesto.nombre}</td>
+            <td data-lable="Tasa:">${data.impuesto.tasa}</td>
+            <td data-lable="Estatus:">
+              <button class="btn ${
+                data.impuesto.estatus == 0 ? "btn-success" : "btn-danger"
+              }">
+              ${data.impuesto.estatus == 0 ? "Activo" : "Inactivo"}
+              </button>
+            </td>
+            <td data-lable="Editar:">
+              <button title="Editar" class="editarImpuesto fa-solid fa-pen-to-square" data-id="${
+                data.impuesto.id
+              }"></button>
+              </td>
+              <td data-lable="Eliminar:">
+              <button title="Eliminar" class="eliminarImpuesto fa-solid fa-trash" data-id="${
+                data.impuesto.id
+              }"></button>
             </td>
           `;
 
@@ -7894,6 +7902,9 @@ function procesarFormularioImpuesto(event, tipo) {
           title: "¡Éxito!",
           text: data.message, // Usar el mensaje del backend
           icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
         });
       } else {
         // Mostrar un mensaje de error específico del backend
@@ -7945,7 +7956,7 @@ function validarFormularioImpuesto(event) {
   // Elimina la clase de error al corregir
   const inputdesc = document.querySelector("#crear-tasa");
   inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 3) {
+    if (inputdesc.value.length >= 1) {
       inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
@@ -7954,7 +7965,10 @@ function validarFormularioImpuesto(event) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     return;
   }
@@ -7964,9 +7978,12 @@ function validarFormularioImpuesto(event) {
     .then((esDuplicado) => {
       if (esDuplicado) {
         Swal.fire({
-          title: "Error",
+          title: "Atención",
           text: "El nombre ya existe. Por favor, elige otro.",
-          icon: "error",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
         });
       } else {
         // Si no hay errores, enviar el formulario
@@ -7994,7 +8011,14 @@ function verificarDuplicadoImpuesto(impuesto) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre ya existe.");
+        Swal.fire({
+          title: "Error",
+          text: data.message || "El nombre del impuesto ya existe.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
       return data.existe;
     })
@@ -8020,7 +8044,7 @@ document.addEventListener("DOMContentLoaded", function () {
               "form-editarImpuesto"
             );
             if (formularioImpuesto) {
-              const campos = ["idimpuesto", "impuesto", "tasa"];
+              const campos = ["idimpuesto", "impuesto", "tasa", "estatus"];
               campos.forEach((campo) => {
                 //console.log(`Asignando ${campo}:`, data.impuesto[campo]);
                 formularioImpuesto[`editar-${campo}`].value =
@@ -8071,7 +8095,14 @@ function verificarDuplicadoEditarImpuesto(impuesto, id = 0) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre ya existe.");
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "El nombre del ya existe.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
       return data.existe;
     })
@@ -8171,19 +8202,25 @@ function enviarFormularioEdicionImpuesto(formulario) {
     .then((data) => {
       //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
-        mostrarAlerta(
-          "success",
-          "¡Éxito!",
-          data.message || "Actualizada correctamente."
-        );
+        Swal.fire({
+          title: "Actualizado",
+          text: data.message || "Se actualizo correctamente.", // Mostrar el mensaje específico si existe
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
         actualizarFilaTablaImpuesto(formData);
         cerrarModal("editar-modalImpuesto");
       } else {
-        mostrarAlerta(
-          "error",
-          "Error",
-          data.message || "No se pudo actualizar."
-        );
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "No se ha actualizdo.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
     })
     .catch((error) => {
@@ -8200,6 +8237,15 @@ function actualizarFilaTablaImpuesto(formData) {
   if (fila) {
     fila.cells[0].textContent = formData.get("impuesto");
     fila.cells[1].textContent = formData.get("tasa");
+
+        // Determinar clases y texto del botón
+    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
+    const claseBtn =
+      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
+
+    // Insertar el botón en la celda
+    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
+    cargarImpuestosFiltrados();
   }
 }
 // Eliminar Impuestos*****************************
@@ -8224,11 +8270,14 @@ document.addEventListener("click", function (event) {
           .then((data) => {
             if (data.success) {
               //alert("Registro eliminado correctamente");
-              Swal.fire(
-                "¡Eliminado!",
-                "El registro ha sido eliminado correctamente.",
-                "success"
-              );
+              Swal.fire({
+                title: "Eliminado",
+                text: data.message || "El registro se ha eliminado.",
+                icon: "success",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+              });
               // Remover la fila de la tabla
               event.target.closest("tr").remove();
             } else {
@@ -8353,6 +8402,191 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+//Función para filtrar Impuestos desde el servidor *********************************
+function cargarImpuestosFiltrados() {
+  const estatusFiltro = document
+    .getElementById("estatusFiltroImpuesto")
+    .value.trim()
+    .toLowerCase();
+
+  if (!estatusFiltro) {
+    cargarImpuestos(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
+    return;
+  }
+  //console.log("Cargando impuestos filtrados del servidor:", estatusFiltro);
+
+  fetch(`cruds/cargar_impuestos.php?estatus=${estatusFiltro}`)
+    .then((response) => response.json())
+    .then((data) => {
+      // console.log("Filtrados: ",data);
+      actualizarTablaImpuestos(data);
+    })
+    .catch((error) =>
+      console.error("Error al cargar impuestos filtrados:", error)
+    );
+}
+
+//Función para actualizar la tabla con las impuestos filtradas
+function actualizarTablaImpuestos(impuestos) {
+  let tbody = document.getElementById("impuestos-lista");
+  tbody.innerHTML = ""; // Limpiar la tabla
+
+  if (impuestos.length === 0) {
+    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron impuestos</td></tr>`;
+    return;
+  }
+  //LIMPIAR LA TABLA antes de agregar nuevos impuestos
+  tbody.innerHTML = "";
+
+  impuestos.forEach((impuestos) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td data-lable="Nombre:">${impuestos.nomimpuesto}</td>
+      <td data-lable="Descripción:">${impuestos.tasa}</td>
+
+      <td data-lable="Estatus">
+        <button class="btn ${
+          impuestos.estatus == 0 ? "btn-success" : "btn-danger"
+        }">
+          ${impuestos.estatus == 0 ? "Activo" : "Inactivo"}
+        </button>
+      </td>
+      <td data-lable="Editar:">
+        <button title="Editar" class="editarImpuesto fa-solid fa-pen-to-square" data-id="${
+          impuestos.idimpuesto
+        }"></button>
+        </td>
+        <td data-lable="Eliminar:">
+        <button title="Eliminar" class="eliminarImpuesto fa-solid fa-trash" data-id="${
+          impuestos.idimpuesto
+        }"></button>
+      </td>
+    `;
+    tbody.appendChild(fila);
+  });
+}
+
+//Función para cargar los primeros 10 impuestos defecto
+function cargarImpuestos() {
+  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
+  cargando = false; //Asegurar que el scroll pueda volver a activarse
+
+  fetch("cruds/cargar_impuestos.php?limit=10&offset=0")
+    .then((response) => response.json())
+    .then((data) => {
+      actualizarTablaImpuestos(data);
+    })
+    .catch((error) => console.error("Error al cargar Impuestos:", error));
+}
+
+/* ------------------------ SCROLL INFINITO impuestos -------------------*/
+
+function cargarImpuestosScroll() {
+  if (cargando) return;
+  cargando = true;
+
+  // Obtener el filtro actual para que el scroll también lo respete
+  const estatusFiltroImpuesto = document
+    .getElementById("estatusFiltroImpuesto")
+    .value.trim()
+    .toLowerCase();
+  let url = `cruds/cargar_impuestos_scroll.php?page=${pagina}`;
+
+  if (estatusFiltroImpuesto !== "") {
+    url += `&estatus=${estatusFiltroImpuesto}`; // Enviar el filtro al servidor
+  }
+
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.length > 0) {
+        const tbody = document.querySelector("#tabla-impuestos tbody");
+        data.forEach((impuesto) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td data-lable="Nombre:">${impuesto.nombre}</td>
+            <td data-lable="Descripción:">${impuesto.descripcion}</td>
+            
+            <td data-lable="Estatus:">
+              <button class="btn ${
+                impuesto.estatus == 0 ? "btn-success" : "btn-danger"
+              }">
+                ${impuesto.estatus == 0 ? "Activo" : "Inactivo"}
+              </button>
+            </td>
+            <td data-lable="Editar">
+              <button title="Editar" class="editarImpuesto fa-solid fa-pen-to-square" data-id="${
+                impuesto.idimpuesto
+              }"></button>
+            </td>
+        <td data-lable="Eliminar">
+        <button title="Eliminar" class="eliminarImpuesto fa-solid fa-trash" data-id="${
+          impuesto.idimpuesto
+        }"></button>
+      </td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        pagina++; // Aumentamos la página
+        cargando = false;
+      } else {
+        Swal.fire({
+          title: "No hay más Impuestos.",
+          icon: "info",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+    })
+    .catch((error) => console.error("Error al cargar impuestos:", error));
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.location.pathname.includes("impuestos.php")) {
+    pagina = 2; //  Reiniciar paginación
+    cargando = false; // Permitir cargar más marcas
+    console.log("Reiniciando scroll y cargando impuestos en impuestos.php");
+
+    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A Impuestos.php
+    iniciarScrollImpuestos();
+  }
+});
+
+function iniciarScrollImpuestos() {
+  const scrollContainer = document.getElementById("scroll-containerImp");
+  if (!scrollContainer) return;
+
+  scrollContainer.addEventListener("scroll", () => {
+    if (
+      scrollContainer.scrollTop + scrollContainer.clientHeight >=
+        scrollContainer.scrollHeight - 10 &&
+      !cargando
+    ) {
+      //console.log(" Scroll detectado, cargando más Impuestos...");
+      cargarImpuestosScroll();
+    }
+  });
+
+  //console.log(" Scroll infinito reactivado en Impuestos.php");
+}
+
+const observerImpuestos = new MutationObserver(() => {
+  const impuestosSeccion = document.getElementById("scroll-containerImp");
+  if (impuestosSeccion) {
+    observerImpuestos.disconnect();
+    iniciarScrollImpuestos();
+  }
+});
+
+const Impuestos = document.getElementById("content-area");
+if (Impuestos) {
+  observerImpuestos.observe(Impuestos, { childList: true, subtree: true });
+}
+
+
 // Llamar Proveedores*************************************************
 document
   .getElementById("proveedores-link")

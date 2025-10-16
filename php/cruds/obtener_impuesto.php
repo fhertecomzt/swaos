@@ -19,7 +19,8 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
       $response["impuesto"] = [
         "idimpuesto" => htmlspecialchars($impuesto["idimpuesto"]),
         "impuesto" => htmlspecialchars($impuesto["nomimpuesto"]),
-        "tasa" => htmlspecialchars($impuesto["tasa"])
+        "tasa" => htmlspecialchars($impuesto["tasa"]),
+        "estatus" => htmlspecialchars($impuesto["estatus"])
       ];
     } else {
       $response["message"] = "No sé a encontrado.";
