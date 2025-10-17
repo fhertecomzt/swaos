@@ -4,7 +4,7 @@
 function obtenerRegistros($dbh, $tabla, $campos = "*", $orden = "id DESC", $campoId = "id", $registrosPorPagina = 10, $pagina = 1)
 {
   // Evita SQL Injection verificando que el nombre de la tabla sea válido
-  $tablasPermitidas = ['talleres', 'roles', 'productos', 'categorias', 'marcas', 'tiposervicios', 'estadosservicios',  'metodosdepago', 'impuestos', 'clientes', 'proveedores'];
+  $tablasPermitidas = ['talleres', 'roles', 'productos', 'categorias', 'marcas', 'tiposervicios', 'estadosservicios',  'metodosdepago', 'impuestos', 'clientes', 'proveedores', 'estados'];
   if (!in_array($tabla, $tablasPermitidas)) {
     return []; // Evita consultas en tablas no permitidas
   }
@@ -33,6 +33,13 @@ function obtenerTotalRegistros($dbh, $tabla)
   $stmt = $dbh->prepare($sql);
   $stmt->execute();
   return $stmt->fetchColumn();
+}
+
+function obtenerEstados($dbh)
+{
+  $stmt = $dbh->prepare("SELECT id, nombre FROM estados ORDER BY nombre ASC");
+  $stmt->execute();
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function obtenerUsuarios($dbh)
