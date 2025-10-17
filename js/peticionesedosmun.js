@@ -1,7 +1,7 @@
 const cbxEstado = document.getElementById("estado");
 const cbxMunicipio = document.getElementById("municipio");
 const cbxColonia = document.getElementById("colonia");
-const cbxCP = document.getElementById("codigo_postal");
+const inputCP = document.getElementById("codigo_postal");
 
 cbxEstado.addEventListener("change", getMunicipios);
 cbxMunicipio.addEventListener("change", getColonias);
@@ -48,18 +48,28 @@ function getColonias() {
 }
 
 function getCodigoPostal() {
-  // Limpiamos los resultados anteriores
-  cbxCP.innerHTML = "<option value=''>Seleccionar</option>";
+  // 1. Limpiamos el input del Código Postal
+  inputCP.value = "";
 
   let colonia = cbxColonia.value;
   if (!colonia) return;
 
-  let url = "../funciones/getCodigoPostal.php"; // Ruta al script de PHP creado
+  let url = "../funciones/getCodigoPostal.php"; // La ruta del script PHP
   let formData = new FormData();
-  formData.append("colonia", colonia); // Enviar el ID de la Colonia
+  formData.append("colonia", colonia); // Enviamos el ID de la Colonia
 
-  // Usar la función genérica para hacer el fetch y llenar el select del CP
-  fetchAndSetdata(url, formData, cbxCP).catch((err) =>
-    console.error("Error cargando Código Postal:", err)
-  );
+  // Hacemos un fetch específico para este caso:
+  fetch(url, {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // 2. Revisamos si el JSON tiene la propiedad 'codigo_postal'
+      if (data.codigo_postal) {
+        // 3. Rellenamos el campo de texto con el valor
+        inputCP.value = data.codigo_postal;
+      }
+    })
+    .catch((err) => console.error("Error cargando Código Postal:", err));
 }

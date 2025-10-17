@@ -30,7 +30,7 @@ $estados = obtenerEstados($dbh);
         <?php endforeach; ?>
       </select>
     </p>
-    
+
     <p>
       <label for="municipio">Municipio</label>
       <select name="municipio" id="municipio">
@@ -47,10 +47,9 @@ $estados = obtenerEstados($dbh);
 
     <p>
       <label for="codigo_postal">Código Postal</label>
-      <select name="codigo_postal" id="codigo_postal">
-        <option value="">Seleccionar</option>
-      </select>
+      <input type="text" name="codigo_postal" id="codigo_postal" readonly>
     </p>
+
   </form>
 
   <script src="../../js/peticionesedosmun.js"></script>
