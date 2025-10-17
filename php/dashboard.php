@@ -19,21 +19,21 @@ include "verificar_sesion.php";
 <div class="container_dashboard" id="dashboard">
   <!--Cards-->
   <div class="cards">
-    
+
     <div class="card" data-page="catalogos/productos.php">
       <div>
         <span class="card-numeros">10</span>
-        <span class="card-nombre">ÓRDENES PENDIENTES</span>
+        <p><span class="card-nombre">Órdenes pendientes</span></p>
       </div>
       <div class="card-icono">
         <i class="fa-solid fa-boxes-stacked"></i>
       </div>
     </div>
-    
+
     <div class="card" data-page="catalogos/productos.php">
       <div>
         <span class="card-numeros">3</span>
-        <span class="card-nombre">ÓRDENES LISTAS</span>
+       <p> <span class="card-nombre">Órdenes listas</span></p>
       </div>
       <div class="card-icono">
         <i class="fa-solid fa-boxes-stacked"></i>
@@ -43,17 +43,17 @@ include "verificar_sesion.php";
     <div class="card" data-page="catalogos/productos.php">
       <div>
         <span class="card-numeros">0</span><br>
-        <span class="card-nombre">Productos</span>
+        <p><span class="card-nombre">Productos</span></p>
       </div>
       <div class="card-icono">
         <i class="fa-solid fa-boxes-stacked"></i>
       </div>
     </div>
-    
+
     <div class="card" data-page="catalogos/clientes.php">
       <div>
         <span class=" card-numeros">0</span>
-        <span class="card-nombre">Clientes</span>
+        <p><span class="card-nombre">Clientes</span></p>
       </div>
       <div class="card-icono">
         <i class="fa-solid fa-people-group"></i>
@@ -63,7 +63,7 @@ include "verificar_sesion.php";
     <div class="card" data-page="catalogos/proveedores.php">
       <div>
         <span class=" card-numeros">0</span>
-        <span class="card-nombre">Proveedores</span>
+        <p><span class="card-nombre">Proveedores</span></p>
       </div>
       <div class="card-icono">
         <i class="fa-solid fa-people-group"></i>
@@ -72,8 +72,8 @@ include "verificar_sesion.php";
 
     <div class="card">
       <div>
-        <span class="card-numeros">3,500</span>
-        <span class="card-nombre">Ventas</span>
+        <span class="card-numeros">0</span>
+        <p><span class="card-nombre">Ventas</span></p>
       </div>
       <div class="card-icono">
         <i class="fa-solid fa-money-check-dollar"></i>

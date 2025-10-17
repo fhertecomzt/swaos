@@ -67,6 +67,7 @@ $_SESSION['last_token'] = $current_token;
 </head>
 
 <body class="<?php echo (isset($_COOKIE['darkmode']) && $_COOKIE['darkmode'] == 'true') ? 'darkmode' : ''; ?>">
+    <!--Nav-->
     <nav class="navbar">
         <figure class="logo">
 
@@ -293,7 +294,7 @@ $_SESSION['last_token'] = $current_token;
             <i title="Modo oscuro" class="fa-solid fa-sun"></i>
             <p class="darkmode_title"></p>
         </button>
-    </div>
+    </div><!--Fin Darmode btn-->
 
     <div class="main--content" id="main-content">
         <div class="header--wrapper">
@@ -301,7 +302,8 @@ $_SESSION['last_token'] = $current_token;
                 <img src="../imgs/menu.svg" alt="Mi menú" class="nav__icon" style="height: 45px; width: 45px; padding: 5px; margin-right: 20px;" />
             </a> -->
             <div class="header--title">
-                <h2>Taller: <?php echo $_SESSION['nombre_t'] . ", Id: " . $_SESSION['taller_id'] ?></h2>
+                <!-- <h2>Taller: <?php echo $_SESSION['nombre_t'] . ", Id: " . $_SESSION['taller_id'] ?></h2> -->
+                <h2>Taller: <?php echo $_SESSION['nombre_t'] ?></h2>
                 <span>Usuario: <?php echo $_SESSION['usuario'] ?></span>
             </div>
             <div class="user--info">

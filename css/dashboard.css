@@ -15,15 +15,14 @@
   display: grid;
   grid-gap: 30px;
   grid-template-columns: repeat(4, 1fr);
-  padding: 20px; 
+  padding: 20px;
   position: relative;
   width: 100%;
 }
 .cards .card {
   position: relative;
-  background: #daf3ff;
+  background: #40a6d7;
   padding: 30px;
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   border-radius: 20px;
   display: flex;
   justify-content: space-between;
@@ -31,28 +30,30 @@
   transition: 0.4s;
 }
 .cards .card:hover {
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.4);
   background: #5ac8ff;
 }
+
 .cards .card .card-numeros {
   position: relative;
   font-weight: 700;
   font-size: 2.5rem;
-  color: #9316c0;
+  color: #1b4357;
 }
 .cards .card .card-nombre {
-  color: #a586ae;
+  color: #1b4357;
   font-size: 1.1em;
   margin-top: 5px;
   margin-right: 80px;
 }
 .cards .card .card-icono {
   font-size: 3.5em;
-  color: #a586ae;
+  color: #1b4357;
 }
 .cards .card:hover .card-numeros,
 .cards .card:hover .card-nombre,
 .cards .card:hover .card-icono {
-  color: #daf3ff;
+  color: #ffffff;
 }
 
 /* Estilos cuando el modo oscuro está activado */
@@ -60,15 +61,17 @@
 .darkmode .container_dashboard {
   background: #2f2f31 !important;
 }
-.darkmode .cards {
+.darkmode .cards .card-nombre,.darkmode .card-numeros,.darkmode  .card-icono {
   color: white !important;
 }
 
-.darkmode .card {
+.darkmode .card {  
   background: #444446 !important;
 }
 .darkmode .cards .card:hover {
-  background: rgb(41, 102, 128) !important;  
+  background: rgb(41, 102, 128) !important;
+  box-shadow: 0 7px 7px rgba(255, 255, 255, 0.5);
+
 }
 .darkmode .cards .card:hover .card-numeros,
 .darkmode .cards .card:hover .card-nombre,

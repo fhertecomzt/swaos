@@ -71,11 +71,11 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
         <p class="mensajevacio" id="mensaje-vacio" style="display: none;">No se encontraron resultados.</p>
     </div>
 
-    <!-- Modal para crear tienda -->
+    <!-- Modal para crear taller -->
     <div id="crear-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span title="Cerrar" class="close" onclick="cerrarModal('crear-modal')">&times;</span>
-            <h2 class="tittle">Crear Tienda</h2>
+            <h2 class="tittle">Crear taller</h2>
             <form id="form-crear" onsubmit="validarFormularioTienda(event)">
                 <div class="form-group">
                     <label for="crear-nombre">Nombre:</label>
@@ -104,82 +104,82 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                         title="Solo se permiten letras y espacios."
                         oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ]/g, '')" size="10" min="0" maxlength="30" required>
                 </div>
-                    <div class="form-containernum">
-                        <div class="form-group ladoble">
-                            <label for="crear-noexterior">No. exterior:</label>
-                            <input type="number" id="crear-noexterior" name="noexterior" autocomplete="off"
-                                pattern="[0-9]+"
-                                title="Solo se permiten númerosx."
-                                oninput="this.value = this.value.replace(/[^0-9\s]/g, '')" size="6" min="0" maxlength="6" required>
-                        </div>
-
-                        <div class="form-group ladoble">
-                            <label for="crear-nointerior">No. Interior:</label>
-                            <input type="text" id="crear-nointerior" name="nointerior" autocomplete="off" size="10" min="0" value="0"
-                                title="Solo se permiten letras y números."
-                                oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size=" 10" min="0" value="0" maxlength="6" required>
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <label for="crear-colonia">Colonia:</label>
-                        <input type="text" id="crear-colonia" name="colonia" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ\s]+"
-                            title="Solo se permiten letras y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="crear-ciudad">Ciudad:</label>
-                        <input type="text" id="crear-ciudad" name="ciudad" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ\s]+"
-                            title="Solo se permiten letras y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="crear-estado">Estado:</label>
-                        <input type="text" id="crear-estado" name="estado" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ\s]+"
-                            title="Solo se permiten letras y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="crear-cpostal">Código postal:</label>
-                        <input type="text" id="crear-cpostal" name="cpostal" autocomplete="off" maxlength="5"
-                            pattern="\d{5}"
-                            title="Por favor, ingrese un código postal de 5 dígitos."
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="crear-email">Email:</label>
-                        <input type="email" id="crear-email" name="email" autocomplete="off" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="crear-telefono">Teléfono:</label>
-                        <input type="text" id="crear-telefono" name="telefono" autocomplete="off" maxlength="10 "
-                            pattern="\d{10}"
-                            title="Por favor, ingrese un número de telefono de 10 dígitos."
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                <div class="form-containernum">
+                    <div class="form-group ladoble">
+                        <label for="crear-noexterior">No. exterior:</label>
+                        <input type="number" id="crear-noexterior" name="noexterior" autocomplete="off"
+                            pattern="[0-9]+"
+                            title="Solo se permiten númerosx."
+                            oninput="this.value = this.value.replace(/[^0-9\s]/g, '')" size="6" min="0" maxlength="6" required>
                     </div>
 
-                    <!-- Selección de Estatus -->
-                    <div class="form-group">
-                        <label for="estatus">Estatus:</label>
-                        <select id="estatus" name="estatus">
-                            <?php foreach ($options as $key => $text) { ?>
-                                <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
-                            <?php } ?>
-                        </select>
+                    <div class="form-group ladoble">
+                        <label for="crear-nointerior">No. Interior:</label>
+                        <input type="text" id="crear-nointerior" name="nointerior" autocomplete="off" size="10" min="0" value="0"
+                            title="Solo se permiten letras y números."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size=" 10" min="0" value="0" maxlength="6" required>
                     </div>
+                </div>
+                <div class="form-group ">
+                    <label for="crear-colonia">Colonia:</label>
+                    <input type="text" id="crear-colonia" name="colonia" autocomplete="off"
+                        pattern="[a-zA-ZÀ-ÿ\s]+"
+                        title="Solo se permiten letras y espacios."
+                        oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
+                </div>
+                <div class="form-group">
+                    <label for="crear-ciudad">Ciudad:</label>
+                    <input type="text" id="crear-ciudad" name="ciudad" autocomplete="off"
+                        pattern="[a-zA-ZÀ-ÿ\s]+"
+                        title="Solo se permiten letras y espacios."
+                        oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
+                </div>
+                <div class="form-group">
+                    <label for="crear-estado">Estado:</label>
+                    <input type="text" id="crear-estado" name="estado" autocomplete="off"
+                        pattern="[a-zA-ZÀ-ÿ\s]+"
+                        title="Solo se permiten letras y espacios."
+                        oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
+                </div>
+                <div class="form-group">
+                    <label for="crear-cpostal">Código postal:</label>
+                    <input type="text" id="crear-cpostal" name="cpostal" autocomplete="off" maxlength="5"
+                        pattern="\d{5}"
+                        title="Por favor, ingrese un código postal de 5 dígitos."
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                </div>
+                <div class="form-group">
+                    <label for="crear-email">Email:</label>
+                    <input type="email" id="crear-email" name="email" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="crear-telefono">Teléfono:</label>
+                    <input type="text" id="crear-telefono" name="telefono" autocomplete="off" maxlength="10 "
+                        pattern="\d{10}"
+                        title="Por favor, ingrese un número de telefono de 10 dígitos."
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                </div>
 
-                    <button type="submit">Guardar</button>
+                <!-- Selección de Estatus -->
+                <div class="form-group">
+                    <label for="estatus">Estatus:</label>
+                    <select id="estatus" name="estatus">
+                        <?php foreach ($options as $key => $text) { ?>
+                            <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+
+                <button type="submit">Guardar</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal para editar tienda -->
+    <!-- Modal para editar taller -->
     <div id="editar-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span title="Cerrar" class="close" onclick="cerrarModal('editar-modal')">&times;</span>
-            <h2 class="tittle">Editar Tienda</h2>
+            <h2 class="tittle">Editar taller</h2>
             <form id="form-editar">
                 <input type="hidden" id="editar-id" name="editar-id" value="" />
                 <div class="form-group">
