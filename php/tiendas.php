@@ -11,6 +11,8 @@ include "conexion.php";
 include "funciones/funciones.php";
 include "funciones/activoinactivo.php";
 
+$estados = obtenerEstados($dbh);
+
 $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representante_t, pri_apellido_rep_t, seg_apellido_rep_t, rfc_t, email_t, tel_t, estatus_t", "ASC", "id_taller");
 ?>
 
@@ -91,6 +93,7 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                         title="Solo se permiten letras y espacios."
                         oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                 </div>
+
                 <div class="form-group">
                     <label for="crear-rfc">R.F.C.:</label>
                     <input type="text" id="crear-rfc" name="rfc" autocomplete="off" maxlength="13"
@@ -98,12 +101,14 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                         title="Solo se permiten letras y números."
                         oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" required>
                 </div>
+
                 <div class="form-group">
                     <label for="crear-domicilio">Calle:</label>
                     <input type="text" id="crear-domicilio" name="domicilio" autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
                         title="Solo se permiten letras y espacios."
                         oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ]/g, '')" size="10" min="0" maxlength="30" required>
                 </div>
+
                 <div class="form-containernum">
                     <div class="form-group ladoble">
                         <label for="crear-noexterior">No. exterior:</label>
@@ -120,57 +125,64 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                             oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size=" 10" min="0" value="0" maxlength="6" required>
                     </div>
                 </div>
-                <div class="form-group ">
-                    <label for="crear-colonia">Colonia:</label>
-                    <input type="text" id="crear-colonia" name="colonia" autocomplete="off"
-                        pattern="[a-zA-ZÀ-ÿ\s]+"
-                        title="Solo se permiten letras y espacios."
-                        oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
-                </div>
+
                 <div class="form-group">
-                    <label for="crear-ciudad">Ciudad:</label>
-                    <input type="text" id="crear-ciudad" name="ciudad" autocomplete="off"
-                        pattern="[a-zA-ZÀ-ÿ\s]+"
-                        title="Solo se permiten letras y espacios."
-                        oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
+                    <label for="estado">Estado</label>
+                    <select name="nombre" id="estado">
+                        <option value="">Seleccionar</option>
+                        <?php foreach ($estados as $row) : ?>
+                            <option value="<?php echo $row['id']; ?>"><?php echo $row['nombre']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="crear-estado">Estado:</label>
-                    <input type="text" id="crear-estado" name="estado" autocomplete="off"
-                        pattern="[a-zA-ZÀ-ÿ\s]+"
-                        title="Solo se permiten letras y espacios."
-                        oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
+                    <label for="municipio">Municipio</label>
+                    <select name="municipio" id="municipio">
+                        <option value="">Seleccionar</option>
+                    </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="crear-cpostal">Código postal:</label>
-                    <input type="text" id="crear-cpostal" name="cpostal" autocomplete="off" maxlength="5"
-                        pattern="\d{5}"
-                        title="Por favor, ingrese un código postal de 5 dígitos."
-                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                    <label for=" colonia">Colonia</label>
+                    <select name="colonia" id="colonia">
+                        <option value="">Seleccionar</option>
+                    </select>
                 </div>
+
+                <div class="form-group ladoble">
+                    <label for="codigo_postal">Código Postal</label>
+                    <input type="text" name="codigo_postal" id="codigo_postal" readonly>
+                </div>
+
                 <div class="form-group">
                     <label for="crear-email">Email:</label>
                     <input type="email" id="crear-email" name="email" autocomplete="off" required>
                 </div>
-                <div class="form-group">
-                    <label for="crear-telefono">Teléfono:</label>
-                    <input type="text" id="crear-telefono" name="telefono" autocomplete="off" maxlength="10 "
-                        pattern="\d{10}"
-                        title="Por favor, ingrese un número de telefono de 10 dígitos."
-                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                </div>
 
-                <!-- Selección de Estatus -->
-                <div class="form-group">
-                    <label for="estatus">Estatus:</label>
-                    <select id="estatus" name="estatus">
-                        <?php foreach ($options as $key => $text) { ?>
-                            <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
-                        <?php } ?>
-                    </select>
-                </div>
+                <div class="form-containernum">
 
-                <button type="submit">Guardar</button>
+                    <div class="form-group">
+                        <label for="crear-telefono">Teléfono:</label>
+                        <input type="text" id="crear-telefono" name="telefono" autocomplete="off" maxlength="10 "
+                            pattern="\d{10}"
+                            title="Por favor, ingrese un número de telefono de 10 dígitos."
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                    </div>
+                    <!-- Selección de Estatus -->
+                    <div class="form-group">
+                        <label for="estatus">Estatus:</label>
+                        <select id="estatus" name="estatus">
+                            <?php foreach ($options as $key => $text) { ?>
+                                <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-containernum">
+                    <button type="submit">Guardar</button>
+                    <span class="cancelarModal" onclick="cerrarModal('crear-modal')" type=" submit">Cancelar</span>
+                </div>
             </form>
         </div>
     </div>

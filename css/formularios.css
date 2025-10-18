@@ -149,13 +149,13 @@ form .button input {
   gap: 20px; /* Espaciado entre los inputs */
   align-items: center; /* Alineación vertical */
   flex-wrap: wrap; /* Permite que se acomoden en pantallas pequeñas */
-  margin-left: 5px;
+  /*margin-left: 5px;*/
 }
 
 .ladoble {
   display: flex;
   flex-direction: column; /* Mantiene el label encima del input */
-  width: calc(100% / 2 - 24px);
+  width: calc(100% / 2 - 15px);
 }
 .laquinta {
   display: flex;

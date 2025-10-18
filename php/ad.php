@@ -341,6 +341,7 @@ $_SESSION['last_token'] = $current_token;
     <!--Scripts JS-->
 
     <script src="../js/dashboard.js"></script>
+
     <script src="../js/scripts.js"></script>
     <script src="../js/scriptssup.js"></script>
     <script src="../js/clientes.js"></script>
@@ -352,6 +353,9 @@ $_SESSION['last_token'] = $current_token;
 
     <!--Alertas SweetAlert2-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!--Scripts Selects anidados estado, ciudad, colonia y cp-->
+    <script src="../js/peticionesedosmun.js"></script>
 </body>
 
 </html>
