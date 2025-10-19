@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-//Variables globales
+//Variables globales ***********************************************************
 let pagina = 2;
 let cargando = false;
 
@@ -110,7 +110,7 @@ document
       });
   });
 
-//Llamar Tiendas*********************************************
+//Llamar Talleres *********************************************
 document
   .getElementById("tiendas-link")
   .addEventListener("click", function (event) {
@@ -119,14 +119,14 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        cargarTiendasFiltradas();
+        //cargarTiendasFiltradas();
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-// Crear Tiendas*******************************
+// Crear Talleres *******************************
 function abrirModal(id) {
   document.getElementById(id).style.display = "flex";
 }
@@ -927,6 +927,8 @@ function actualizarTablaTiendas(tiendas) {
     fila.innerHTML = `
       <td data-lable="Nombre:">${tienda.nombre_t}</td>
       <td data-lable="Representante:">${tienda.representante_t}</td>
+      <td data-lable="Primer apellido:">${tienda.pri_apellido_rep_t}</td>
+      <td data-lable="Segundo apellido:">${tienda.seg_apellido_rep_t}</td>
       <td data-lable="R.F.C.">${tienda.rfc_t}</td>
       <td data-lable="Email">${tienda.email_t}</td>
       <td data-lable="Teléfono">${tienda.tel_t}</td>

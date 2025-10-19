@@ -111,6 +111,7 @@ span {
   border-radius: 10px;
   padding: 5px 2rem;
   margin-bottom: 1rem;
+  width: 99%;
 }
 .header--wrapper img {
   width: 50px;

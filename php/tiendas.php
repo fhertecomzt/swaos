@@ -37,8 +37,10 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
         <table class="tbl" id="tabla-tiendas">
             <thead>
                 <tr>
-                    <th>Nombre</th>
+                    <th>Nombre del taller</th>
                     <th>Representante</th>
+                    <th>Primer apellido</th>
+                    <th>Segundo apellido</th>
                     <th>R.F.C.</th>
                     <th>Email</th>
                     <th>Teléfono</th>
@@ -52,17 +54,19 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                     <tr>
                         <td data-lable="Nombre: "><?php echo $tienda['nombre_t']; ?></td>
                         <td data-lable="Representante: "><?php echo $tienda['representante_t']; ?></td>
+                        <td data-lable="Primer apellido: "><?php echo $tienda['pri_apellido_rep_t']; ?></td>
+                        <td data-lable="Segundo apellido: "><?php echo $tienda['seg_apellido_rep_t']; ?></td>
                         <td data-lable="R.F.C.: "><?php echo $tienda['rfc_t']; ?></td>
                         <td data-lable="Email: "><?php echo $tienda['email_t']; ?></td>
                         <td data-lable="Teléfono"><?php echo $tienda['tel_t']; ?></td>
-                        <td data-lable="Estatus"><button class="btn <?php echo ($tienda['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
-                                <?php echo ($tienda['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
+                        <td data-lable="Estatus"><button class="btn <?php echo ($tienda['estatus_t'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
+                                <?php echo ($tienda['estatus_t'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
                         <td data-lable=" Editar">
-                            <button title="Editar" class="editar fa-solid fa-pen-to-square" data-id="<?php echo $tienda['idtienda']; ?>"></button>
+                            <button title="Editar" class="editar fa-solid fa-pen-to-square" data-id="<?php echo $tienda['id_taller']; ?>"></button>
                         </td>
                         <td data-lable="Eliminar">
-                            <button title="Eliminar" class="eliminar fa-solid fa-trash" data-id="<?php echo $tienda['idtienda']; ?>"></button>
+                            <button title="Eliminar" class="eliminar fa-solid fa-trash" data-id="<?php echo $tienda['id_taller']; ?>"></button>
                         </td>
 
                     </tr>
@@ -80,14 +84,14 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
             <h2 class="tittle">Crear taller</h2>
             <form id="form-crear" onsubmit="validarFormularioTienda(event)">
                 <div class="form-group">
-                    <label for="crear-nombre">Nombre:</label>
+                    <label for="crear-nombre">Nombre del taller:</label>
                     <input type="text" id="crear-nombre" name="nombre" autocomplete="off"
                         pattern="[a-zA-ZÀ-ÿ\s]+"
                         title="Solo se permiten letras y espacios."
                         oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                 </div>
                 <div class="form-group">
-                    <label for="crear-representante">Representante:</label>
+                    <label for="crear-representante">Representante legal:</label>
                     <input type="text" id="crear-representante" name="representante" autocomplete="off"
                         pattern="[a-zA-ZÀ-ÿ\s]+"
                         title="Solo se permiten letras y espacios."
@@ -144,7 +148,7 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                 </div>
 
                 <div class="form-group">
-                    <label for=" colonia">Colonia</label>
+                    <label for="colonia">Colonia</label>
                     <select name="colonia" id="colonia">
                         <option value="">Seleccionar</option>
                     </select>
@@ -162,7 +166,7 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
 
                 <div class="form-containernum">
 
-                    <div class="form-group">
+                    <div class="form-group" style="width: 40%">
                         <label for="crear-telefono">Teléfono:</label>
                         <input type="text" id="crear-telefono" name="telefono" autocomplete="off" maxlength="10 "
                             pattern="\d{10}"
@@ -170,7 +174,7 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                             oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
                     </div>
                     <!-- Selección de Estatus -->
-                    <div class="form-group">
+                    <div class="form-group" style="width: 50%">
                         <label for="estatus">Estatus:</label>
                         <select id="estatus" name="estatus">
                             <?php foreach ($options as $key => $text) { ?>

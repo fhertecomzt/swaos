@@ -5,7 +5,7 @@
   height: 60px;
   margin-bottom: 5px;
   padding: 1px 5px;
-  width: 100%;
+  width: 99%;
 }
 .container_dashboard_tablas {
   background: #fff;
@@ -16,7 +16,7 @@
   position: absolute;
   top: 160px;
   transition: 0.4s;
-  width: 98%;
+  width: 97%;
 }
 .boton,
 .btn_movimientos {
@@ -93,12 +93,14 @@
 form .form-group {
   margin-bottom: 2px;
   /*width: calc(100% / 1 - 10px);*/
+  width: 100%;
 }
 form label {
   display: block;
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 4px;
+  margin-top: 5px;
 }
 .form-group input,
 select {
@@ -149,13 +151,12 @@ form .button input {
   gap: 20px; /* Espaciado entre los inputs */
   align-items: center; /* Alineación vertical */
   flex-wrap: wrap; /* Permite que se acomoden en pantallas pequeñas */
-  /*margin-left: 5px;*/
 }
 
 .ladoble {
   display: flex;
   flex-direction: column; /* Mantiene el label encima del input */
-  width: calc(100% / 2 - 15px);
+  width: calc(100% / 2 - 15px) !important;
 }
 .laquinta {
   display: flex;
@@ -180,9 +181,9 @@ form .button input {
 .modal-content {
   background-color: #fff; /* Fondo blanco */
   margin: auto auto; /* Centrarse vertical y horizontalmente */
-  padding: 20px;
+  padding: 15px;
   border: 1px solid #888;
-  width: 30%; /* Ancho del modal */
+  width: 25%; /* Ancho del modal */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
 }

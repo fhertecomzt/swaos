@@ -7,7 +7,7 @@
   min-height: 80vh;
   position: absolute;
   transition: 0.4s;
-  width: calc(100% - 30px);
+  width: calc(99% - 30px);
 }
 
 /*Cards*/
