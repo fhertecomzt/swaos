@@ -230,13 +230,11 @@ function validarFormularioTienda(event) {
   const rfc = document.querySelector("[name='rfc']").value.trim();
   const calle = document.querySelector("[name='calle']").value.trim();
   const noexterior = document.querySelector("[name='noexterior']").value.trim();
-  
-  /*
-  const nointerior = document.querySelector("[name='nointerior']").value.trim();
-  const colonia = document.querySelector("[name='colonia']").value.trim();
-  const municipio = document.querySelector("[name='municipio']").value.trim();
-  const estado = document.querySelector("[name='estado']").value.trim();
-  */
+
+  //Validaciones select de crear taller
+  const selectEstado = document.querySelector("#estado");
+  const selectMunicipio = document.querySelector("#municipio");
+  const selectColonia = document.querySelector("#colonia");
 
   const errores = [];
 
@@ -311,69 +309,57 @@ function validarFormularioTienda(event) {
       inputnoexterior.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
-/*
-  if (nointerior.length < 1) {
-    errores.push("Número interior debe tener al menos 1 carácter.");
-    const inputnointerior = document.querySelector("#crear-nointerior");
-    inputnointerior.focus();
-    inputnointerior.classList.add("input-error"); // Añade la clase de error
+
+  if (selectEstado.value === "") {
+    errores.push("Selecciona un estado.");
+    const selectestado = document.querySelector("#estado");
+    selectestado.focus();
+    selectestado.classList.add("input-error"); // Añade la clase de error
   }
   // Elimina la clase de error al corregir
-  const inputnointerior = document.querySelector("#crear-nointerior");
-  inputnointerior.addEventListener("input", () => {
-    if (inputnointerior.value.length >= 1) {
-      inputnointerior.classList.remove("input-error"); // Quita la clase si el campo es válido
+  const selectestado = document.querySelector("#estado");
+  selectestado.addEventListener("input", () => {
+    if (selectestado.value.length >= 0) {
+      selectestado.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
 
-  if (estado.length < 3) {
-    errores.push("El estado debe tener al menos 3 caracteres.");
-    const inputestado = document.querySelector("#crear-estado");
-    inputestado.focus();
-    inputestado.classList.add("input-error"); // Añade la clase de error
+  if (selectMunicipio.value === "") {
+    errores.push("Selecciona un municipio.");
+    const selectmunicipio = document.querySelector("#municipio");
+    selectmunicipio.focus();
+    selectmunicipio.classList.add("input-error"); // Añade la clase de error
   }
   // Elimina la clase de error al corregir
-  const inputestado = document.querySelector("#crear-estado");
-  inputestado.addEventListener("input", () => {
-    if (inputestado.value.length >= 3) {
-      inputestado.classList.remove("input-error"); // Quita la clase si el campo es válido
+  const selectmunicipio = document.querySelector("#municipio");
+  selectmunicipio.addEventListener("input", () => {
+    if (selectmunicipio.value.length >= 0) {
+      selectmunicipio.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
 
-  if (colonia.length < 3) {
-    errores.push("La colonia debe tener al menos 3 caracteres.");
-    const inputcolonia = document.querySelector("#crear-colonia");
-    inputcolonia.focus();
-    inputcolonia.classList.add("input-error"); // Añade la clase de error
+  if (selectColonia.value === "") {
+    errores.push("Selecciona una colonia.");
+    const selectColonia = document.querySelector("#colonia");
+    selectColonia.focus();
+    selectColonia.classList.add("input-error"); // Añade la clase de error
   }
   // Elimina la clase de error al corregir
-  const inputcolonia = document.querySelector("#crear-colonia");
-  inputcolonia.addEventListener("input", () => {
-    if (inputcolonia.value.length >= 3) {
-      inputcolonia.classList.remove("input-error"); // Quita la clase si el campo es válido
+  const selectcolonia = document.querySelector("#colonia");
+  selectcolonia.addEventListener("input", () => {
+    if (selectcolonia.value.length >= 0) {
+      selectcolonia.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
-
-  if (municipio.length < 3) {
-    errores.push("El municipio debe tener al menos 3 caracteres.");
-    const inputmunicipio = document.querySelector("#crear-municipio");
-    inputmunicipio.focus();
-    inputmunicipio.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputmunicipio = document.querySelector("#crear-municipio");
-  inputmunicipio.addEventListener("input", () => {
-    if (inputmunicipio.value.length >= 3) {
-      inputmunicipio.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-  */
 
   if (errores.length > 0) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     return;
   }
@@ -383,9 +369,9 @@ function validarFormularioTienda(event) {
     .then((esDuplicado) => {
       if (esDuplicado) {
         Swal.fire({
-          title: "Error",
-          text: "El nombre de la tienda ya existe. Por favor, elige otro.",
-          icon: "error",
+          title: "Atención",
+          text: "El nombre del taller ya existe. Por favor, elige otro.",
+          icon: "warning",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
