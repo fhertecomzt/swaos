@@ -161,7 +161,9 @@ function procesarFormulario(event, tipo) {
           const newRow = document.createElement("tr");
           newRow.innerHTML = `
             <td data-lable="Nombre:">${data.tienda.nombre}</td>
-            <td data-lable="Representante:">${data.tienda.representante}</td>
+            <td data-lable="Nombre, denominación o razón social:">${
+              data.tienda.razonsocial
+            }</td>
             <td data-lable="R.F.C.:">${data.tienda.rfc}</td>
             <td data-lable="Email:">${data.tienda.email}</td>
             <td data-lable="Teléfono">${data.tienda.telefono}</td>
@@ -222,16 +224,19 @@ function validarFormularioTienda(event) {
   event.preventDefault();
 
   const nombre = document.querySelector("[name='nombre']").value.trim();
-  const representante = document
-    .querySelector("[name='representante']")
+  const razonsocial = document
+    .querySelector("[name='razonsocial']")
     .value.trim();
   const rfc = document.querySelector("[name='rfc']").value.trim();
-  const domicilio = document.querySelector("[name='domicilio']").value.trim();
+  const calle = document.querySelector("[name='calle']").value.trim();
   const noexterior = document.querySelector("[name='noexterior']").value.trim();
+  
+  /*
   const nointerior = document.querySelector("[name='nointerior']").value.trim();
   const colonia = document.querySelector("[name='colonia']").value.trim();
-  const ciudad = document.querySelector("[name='ciudad']").value.trim();
+  const municipio = document.querySelector("[name='municipio']").value.trim();
   const estado = document.querySelector("[name='estado']").value.trim();
+  */
 
   const errores = [];
 
@@ -249,17 +254,19 @@ function validarFormularioTienda(event) {
     }
   });
 
-  if (representante.length < 3) {
-    errores.push("El representante debe tener al menos 3 caracteres.");
-    const inputrep = document.querySelector("#crear-representante");
-    inputrep.focus();
-    inputrep.classList.add("input-error"); // Añade la clase de error
+  if (razonsocial.length < 3) {
+    errores.push(
+      "La denominación o razón social: debe tener al menos 3 caracteres."
+    );
+    const inputrazonsocial = document.querySelector("#crear-razonsocial");
+    inputrazonsocial.focus();
+    inputrazonsocial.classList.add("input-error"); // Añade la clase de error
   }
   // Elimina la clase de error al corregir
-  const inputrep = document.querySelector("#crear-representante");
-  inputrep.addEventListener("input", () => {
-    if (inputrep.value.length >= 3) {
-      inputrep.classList.remove("input-error"); // Quita la clase si el campo es válido
+  const inputrazonsocial = document.querySelector("#crear-razonsocial");
+  inputrazonsocial.addEventListener("input", () => {
+    if (inputrazonsocial.value.length >= 3) {
+      inputrazonsocial.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
 
@@ -277,17 +284,17 @@ function validarFormularioTienda(event) {
     }
   });
 
-  if (domicilio.length < 3) {
+  if (calle.length < 3) {
     errores.push("La calle debe tener al menos 3 caracteres.");
-    const inputdomicilio = document.querySelector("#crear-domicilio");
-    inputdomicilio.focus();
-    inputdomicilio.classList.add("input-error"); // Añade la clase de error
+    const inputcalle = document.querySelector("#crear-calle");
+    inputcalle.focus();
+    inputcalle.classList.add("input-error"); // Añade la clase de error
   }
   // Elimina la clase de error al corregir
-  const inputdomicilio = document.querySelector("#crear-domicilio");
-  inputdomicilio.addEventListener("input", () => {
-    if (inputdomicilio.value.length >= 3) {
-      inputdomicilio.classList.remove("input-error"); // Quita la clase si el campo es válido
+  const inputcalle = document.querySelector("#crear-calle");
+  inputcalle.addEventListener("input", () => {
+    if (inputcalle.value.length >= 3) {
+      inputcalle.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
 
@@ -304,7 +311,7 @@ function validarFormularioTienda(event) {
       inputnoexterior.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
-
+/*
   if (nointerior.length < 1) {
     errores.push("Número interior debe tener al menos 1 carácter.");
     const inputnointerior = document.querySelector("#crear-nointerior");
@@ -316,6 +323,20 @@ function validarFormularioTienda(event) {
   inputnointerior.addEventListener("input", () => {
     if (inputnointerior.value.length >= 1) {
       inputnointerior.classList.remove("input-error"); // Quita la clase si el campo es válido
+    }
+  });
+
+  if (estado.length < 3) {
+    errores.push("El estado debe tener al menos 3 caracteres.");
+    const inputestado = document.querySelector("#crear-estado");
+    inputestado.focus();
+    inputestado.classList.add("input-error"); // Añade la clase de error
+  }
+  // Elimina la clase de error al corregir
+  const inputestado = document.querySelector("#crear-estado");
+  inputestado.addEventListener("input", () => {
+    if (inputestado.value.length >= 3) {
+      inputestado.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
 
@@ -333,33 +354,20 @@ function validarFormularioTienda(event) {
     }
   });
 
-  if (ciudad.length < 3) {
-    errores.push("La ciudad debe tener al menos 3 caracteres.");
-    const inputciudad = document.querySelector("#crear-ciudad");
-    inputciudad.focus();
-    inputciudad.classList.add("input-error"); // Añade la clase de error
+  if (municipio.length < 3) {
+    errores.push("El municipio debe tener al menos 3 caracteres.");
+    const inputmunicipio = document.querySelector("#crear-municipio");
+    inputmunicipio.focus();
+    inputmunicipio.classList.add("input-error"); // Añade la clase de error
   }
   // Elimina la clase de error al corregir
-  const inputciudad = document.querySelector("#crear-ciudad");
-  inputciudad.addEventListener("input", () => {
-    if (inputciudad.value.length >= 3) {
-      inputciudad.classList.remove("input-error"); // Quita la clase si el campo es válido
+  const inputmunicipio = document.querySelector("#crear-municipio");
+  inputmunicipio.addEventListener("input", () => {
+    if (inputmunicipio.value.length >= 3) {
+      inputmunicipio.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
-
-  if (estado.length < 3) {
-    errores.push("El estado debe tener al menos 3 caracteres.");
-    const inputestado = document.querySelector("#crear-estado");
-    inputestado.focus();
-    inputestado.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputestado = document.querySelector("#crear-estado");
-  inputestado.addEventListener("input", () => {
-    if (inputestado.value.length >= 3) {
-      inputestado.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
+  */
 
   if (errores.length > 0) {
     Swal.fire({
@@ -446,7 +454,7 @@ document.addEventListener("DOMContentLoaded", function () {
               const campos = [
                 "id",
                 "nombre",
-                "representante",
+                "razonsocial",
                 "rfc",
                 "calle",
                 "noexterior",
@@ -537,9 +545,9 @@ async function validarFormularioEdicion(formulario) {
       mensaje: "El nombre debe tener al menos 3 caracteres.",
     },
     {
-      nombrec: "representante",
+      nombrec: "razonsocial",
       min: 3,
-      mensaje: "El representante debe tener al menos 3 caracteres.",
+      mensaje: "El razón social debe tener al menos 3 caracteres.",
     },
     {
       nombrec: "rfc",
@@ -570,7 +578,7 @@ async function validarFormularioEdicion(formulario) {
     {
       nombrec: "municipio",
       min: 3,
-      mensaje: "La ciudad debe tener al menos 3 caracteres.",
+      mensaje: "El municipio debe tener al menos 3 caracteres.",
     },
     {
       nombrec: "estado",
@@ -717,7 +725,7 @@ function actualizarFilaTabla(formData) {
     .closest("tr");
   if (fila) {
     fila.cells[0].textContent = formData.get("nombre_t");
-    fila.cells[1].textContent = formData.get("representante_t");
+    fila.cells[1].textContent = formData.get("razonsocial_t");
     fila.cells[2].textContent = formData.get("rfc_t");
     fila.cells[3].textContent = formData.get("email_t");
     fila.cells[4].textContent = formData.get("tel_t");
@@ -926,9 +934,9 @@ function actualizarTablaTiendas(tiendas) {
     const fila = document.createElement("tr");
     fila.innerHTML = `
       <td data-lable="Nombre:">${tienda.nombre_t}</td>
-      <td data-lable="Representante:">${tienda.representante_t}</td>
-      <td data-lable="Primer apellido:">${tienda.pri_apellido_rep_t}</td>
-      <td data-lable="Segundo apellido:">${tienda.seg_apellido_rep_t}</td>
+      <td data-lable="Nombre, denominación o razón social:">${
+        tienda.razonsocial_t
+      }</td>
       <td data-lable="R.F.C.">${tienda.rfc_t}</td>
       <td data-lable="Email">${tienda.email_t}</td>
       <td data-lable="Teléfono">${tienda.tel_t}</td>
@@ -994,7 +1002,7 @@ function cargarTiendasScroll() {
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${tienda.nombre_t}</td>
-            <td>${tienda.representante_t}</td>
+            <td>${tienda.razonsocial_t}</td>
             <td>${tienda.rfc_t}</td>
             <td>${tienda.tel_t}</td>
             <td>
@@ -8240,7 +8248,7 @@ function actualizarFilaTablaImpuesto(formData) {
     fila.cells[0].textContent = formData.get("impuesto");
     fila.cells[1].textContent = formData.get("tasa");
 
-        // Determinar clases y texto del botón
+    // Determinar clases y texto del botón
     const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
     const claseBtn =
       formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
@@ -8587,7 +8595,6 @@ const Impuestos = document.getElementById("content-area");
 if (Impuestos) {
   observerImpuestos.observe(Impuestos, { childList: true, subtree: true });
 }
-
 
 // Llamar Proveedores*************************************************
 document

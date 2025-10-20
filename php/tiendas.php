@@ -12,8 +12,7 @@ include "funciones/funciones.php";
 include "funciones/activoinactivo.php";
 
 $estados = obtenerEstados($dbh);
-
-$tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representante_t, pri_apellido_rep_t, seg_apellido_rep_t, rfc_t, email_t, tel_t, estatus_t", "ASC", "id_taller");
+$tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, razonsocial_t, rfc_t, email_t, tel_t, estatus_t", "ASC", "id_taller");
 ?>
 
 <div class="containerr">
@@ -38,9 +37,7 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
             <thead>
                 <tr>
                     <th>Nombre del taller</th>
-                    <th>Representante</th>
-                    <th>Primer apellido</th>
-                    <th>Segundo apellido</th>
+                    <th>Nombre, denominación o razón social</th>
                     <th>R.F.C.</th>
                     <th>Email</th>
                     <th>Teléfono</th>
@@ -53,9 +50,7 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                 <?php foreach ($tiendas as $tienda) : ?>
                     <tr>
                         <td data-lable="Nombre: "><?php echo $tienda['nombre_t']; ?></td>
-                        <td data-lable="Representante: "><?php echo $tienda['representante_t']; ?></td>
-                        <td data-lable="Primer apellido: "><?php echo $tienda['pri_apellido_rep_t']; ?></td>
-                        <td data-lable="Segundo apellido: "><?php echo $tienda['seg_apellido_rep_t']; ?></td>
+                        <td data-lable="Nombre, denominación o razón social: "><?php echo $tienda['razonsocial_t']; ?></td>
                         <td data-lable="R.F.C.: "><?php echo $tienda['rfc_t']; ?></td>
                         <td data-lable="Email: "><?php echo $tienda['email_t']; ?></td>
                         <td data-lable="Teléfono"><?php echo $tienda['tel_t']; ?></td>
@@ -91,8 +86,8 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                         oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                 </div>
                 <div class="form-group">
-                    <label for="crear-representante">Representante legal:</label>
-                    <input type="text" id="crear-representante" name="representante" autocomplete="off"
+                    <label for="crear-razonsocial">Nombre, denominación o razón social:</label>
+                    <input type="text" id="crear-razonsocial" name="razonsocial" autocomplete="off"
                         pattern="[a-zA-ZÀ-ÿ\s]+"
                         title="Solo se permiten letras y espacios."
                         oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
@@ -107,8 +102,8 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                 </div>
 
                 <div class="form-group">
-                    <label for="crear-domicilio">Calle:</label>
-                    <input type="text" id="crear-domicilio" name="domicilio" autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
+                    <label for="crear-calle">Calle:</label>
+                    <input type="text" id="crear-calle" name="calle" autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
                         title="Solo se permiten letras y espacios."
                         oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ]/g, '')" size="10" min="0" maxlength="30" required>
                 </div>
@@ -132,7 +127,7 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
 
                 <div class="form-group">
                     <label for="estado">Estado</label>
-                    <select name="nombre" id="estado">
+                    <select name="estado" id="estado">
                         <option value="">Seleccionar</option>
                         <?php foreach ($estados as $row) : ?>
                             <option value="<?php echo $row['id']; ?>"><?php echo $row['nombre']; ?></option>
@@ -203,8 +198,8 @@ $tiendas = obtenerRegistros($dbh, "talleres", "id_taller, nombre_t, representant
                     <input type="text" id="editar-nombre" name="nombre" required />
                 </div>
                 <div class="form-group">
-                    <label for="editar-representante">Representante:</label>
-                    <input type="text" id="editar-representante" name="representante" required />
+                    <label for="editar-razonsocial">Nombre, denominación o razón social:</label>
+                    <input type="text" id="editar-razonsocial" name="razonsocial" required />
                 </div>
                 <div class="form-group">
                     <label for="editar-rfc">R.F.C.:</label>

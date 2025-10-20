@@ -8,46 +8,42 @@ $response = ["success" => false, "message" => ""];
 try {
   // Insertar en la base de datos
   $stmt = $dbh->prepare("
-        INSERT INTO tiendas (
-            nomtienda, reptienda, rfctienda, domtienda, noexttienda, nointtienda,
-            coltienda, cdtienda, edotienda, cptienda, emailtienda, teltienda, estatus
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO talleres (nombre_t, razonsocial_t, rfc_t, calle_t, numext_t, numint_t, id_edo_t, id_munici_t, id_col_t, id_cp_t, tel_t, email_t, estatus_t) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
   $stmt->execute([
     $_POST['nombre'],
-    $_POST['representante'],
+    $_POST['razonsocial'],
     $_POST['rfc'],
-    $_POST['domicilio'],
+    $_POST['calle'],
     $_POST['noexterior'],
     $_POST['nointerior'] ?? '',
-    $_POST['colonia'],
-    $_POST['ciudad'],
     $_POST['estado'],
-    $_POST['cpostal'],
+    $_POST['municipio'],
+    $_POST['colonia'],
+    $_POST['codigo_postal'],
     $_POST['email'],
     $_POST['telefono'],
-    $_POST['estatus'],
-
+    $_POST['estatus']
   ]);
 
   $lastId = $dbh->lastInsertId();
 
   // Respuesta exitosa
   $response["success"] = true;
-  $response["message"] = "La tienda fue creada exitosamente.";
+  $response["message"] = "El taller fue creado exitosamente.";
   $response["tienda"] = [
     "id" => $lastId,
     "nombre" => $_POST['nombre'],
-    "representante" => $_POST['representante'],
+    "razonsocial" => $_POST['razonsocial'],
     "rfc" => $_POST['rfc'],
-    "domicilio" => $_POST['domicilio'],
+    "calle" => $_POST['calle'],
     "noexterior" => $_POST['noexterior'],
     "nointerior" => $_POST['nointerior'] ?? '',
-    "colonia" => $_POST['colonia'],
-    "ciudad" => $_POST['ciudad'],
     "estado" => $_POST['estado'],
-    "cpostal" => $_POST['cpostal'],
+    "municipio" => $_POST['municipio'],
+    "colonia" => $_POST['colonia'],
+    "codigo_postal" => $_POST['codigo_postal'],
     "email" => $_POST['email'],
     "telefono" => $_POST['telefono'],
     "estatus" => $_POST['estatus']
