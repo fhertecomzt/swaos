@@ -22,8 +22,8 @@ try {
     $_POST['municipio'],
     $_POST['colonia'],
     $_POST['codigo_postal'],
-    $_POST['email'],
     $_POST['telefono'],
+    $_POST['email'],
     $_POST['estatus']
   ]);
 
@@ -44,8 +44,8 @@ try {
     "municipio" => $_POST['municipio'],
     "colonia" => $_POST['colonia'],
     "codigo_postal" => $_POST['codigo_postal'],
-    "email" => $_POST['email'],
     "telefono" => $_POST['telefono'],
+    "email" => $_POST['email'],
     "estatus" => $_POST['estatus']
   ];
 } catch (PDOException $e) {

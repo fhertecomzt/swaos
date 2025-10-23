@@ -422,7 +422,7 @@ function verificarDuplicado(nombre) {
     });
 }
 
-//Editar Tiendas *************************************************************************
+//Editar taller *************************************************************************
 document.addEventListener("DOMContentLoaded", function () {
   // Escuchar clic en el botón de editar
   document.body.addEventListener("click", function (event) {
@@ -433,11 +433,14 @@ document.addEventListener("DOMContentLoaded", function () {
       fetch(`cruds/obtener_tienda.php?id=${id}`)
         .then((response) => response.json())
         .then((data) => {
-          console.log("Datos recibidos del servidor:", data);
+          //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
             const formulario = document.getElementById("form-editar");
             if (formulario) {
-              const campos = [
+              // --- INICIO: NUEVA LÓGICA DE POBLADO ---
+
+              // 1. Llenar campos simples (inputs de texto, etc.)
+              const camposSimples = [
                 "id",
                 "nombre",
                 "razonsocial",
@@ -445,20 +448,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 "calle",
                 "noexterior",
                 "nointerior",
-                "pais",
-                "estado",
-                "municipio",
-                "colonia",
-                "cpostal",
                 "telefono",
                 "email",
                 "estatus",
               ];
 
-              campos.forEach((campo) => {
-                formulario[`editar-${campo}`].value = data.tienda[campo] || "";
+              camposSimples.forEach((campo) => {
+                const input = formulario[`editar-${campo}`];
+                if (input) {
+                  input.value = data.tienda[campo] || "";
+                } else {
+                  console.warn(`Campo 'editar-${campo}' no encontrado.`);
+                }
               });
-              console.log("Estos son los campos: ", campos);
+
+              // 2. Obtener los IDs y valores guardados de la base de datos
+              const idEstadoDB = data.tienda.estado;
+              const idMunicipioDB = data.tienda.municipio;
+              const idColoniaDB = data.tienda.colonia;
+              const cpDB = data.tienda.codigo_postal; // Obtenemos el CP
+
+              // 3. Llamar a nuestra nueva función para cargar y seleccionar
+              //    los valores en los selects anidados.
+              cargarYSeleccionarUbicacionEditar(
+                idEstadoDB,
+                idMunicipioDB,
+                idColoniaDB,
+                cpDB
+              );
+
+              // --- FIN: NUEVA LÓGICA DE POBLADO ---
+
               abrirModal("editar-modal");
             } else {
               console.error("Formulario de edición no encontrado.");
@@ -491,7 +511,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-//Validar duplicados en edicion de tiendas
+//Validar duplicados en edicion de talleres
 function verificarDuplicadoEditarTienda(nombre, id = 0) {
   //console.log("Nombre:", nombre);
   //console.log("ID (si aplica):", id);
@@ -506,9 +526,9 @@ function verificarDuplicadoEditarTienda(nombre, id = 0) {
       // console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
         Swal.fire({
-          title: "Error",
-          text: data.message || "El nombre del ttaller ya existe.", // Mostrar el mensaje específico si existe
-          icon: "error",
+          title: "Atención",
+          text: data.message || "El nombre del taller ya existe.", // Mostrar el mensaje específico si existe
+          icon: "warning",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
@@ -555,21 +575,6 @@ async function validarFormularioEdicion(formulario) {
       nombrec: "nointerior",
       min: 1,
       mensaje: "El número interior debe ser mayor o igual a 0",
-    },
-    {
-      nombrec: "colonia",
-      min: 3,
-      mensaje: "La colonia debe tener al menos 3 caracteres.",
-    },
-    {
-      nombrec: "municipio",
-      min: 3,
-      mensaje: "El municipio debe tener al menos 3 caracteres.",
-    },
-    {
-      nombrec: "estado",
-      min: 3,
-      mensaje: "El estado debe tener al menos 3 caracteres.",
     },
   ];
 
@@ -625,7 +630,7 @@ async function validarFormularioEdicion(formulario) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
       showConfirmButton: false,
       timer: 1500,
       timerProgressBar: true,
@@ -666,7 +671,7 @@ function enviarFormularioEdicion(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidor:", data);
+    //  console.log("Respuesta del servidor:", data);
       if (data.success) {
         Swal.fire({
           title: "¡Actualizada!",
@@ -682,7 +687,7 @@ function enviarFormularioEdicion(formulario) {
         Swal.fire({
           title: "Atención",
           text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
+          icon: "warning",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
@@ -710,15 +715,15 @@ function actualizarFilaTabla(formData) {
     .querySelector(`button[data-id="${formData.get("editar-id")}"]`)
     .closest("tr");
   if (fila) {
-    fila.cells[0].textContent = formData.get("nombre_t");
-    fila.cells[1].textContent = formData.get("razonsocial_t");
-    fila.cells[2].textContent = formData.get("rfc_t");
-    fila.cells[3].textContent = formData.get("email_t");
-    fila.cells[4].textContent = formData.get("tel_t");
+    fila.cells[0].textContent = formData.get("nombre");
+    fila.cells[1].textContent = formData.get("razonsocial");
+    fila.cells[2].textContent = formData.get("rfc");
+    fila.cells[3].textContent = formData.get("email");
+    fila.cells[4].textContent = formData.get("telefono");
     // Determinar clases y texto del botón
-    const estatus = formData.get("estatus_t") === "0" ? "Activo" : "Inactivo";
+    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
     const claseBtn =
-      formData.get("estatus_t") === "0" ? "btn btn-success" : "btn btn-danger";
+      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
 
     // Insertar el botón en la celda
     fila.cells[5].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
@@ -727,7 +732,187 @@ function actualizarFilaTabla(formData) {
   }
 }
 
-// Eliminar Tiendas************************************************
+// --- INICIO: LÓGICA PARA SELECTS ANIDADOS (ESTADO, MUNICIPIO, COLONIA) ---
+
+/**
+ * Función auxiliar para llenar un <select> con opciones.
+ * @param {HTMLSelectElement} selectElement - El elemento <select> a llenar.
+ * @param {Array} items - Un array de objetos (ej. [{id: 1, nombre: 'Opción 1'}])
+ * @param {String} [valorDefault] - El valor para la opción "Seleccionar".
+ */
+function popularSelect(selectElement, items, valorDefault = "Seleccionar") {
+    if (!selectElement) return;
+    selectElement.innerHTML = `<option value="">${valorDefault}</option>`; // Limpiar opciones
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.nombre;
+        selectElement.appendChild(option);
+    });
+}
+
+/**
+ * Carga los municipios usando POST.
+ * @param {string} idEstado - El ID del estado seleccionado.
+ * @param {string} idSelectMunicipio - El ID del <select> de municipios.
+ * @param {string} idSelectColonia - El ID del <select> de colonias.
+ * @param {string} idInputCP - El ID del <input> de código postal.
+ */
+async function cargarMunicipios(idEstado, idSelectMunicipio, idSelectColonia, idInputCP) {
+    const selectMunicipio = document.getElementById(idSelectMunicipio);
+    const selectColonia = document.getElementById(idSelectColonia);
+    const inputCP = document.getElementById(idInputCP);
+
+    // Limpiar selects dependientes
+    popularSelect(selectMunicipio, [], "Cargando...");
+    popularSelect(selectColonia, []);
+    if (inputCP) inputCP.value = '';
+
+    if (idEstado) {
+        try {
+            const formData = new FormData();
+            formData.append('estado', idEstado);
+
+            const response = await fetch(`funciones/getMunicipios.php`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            popularSelect(selectMunicipio, data);
+        } catch (error) {
+            console.error('Error al cargar municipios:', error);
+            popularSelect(selectMunicipio, [], "Error al cargar");
+        }
+    } else {
+        popularSelect(selectMunicipio, []); // Limpiar si no hay estado
+    }
+}
+
+/**
+ * Carga las colonias usando POST.
+ * @param {string} idMunicipio - El ID del municipio seleccionado.
+ * @param {string} idSelectColonia - El ID del <select> de colonias.
+ * @param {string} idInputCP - El ID del <input> de código postal.
+ */
+async function cargarColonias(idMunicipio, idSelectColonia, idInputCP) {
+    const selectColonia = document.getElementById(idSelectColonia);
+    const inputCP = document.getElementById(idInputCP);
+
+    popularSelect(selectColonia, [], "Cargando...");
+    if (inputCP) inputCP.value = '';
+
+    if (idMunicipio) {
+        try {
+            const formData = new FormData();
+            formData.append('municipio', idMunicipio);
+
+            const response = await fetch(`funciones/getColonias.php`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            popularSelect(selectColonia, data);
+        } catch (error) {
+            console.error('Error al cargar colonias:', error);
+            popularSelect(selectColonia, [], "Error al cargar");
+        }
+    } else {
+        popularSelect(selectColonia, []); // Limpiar si no hay municipio
+    }
+}
+
+/**
+ * Carga el Código Postal usando POST.
+ * @param {string} idColonia - El ID de la colonia seleccionada.
+ * @param {string} idInputCP - El ID del <input> de código postal.
+ */
+async function cargarCP(idColonia, idInputCP) {
+    const inputCP = document.getElementById(idInputCP);
+    if (!inputCP) return;
+
+    if (idColonia) {
+        try {
+            const formData = new FormData();
+            formData.append('colonia', idColonia);
+
+            const response = await fetch(`funciones/getCodigoPostal.php`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            inputCP.value = data.codigo_postal || '';
+        } catch (error) {
+            console.error('Error al cargar CP:', error);
+            inputCP.value = 'Error';
+        }
+    } else {
+        inputCP.value = '';
+    }
+}
+
+// --- Event Listeners para los selects (Usando delegación de eventos) ---
+
+document.addEventListener('change', function(event) {
+    
+    // Para el modal CREAR (basado en tiendas.php)
+    if (event.target.id === 'estado') {
+        cargarMunicipios(event.target.value, 'municipio', 'colonia', 'codigo_postal');
+    }
+    if (event.target.id === 'municipio') {
+        cargarColonias(event.target.value, 'colonia', 'codigo_postal');
+    }
+    if (event.target.id === 'colonia') {
+        cargarCP(event.target.value, 'codigo_postal');
+    }
+
+    // Para el modal EDITAR (basado en tiendas.php)
+    if (event.target.id === 'editar-estado') {
+        cargarMunicipios(event.target.value, 'editar-municipio', 'editar-colonia', 'editar-codigo_postal');
+    }
+    if (event.target.id === 'editar-municipio') {
+        cargarColonias(event.target.value, 'editar-colonia', 'editar-codigo_postal');
+    }
+    if (event.target.id === 'editar-colonia') {
+        cargarCP(event.target.value, 'editar-codigo_postal');
+    }
+});
+
+
+/**
+ * Función especial para el modal EDITAR: Carga y selecciona los valores guardados.
+ * @param {string} idEstadoDB - El ID del estado guardado en la BD.
+ * @param {string} idMunicipioDB - El ID del municipio guardado en la BD.
+ * @param {string} idColoniaDB - El ID de la colonia guardada en la BD.
+ * @param {string} cpDB - El Código Postal guardado en la BD.
+ */
+async function cargarYSeleccionarUbicacionEditar(idEstadoDB, idMunicipioDB, idColoniaDB, cpDB) {
+    const selectEstado = document.getElementById('editar-estado');
+    const selectMunicipio = document.getElementById('editar-municipio');
+    const selectColonia = document.getElementById('editar-colonia');
+    const inputCP = document.getElementById('editar-codigo_postal');
+
+    // 1. Establecer Estado (ya debe estar cargado) y CP
+    selectEstado.value = idEstadoDB;
+    inputCP.value = cpDB || ''; // Asignamos el CP que ya teníamos
+
+    // 2. Cargar Municipios y seleccionar el guardado
+    await cargarMunicipios(idEstadoDB, 'editar-municipio', 'editar-colonia', 'editar-codigo_postal');
+    selectMunicipio.value = idMunicipioDB; // ¡Seleccionar!
+
+    // 3. Cargar Colonias y seleccionar la guardada
+    await cargarColonias(idMunicipioDB, 'editar-colonia', 'editar-codigo_postal');
+    selectColonia.value = idColoniaDB; // ¡Seleccionar!
+    
+    // 4. (Opcional) Recargar el CP por si acaso, aunque ya lo teníamos.
+    // Si prefieres que el CP se base en la colonia guardada:
+     await cargarCP(idColoniaDB, 'editar-codigo_postal');
+    // Si no, la línea del paso 1 (inputCP.value = cpDB) es suficiente.
+}
+
+// --- FIN: LÓGICA PARA SELECTS ANIDADOS ---
+
+
+// Eliminar Taller ************************************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminar")) {
     const id = event.target.dataset.id;
@@ -5676,7 +5861,7 @@ function verificarDuplicadotiposervicios(tiposervicios) {
     });
 }
 
-//Editar Tiposervicios***********************************************
+//Editar Tipo servicios***********************************************
 document.addEventListener("DOMContentLoaded", function () {
   // Escuchar clic en el botón de editar
   document.addEventListener("click", function (event) {

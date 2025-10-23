@@ -42,6 +42,20 @@ function obtenerEstados($dbh)
   return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function obtenerMunicipios($dbh)
+{
+  $stmt = $dbh->prepare("SELECT id, nombre FROM municipios ORDER BY nombre ASC");
+  $stmt->execute();
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function obtenerColonias($dbh)
+{
+  $stmt = $dbh->prepare("SELECT id, nombre FROM colonias ORDER BY nombre ASC");
+  $stmt->execute();
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function obtenerUsuarios($dbh)
 {
   $stmt = $dbh->prepare("SELECT u.id_usuario, u.usuario, u.nombre, u.p_appellido, u.s_appellido, u.imagen, u.estatus, r.nom_rol, t.nombre_t
