@@ -2028,10 +2028,10 @@ document
 
         // *** bloque dentro del callback ***
         const crearUsuarioForm = document.querySelector("#form-crearUser");
-        console.log("Formulario de creación encontrado:", crearUsuarioForm);
+        //console.log("Formulario de creación encontrado:", crearUsuarioForm);
         if (crearUsuarioForm) {
           crearUsuarioForm.addEventListener("submit", validarFormularioUser);
-          console.log("Event listener adjuntado al formulario.");
+          //console.log("Event listener adjuntado al formulario.");
         } else {
           console.log("Formulario de creación NO encontrado.");
         }

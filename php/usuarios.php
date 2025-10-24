@@ -45,7 +45,6 @@ $usuarios = obtenerUsuarios($dbh);
                     <th>Segundo Apellido</th>
                     <th>Rol</th>
                     <th>Tienda</th>
-                    <th>Comisión</th>
                     <th>Estatus</th>
                     <th colspan="2" style="text-align: center;">Acciones</th>
                 </tr>
@@ -62,20 +61,19 @@ $usuarios = obtenerUsuarios($dbh);
                         </td>
                         <td data-lable="Usuario:"><?php echo htmlspecialchars($u['usuario']); ?></td>
                         <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre']); ?></td>
-                        <td data-lable="Primer apellido:"><?php echo htmlspecialchars($u['appaterno']); ?></td>
-                        <td data-lable="Segundo apellido:"><?php echo htmlspecialchars($u['apmaterno']); ?></td>
-                        <td data-lable="Rol:"><?php echo htmlspecialchars($u['nomrol']); ?></td>
-                        <td data-lable="Tienda:"><?php echo htmlspecialchars($u['nomtienda']); ?></td>
-                        <td data-lable="Comisión:"><?php echo htmlspecialchars($u['comision']); ?></td>
+                        <td data-lable="Primer apellido:"><?php echo htmlspecialchars($u['p_appellido']); ?></td>
+                        <td data-lable="Segundo apellido:"><?php echo htmlspecialchars($u['s_appellido']); ?></td>
+                        <td data-lable="Rol:"><?php echo htmlspecialchars($u['nom_rol']); ?></td>
+                        <td data-lable="Tienda:"><?php echo htmlspecialchars($u['nombre_t']); ?></td>
                         <td data-lable="Estatus:"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
 
                         <td data-lable="Editar:">
-                            <button title="Editar" class="editarUser fa-solid fa-pen-to-square" data-id="<?php echo $u['idusuario']; ?>"></button>
+                            <button title="Editar" class="editarUser fa-solid fa-pen-to-square" data-id="<?php echo $u['id_usuario']; ?>"></button>
                         </td>
                         <td data-lable="Eliminar:">
-                            <button title=" Eliminar" class="eliminarUser fa-solid fa-trash" data-id="<?php echo $u['idusuario']; ?>"></button>
+                            <button title=" Eliminar" class="eliminarUser fa-solid fa-trash" data-id="<?php echo $u['id_usuario']; ?>"></button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
