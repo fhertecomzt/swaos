@@ -9,11 +9,15 @@ document
         document.getElementById("content-area").innerHTML = html;
 
         // *** bloque dentro del callback ***
-        const crearUsuarioFormSup = document.querySelector("#form-crearUserSup");
-        console.log("Formulario de creación encontrado:", crearUsuarioFormSup);
+        const crearUsuarioFormSup =
+          document.querySelector("#form-crearUserSup");
+        //console.log("Formulario de creación encontrado:", crearUsuarioFormSup);
         if (crearUsuarioFormSup) {
-          crearUsuarioFormSup.addEventListener("submit", validarFormularioUser);
-          console.log("Event listener adjuntado al formulario.");
+          crearUsuarioFormSup.addEventListener(
+            "submit",
+            validarFormularioUserSup
+          );
+          //console.log("Event listener adjuntado al formulario.");
         } else {
           console.log("Formulario de creación NO encontrado.");
         }
@@ -35,7 +39,7 @@ function cerrarModalUserSup(id) {
 function procesarFormularioUserSup(event, tipo) {
   event.preventDefault(); //Para que no recergue la pagina
   const formData = new FormData(event.target);
-  console.log("Interceptando envío del formulario usuarios"); // Verifica si se ejecuta
+  //console.log("Interceptando envío del formulario usuarios"); // Verifica si se ejecuta
 
   fetch(`cruds/procesar_${tipo}_user.php`, {
     method: "POST",
@@ -43,13 +47,13 @@ function procesarFormularioUserSup(event, tipo) {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("Respuesta del servidor:", data);
+      //console.log("Respuesta del servidor:", data);
 
       if (!data.success) {
         throw new Error(data.message || "Error desconocido.");
       }
 
-      console.log("Imagen subida con éxito:", data.rutaImagen);
+      //console.log("Imagen subida con éxito:", data.rutaImagen);
 
       // Restablecer la variable después de recibir la respuesta del servidor
       enviando = false;
@@ -61,7 +65,7 @@ function procesarFormularioUserSup(event, tipo) {
 
       if (data.success) {
         // Cerrar el modal
-        cerrarModalUserSup(tipo + "-modalUser");
+        cerrarModalUserSup(tipo + "-modalUserSup");
         // Limpiar los campos del formulario
         event.target.reset();
 
@@ -72,14 +76,26 @@ function procesarFormularioUserSup(event, tipo) {
           // Crear una nueva fila
           const newRow = document.createElement("tr");
           newRow.innerHTML = `
-                            <td data-lable"Imagen">${data.usuario.imagen}</td>
-                            <td data-lable="Usuario:">${data.usuario.usuario}</td>
+                    <td data-lable"Imagen">${
+                      data.usuario.imagen
+                        ? `<img src="${data.usuario.imagen}"  alt="Perfil" width="50" height="50" style="border-radius: 50%;">`
+                        : "N/A"
+                    } 
+                    </td>
+                            <td data-lable="Usuario:">${
+                              data.usuario.usuario
+                            }</td>
                             <td data-lable="Nombre:">${data.usuario.nombre}</td>
-                            <td data-lable="Primer apellido:">${data.usuario.papellido}</td>
-                            <td data-lable="Segundo apellido:">${data.usuario.sapellido}</td>
-                            <td data-lable="Rol:">${data.usuario.nomrol}</td>
-                            <td data-lable="Tienda:">${data.usuario.nomtienda}</td>
-                            <td data-lable="Comisión:">${data.usuario.comision}</td>
+                            <td data-lable="Primer apellido:">${
+                              data.usuario.appaterno
+                            }</td>
+                            <td data-lable="Segundo apellido:">${
+                              data.usuario.sapellido
+                            }</td>
+                            <td data-lable="Rol:">${data.usuario.nom_rol}</td>
+                            <td data-lable="Taller:">${
+                              data.usuario.nombre_t
+                            }</td>                            
 
                             <td data-lable="Estatus:">
                               <button class="btn ${
@@ -146,7 +162,7 @@ function procesarFormularioUserSup(event, tipo) {
 
 function validarFormularioUserSup(event) {
   event.preventDefault();
-  console.log("validarFormularioUser ejecutado");
+  //console.log("validarFormularioUserSup ejecutado");
 
   const usuario = document.querySelector("[name='usuario']").value.trim();
   const nombre = document.querySelector("[name='nombre']").value.trim();
@@ -158,7 +174,7 @@ function validarFormularioUserSup(event) {
   const tienda = document.querySelector("[name='tienda']").value.trim();
   const estatus = document.querySelector("[name='estatus']").value.trim();
 
-  console.log("Valores de los campos:", {
+  /*console.log("Valores de los campos:", {
     usuario,
     nombre,
     papellido,
@@ -168,7 +184,7 @@ function validarFormularioUserSup(event) {
     password2,
     tienda,
     estatus,
-  });
+  });*/
 
   const errores = [];
 
@@ -219,7 +235,7 @@ function validarFormularioUserSup(event) {
     }
   }
 
-  console.log("Errores de validación:", errores);
+  //console.log("Errores de validación:", errores);
 
   if (errores.length > 0) {
     Swal.fire({
@@ -230,11 +246,11 @@ function validarFormularioUserSup(event) {
     return;
   }
 
-  console.log("Iniciando verificación de duplicados...");
+  //console.log("Iniciando verificación de duplicados...");
   // Verificar duplicados antes de proceder
   verificarDuplicadoUserSup(usuario, nombre)
     .then((esDuplicado) => {
-      console.log("Resultado de verificarDuplicadoUser:", esDuplicado);
+      //console.log("Resultado de verificarDuplicadoUser:", esDuplicado);
       if (esDuplicado) {
         Swal.fire({
           title: "Error",
@@ -244,7 +260,7 @@ function validarFormularioUserSup(event) {
         return; // Detener la ejecución si hay duplicados
       }
 
-      console.log("No hay duplicados, procediendo a procesarFormularioUser...");
+      //console.log("No hay duplicados, procediendo a procesarFormularioUser...");
       // Si no hay errores, enviar el formulario
       procesarFormularioUserSup(event, "crear");
     })
@@ -361,7 +377,7 @@ if (crearUsuarioFormSup) {
   crearUsuarioFormSup.addEventListener("submit", validarFormularioUserSup);
 }
 
-//Para Editar Usuarios ********************************************
+//Para Editar Sup Usuarios ********************************************
 document.addEventListener("DOMContentLoaded", function () {
   // Escuchar clic en el botón de editar
   document.addEventListener("click", function (event) {
@@ -385,9 +401,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 "nombre",
                 "papellido",
                 "sapellido",
+                "email",
                 "rol",
                 "tienda",
-                "comision",
                 "estatus",
               ];
               campos.forEach((campo) => {
@@ -459,9 +475,9 @@ function verificarDuplicadoEditarUsuarioSup(usuario, id = 0) {
       //console.log("Respuesta de verificar_nombre_usuario.php:", data);
       if (data.existe) {
         Swal.fire({
-          title: "Error",
+          title: "Atención",
           text: data.message || "El usuario ya existe. Por favor, elige otro.", // Mostrar el mensaje específico si existe
-          icon: "error",
+          icon: "warning",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
@@ -532,7 +548,10 @@ async function validarFormularioEdicionUsuarioSup(formularioUsuarioSup) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     if (primerError) primerError.focus(); // Enfocar el primer campo con error
     return;
@@ -589,7 +608,7 @@ function enviarFormularioEdicionUsuarioSup(formularioUsuarioSup) {
         cerrarModalUserSup("editar-modalUserSup");
       } else {
         Swal.fire({
-          title: "¡Error!",
+          title: "Atención!",
           text: data.message || "No hubo cambios en el registro.",
           icon: "warning",
           showConfirmButton: false,
@@ -619,7 +638,6 @@ function actualizarFilaTablaUsuarioSup(formData) {
     fila.cells[4].textContent = formData.get("sapellido");
     fila.cells[5].textContent = formData.get("rol");
     fila.cells[6].textContent = formData.get("tienda");
-    fila.cells[7].textContent = formData.get("comision");
     // Determinar clases y texto del botón
     const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
     const claseBtn =
@@ -632,7 +650,7 @@ function actualizarFilaTablaUsuarioSup(formData) {
   }
 }
 
-// Eliminar usuario *************************************************
+// Eliminar sup usuario *************************************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarUserSup")) {
     const id = event.target.dataset.id;
@@ -657,7 +675,7 @@ document.addEventListener("click", function (event) {
               Swal.fire({
                 title: "Eliminado",
                 text: data.message, // Mostrar el mensaje específico si existe
-                icon: "warning",
+                icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
@@ -832,11 +850,11 @@ function actualizarTablaUsuariosSup(data) {
           }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
           <td data-lable="Usuario:">${usuario.usuario}</td>
           <td data-lable="Nombre:">${usuario.nombre}</td>
-          <td data-lable="Primer apellido:">${usuario.appaterno}</td>
-          <td data-lable="Segundo apellido:">${usuario.apmaterno}</td>          
-          <td data-lable="Rol:">${usuario.nomrol}</td>
-          <td data-lable="Tienda:">${usuario.nomtienda}</td>
-          <td data-lable="Comisión:">${usuario.comision}</td>
+          <td data-lable="Primer apellido:">${usuario.p_appellido}</td>
+          <td data-lable="Segundo apellido:">${usuario.s_appellido
+          }</td>          
+          <td data-lable="Rol:">${usuario.nom_rol}</td>
+          <td data-lable="Taller:">${usuario.nombre_t}</td>
 
           <td data-lable="Estatus">
           <button class="btn ${
@@ -847,12 +865,12 @@ function actualizarTablaUsuariosSup(data) {
           </td>
           <td data-lable="Editar">
             <button title="Editar" class="editarUserSup fa-solid fa-pen-to-square" data-id="${
-              usuario.idusuario
+              usuario.id_usuario
             }"></button>
             </td>
             <td data-lable="Eliminar">
             <button title="Eliminar" class="eliminarUserSup fa-solid fa-trash" data-id="${
-              usuario.idusuario
+              usuario.id_usuario
             }"></button>
           </td>
       `;
@@ -903,11 +921,10 @@ function cargarUsuariosScrollSup() {
             }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
             <td data-lable="Usuario:">${usuario.usuario}</td>
             <td data-lable="Nombre:">${usuario.nombre}</td>
-            <td data-lable="Primer apellido:">${usuario.appaterno}</td>
-            <td data-lable="Segundo apellido:">${usuario.apmaterno}</td>
-            <td data-lable="Rol:">${usuario.nomrol}</td>
-            <td data-lable="Tienda:">${usuario.nomtienda}</td>
-            <td data-lable="Comisión:">${usuario.comision}</td>
+            <td data-lable="Primer apellido:">${usuario.p_appellido}</td>
+            <td data-lable="Segundo apellido:">${usuario.s_appellido}</td>
+            <td data-lable="Rol:">${usuario.nom_rol}</td>
+            <td data-lable="Tienda:">${usuario.nombre_t}</td>
 
             <td data-lable="Estatus:">
               <button class="btn ${
@@ -918,12 +935,12 @@ function cargarUsuariosScrollSup() {
             </td>
             <td data-lable="Editar:">
               <button title="Editar" class="editarUserSup fa-solid fa-pen-to-square" data-id="${
-                usuario.idusuario
+                usuario.id_usuario
               }"></button>
               </td>
               <td data-lable="Eliminar:">
               <button title="Eliminar" class="eliminarUserSup fa-solid fa-trash" data-id="${
-                usuario.idusuario
+                usuario.id_usuario
               }"></button>
             </td>
           `;

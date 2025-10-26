@@ -64,7 +64,7 @@ $usuarios = obtenerUsuarios($dbh);
                         <td data-lable="Primer apellido:"><?php echo htmlspecialchars($u['p_appellido']); ?></td>
                         <td data-lable="Segundo apellido:"><?php echo htmlspecialchars($u['s_appellido']); ?></td>
                         <td data-lable="Rol:"><?php echo htmlspecialchars($u['nom_rol']); ?></td>
-                        <td data-lable="Tienda:"><?php echo htmlspecialchars($u['nombre_t']); ?></td>
+                        <td data-lable="Taller:"><?php echo htmlspecialchars($u['nombre_t']); ?></td>
                         <td data-lable="Estatus:"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
@@ -260,9 +260,9 @@ $usuarios = obtenerUsuarios($dbh);
                         <input type="password" id="editar-password2" name="password2" autocomplete="off">
                     </div>
 
-                    <!-- Selección de la tienda -->
+                    <!-- Selección de la taller -->
                     <div class="form-group">
-                        <label for="editar-tienda">Tienda:</label>
+                        <label for="editar-tienda">Taller:</label>
                         <select id="editar-tienda" name="tienda" required>
                             <option value="">[Selecciona un taller]</option>
                             <?php foreach ($lista_tiendas as $tienda): ?>

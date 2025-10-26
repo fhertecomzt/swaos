@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 include "../conexion.php";
 
@@ -15,13 +12,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $nombre = $_POST["nombre"] ?? null;
   $papellido = $_POST["papellido"] ?? null;
   $sapellido = $_POST["sapellido"] ?? null;
+  $email = $_POST["email"] ?? null;
   $rol = $_POST["rol"] ?? null;
   $password1 = $_POST["password1"] ?? null;
   $tienda = $_POST["tienda"] ?? null;
   // Imagen
   $imagen = $_FILES["imagen"]["name"] ?? null;
   $imagenTmp = $_FILES["imagen"]["tmp_name"] ?? null;
-  $comision = $_POST["comision"] ?? null;
   $estatus = $_POST["estatus"] ?? null;
 
   // Sanitización y validación de datos
@@ -35,12 +32,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   // Verificar si $rol es un ID o un nombre
   if (!is_numeric($rol)) {
     // Buscar el ID del rol por nombre
-    $consulta_rol = $dbh->prepare("SELECT idrol FROM roles WHERE nomrol = ?");
+    $consulta_rol = $dbh->prepare("SELECT id_rol FROM roles WHERE nom_rol = ?");
     $consulta_rol->execute([$rol]);
     $rol_data = $consulta_rol->fetch(PDO::FETCH_ASSOC);
 
     if ($rol_data) {
-      $rol = $rol_data['idrol'];
+      $rol = $rol_data['id_rol'];
     } else {
       // Manejar el error si no se encuentra el rol
       echo json_encode(['success' => false, 'message' => 'Rol no encontrado.']);
@@ -51,22 +48,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   // Verificar si $tienda es un ID o un nombre
   if (!is_numeric($tienda)) {
     // Buscar el ID del tienda por nombre
-    $consulta_tienda = $dbh->prepare("SELECT idtienda FROM tiendas WHERE nomtienda = ?");
+    $consulta_tienda = $dbh->prepare("SELECT id_taller FROM talleres WHERE nombre_t = ?");
     $consulta_tienda->execute([$tienda]);
     $tienda_data = $consulta_tienda->fetch(PDO::FETCH_ASSOC);
 
     if ($tienda_data) {
-      $tienda = $tienda_data['idtienda'];
+      $tienda = $tienda_data['id_taller'];
     } else {
       // Manejar el error si no se encuentra el tienda
-      echo json_encode(['success' => false, 'message' => 'tienda no encontrado.']);
+      echo json_encode(['success' => false, 'message' => 'taller no encontrado.']);
       exit;
     }
   }
 
   try {
     // Obtener el usuario actual para verificar la contraseña y la imagen
-    $stmt = $dbh->prepare("SELECT password1, imagen FROM usuarios WHERE idusuario = :idusuario");
+    $stmt = $dbh->prepare("SELECT password, imagen FROM usuarios WHERE id_usuario = :idusuario");
     $stmt->execute([":idusuario" => $idusuario]);
     $usuarioActual = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -76,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $passwordHash = password_hash($password1, PASSWORD_BCRYPT);
     } else {
       // Mantener la contraseña actual
-      $passwordHash = $usuarioActual["password1"];
+      $passwordHash = $usuarioActual["password"];
     }
 
     // Manejo de la imagen
@@ -118,15 +115,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "UPDATE usuarios 
              SET usuario = :usuario,
                  nombre = :nombre,
-                 appaterno = :appaterno,
-                 apmaterno = :apmaterno,
-                 idrol = :idrol,
-                 password1 = :password1,
-                 sucursales_id = :sucursales_id,
+                 p_appellido = :appaterno,
+                 s_appellido = :apmaterno,
+                 id_rol = :idrol,
+                 password = :password1,
+                 taller_id = :sucursales_id,
                  imagen = :imagen,
-                 comision = :comision,
                  estatus = :estatus
-            WHERE idusuario = :idusuario"
+            WHERE id_usuario = :idusuario"
     );
 
     // Ejecutar la consulta con los parámetros
@@ -139,7 +135,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       ":password1" => $passwordHash,
       ":sucursales_id" => $tienda,
       ":imagen" => $rutaImagen,
-      ":comision" => $comision,
       ":estatus" => $estatus,
       ":idusuario" => $idusuario
     ]);
@@ -147,13 +142,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Verificamos si hubo una actualización
     if ($stmt->rowCount() > 0) {
       $response["success"] = true;
-      $response["message"] = "Usuario actualizado correctamente.";
+      $response["message"] = "SuperUsuario actualizado correctamente.";
     } else {
-      $response["message"] = "No se realizaron cambios en el Usuario.";
+      $response["message"] = "No se realizaron cambios en el SuperUsuario.";
     }
   } catch (PDOException $e) {
     $response["message"] = "Error de base de datos: " . $e->getMessage();
-    error_log("Error de base de datos en editar_user.php: " . $e->getMessage());
+    error_log("Error de base de datos en editar_user_sup.php: " . $e->getMessage());
   } catch (Exception $e) {
     $response["message"] = "Error: " . $e->getMessage();
     error_log("Error en editar_user.php: " . $e->getMessage());

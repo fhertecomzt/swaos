@@ -188,7 +188,8 @@ form .button input {
   border-radius: 8px;
 }
 .modal-contentProductos,
-.modal-contentUsuarios {
+.modal-contentUsuarios,
+.modal-contentUsuariosSup {
   background-color: #fff; /* Fondo blanco */
   margin: auto auto; /* Centrarse vertical y horizontalmente */
   padding: 20px;
