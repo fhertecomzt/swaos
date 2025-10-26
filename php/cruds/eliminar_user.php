@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id'])) {
 
   try {
     // Preparar la consulta para eliminar el registro
-    $stmt = $dbh->prepare("DELETE FROM usuarios WHERE idusuario = :id");
+    $stmt = $dbh->prepare("DELETE FROM usuarios WHERE id_usuario = :id");
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
     // Ejecutar la consulta
