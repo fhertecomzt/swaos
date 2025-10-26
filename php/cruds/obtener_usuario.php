@@ -10,12 +10,11 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
   try {
     // Consulta segura con consulta preparada
     //$stmt = $dbh->prepare("SELECT * FROM usuarios WHERE idusuario = ?");
-    $stmt = $dbh->prepare("SELECT u.idusuario, u.usuario, u.nombre, u.appaterno, u.apmaterno, u.imagen, u.comision, u.estatus, r.nomrol, t.nomtienda
+    $stmt = $dbh->prepare("SELECT u.id_usuario, u.usuario, u.nombre, u.p_appellido, u.s_appellido, u.email, u.imagen, u.estatus, r.nom_rol, t.nombre_t
         FROM usuarios u
-        JOIN roles r ON u.idrol = r.idrol
-        JOIN tiendas t ON u.sucursales_id = t.idtienda
-        WHERE u.idusuario = ?");
-
+        JOIN roles r ON u.id_rol = r.id_rol
+        JOIN talleres t ON u.taller_id = t.id_taller
+        WHERE u.id_usuario = ?");
 
     $stmt->execute([$idusuario]);
     $users = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -24,15 +23,15 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
       // Sanitizar datos antes de enviarlos en la respuesta (Llenar campos)
       $response["success"] = true;
       $response["users"] = [
-        "idusuario" => htmlspecialchars($users["idusuario"]),
+        "idusuario" => htmlspecialchars($users["id_usuario"]),
         "usuario" => htmlspecialchars($users["usuario"]),
         "nombre" => htmlspecialchars($users["nombre"]),
-        "papellido" => htmlspecialchars($users["appaterno"]),
-        "sapellido" => htmlspecialchars($users["apmaterno"]),
-        "rol" => htmlspecialchars($users["nomrol"]),
-        "tienda" => htmlspecialchars($users["nomtienda"]),
+        "papellido" => htmlspecialchars($users["p_appellido"]),
+        "sapellido" => htmlspecialchars($users["s_appellido"]),
+        "email" => htmlspecialchars($users["email"]),
+        "rol" => htmlspecialchars($users["nom_rol"]),
+        "tienda" => htmlspecialchars($users["nombre_t"]),
         "imagen" => htmlspecialchars($users["imagen"]),
-        "comision" => htmlspecialchars($users["comision"]),
         "estatus" => htmlspecialchars($users["estatus"]),
       ];
     } else {

@@ -2446,9 +2446,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 "nombre",
                 "papellido",
                 "sapellido",
+                "email",
                 "rol",
                 "tienda",
-                "comision",
                 "estatus",
               ];
               campos.forEach((campo) => {
@@ -2593,7 +2593,10 @@ async function validarFormularioEdicionUsuario(formularioUsuario) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     if (primerError) primerError.focus(); // Enfocar el primer campo con error
     return;
@@ -2892,11 +2895,10 @@ function actualizarTablaUsuarios(data) {
           }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
           <td data-lable="Usuario:">${usuario.usuario}</td>
           <td data-lable="Nombre:">${usuario.nombre}</td>
-          <td data-lable="Primer apellido:">${usuario.appaterno}</td>
-          <td data-lable="Segundo apellido:">${usuario.apmaterno}</td>          
-          <td data-lable="Rol:">${usuario.nomrol}</td>
-          <td data-lable="Tienda:">${usuario.nomtienda}</td>
-          <td data-lable="Comisión:">${usuario.comision}</td>
+          <td data-lable="Primer apellido:">${usuario.p_appellido}</td>
+          <td data-lable="Segundo apellido:">${usuario.s_appellido}</td>          
+          <td data-lable="Rol:">${usuario.nom_rol}</td>
+          <td data-lable="Taller:">${usuario.nombre_t}</td>
 
           <td data-lable="Estatus">
           <button class="btn ${
@@ -2907,12 +2909,12 @@ function actualizarTablaUsuarios(data) {
           </td>
           <td data-lable="Editar">
             <button title="Editar" class="editarUser fa-solid fa-pen-to-square" data-id="${
-              usuario.idusuario
+              usuario.id_usuario
             }"></button>
             </td>
             <td data-lable="Eliminar">
             <button title="Eliminar" class="eliminarUser fa-solid fa-trash" data-id="${
-              usuario.idusuario
+              usuario.id_usuario
             }"></button>
           </td>
       `;
@@ -2963,11 +2965,10 @@ function cargarUsuariosScroll() {
             }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
             <td data-lable="Usuario:">${usuario.usuario}</td>
             <td data-lable="Nombre:">${usuario.nombre}</td>
-            <td data-lable="Primer apellido:">${usuario.appaterno}</td>
-            <td data-lable="Segundo apellido:">${usuario.apmaterno}</td>
-            <td data-lable="Rol:">${usuario.nomrol}</td>
-            <td data-lable="Tienda:">${usuario.nomtienda}</td>
-            <td data-lable="Comisión:">${usuario.comision}</td>
+            <td data-lable="Primer apellido:">${usuario.p_appellido}</td>
+            <td data-lable="Segundo apellido:">${usuario.s_appellido}</td>
+            <td data-lable="Rol:">${usuario.nom_rol}</td>
+            <td data-lable="Tienda:">${usuario.nombre_t}</td>
 
             <td data-lable="Estatus:">
               <button class="btn ${
@@ -2978,12 +2979,12 @@ function cargarUsuariosScroll() {
             </td>
             <td data-lable="Editar:">
               <button title="Editar" class="editarUser fa-solid fa-pen-to-square" data-id="${
-                usuario.idusuario
+                usuario.id_usuario
               }"></button>
               </td>
               <td data-lable="Eliminar:">
               <button title="Eliminar" class="eliminarUser fa-solid fa-trash" data-id="${
-                usuario.idusuario
+                usuario.id_usuario
               }"></button>
             </td>
           `;

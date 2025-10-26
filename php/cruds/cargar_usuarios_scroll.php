@@ -5,10 +5,10 @@ $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $limit = 5; // Cantidad de usuarios que se mostraran 
 $offset = ($page - 1) * $limit;
 
-$sql = "SELECT u.idusuario, u.usuario, u.nombre, u.appaterno, u.apmaterno, u.imagen, u.comision, u.estatus, r.nomrol, t.nomtienda
+$sql = "SELECT u.id_usuario, u.usuario, u.nombre, u.p_appellido, u.s_appellido, u.imagen, u.estatus, r.nom_rol, t.nombre_t
         FROM usuarios u
-        JOIN roles r ON u.idrol = r.idrol
-        JOIN tiendas t ON u.sucursales_id = t.idtienda WHERE u.estatus = :estatus ORDER BY u.idusuario ASC LIMIT :limit OFFSET :offset";
+        JOIN roles r ON u.id_rol = r.id_rol
+        JOIN talleres t ON u.taller_id = t.id_taller WHERE u.estatus = :estatus ORDER BY u.id_usuario ASC LIMIT :limit OFFSET :offset";
 
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':estatus', 0, PDO::PARAM_INT); //Solo trae activos

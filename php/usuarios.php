@@ -232,8 +232,7 @@ $usuarios = obtenerUsuarios($dbh);
 
                     <div class="form-group">
                         <label for="editar-email">Email:</label>
-                        <input type="email" id="editar-email" name="email" autocomplete="off"
-                            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Introduce una dirección de correo válida" required>
+                        <input type="email" id="editar-email" name="email" autocomplete="off" required>
                     </div>
 
                     <!-- Selección del rol -->
@@ -242,10 +241,10 @@ $usuarios = obtenerUsuarios($dbh);
                         <select id="editar-rol" name="rol" required>
                             <option value="">[Selecciona un rol]</option>
                             <?php foreach ($lista_roles as $rol): ?>
-                                <option value="<?php echo htmlspecialchars($rol['nomrol']); ?>"
-                                    data-nomrol="<?php echo htmlspecialchars($rol['nomrol']); ?>"
-                                    <?php echo (isset($usuario) && $usuario['idrol'] == $rol['idrol']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($rol['nomrol']); ?>
+                                <option value="<?php echo htmlspecialchars($rol['nom_rol']); ?>"
+                                    data-nomrol="<?php echo htmlspecialchars($rol['nom_rol']); ?>"
+                                    <?php echo (isset($usuario) && $usuario['id_rol'] == $rol['id_rol']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($rol['nom_rol']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -265,12 +264,12 @@ $usuarios = obtenerUsuarios($dbh);
                     <div class="form-group">
                         <label for="editar-tienda">Tienda:</label>
                         <select id="editar-tienda" name="tienda" required>
-                            <option value="">[Selecciona un tienda]</option>
+                            <option value="">[Selecciona un taller]</option>
                             <?php foreach ($lista_tiendas as $tienda): ?>
-                                <option value="<?php echo htmlspecialchars($tienda['nomtienda']); ?>"
-                                    data-nomrol="<?php echo htmlspecialchars($tienda['nomtienda']); ?>"
-                                    <?php echo (isset($usuario) && $usuario['nomtienda'] == $tienda['idtienda']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($tienda['nomtienda']); ?>
+                                <option value="<?php echo htmlspecialchars($tienda['nombre_t']); ?>"
+                                    data-nomrol="<?php echo htmlspecialchars($tienda['nombre_t']); ?>"
+                                    <?php echo (isset($usuario) && $usuario['nombre_t'] == $tienda['id_taller']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($tienda['nombre_t']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -292,6 +291,7 @@ $usuarios = obtenerUsuarios($dbh);
                     </div>
 
                     <button type="submit">Actualizar</button>
+                    <span class="cancelarModal" onclick="cerrarModalRol('editar-modalUser')" type=" submit">Cancelar</span>
                 </form>
             </div>
         </div>
