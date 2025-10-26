@@ -44,7 +44,7 @@ $usuarios = obtenerUsuarios($dbh);
                     <th>Primer Apellido</th>
                     <th>Segundo Apellido</th>
                     <th>Rol</th>
-                    <th>Tienda</th>
+                    <th>Taller</th>
                     <th>Estatus</th>
                     <th colspan="2" style="text-align: center;">Acciones</th>
                 </tr>
@@ -123,6 +123,11 @@ $usuarios = obtenerUsuarios($dbh);
                             oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
                     </div>
 
+                    <div class="form-group">
+                        <label for="crear-email">Email:</label>
+                        <input type="email" id="crear-email" name="email" autocomplete="off" required>
+                    </div>
+
                     <!-- Selección del rol -->
                     <div class="form-group">
                         <label for="crear-rol">Rol:</label>
@@ -131,8 +136,8 @@ $usuarios = obtenerUsuarios($dbh);
                             <?php
                             // Asumiendo que $lista_roles es un array de roles
                             foreach ($lista_roles as $rol): ?>
-                                <option value="<?php echo htmlspecialchars($rol['idrol']); ?>" <?php echo (isset($usuario) && $usuario['idrol'] == $rol['idrol']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($rol['nomrol']); ?>
+                                <option value="<?php echo htmlspecialchars($rol['id_rol']); ?>" <?php echo (isset($usuario) && $usuario['id_rol'] == $rol['id_rol']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($rol['nom_rol']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -148,15 +153,15 @@ $usuarios = obtenerUsuarios($dbh);
                         <input type="password" id="crear-password2" name="password2" autocomplete="off" required>
                     </div>
 
-                    <!-- Selección de la tienda -->
+                    <!-- Selección de la taller -->
                     <div class="form-group">
-                        <label for="crear-tienda">Tienda:</label>
+                        <label for="crear-tienda">Taller:</label>
                         <select id="crear-tienda" name="tienda" required>
-                            <option value="">[Selecciona una tienda]</option>
+                            <option value="">[Selecciona un taller]</option>
                             <?php
                             foreach ($lista_tiendas as $tienda): ?>
-                                <option value="<?php echo htmlspecialchars($tienda['idtienda']); ?>" <?php echo (isset($usuario) && $usuario['sucursales_id'] == $tienda['idtienda']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($tienda['nomtienda']); ?>
+                                <option value="<?php echo htmlspecialchars($tienda['id_taller']); ?>" <?php echo (isset($usuario) && $usuario['taller_id'] == $tienda['id_taller']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($tienda['nombre_t']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -165,14 +170,6 @@ $usuarios = obtenerUsuarios($dbh);
                     <div class="form-group">
                         <label for="crear-imagen">Imagen de perfil:</label>
                         <input type="file" id="crear-imagen" name="imagen" accept="image/*">
-                    </div>
-
-                    <div class="form-group">
-                        <Label for="crear-comision">Comisión %:</Label>
-                        <input type="number" id="crear-comision" name="comision" autocomplete="off" size="2" min="0" maxlength="2" value="0"
-                            pattern="^[0-9]"
-                            title="Solo se permiten números."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" required>
                     </div>
 
                     <!-- Selección de Estatus -->
@@ -186,6 +183,7 @@ $usuarios = obtenerUsuarios($dbh);
                     </div>
 
                     <button type="submit">Guardar</button>
+                    <span class="cancelarModal" onclick="cerrarModal('crear-modalUser')" type=" submit">Cancelar</span>
 
                 </form>
             </div>
@@ -232,6 +230,12 @@ $usuarios = obtenerUsuarios($dbh);
                             oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
                     </div>
 
+                    <div class="form-group">
+                        <label for="editar-email">Email:</label>
+                        <input type="email" id="editar-email" name="email" autocomplete="off"
+                            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Introduce una dirección de correo válida" required>
+                    </div>
+
                     <!-- Selección del rol -->
                     <div class="form-group">
                         <label for="editar-rol">Rol:</label>
@@ -275,11 +279,6 @@ $usuarios = obtenerUsuarios($dbh);
                     <div class="form-group">
                         <label for="imagen">Imagen de perfil:</label>
                         <input type="file" id="imagen" name="imagen" accept="image/*">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editar-comision">Comisión %:</label>
-                        <input type="numeric" id="editar-comision" name="comision" placeholder="Solo escribir la cantidad" required>
                     </div>
 
                     <!-- Selección de Estatus -->

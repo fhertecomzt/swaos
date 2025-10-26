@@ -21,7 +21,7 @@ try {
 
     // Si se proporciona un ID (edición), excluir ese registro de la validación
     if ($id > 0) {
-      $query = "SELECT COUNT(*) FROM usuarios WHERE usuario = ? AND idusuario != ?";
+      $query = "SELECT COUNT(*) FROM usuarios WHERE usuario = ? AND id_usuario != ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$usuario, $id]);
     } else {
