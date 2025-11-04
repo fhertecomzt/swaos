@@ -1,0 +1,83 @@
+* Contenedor principal que usa Flexbox */
+.usuarios-layout-container {
+  display: flex; /* Activa Flexbox */
+  gap: 20px; /* Espacio entre la tabla y la imagen */
+  align-items: flex-start; /* Alinea los items al inicio verticalmente */
+  align-items: center;
+}
+h2{
+  color: #7c52f0;
+}
+
+/* Columna de la tabla (izquierda) */
+.container_dashboard_tablas {
+  flex: 1; /* Ocupa el espacio restante */
+  min-width: 0; /* Necesario para que la tabla no desborde en flex */
+}
+
+/* Columna de la imagen (derecha) */
+.imagen-preview-container {
+  width: 36%; /* Ancho fijo para la columna de la imagen */
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  text-align: center; /* Centra el contenido */
+}
+
+.imagen-placeholder img {
+  display: block; /* Asegura que la imagen ocupe su propio espacio */
+  margin: 10px auto 10px auto; /* Centra la imagen y añade margen inferior */
+  max-height: 250px; /* Limita la altura de la imagen */
+  border: 1px solid #eee; /* Borde sutil para la imagen */
+  border-radius: 10px !important;
+}
+
+/* Estilos adicionales para la tabla (opcional) */
+#tablaPerfilUsuarios{
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+#tablaPerfilUsuarios thead{
+  background-color: #ccc;
+}
+#tablaPerfilUsuarios th,
+#tablaPerfilUsuarios td {
+  border: 1px solid #ddd !important;
+  color: black;
+  padding: 20px !important;
+  text-align: left !important;
+}
+
+#tablaPerfilUsuarios th {
+  background-color: #387ebf !important;
+  color: rgb(255, 255, 255);
+  font-weight: 500;
+}
+
+/* Estilo para resaltar la fila seleccionada (opcional, para JS) */
+#tablaPerfilUsuarios thead td.selected {
+  background-color: #e0f7fa !important;
+}
+#tablaPerfilUsuarios tr:hover td {
+  background-color: #8538c3;
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  transition: all 0.3s ease-in;
+}
+#tablaPerfilUsuarios input{
+  height: 30px;
+  background-color: #ededed;
+  width: 90%;
+  border-radius: 5px;
+}
+
+ .modal-contentPerfilUsuario {
+    background-color: #fff;
+    margin: auto auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 510px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}

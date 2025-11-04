@@ -63,6 +63,8 @@ $_SESSION['last_token'] = $current_token;
     <link rel="stylesheet" href="../css/mensajesdeestado.css">
     <!--Estilo dashboard -->
     <link rel="stylesheet" href="../css/dashboard.css">
+    <!--Estilo Perfil -->
+    <link rel="stylesheet" href="../css/perfil.css">
 
 </head>
 
@@ -265,7 +267,7 @@ $_SESSION['last_token'] = $current_token;
                 </a>
                 <ul>
                     <li>
-                        <a href="#" id="perfil-link" class="disabled-link" onclick="return false;">
+                        <a href="#" id="perfil-link" class="nav-link">
                             <i class=" fa-solid fa-user-pen"></i>
                             <span>PERFIL</span>
                         </a>

@@ -712,7 +712,7 @@ form .button input {
 }
 
 .darkmode .modal-content, .darkmode .modal-contentProductos,
-.darkmode .modal-contentUsuarios, .darkmode .swal2-container {
+.darkmode .modal-contentUsuarios, .darkmode .modal-contentPerfilUsuario , .darkmode .swal2-container, .darkmode .imagen-preview-container {
   background-color: #444446;
   color: white;
 }
@@ -754,6 +754,9 @@ form .button input {
 }
 .darkmode .carrito-total .btn-pagar:hover {
   background: #2f9a2a;
+}
+.darkmode h2{
+  color: #a667bc;
 }
 
 /* Opcional: Ajustar para pantallas más pequeñas */

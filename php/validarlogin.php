@@ -57,7 +57,7 @@ if (empty($errores)) {
             }
 
             // Si el usuario está activo, procedemos con la verificación de la contraseña y la sesión
-            $stmt = $dbh->prepare("SELECT usuarios.id_usuario, usuarios.usuario, usuarios.nombre, usuarios.p_appellido, usuarios.s_appellido, usuarios.password, usuarios.imagen, roles.nom_rol, talleres.id_taller, talleres.nombre_t, usuarios.intentos_fallidos, usuarios.bloqueado_hasta, usuarios.session_token, usuarios.ultimo_acceso_token
+            $stmt = $dbh->prepare("SELECT usuarios.id_usuario, usuarios.usuario, usuarios.nombre, usuarios.email, usuarios.p_appellido, usuarios.s_appellido, usuarios.password, usuarios.imagen, roles.nom_rol, talleres.id_taller, talleres.nombre_t, usuarios.intentos_fallidos, usuarios.bloqueado_hasta, usuarios.session_token, usuarios.ultimo_acceso_token
             FROM usuarios
             JOIN roles ON usuarios.id_rol = roles.id_rol
             JOIN talleres ON usuarios.taller_id = talleres.id_taller
@@ -144,6 +144,7 @@ if (empty($errores)) {
                     $_SESSION['rol'] = $user['nom_rol'];
                     $_SESSION['taller_id'] = $user['id_taller'];
                     $_SESSION['nombre_t'] = $user['nombre_t'];
+                    $_SESSION['email'] = $user['email'];
                     $_SESSION['session_token'] = $sessionToken; // Almacenar el token de sesión en la sesión
                     $_SESSION['ultimo_acceso'] = time(); // Inicializar la hora del último acceso
 
