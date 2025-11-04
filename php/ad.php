@@ -317,8 +317,8 @@ $_SESSION['last_token'] = $current_token;
 
                     <!-- Contenido del Dropdown Perfil -->
                     <div id="perfilDropdown" class="dropdown-content">
-                        <div class="perfil-info">
-                            <img src="<?php echo $_SESSION['imagen']; ?>" alt="Imagen de perfil" width="80" height="80">
+                        <div class="perfil-info">                            
+                            <img id="header-user-image" src="<?php echo $_SESSION['imagen']; ?>" alt="Imagen de perfil" width="80" height="80">
                             <p><strong><?php echo $_SESSION['usuario']; ?></strong></p>
                             <p><?php echo $_SESSION['nombre'] . " " . $_SESSION['appaterno'] . " " . $_SESSION['apmaterno']; ?></p>
                             <p><strong>Rol:</strong> <?php echo $_SESSION['rol']; ?></p>

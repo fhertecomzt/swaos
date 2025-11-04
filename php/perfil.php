@@ -52,12 +52,52 @@ include "funciones/activoinactivo.php";
                 </thead>
             </table>
         </div>
-        <div class="imagen-preview-container">
-            <h4>Fotografía de perfil</h4>
-            <div class="imagen-placeholder">
-                <img src="<?php echo $_SESSION['imagen']; ?>" alt="Imagen de perfil" width="250" height="250">
-            </div>
+        <div style="width: 40%; text-align: center;">
+
+            <form id="form-editarFoto" enctype="multipart/form-data" method="POST">
+                <div class="imagen-placeholder-perfil">
+
+                    <img src="<?php echo htmlspecialchars($_SESSION['imagen']); ?>"
+                        alt="Imagen de perfil"
+                        width="200"
+                        height="200"
+                        id="previewImagenPerfil"
+                        title="Haz clic para cambiar tu foto">
+
+                    <input type="file"
+                        id="inputImagenPerfil"
+                        name="imagen_perfil"
+                        accept="image/jpeg, image/png"
+                        style="display: none;">
+
+                    <input type="hidden" name="id_usuario_foto" value="<?php echo $_SESSION['idusuario']; ?>">
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <button type="button" class="boton-secundario" id="btnSeleccionarFoto">
+                        Seleccionar Foto
+                    </button>
+                    <button type="submit" class="boton" id="btnGuardarFoto" style="display: none; width: 100px">
+                        Guardar Foto
+                    </button>
+                </div>
+            </form>
+
         </div>
+
+        <style>
+            .imagen-placeholder-perfil img {
+                cursor: pointer;
+                border-radius: 25%;
+                /* Para que se vea circular */
+                border: 3px solid #ddd;
+                transition: opacity 0.3s;
+            }
+
+            .imagen-placeholder-perfil img:hover {
+                opacity: 0.7;
+            }
+        </style>
     </div>
     <!-- Modal para editar perfil de Usuario **************************************-->
     <div id="editar-modalPerfilUser" class="modal" style="display: none;">

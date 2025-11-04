@@ -155,7 +155,8 @@ td img {
 .editarImpuesto,
 .editarCliente,
 .editarProveedor,
-.editarProducto {
+.editarProducto,
+.editarPerfilUser {
   color: #002cee;
   background: none;
 }
@@ -171,7 +172,8 @@ td img {
 .editarImpuesto:hover,
 .editarCliente:hover,
 .editarProveedor:hover,
-.editarProducto:hover {
+.editarProducto:hover,
+.editarPerfilUser:hover {
   background-color: #f2ff00;
   scale: 1.05;
 }

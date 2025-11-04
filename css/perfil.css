@@ -81,3 +81,16 @@ h2{
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
 }
+.boton-secundario{
+    background: #5fb3ef;
+    border: none;
+    border-radius: 5px;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    margin: 8px;
+    height: 43px;
+    width: 125px;
+}
