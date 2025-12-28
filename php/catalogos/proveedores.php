@@ -44,7 +44,7 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
                     <th colspan="2" style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="proveedores-lista">
                 <?php foreach ($proveedores as $u): ?>
                     <tr>
                         <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre_prov']); ?></td>

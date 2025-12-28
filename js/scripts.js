@@ -9446,6 +9446,85 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+//Función para filtrar Proveedores desde el servidor ******************************
+function cargarProvFiltrados() {
+  const estatusFiltro = document
+    .getElementById("estatusFiltroProv")
+    .value.trim()
+    .toLowerCase();
+
+  if (!estatusFiltro) {
+    cargarProveedores(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
+    return;
+  }
+  //console.log("Cargando Proveedores filtrados del servidor:", estatusFiltro);
+
+  fetch(`cruds/cargar_proveedores.php?estatus=${estatusFiltro}`)
+    .then((response) => response.json())
+    .then((data) => {
+      // console.log("Filtrados: ",data);
+      actualizarTablaProveedores(data);
+    })
+    .catch((error) =>
+      console.error("Error al cargar Proveedores filtrados:", error)
+    );
+}
+
+//Función para actualizar la tabla con los proveedores filtradas
+function actualizarTablaProveedores(proveedores) {
+  let tbody = document.getElementById("proveedores-lista");
+  tbody.innerHTML = ""; // Limpiar la tabla
+
+  if (proveedores.length === 0) {
+    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron proveedores</td></tr>`;
+    return;
+  }
+  //LIMPIAR LA TABLA antes de agregar nuevas proveedores
+  tbody.innerHTML = "";
+
+  proveedores.forEach((proveedor) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td data-lable="Nombre:">${proveedor.nombre_prov}</td>
+      <td data-lable="Empresa:">${proveedor.contacto_prov}</td>
+      <td data-lable="Teléfono:">${proveedor.tel_prov}</td>
+      <td data-lable="Email:">${proveedor.email_prov}</td>
+
+      <td data-lable="Estatus">
+        <button class="btn ${
+          proveedor.estatus == 0 ? "btn-success" : "btn-danger"
+        }">
+          ${proveedor.estatus == 0 ? "Activo" : "Inactivo"}
+        </button>
+      </td>
+      <td data-lable="Editar:">
+        <button title="Editar" class="editarProveedor fa-solid fa-pen-to-square" data-id="${
+          proveedor.id_prov
+        }"></button>
+        </td>
+        <td data-lable="Eliminar:">
+        <button title="Eliminar" class="eliminarProveedor fa-solid fa-trash" data-id="${
+          proveedor.id_prov
+        }"></button>
+      </td>
+    `;
+    tbody.appendChild(fila);
+  });
+}
+
+//Función para cargar los primeros 10 provedores por defecto
+function cargarProveedores() {
+  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
+  cargando = false; //Asegurar que el scroll pueda volver a activarse
+
+  fetch("cruds/cargar_proveedores.php?limit=10&offset=0")
+    .then((response) => response.json())
+    .then((data) => {
+      actualizarTablaProveedores(data);
+    })
+    .catch((error) => console.error("Error al cargar proveedores:", error));
+}
+
 // Llamar movimientos ********************************************
 document.addEventListener("DOMContentLoaded", function () {
   // Llamar a la función para adjuntar listeners a los botones del menú SOLO UNA VEZ
