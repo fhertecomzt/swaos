@@ -17,7 +17,16 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
 <div class="containerr">
     <button class="boton" onclick="abrirModalProveedor('crear-modalProveedor')">Nuevo</button>
     <label class="buscarlabel" for="buscarboxproveedor">Buscar:</label>
-    <input class="buscar--box" id="buscarboxproveedor" type="search" placeholder="Qué estas buscando?">
+    <input class="buscar--box" id="buscarboxproveedor" type="search" placeholder="Qué estas buscando?" autocomplete="off">
+
+        <!-- Filtro de estatus -->
+    <label class="buscarlabel" for="estatusFiltroProv">Filtrar por Estatus:</label>
+    <select class="buscar--box" id="estatusFiltroProv" onchange="cargarProvFiltrados()" style="width: 100px;">
+        <option value="">Todos</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+    </select>
+
 </div>
 
 <div class="container_dashboard_tablas" id="proveedores">

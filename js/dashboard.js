@@ -12,9 +12,12 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         let cardElements = document.querySelectorAll(".card .card-numeros");
         if (cardElements.length >= 3) {
-          cardElements[0].textContent = data.productos;
-          cardElements[1].textContent = data.clientes;
-          cardElements[2].textContent = data.proveedores;
+          cardElements[0].textContent = data.opendientes;
+          cardElements[1].textContent = data.olistas;
+          cardElements[2].textContent = data.productos;
+          cardElements[3].textContent = data.clientes;
+          cardElements[4].textContent = data.proveedores;
+          cardElements[5].textContent = data.ventas;
         }
       })
       .catch((error) => console.error("Error al obtener los datos:", error))

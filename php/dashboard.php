@@ -20,9 +20,9 @@ include "verificar_sesion.php";
   <!--Cards-->
   <div class="cards">
 
-    <div class="card" data-page="catalogos/productos.php">
+    <div class="card" data-page="catalogos/1productos.php">
       <div>
-        <span class="card-numeros">10</span>
+        <span class="card-numeros">0</span>
         <p><span class="card-nombre">Órdenes pendientes</span></p>
       </div>
       <div class="card-icono">
@@ -30,9 +30,9 @@ include "verificar_sesion.php";
       </div>
     </div>
 
-    <div class="card" data-page="catalogos/productos.php">
+    <div class="card" data-page="catalogos/2productos.php">
       <div>
-        <span class="card-numeros">3</span>
+        <span class="card-numeros">0</span>
        <p> <span class="card-nombre">Órdenes listas</span></p>
       </div>
       <div class="card-icono">
@@ -40,7 +40,7 @@ include "verificar_sesion.php";
       </div>
     </div>
 
-    <div class="card" data-page="catalogos/productos.php">
+    <div class="card" data-page="catalogos/3productos.php">
       <div>
         <span class="card-numeros">0</span><br>
         <p><span class="card-nombre">Productos</span></p>
@@ -50,7 +50,7 @@ include "verificar_sesion.php";
       </div>
     </div>
 
-    <div class="card" data-page="catalogos/clientes.php">
+    <div class="card" data-page="catalogos/4clientes.php">
       <div>
         <span class=" card-numeros">0</span>
         <p><span class="card-nombre">Clientes</span></p>
