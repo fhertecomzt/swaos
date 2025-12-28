@@ -9,7 +9,7 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
 
   try {
     // Consulta segura con consulta preparada
-    $stmt = $dbh->prepare("SELECT * FROM proveedores WHERE idproveedor = ?");
+    $stmt = $dbh->prepare("SELECT * FROM proveedores WHERE id_prov = ?");
     $stmt->execute([$id]);
     $proveedor = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -17,15 +17,15 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
       // Sanitizar los datos antes de enviarlos en la respuesta
       $response["success"] = true;
       $response["proveedor"] = [
-        "idproveedor" => htmlspecialchars($proveedor["idproveedor"]),
-        "proveedor" => htmlspecialchars($proveedor["nomproveedor"]),
-        "contacto" => htmlspecialchars($proveedor["contacproveedor"]),
-        "rfc" => htmlspecialchars($proveedor["rfcproveedor"]),
-        "telefono" => htmlspecialchars($proveedor["telproveedor"]),
-        "celular" => htmlspecialchars($proveedor["celproveedor"]),
-        "email" => htmlspecialchars($proveedor["emailproveedor"]),
-        "limitecred" => htmlspecialchars($proveedor["limitecredproveedor"]),
-        "diacred" => htmlspecialchars($proveedor["dicredproveedor"]),
+        "idproveedor" => htmlspecialchars($proveedor["id_prov"]),
+        "proveedor" => htmlspecialchars($proveedor["nombre_prov"]),
+        "papellido" => htmlspecialchars($proveedor["papellido_prov"]),
+        "sapellido" => htmlspecialchars($proveedor["sapellido_prov"]),
+        "contacto" => htmlspecialchars($proveedor["contacto_prov"]),
+        "rfc" => htmlspecialchars($proveedor["rfc_prov"]),
+        "telefono" => htmlspecialchars($proveedor["tel_prov"]),
+        "email" => htmlspecialchars($proveedor["email_prov"]),
+        "estatus" => htmlspecialchars($proveedor["estatus"])
       ];
     } else {
       $response["message"] = "No encontrado.";

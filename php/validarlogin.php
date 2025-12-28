@@ -1,8 +1,9 @@
 <?php
+
 //Encabezados para evitar el caché
-ini_set('session.cookie_secure', '1'); // Requiere HTTPS
-ini_set('session.cookie_httponly', '1'); // Evita acceso por JavaScript
-ini_set('session.use_strict_mode', '1'); // Rechaza IDs inválidas
+ ini_set('session.cookie_secure', '1'); // Requiere HTTPS
+ ini_set('session.cookie_httponly', '1'); // Evita acceso por JavaScript
+ ini_set('session.use_strict_mode', '1'); // Rechaza IDs inválidas
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -160,7 +161,7 @@ if (empty($errores)) {
                             header("Location: gm.php");
                             break;
                         default:
-                            header("Location: ../index.php");
+                            header("Location: index.php");
                             break;
                     }
                     exit;
@@ -206,7 +207,7 @@ if (empty($errores)) {
     } catch (PDOException $e) {
         // Registrar el error para fines de depuración
         error_log("Database error in validarlogin.php: " . $e->getMessage());
-        $_SESSION['errores'] = ["Ocurrió un error al intentar iniciar sesión."];
+        // $_SESSION['errores'] = ["Ocurrió un error al intentar iniciar sesión."];
         header("Location: ../index.php");
         exit;
     }

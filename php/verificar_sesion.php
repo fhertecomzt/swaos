@@ -11,7 +11,7 @@ $tiempo_inactividad = 3600; // 2 minutos 120 1200 20 min
 
 // Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || !isset($_SESSION['idusuario']) || !isset($_SESSION['session_token'])) {
-  header("Location: ../index.php");
+  header("Location: ../../index.php");
   exit;
 }
 

@@ -21,12 +21,12 @@ try {
 
     // Si se proporciona un ID (edición), excluir ese registro de la validación
     if ($id > 0) {
-      $query = "SELECT COUNT(*) FROM proveedores WHERE nomproveedor = ? AND idproveedor != ?";
+      $query = "SELECT COUNT(*) FROM proveedores WHERE nombre_prov = ? AND id_prov != ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$proveedores, $id]);
     } else {
       // Si no hay ID, es un registro nuevo
-      $query = "SELECT COUNT(*) FROM proveedores WHERE nomproveedor = ?";
+      $query = "SELECT COUNT(*) FROM proveedores WHERE nombre_prov = ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$proveedores]);
     }

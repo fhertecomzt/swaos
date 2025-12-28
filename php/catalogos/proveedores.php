@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$roles_permitidos = ["SISTEMAS", "GERENCIA"];
+$roles_permitidos = ["superusuario", "gerencia"];
 
 //Includes
 include "../verificar_sesion.php";
@@ -11,7 +11,7 @@ include "../conexion.php";
 include "../funciones/funciones.php";
 include "../funciones/activoinactivo.php";
 
-$proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor, contacproveedor, rfcproveedor, telproveedor, celproveedor, emailproveedor, limitecredproveedor, dicredproveedor", "ASC", "idproveedor");
+$proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, papellido_prov, sapellido_prov, contacto_prov, rfc_prov, tel_prov, email_prov, estatus", "ASC", "id_prov");
 ?>
 
 <div class="containerr">
@@ -28,31 +28,36 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor,
             <thead>
                 <tr>
                     <th>Nombre</th>
-                    <th>Contacto</th>
+                    <th>Empresa</th>
                     <th>Teléfono</th>
                     <th>Email</th>
+                    <th>Estatus</th>
                     <th colspan="2" style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($proveedores as $u): ?>
                     <tr>
-                        <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nomproveedor']); ?></td>
-                        <td data-lable="Contacto:"><?php echo htmlspecialchars($u['contacproveedor']); ?></td>
-                        <td data-lable="Teléfono:"><?php echo htmlspecialchars($u['telproveedor']); ?></td>
-                        <td data-lable="Email:"><?php echo htmlspecialchars($u['emailproveedor']); ?></td>
+                        <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre_prov']); ?></td>
+                        <td data-lable="Contacto:"><?php echo htmlspecialchars($u['contacto_prov']); ?></td>
+                        <td data-lable="Teléfono:"><?php echo htmlspecialchars($u['tel_prov']); ?></td>
+                        <td data-lable="Email:"><?php echo htmlspecialchars($u['email_prov']); ?></td>
+                        <td data-lable="Estatus:"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
+                                <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
+                            </button></td>
+
                         <td data-lable="Editar:">
-                            <button title="Editar" class="editarProveedor fa-solid fa-pen-to-square" data-id="<?php echo $u['idproveedor']; ?>"></button>
+                            <button title="Editar" class="editarProveedor fa-solid fa-pen-to-square" data-id="<?php echo $u['id_prov']; ?>"></button>
                         </td>
                         <td data-lable="Eliminar:">
-                            <button title="Eliminar" class="eliminarProveedor fa-solid fa-trash" data-id="<?php echo $u['idproveedor']; ?>"></button>
+                            <button title="Eliminar" class="eliminarProveedor fa-solid fa-trash" data-id="<?php echo $u['id_prov']; ?>"></button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
         <!-- Mensaje no encuentra resultados -->
-        <p id="mensaje-vacio" style="display: none; color: red;">No se encontraron resultados.</p>
+        <p id="mensaje-vacio" class="mensajevacio" style="display: none; color: red;">No se encontraron resultados.</p>
 
         <!-- Modal para crear Proveedor -->
         <div id="crear-modalProveedor" class="modal" style="display: none;">
@@ -70,7 +75,23 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor,
                     </div>
 
                     <div class="form-group">
-                        <label for="crear-contacto">Contacto:</label>
+                        <label for="crear-papellido">Primer apellido:</label>
+                        <input type="text" id="crear-papellido" name="papellido" autocomplete="off"
+                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+                            title="Solo se permiten letras, números y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="crear-sapellido">Segundo apellido:</label>
+                        <input type="text" id="crear-sapellido" name="sapellido" autocomplete="off"
+                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+                            title="Solo se permiten letras, números y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="crear-contacto">Empresa:</label>
                         <input type="text" id="crear-contacto" name="contacto" autocomplete="off"
                             pattern="[a-zA-ZÀ-ÿ0-9\s]+"
                             title="Solo se permiten letras, números y espacios."
@@ -94,34 +115,22 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor,
                     </div>
 
                     <div class="form-group">
-                        <label for="crear-celular">Celular:</label>
-                        <input type="text" id="crear-celular" name="celular" autocomplete="off" maxlength="10 "
-                            pattern="\d{10}"
-                            title="Por favor, ingrese un número de telefono de 10 dígitos."
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                    </div>
-
-                    <div class="form-group">
                         <label for="crear-email">Email:</label>
                         <input type="email" id="crear-email" name="email" autocomplete="off" required>
                     </div>
-
+                    <!-- Selección de Estatus -->
                     <div class="form-group">
-                        <label for="crear-limitecred">Limite de crédito:</label>
-                        <input type="text" id="crear-limitecred" name="limitecred" autocomplete="off"
-                            pattern="[0-9]+"
-                            title="Solo se permiten números."
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" size="10" min="0" value="0" maxlength="10" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="crear-diacred">Días de crédito:</label>
-                        <input type="text" id="crear-diacred" name="diacred" autocomplete="off"
-                            pattern="^(?:[0-9]|[1-9][0-9]|[1-3][0-6][0-5])$"
-                            title="Ingrese un número entre 1 y 365." size="3" min="0" value="0" max="365" required>
+                        <label for="estatus">Estatus:</label>
+                        <select id="estatus" name="estatus">
+                            <?php foreach ($options as $key => $text) { ?>
+                                <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
+                            <?php } ?>
+                        </select>
                     </div>
 
                     <button type="submit">Guardar</button>
+                    <span class="cancelarModal" onclick="cerrarModalProveedor('crear-modalProveedor')" type=" submit">Cancelar</span>
+
                 </form>
             </div>
         </div>
@@ -144,7 +153,23 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor,
                     </div>
 
                     <div class="form-group">
-                        <label for="editar-contacto">Contacto:</label>
+                        <label for="editar-papellido">Primer apellido:</label>
+                        <input type="text" id="editar-papellido" name="papellido" autocomplete="off"
+                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+                            title="Solo se permiten letras, números y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editar-sapellido">Segundo apellido:</label>
+                        <input type="text" id="editar-sapellido" name="sapellido" autocomplete="off"
+                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+                            title="Solo se permiten letras, números y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editar-contacto">Empresa:</label>
                         <input type="text" id="editar-contacto" name="contacto" autocomplete="off"
                             pattern="[a-zA-ZÀ-ÿ0-9\s]+"
                             title="Solo se permiten letras, números y espacios."
@@ -168,34 +193,24 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor,
                     </div>
 
                     <div class="form-group">
-                        <label for="editar-celular">Celular:</label>
-                        <input type="text" id="editar-celular" name="celular" autocomplete="off" maxlength="10 "
-                            pattern="\d{10}"
-                            title="Por favor, ingrese un número de telefono de 10 dígitos."
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                    </div>
-
-                    <div class="form-group">
                         <label for="editar-email">Email:</label>
                         <input type="email" id="editar-email" name="email" autocomplete="off" required>
                     </div>
 
+                    <!-- Selección de Estatus -->
                     <div class="form-group">
-                        <label for="editar-limitecred">Limite de crédito:</label>
-                        <input type="text" id="editar-limitecred" name="limitecred" autocomplete="off"
-                            pattern="^\d+(\.\d{1,2})?$"
-                            title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
-                            size="10" min="0" value="0" maxlength="10" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editar-diacred">Días de crédito:</label>
-                        <input type="text" id="editar-diacred" name="diacred" autocomplete="off"
-                            pattern="^(?:[0-9]|[1-9][0-9]|[1-3][0-6][0-5])$"
-                            title="Ingrese un número entre 0 y 365." size="3" min="0" value="0" max="365" required>
+                        <label for="editar-estatus">Estatus:</label>
+                        <select id="editar-estatus" name="estatus">
+                            <?php foreach ($options as $key => $text) { ?>
+                                <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
+                            <?php } ?>
+                        </select>
                     </div>
 
                     <button type="submit">Actualizar</button>
+
+                    <span class="cancelarModal" onclick="cerrarModalProveedor('editar-modalProveedor')" type=" submit">Cancelar</span>
+
                 </form>
             </div>
         </div>

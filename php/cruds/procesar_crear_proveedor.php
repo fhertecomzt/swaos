@@ -9,19 +9,18 @@ try {
   // Insertar en la base de datos
   $stmt = $dbh->prepare("
         INSERT INTO proveedores (
-            nomproveedor, contacproveedor, rfcproveedor, telproveedor, celproveedor, emailproveedor, limitecredproveedor, dicredproveedor
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            nombre_prov, papellido_prov, sapellido_prov, contacto_prov, rfc_prov, tel_prov, email_prov, estatus) VALUES (?,?, ?, ?, ?, ?, ?, ?)
     ");
 
   $stmt->execute([
     $_POST['proveedor'],
+    $_POST['papellido'],
+    $_POST['sapellido'],
     $_POST['contacto'],
     $_POST['rfc'],
     $_POST['telefono'],
-    $_POST['celular'],
     $_POST['email'],
-    $_POST['limitecred'],
-    $_POST['diacred']
+    $_POST['estatus']
   ]);
 
   $lastId = $dbh->lastInsertId();
@@ -32,13 +31,13 @@ try {
   $response["proveedor"] = [
     "id" => $lastId,
     "proveedor" => $_POST['proveedor'],
+    "papellido" => $_POST['papellido'],
+    "sapellido" => $_POST['sapellido'],
     "contacto" => $_POST['contacto'],
     "rfc" => $_POST['rfc'],
     "telefono" => $_POST['telefono'],
-    "celular" => $_POST['celular'],
     "email" => $_POST['email'],
-    "limitecred" => $_POST['limitecred'],
-    "diacred" => $_POST['diacred']
+    "estatus" => $_POST['estatus']
   ];
 } catch (PDOException $e) {
   $response["message"] = "Error en la base de datos: " . $e->getMessage();

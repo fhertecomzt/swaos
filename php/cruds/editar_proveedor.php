@@ -10,40 +10,39 @@ $response = ["success" => false, "message" => ""];
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $id = $_POST["editar-idproveedor"] ?? null;
   $proveedor = $_POST["proveedor"] ?? null;
+  $papellido = $_POST["papellido"] ?? null;
+  $sapellido = $_POST["sapellido"] ?? null;
   $contacto = $_POST["contacto"] ?? null;
   $rfc = $_POST["rfc"] ?? null;
   $telefono = $_POST["telefono"] ?? null;
-  $celular = $_POST["celular"] ?? null;
   $email = $_POST["email"] ?? null;
-  $limitecred = $_POST["limitecred"] ?? null;
-  $diacred = $_POST["diacred"] ?? null;
-
+  $estatus = $_POST["estatus"] ?? null;
   try {
 
     // Preparar la consulta SQL
     $stmt = $dbh->prepare(
       "UPDATE proveedores 
-            SET nomproveedor = :proveedor, 
-                contacproveedor = :contacto, 
-                rfcproveedor = :rfc, 
-                telproveedor = :telefono, 
-                celproveedor = :celular, 
-                emailproveedor = :email, 
-                limitecredproveedor = :limitecred, 
-                dicredproveedor = :diacred
-            WHERE idproveedor = :id"
+            SET nombre_prov = :proveedor, 
+                papellido_prov = :papellido,
+                sapellido_prov = :sapellido,
+                contacto_prov = :contacto, 
+                rfc_prov = :rfc, 
+                tel_prov = :telefono, 
+                email_prov = :email, 
+                estatus = :estatus
+            WHERE id_prov = :id"
     );
 
     // Ejecutar la consulta con los parámetros
     $stmt->execute([
       ":proveedor" => $proveedor,
+      ":papellido" => $papellido,
+      ":sapellido" => $sapellido,
       ":contacto" => $contacto,
       ":rfc" => $rfc,
       ":telefono" => $telefono,
-      ":celular" => $celular,
       ":email" => $email,
-      ":limitecred" => $limitecred,
-      ":diacred" => $diacred,
+      ":estatus" => $estatus,
       ":id" => $id
     ]);
 

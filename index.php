@@ -43,7 +43,7 @@ $_SESSION['captcha_result'] = $num1 + $num2;
                     <div class="logomovil"></div>
                     <div class="info-childs">
                         <h2>Bienvenido</h2>
-                        <p> SWAOS el sistema web de administración para órdenes de servicio</p>
+                        <p>SWAOS el sistema web de administración para órdenes de servicio</p>
                     </div>
                 </div>
 

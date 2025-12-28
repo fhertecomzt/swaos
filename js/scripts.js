@@ -2132,9 +2132,7 @@ function procesarFormularioUser(event, tipo) {
                             <td data-lable="Segundo apellido:">${
                               data.usuario.sapellido
                             }</td>
-                            <td data-lable="Rol:">${
-                              data.usuario.nom_rol
-                            }</td>
+                            <td data-lable="Rol:">${data.usuario.nom_rol}</td>
                             <td data-lable="Taller:">${
                               data.usuario.nombre_t
                             }</td>                            
@@ -2896,7 +2894,9 @@ function actualizarTablaUsuarios(data) {
           <td data-lable="Usuario:">${usuario.usuario}</td>
           <td data-lable="Nombre:">${usuario.nombre}</td>
           <td data-lable="Primer apellido:">${usuario.p_appellido}</td>
-          <td data-lable="Segundo apellido:">${usuario.s_appellido}</td>          
+          <td data-lable="Segundo apellido:">${
+            usuario.s_appellido
+          }</td>          
           <td data-lable="Rol:">${usuario.nom_rol}</td>
           <td data-lable="Taller:">${usuario.nombre_t}</td>
 
@@ -8799,7 +8799,7 @@ if (Impuestos) {
   observerImpuestos.observe(Impuestos, { childList: true, subtree: true });
 }
 
-// Llamar Proveedores*************************************************
+// Llamar Proveedores *************************************************
 document
   .getElementById("proveedores-link")
   .addEventListener("click", function (event) {
@@ -8850,9 +8850,22 @@ function procesarFormularioProveedor(event, tipo) {
             <td>${data.proveedor.contacto}</td>
             <td>${data.proveedor.telefono}</td>
             <td>${data.proveedor.email}</td>
-            <td>
-              <button title="Editar" class="editarProveedor fa-solid fa-pen-to-square" data-id="${data.proveedor.id}"></button>
-              <button title="Eliminar" class="eliminarProveedor fa-solid fa-trash" data-id="${data.proveedor.id}"></button>
+            <td data-lable="Estatus:">
+              <button class="btn ${
+                data.proveedor.estatus == 0 ? "btn-success" : "btn-danger"
+              }">
+              ${data.proveedor.estatus == 0 ? "Activo" : "Inactivo"}
+              </button>
+            </td>
+             <td>
+              <button title="Editar" class="editarProveedor fa-solid fa-pen-to-square" data-id="${
+                data.proveedor.id
+              }"></button>
+              </td>
+              <td>
+              <button title="Eliminar" class="eliminarProveedor fa-solid fa-trash" data-id="${
+                data.proveedor.id
+              }"></button>
             </td>
           `;
 
@@ -8865,6 +8878,9 @@ function procesarFormularioProveedor(event, tipo) {
           title: "¡Éxito!",
           text: data.message, // Usar el mensaje del backend
           icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
         });
       } else {
         // Mostrar un mensaje de error específico del backend
@@ -8889,6 +8905,8 @@ function validarFormularioProveedor(event) {
   event.preventDefault();
 
   const proveedor = document.querySelector("[name='proveedor']").value.trim();
+  const papellido = document.querySelector("[name='papellido']").value.trim();
+  const sapellido = document.querySelector("[name='sapellido']").value.trim();
   const contacto = document.querySelector("[name='contacto']").value.trim();
   const rfc = document.querySelector("[name='rfc']").value.trim();
 
@@ -8905,6 +8923,34 @@ function validarFormularioProveedor(event) {
   inputname.addEventListener("input", () => {
     if (inputname.value.length >= 3) {
       inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
+    }
+  });
+
+  if (papellido.length < 3) {
+    errores.push("El primer apellido debe tener al menos 3 caracteres.");
+    const inputpapellido = document.querySelector("#crear-papellido");
+    inputpapellido.focus();
+    inputpapellido.classList.add("input-error"); // Añade la clase de error
+  }
+  // Elimina la clase de error al corregir
+  const inputpapellido = document.querySelector("#crear-papellido");
+  inputpapellido.addEventListener("input", () => {
+    if (inputpapellido.value.length >= 3) {
+      inputpapellido.classList.remove("input-error"); // Quita la clase si el campo es válido
+    }
+  });
+
+  if (sapellido.length < 3) {
+    errores.push("El segundo apellido debe tener al menos 3 caracteres.");
+    const inputsapellido = document.querySelector("#crear-sapellido");
+    inputsapellido.focus();
+    inputsapellido.classList.add("input-error"); // Añade la clase de error
+  }
+  // Elimina la clase de error al corregir
+  const inputsapellido = document.querySelector("#crear-sapellido");
+  inputsapellido.addEventListener("input", () => {
+    if (inputsapellido.value.length >= 3) {
+      inputsapellido.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
 
@@ -8940,7 +8986,10 @@ function validarFormularioProveedor(event) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     return;
   }
@@ -8950,9 +8999,12 @@ function validarFormularioProveedor(event) {
     .then((esDuplicado) => {
       if (esDuplicado) {
         Swal.fire({
-          title: "Error",
+          title: "Atención",
           text: "El nombre ya existe. Por favor, elige otro.",
-          icon: "error",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
         });
       } else {
         // Si no hay errores, enviar el formulario
@@ -8978,14 +9030,14 @@ function verificarDuplicadoProveedor(proveedor) {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("Respuesta de verificar_nombre.php:", data);
+      //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
         mostrarAlerta("error", "Error", "El nombre ya existe.");
       }
       return data.existe;
     })
     .catch((error) => {
-      console.error("Error al verificar duplicado:", error);
+      //console.error("Error al verificar duplicado:", error);
       return true; // Asume duplicado en caso de error
     });
 }
@@ -9009,13 +9061,13 @@ document.addEventListener("DOMContentLoaded", function () {
               const campos = [
                 "idproveedor",
                 "proveedor",
+                "papellido",
+                "sapellido",
                 "contacto",
                 "rfc",
                 "telefono",
-                "celular",
                 "email",
-                "limitecred",
-                "diacred",
+                "estatus"
               ];
               //console.log(`Asignando ${campo}:`, data.proveedor[campo]);
               campos.forEach((campo) => {
@@ -9179,11 +9231,15 @@ function enviarFormularioEdicionProveedor(formulario) {
     .then((data) => {
       //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
-        mostrarAlerta(
-          "success",
-          "¡Éxito!",
-          data.message || "Actualizada correctamente."
-        );
+                Swal.fire({
+                  title: "Exito",
+                  text: data.message || "Registro actualizado correctamente.", // Mostrar el mensaje específico si existe
+                  icon: "success",
+                  showConfirmButton: false,
+                  timer: 1500,
+                  timerProgressBar: true,
+                });
+
         actualizarFilaTablaProveedor(formData);
         cerrarModal("editar-modalProveedor");
       } else {
@@ -9210,6 +9266,13 @@ function actualizarFilaTablaProveedor(formData) {
     fila.cells[1].textContent = formData.get("contacto");
     fila.cells[2].textContent = formData.get("telefono");
     fila.cells[3].textContent = formData.get("email");
+    // Determinar clases y texto del botón
+    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
+    const claseBtn =
+      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
+
+    // Insertar el botón en la celda
+    fila.cells[4].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
   }
 }
 // Eliminar Proveedores*****************************
@@ -9234,11 +9297,14 @@ document.addEventListener("click", function (event) {
           .then((data) => {
             if (data.success) {
               //alert("Registro eliminado correctamente");
-              Swal.fire(
-                "¡Eliminado!",
-                "El registro ha sido eliminado correctamente.",
-                "success"
-              );
+              Swal.fire({
+                title: "Atención",
+                text: data.message || "El registro se ha eliminado.",
+                icon: "warning",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+              });
               // Remover la fila de la tabla
               event.target.closest("tr").remove();
             } else {
@@ -10185,4 +10251,3 @@ function limpiarFormularioInformes() {
   const selects = document.querySelectorAll("#frmInformes select");
   selects.forEach((select) => (select.selectedIndex = 0)); // Reinicia el select al primer valor (generalmente un placeholder)
 }
-
