@@ -8955,7 +8955,7 @@ function validarFormularioProveedor(event) {
   });
 
   if (contacto.length < 3) {
-    errores.push("El contacto debe tener al menos 3 caracteres.");
+    errores.push("La empresa debe tener al menos 3 caracteres.");
     const inputcontacto = document.querySelector("#crear-contacto");
     inputcontacto.focus();
     inputcontacto.classList.add("input-error"); // Añade la clase de error
@@ -9067,7 +9067,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "rfc",
                 "telefono",
                 "email",
-                "estatus"
+                "estatus",
               ];
               //console.log(`Asignando ${campo}:`, data.proveedor[campo]);
               campos.forEach((campo) => {
@@ -9144,9 +9144,19 @@ async function validarFormularioEdicionProveedor(formulario) {
       mensaje: "El nombre debe tener al menos 3 caracteres.",
     },
     {
+      nombre: "papellido",
+      min: 3,
+      mensaje: "El primer apellido debe tener al menos 3 caracteres.",
+    },
+    {
+      nombre: "sapellido",
+      min: 3,
+      mensaje: "El segundo apellido debe tener al menos 3 caracteres.",
+    },
+    {
       nombre: "contacto",
       min: 3,
-      mensaje: "El contacto debe tener al menos 3 caracteres.",
+      mensaje: "La empresa debe tener al menos 3 caracteres.",
     },
     {
       nombre: "rfc",
@@ -9187,6 +9197,9 @@ async function validarFormularioEdicionProveedor(formulario) {
       title: "Errores en el formulario",
       html: errores.join("<br>"),
       icon: "error",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     if (primerError) primerError.focus(); // Enfocar el primer campo con error
     return;
@@ -9231,23 +9244,26 @@ function enviarFormularioEdicionProveedor(formulario) {
     .then((data) => {
       //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
-                Swal.fire({
-                  title: "Exito",
-                  text: data.message || "Registro actualizado correctamente.", // Mostrar el mensaje específico si existe
-                  icon: "success",
-                  showConfirmButton: false,
-                  timer: 1500,
-                  timerProgressBar: true,
-                });
+        Swal.fire({
+          title: "Exito",
+          text: data.message || "Registro actualizado correctamente.", // Mostrar el mensaje específico si existe
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
 
         actualizarFilaTablaProveedor(formData);
         cerrarModal("editar-modalProveedor");
       } else {
-        mostrarAlerta(
-          "error",
-          "Error",
-          data.message || "No se pudo actualizar."
-        );
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "No se realizaron cambios en el proveedor.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
     })
     .catch((error) => {
