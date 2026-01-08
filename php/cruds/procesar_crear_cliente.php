@@ -9,25 +9,24 @@ try {
   // Insertar en la base de datos
   $stmt = $dbh->prepare("
         INSERT INTO clientes (
-            nom_cliente, rfc_cliente, dom_cliente, noext_cliente, noint_cliente, cp_cliente,
-            col_cliente, cd_cliente, edo_cliente, tel_cliente, email_cliente, limitecred_cliente, diacred_cliente
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+            nombre_cliente, papellido_cliente, sapellido_cliente, rfc_cliente, calle_cliente, noext_cliente, noint_cliente, id_edo_c, id_munici, id_col_c, id_cp_c, tel_cliente, email_cliente, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
   $stmt->execute([
     $_POST['cliente'],
+    $_POST['papellido'],
+    $_POST['sapellido'],
     $_POST['rfc'],
     $_POST['calle'],
     $_POST['noexterior'],
     $_POST['nointerior'] ?? '',    
-    $_POST['cpostal'],
-    $_POST['colonia'],
-    $_POST['ciudad'],
     $_POST['estado'],
+    $_POST['ciudad'],
+    $_POST['colonia'],
+    $_POST['cpostal'],
     $_POST['telefono'],
     $_POST['email'],
-    $_POST['limitecred'],
-    $_POST['diacred'],
+    $_POST['estatus']
   ]);
 
   $lastId = $dbh->lastInsertId();
@@ -42,14 +41,13 @@ try {
     "calle" => $_POST['calle'],
     "noexterior" => $_POST['noexterior'],
     "nointerior" => $_POST['nointerior'] ?? '',
-    "cpostal" => $_POST['cpostal'],
-    "colonia" => $_POST['colonia'],
-    "ciudad" => $_POST['ciudad'],
     "estado" => $_POST['estado'],
+    "ciudad" => $_POST['ciudad'],
+    "colonia" => $_POST['colonia'],
+    "cpostal" => $_POST['cpostal'],
     "telefono" => $_POST['telefono'],
     "email" => $_POST['email'],
-    "limitecred" => $_POST['limitecred'],
-    "diacred" => $_POST['diacred']
+    "estatus" => $_POST['estatus']
   ];
 } catch (PDOException $e) {
   $response["message"] = "Error en la base de datos: " . $e->getMessage();
