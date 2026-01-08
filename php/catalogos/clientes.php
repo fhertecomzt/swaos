@@ -59,7 +59,6 @@ $colonias = obtenerColonias($dbh);
         <div id="crear-modalCliente" class="modal" style="display: none;">
             <div class="modal-content">
                 <span title="Cerrar" class="close" onclick="cerrarModalCliente('crear-modalCliente')">&times;</span>
-                <fieldset>
                     <legend>Crear cliente</legend>
                     <form id="form-crearCliente" onsubmit="validarFormularioCliente(event, 'crear')">
 
@@ -172,7 +171,6 @@ $colonias = obtenerColonias($dbh);
                                 </select>
                             </div>
                         </div>
-                </fieldset>
 
                 <button type="submit">Guardar</button>
                 <span class="cancelarModal" onclick="cerrarModalCliente('crear-modalCliente')" type=" submit">Cancelar</span>
