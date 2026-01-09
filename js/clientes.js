@@ -90,13 +90,12 @@ function validarFormularioCliente(event) {
   event.preventDefault();
 
   const cliente = document.querySelector("[name='cliente']").value.trim();
+  const papellido = document.querySelector("[name='papellido']").value.trim();
+  const sapellido = document.querySelector("[name='sapellido']").value.trim();
   const rfc = document.querySelector("[name='rfc']").value.trim();
   const calle = document.querySelector("[name='calle']").value.trim();
   const noexterior = document.querySelector("[name='noexterior']").value.trim();
-  const nointerior = document.querySelector("[name='nointerior']").value.trim();
-  const colonia = document.querySelector("[name='colonia']").value.trim();
-  const ciudad = document.querySelector("[name='ciudad']").value.trim();
-  const estado = document.querySelector("[name='estado']").value.trim();
+  const telefono = document.querySelector("[name='telefono']").value.trim();
 
   const errores = [];
 
@@ -114,17 +113,45 @@ function validarFormularioCliente(event) {
     }
   });
 
-  if (rfc.length < 12) {
-    errores.push("El RFC debe tener al menos 12 caracteres.");
-    const inputdesc = document.querySelector("#crear-rfc");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
+  if (papellido.length < 3) {
+    errores.push("El primer apellido debe tener al menos 3 caracteres.");
+    const inputpapellido = document.querySelector("#crear-papellido");
+    inputpapellido.focus();
+    inputpapellido.classList.add("input-error"); // Añade la clase de error
   }
   // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-rfc");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 12) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
+  const inputpapellido = document.querySelector("#crear-papellido");
+  inputpapellido.addEventListener("input", () => {
+    if (inputpapellido.value.length >= 3) {
+      inputpapellido.classList.remove("input-error"); // Quita la clase si el campo es válido
+    }
+  });
+
+  if (sapellido.length < 3) {
+    errores.push("El segundo apellido debe tener al menos 3 caracteres.");
+    const inputsapellido = document.querySelector("#crear-sapellido");
+    inputsapellido.focus();
+    inputsapellido.classList.add("input-error"); // Añade la clase de error
+  }
+  // Elimina la clase de error al corregir
+  const inputsapellido = document.querySelector("#crear-sapellido");
+  inputsapellido.addEventListener("input", () => {
+    if (inputsapellido.value.length >= 3) {
+      inputsapellido.classList.remove("input-error"); // Quita la clase si el campo es válido
+    }
+  });
+
+  if (rfc.length < 12) {
+    errores.push("El RFC debe tener al menos 12 caracteres.");
+    const inputrfc = document.querySelector("#crear-rfc");
+    inputrfc.focus();
+    inputrfc.classList.add("input-error"); // Añade la clase de error
+  }
+  // Elimina la clase de error al corregir
+  const inputrfc = document.querySelector("#crear-rfc");
+  inputrfc.addEventListener("input", () => {
+    if (inputrfc.value.length >= 12) {
+      inputrfc.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
 
@@ -155,59 +182,17 @@ function validarFormularioCliente(event) {
     }
   });
 
-  if (nointerior.length < 1) {
-    errores.push("EL número interior debe tener al menos 1 carácter.");
-    const inputnointerior = document.querySelector("#crear-nointerior");
-    inputnointerior.focus();
-    inputnointerior.classList.add("input-error"); // Añade la clase de error
+  if (telefono.length < 1) {
+    errores.push("EL teléfono debe contener 10 números.");
+    const inputtelefono = document.querySelector("#crear-telefono");
+    inputtelefono.focus();
+    inputtelefono.classList.add("input-error"); // Añade la clase de error
   }
   // Elimina la clase de error al corregir
-  const inputnointerior = document.querySelector("#crear-nointerior");
-  inputnointerior.addEventListener("input", () => {
-    if (inputnointerior.value.length >= 1) {
-      inputnointerior.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (colonia.length < 3) {
-    errores.push("La colonia debe tener al menos 3 caracteres.");
-    const inputcolonia = document.querySelector("#crear-colonia");
-    inputcolonia.focus();
-    inputcolonia.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputcolonia = document.querySelector("#crear-colonia");
-  inputcolonia.addEventListener("input", () => {
-    if (inputcolonia.value.length >= 3) {
-      inputcolonia.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (ciudad.length < 3) {
-    errores.push("La ciudad debe tener al menos 3 caracteres.");
-    const inputciudad = document.querySelector("#crear-ciudad");
-    inputciudad.focus();
-    inputciudad.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputciudad = document.querySelector("#crear-ciudad");
-  inputciudad.addEventListener("input", () => {
-    if (inputciudad.value.length >= 3) {
-      inputciudad.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (estado.length < 3) {
-    errores.push("El estado debe tener al menos 3 caracteres.");
-    const inputestado = document.querySelector("#crear-estado");
-    inputestado.focus();
-    inputestado.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputestado = document.querySelector("#crear-estado");
-  inputestado.addEventListener("input", () => {
-    if (inputestado.value.length >= 3) {
-      inputestado.classList.remove("input-error"); // Quita la clase si el campo es válido
+  const inputtelefono = document.querySelector("#crear-telefono");
+  inputtelefono.addEventListener("input", () => {
+    if (inputtelefono.value.length >= 1) {
+      inputtelefono.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
 
@@ -215,19 +200,25 @@ function validarFormularioCliente(event) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     return;
   }
 
-  // Verificar duplicados
+  // Verificar duplicados de clientes
   verificarDuplicadoCliente(cliente)
     .then((esDuplicado) => {
       if (esDuplicado) {
         Swal.fire({
           title: "Error",
-          text: "El nombre ya existe. Por favor, elige otro.",
-          icon: "error",
+          text: "El nombre del cliente ya existe. Por favor, elige otro.",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
         });
       } else {
         // Si no hay errores, enviar el formulario
@@ -240,6 +231,9 @@ function validarFormularioCliente(event) {
         title: "Error",
         text: "Ocurrió un problema al validar el nombre.",
         icon: "error",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
       });
     });
 }
@@ -255,7 +249,14 @@ function verificarDuplicadoCliente(cliente) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre ya existe.");
+        Swal.fire({
+          title: "Error",
+          text: data.message, // Mostrar el mensaje específico si existe
+          icon: "error",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
       return data.existe;
     })
@@ -280,34 +281,47 @@ document.addEventListener("DOMContentLoaded", function () {
             const formularioCliente =
               document.getElementById("form-editarCliente");
             if (formularioCliente) {
+              // --- INICIO: NUEVA LÓGICA DE POBLADO ---
+              // 1. Llenar campos simples (inputs de texto, etc.)
               const campos = [
                 "idcliente",
                 "cliente",
+                "papellido",
+                "sapellido",
                 "rfc",
                 "calle",
                 "noexterior",
                 "nointerior",
-                "cpostal",
-                "colonia",
-                "ciudad",
-                "estado",
                 "telefono",
                 "email",
-                "limitecred",
-                "diacred",
+                "estatus",
               ];
               //console.log(`Asignando ${campo}:`, data.cliente[campo]);
               campos.forEach((campo) => {
                 const input = formularioCliente[`editar-${campo}`];
                 if (input) {
-                  //console.log(`Asignando ${campo}:`, data.cliente[campo]);
                   input.value = data.cliente[campo] || "";
                 } else {
-                  console.warn(
-                    `El campo editar-${campo} no existe en el formulario.`
-                  );
+                  console.warn(`Campo 'editar-${campo}' no encontrado.`);
                 }
               });
+
+              // 2. Obtener los IDs y valores guardados de la base de datos
+              const idEstadoDB = data.cliente.estado;
+              const idMunicipioDB = data.cliente.municipio;
+              const idColoniaDB = data.cliente.colonia;
+              const cpDB = data.cliente.codigo_postal; // Obtenemos el CP
+
+              // 3. Llamar a nuestra nueva función para cargar y seleccionar
+              //    los valores en los selects anidados.
+              cargarYSeleccionarUbicacionEditar(
+                idEstadoDB,
+                idMunicipioDB,
+                idColoniaDB,
+                cpDB
+              );
+
+              // --- FIN: NUEVA LÓGICA DE POBLADO ---
               abrirModalCliente("editar-modalCliente");
             } else {
               console.error("Formulario de edición no encontrado.");
@@ -543,11 +557,18 @@ document.addEventListener("click", function (event) {
           .then((data) => {
             if (data.success) {
               //alert("Registro eliminado correctamente");
-              Swal.fire(
-                "¡Eliminado!",
-                "El registro ha sido eliminado correctamente.",
-                "success"
-              );
+
+              Swal.fire({
+                title: "Eliminado!",
+                text:
+                  data.message ||
+                  "El registro ha sido eliminado correctamente.", // Mostrar el mensaje específico si existe
+                icon: "success",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+              });
+
               // Remover la fila de la tabla
               event.target.closest("tr").remove();
             } else {
