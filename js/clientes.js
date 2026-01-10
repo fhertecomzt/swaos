@@ -195,6 +195,47 @@ function validarFormularioCliente(event) {
       inputtelefono.classList.remove("input-error"); // Quita la clase si el campo es válido
     }
   });
+  if (selectEstado.value === "") {
+    errores.push("Selecciona un estado.");
+    const selectestado = document.querySelector("#estado");
+    selectestado.focus();
+    selectestado.classList.add("input-error"); // Añade la clase de error
+  }
+  // Elimina la clase de error al corregir
+  const selectestado = document.querySelector("#estado");
+  selectestado.addEventListener("input", () => {
+    if (selectestado.value.length >= 0) {
+      selectestado.classList.remove("input-error"); // Quita la clase si el campo es válido
+    }
+  });
+
+  if (selectMunicipio.value === "") {
+    errores.push("Selecciona un municipio.");
+    const selectmunicipio = document.querySelector("#municipio");
+    selectmunicipio.focus();
+    selectmunicipio.classList.add("input-error"); // Añade la clase de error
+  }
+  // Elimina la clase de error al corregir
+  const selectmunicipio = document.querySelector("#municipio");
+  selectmunicipio.addEventListener("input", () => {
+    if (selectmunicipio.value.length >= 0) {
+      selectmunicipio.classList.remove("input-error"); // Quita la clase si el campo es válido
+    }
+  });
+
+  if (selectColonia.value === "") {
+    errores.push("Selecciona una colonia.");
+    const selectColonia = document.querySelector("#colonia");
+    selectColonia.focus();
+    selectColonia.classList.add("input-error"); // Añade la clase de error
+  }
+  // Elimina la clase de error al corregir
+  const selectcolonia = document.querySelector("#colonia");
+  selectcolonia.addEventListener("input", () => {
+    if (selectcolonia.value.length >= 0) {
+      selectcolonia.classList.remove("input-error"); // Quita la clase si el campo es válido
+    }
+  });
 
   if (errores.length > 0) {
     Swal.fire({
@@ -292,14 +333,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 "calle",
                 "noexterior",
                 "nointerior",
-                "telefono",
                 "email",
+                "telefono",
                 "estatus",
               ];
-              //console.log(`Asignando ${campo}:`, data.cliente[campo]);
+              //console.log(`Asignando ${campos}:`, data.cliente[campos]);
               campos.forEach((campo) => {
                 const input = formularioCliente[`editar-${campo}`];
                 if (input) {
+                  //console.log(`Asignando ${campo}:`, data.cliente[campo]);
                   input.value = data.cliente[campo] || "";
                 } else {
                   console.warn(`Campo 'editar-${campo}' no encontrado.`);
@@ -372,7 +414,14 @@ function verificarDuplicadoEditarCliente(cliente, id = 0) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre ya existe.");
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "El nombre del cliente ya existe.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
       return data.existe;
     })
@@ -388,6 +437,16 @@ async function validarFormularioEdicionCliente(formulario) {
       nombre: "cliente",
       min: 3,
       mensaje: "El nombre debe tener al menos 3 caracteres.",
+    },
+    {
+      nombre: "papellido",
+      min: 3,
+      mensaje: "El primer apellido debe tener al menos 3 caracteres.",
+    },
+    {
+      nombre: "sapellido",
+      min: 3,
+      mensaje: "El segundo apellido debe tener al menos 3 caracteres.",
     },
     {
       nombre: "rfc",
@@ -409,21 +468,6 @@ async function validarFormularioEdicionCliente(formulario) {
       nombre: "nointerior",
       min: 0,
       mensaje: "El número interior debe ser mayor o igual a 0",
-    },
-    {
-      nombre: "colonia",
-      min: 3,
-      mensaje: "La colonia debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "ciudad",
-      min: 3,
-      mensaje: "La ciudad debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "estado",
-      min: 3,
-      mensaje: "El estado debe tener al menos 3 caracteres.",
     },
   ];
   let primerError = null;
@@ -458,7 +502,10 @@ async function validarFormularioEdicionCliente(formulario) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     if (primerError) primerError.focus(); // Enfocar el primer campo con error
     return;
@@ -503,19 +550,26 @@ function enviarFormularioEdicionCliente(formulario) {
     .then((data) => {
       //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
-        mostrarAlerta(
-          "success",
-          "¡Éxito!",
-          data.message || "Actualizada correctamente."
-        );
+        Swal.fire({
+          title: "Actualizado",
+          text: data.message || "El cliente ha sido actualizado correctamente.", // Mostrar el mensaje específico si existe
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+
         actualizarFilaTablaCliente(formData);
         cerrarModal("editar-modalCliente");
       } else {
-        mostrarAlerta(
-          "error",
-          "Error",
-          data.message || "No se pudo actualizar."
-        );
+        Swal.fire({
+          title: "!Atención!",
+          text: data.message || "No se realizaron cambios en el registro.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
     })
     .catch((error) => {

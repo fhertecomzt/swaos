@@ -438,7 +438,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const formulario = document.getElementById("form-editar");
             if (formulario) {
               // --- INICIO: NUEVA LÓGICA DE POBLADO ---
-
               // 1. Llenar campos simples (inputs de texto, etc.)
               const camposSimples = [
                 "id",
@@ -9069,7 +9068,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "email",
                 "estatus",
               ];
-              //console.log(`Asignando ${campo}:`, data.proveedor[campo]);
+              //console.log(`Asignando ${campos}:`, data.proveedor[campos]);
               campos.forEach((campo) => {
                 const input = formularioProveedor[`editar-${campo}`];
                 if (input) {

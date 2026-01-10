@@ -21,12 +21,12 @@ try {
 
     // Si se proporciona un ID (edición), excluir ese registro de la validación
     if ($id > 0) {
-      $query = "SELECT COUNT(*) FROM clientes WHERE nom_cliente = ? AND idcliente != ?";
+      $query = "SELECT COUNT(*) FROM clientes WHERE nombre_cliente = ? AND id_cliente != ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$clientes, $id]);
     } else {
       // Si no hay ID, es un registro nuevo
-      $query = "SELECT COUNT(*) FROM clientes WHERE nom_cliente = ?";
+      $query = "SELECT COUNT(*) FROM clientes WHERE nombre_cliente = ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$clientes]);
     }

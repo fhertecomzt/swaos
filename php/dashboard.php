@@ -50,7 +50,7 @@ include "verificar_sesion.php";
       </div>
     </div>
 
-    <div class="card" data-page="catalogos/4clientes.php">
+    <div class="card" data-page="catalogos/clientes.php">
       <div>
         <span class=" card-numeros">0</span>
         <p><span class="card-nombre">Clientes</span></p>

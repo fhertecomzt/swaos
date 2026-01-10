@@ -231,7 +231,7 @@ $colonias = obtenerColonias($dbh);
 
                     <div class="form-group ladoble">
                         <label for="editar-nointerior">No. Interior:</label>
-                        <input type="text" id="editar-nointerior" name="nointerior" autocomplete="off" size="10" min="0" value="0" title="Solo se permiten letras y números." oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" maxlength="6" required>
+                        <input type="text" id="editar-nointerior" name="nointerior" autocomplete="off" size="10" min="0" value="0" title="Solo se permiten letras y números." oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" maxlength="6">
                     </div>
 
                     <div class="form-group">

@@ -10,55 +10,58 @@ $response = ["success" => false, "message" => ""];
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $id = $_POST["editar-idcliente"] ?? null;
   $cliente = $_POST["cliente"] ?? null;
+  $papellido = $_POST["papellido"] ?? null;
+  $sapellido = $_POST["sapellido"] ?? null;
   $rfc = $_POST["rfc"] ?? null;
   $calle = $_POST["calle"] ?? null;
   $noexterior = $_POST["noexterior"] ?? null;
   $nointerior = $_POST["nointerior"] ?? null;
-  $cpostal = $_POST["cpostal"] ?? null;
-  $colonia = $_POST["colonia"] ?? null;
-  $ciudad = $_POST["ciudad"] ?? null;
   $estado = $_POST["estado"] ?? null;
-  $telefono = $_POST["telefono"] ?? null;
+  $municipio = $_POST["municipio"] ?? null;
+  $colonia = $_POST["colonia"] ?? null;
+  $cpostal = $_POST["codigo_postal"] ?? null;
   $email = $_POST["email"] ?? null;
-  $limitecred = $_POST["limitecred"] ?? null;
-  $diacred = $_POST["diacred"] ?? null;
+  $telefono = $_POST["telefono"] ?? null;
+  $estatus = $_POST["estatus"] ?? null;
 
   try {
 
     // Preparar la consulta SQL
     $stmt = $dbh->prepare(
       "UPDATE clientes 
-            SET nom_cliente = :cliente, 
+            SET nombre_cliente = :cliente,
+                papellido_cliente = :papellido, 
+                sapellido_cliente = :sapellido, 
                 rfc_cliente = :rfc,                 
-                dom_cliente = :calle, 
+                calle_cliente = :calle, 
                 noext_cliente = :noexterior, 
                 noint_cliente = :nointerior, 
-                col_cliente = :colonia, 
-                cd_cliente = :ciudad, 
-                edo_cliente = :estado, 
+                id_edo_c = :estado, 
+                id_munici_c = :municipio, 
+                id_col_c = :colonia, 
+                id_cp_c = :cpostal, 
                 tel_cliente = :telefono, 
-                cp_cliente = :cpostal, 
-                email_cliente = :email, 
-               limitecred_cliente = :limitecred,
-               diacred_cliente = :diacred 
-            WHERE idcliente = :id"
+                email_cliente = :email,
+                estatus = :estatus
+            WHERE id_cliente = :id"
     );
 
     // Ejecutar la consulta con los parámetros
     $stmt->execute([
       ":cliente" => $cliente,
+      ":papellido" => $papellido,
+      ":sapellido" => $sapellido,
       ":rfc" => $rfc,
       ":calle" => $calle,
       ":noexterior" => $noexterior,
       ":nointerior" => $nointerior,
-      ":colonia" => $colonia,
-      ":ciudad" => $ciudad,
       ":estado" => $estado,
-      ":telefono" => $telefono,
+      ":municipio" => $municipio,
+      ":colonia" => $colonia,
       ":cpostal" => $cpostal,
+      ":telefono" => $telefono,
       ":email" => $email,
-      ":limitecred" => $limitecred,
-      ":diacred" => $diacred,
+      ":estatus" => $estatus,
       ":id" => $id
     ]);
 

@@ -9,7 +9,7 @@ try {
   // Insertar en la base de datos
   $stmt = $dbh->prepare("
         INSERT INTO clientes (
-            nombre_cliente, papellido_cliente, sapellido_cliente, rfc_cliente, calle_cliente, noext_cliente, noint_cliente, id_edo_c, id_munici, id_col_c, id_cp_c, tel_cliente, email_cliente, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            nombre_cliente, papellido_cliente, sapellido_cliente, rfc_cliente, calle_cliente, noext_cliente, noint_cliente, id_edo_c, id_munici_c, id_col_c, id_cp_c, tel_cliente, email_cliente, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
   $stmt->execute([
@@ -21,9 +21,9 @@ try {
     $_POST['noexterior'],
     $_POST['nointerior'] ?? '',    
     $_POST['estado'],
-    $_POST['ciudad'],
+    $_POST['municipio'],
     $_POST['colonia'],
-    $_POST['cpostal'],
+    $_POST['codigo_postal'],
     $_POST['telefono'],
     $_POST['email'],
     $_POST['estatus']
@@ -42,9 +42,9 @@ try {
     "noexterior" => $_POST['noexterior'],
     "nointerior" => $_POST['nointerior'] ?? '',
     "estado" => $_POST['estado'],
-    "ciudad" => $_POST['ciudad'],
+    "ciudad" => $_POST['municipio'],
     "colonia" => $_POST['colonia'],
-    "cpostal" => $_POST['cpostal'],
+    "cpostal" => $_POST['codigo_postal'],
     "telefono" => $_POST['telefono'],
     "email" => $_POST['email'],
     "estatus" => $_POST['estatus']

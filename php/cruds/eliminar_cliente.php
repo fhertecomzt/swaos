@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id']) && ctype_digit($
 
   try {
     // Preparar y ejecutar la consulta para eliminar
-    $stmt = $dbh->prepare("DELETE FROM clientes WHERE idcliente = :id");
+    $stmt = $dbh->prepare("DELETE FROM clientes WHERE id_cliente = :id");
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
     if ($stmt->execute()) {
