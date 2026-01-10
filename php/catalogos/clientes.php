@@ -21,7 +21,15 @@ $colonias = obtenerColonias($dbh);
 <div class="containerr">
     <button class="boton" onclick="abrirModalCliente('crear-modalCliente')">Nuevo</button>
     <label class="buscarlabel" for="buscarboxcliente">Buscar:</label>
-    <input class="buscar--box" id="buscarboxcliente" type="search" placeholder="Qué estas buscando?" enterkeyhint="search">
+    <input class="buscar--box" id="buscarboxcliente" type="search" placeholder="Qué estas buscando?" enterkeyhint="search" autocomplete="off">
+
+    <!-- Filtro de estatus -->
+    <label class="buscarlabel" for="estatusFiltroCl">Filtrar por Estatus:</label>
+    <select class="buscar--box" id="estatusFiltroCl" onchange="cargarClientesFiltrados()" style="width: 100px;">
+        <option value="">Todos</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+    </select>
 </div>
 
 <div class="container_dashboard_tablas" id="clientes">
@@ -33,15 +41,19 @@ $colonias = obtenerColonias($dbh);
                     <th>Nombre</th>
                     <th>Teléfono</th>
                     <th>Email</th>
+                    <th>Estatus</th>
                     <th colspan="2" style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="clientes-lista">
                 <?php foreach ($clientes as $u): ?>
                     <tr>
                         <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre_cliente']); ?></td>
                         <td data-lable="Teléfono:"><?php echo htmlspecialchars($u['tel_cliente']); ?></td>
                         <td data-lable="Email:"><?php echo htmlspecialchars($u['email_cliente']); ?></td>
+                        <td data-lable="Estatus"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
+                                <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
+                            </button></td>
                         <td data-lable="Editar:">
                             <button title="Editar" class="editarCliente fa-solid fa-pen-to-square" data-id="<?php echo $u['id_cliente']; ?>"></button>
                         </td>

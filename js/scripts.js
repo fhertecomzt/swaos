@@ -9453,7 +9453,7 @@ function cargarProvFiltrados() {
     .toLowerCase();
 
   if (!estatusFiltro) {
-    cargarProveedores(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
+    cargarProveedores(); // Si el usuario selecciona "Todos", cargamos las primeros 10 proveedores normales
     return;
   }
   //console.log("Cargando Proveedores filtrados del servidor:", estatusFiltro);

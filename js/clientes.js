@@ -97,6 +97,11 @@ function validarFormularioCliente(event) {
   const noexterior = document.querySelector("[name='noexterior']").value.trim();
   const telefono = document.querySelector("[name='telefono']").value.trim();
 
+  //Validaciones select de crear cliente
+  const selectEstado = document.querySelector("#estado");
+  const selectMunicipio = document.querySelector("#municipio");
+  const selectColonia = document.querySelector("#colonia");
+
   const errores = [];
 
   if (cliente.length < 3) {
@@ -587,6 +592,15 @@ function actualizarFilaTablaCliente(formData) {
     fila.cells[0].textContent = formData.get("cliente");
     fila.cells[1].textContent = formData.get("telefono");
     fila.cells[2].textContent = formData.get("email");
+    // Determinar clases y texto del botón
+    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
+    const claseBtn =
+      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
+
+    // Insertar el botón en la celda
+    fila.cells[3].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
+    //Para mantener el filtro seleccionado y actualizar la tabla cuando se edite
+    cargarClientesFiltrados();
   }
 }
 // Eliminar Clientes*****************************
@@ -646,7 +660,7 @@ document.addEventListener("click", function (event) {
   }
 });
 
-//Buscar en la tabla y filtrar
+//Buscar en la tabla y filtrar *************************
 document.addEventListener("DOMContentLoaded", function () {
   const observarDOM = new MutationObserver(function (mutations) {
     mutations.forEach((mutation) => {
@@ -747,3 +761,81 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+//Función para filtrar clientes desde el servidor ***********************************
+function cargarClientesFiltrados() {
+  const estatusFiltro = document
+    .getElementById("estatusFiltroCl")
+    .value.trim()
+    .toLowerCase();
+
+  if (!estatusFiltro) {
+    cargarClientes(); // Si el usuario selecciona "Todos", cargamos las primeras 10 Clientes normales
+    return;
+  }
+  //console.log("Cargando Clientes filtrados del servidor:", estatusFiltro);
+
+  fetch(`cruds/cargar_clientes.php?estatus=${estatusFiltro}`)
+    .then((response) => response.json())
+    .then((data) => {
+       //console.log("Filtrados: ",data);
+      actualizarTablaClientes(data);
+    })
+    .catch((error) =>
+      console.error("Error al cargar clientes filtrados:", error)
+    );
+}
+
+//Función para actualizar la tabla con las Clientes filtrados
+function actualizarTablaClientes(clientes) {
+  let tbody = document.getElementById("clientes-lista");
+  tbody.innerHTML = ""; // Limpiar la tabla
+
+  if (clientes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron clientes</td></tr>`;
+    return;
+  }
+  //LIMPIAR LA TABLA antes de agregar nuevos clientes
+  tbody.innerHTML = "";
+
+  clientes.forEach((cliente) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td data-lable="Nombre:">${cliente.nombre_cliente}</td>
+      <td data-lable="Teléfono">${cliente.tel_cliente}</td>
+      <td data-lable="Email">${cliente.email_cliente}</td>
+
+      <td data-lable="Estatus">
+        <button class="btn ${
+          cliente.estatus == 0 ? "btn-success" : "btn-danger"
+        }">
+          ${cliente.estatus == 0 ? "Activo" : "Inactivo"}
+        </button>
+      </td>
+      <td data-lable="Editar">
+        <button title="Editar" class="editarCliente fa-solid fa-pen-to-square" data-id="${
+          cliente.id_cliente
+        }"></button>
+        </td>
+        <td data-lable="Eliminar">
+        <button title="Eliminar" class="eliminarCliente fa-solid fa-trash" data-id="${
+          cliente.id_cliente
+        }"></button>
+      </td>
+    `;
+    tbody.appendChild(fila);
+  });
+}
+
+//Función para cargar los primeros 10 tiendas por defecto
+function cargarClientes() {
+  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
+  cargando = false; //Asegurar que el scroll pueda volver a activarse
+
+  fetch("cruds/cargar_clientes.php?limit=10&offset=0")
+    .then((response) => response.json())
+    .then((data) => {
+      actualizarTablaClientes(data);
+    })
+    .catch((error) => console.error("Error al cargar Clientes:", error));
+}
