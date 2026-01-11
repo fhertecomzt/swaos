@@ -8,38 +8,44 @@ header("Content-Type: application/json");
 $response = ["existe" => false, "error" => ""];
 
 try {
-  // Configurar el manejo de errores de PDO
   $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-  // Leer el cuerpo de la solicitud y decodificar JSON
   $data = json_decode(file_get_contents("php://input"), true);
 
-  // Verificar que se recibió el nombre
-  if (!empty($data['cliente'])) {
-    $clientes = trim($data['cliente']); // Limpiar el nombre
-    $id = isset($data['id']) ? intval($data['id']) : 0; // ID (opcional)
+  // 1. Verificamos que se reciban los tres componentes del nombre
+  if (!empty($data['cliente']) && !empty($data['papellido']) && !empty($data['sapellido'])) {
 
-    // Si se proporciona un ID (edición), excluir ese registro de la validación
+    $nombre = trim($data['cliente']);
+    $papellido = trim($data['papellido']);
+    $sapellido = trim($data['sapellido']);
+    $id = isset($data['id']) ? intval($data['id']) : 0;
+
     if ($id > 0) {
-      $query = "SELECT COUNT(*) FROM clientes WHERE nombre_cliente = ? AND id_cliente != ?";
+      // CASO EDICIÓN: 
+      // Buscamos si existe otro cliente con el mismo nombre completo pero con ID diferente
+      $query = "SELECT COUNT(*) FROM clientes 
+                WHERE nombre_cliente = ? 
+                AND papellido_cliente = ? 
+                AND sapellido_cliente = ? 
+                AND id_cliente != ?";
       $stmt = $dbh->prepare($query);
-      $stmt->execute([$clientes, $id]);
+      $stmt->execute([$nombre, $papellido, $sapellido, $id]);
     } else {
-      // Si no hay ID, es un registro nuevo
-      $query = "SELECT COUNT(*) FROM clientes WHERE nombre_cliente = ?";
+      // CASO CREACIÓN: 
+      // Buscamos si ya existe alguien con la combinación exacta de nombre y apellidos
+      $query = "SELECT COUNT(*) FROM clientes 
+                WHERE nombre_cliente = ? 
+                AND papellido_cliente = ? 
+                AND sapellido_cliente = ?";
       $stmt = $dbh->prepare($query);
-      $stmt->execute([$clientes]);
+      $stmt->execute([$nombre, $papellido, $sapellido]);
     }
 
-    // Actualizar la respuesta en función del resultado
     $response["existe"] = $stmt->fetchColumn() > 0;
   } else {
-    $response["error"] = "Falta el parámetro 'nombre'.";
+    $response["error"] = "Faltan parámetros para la validación del nombre completo.";
   }
 } catch (Exception $e) {
-  // Capturar errores y devolverlos en la respuesta
   $response["error"] = "Error al verificar el nombre: " . $e->getMessage();
 }
 
-// Devolver la respuesta en formato JSON
 echo json_encode($response);

@@ -265,7 +265,7 @@ function validarFormularioCliente(event) {
   }
 
   // Verificar duplicados de clientes
-  verificarDuplicadoCliente(cliente)
+  verificarDuplicadoCliente(cliente, papellido, sapellido)
     .then((esDuplicado) => {
       if (esDuplicado) {
         Swal.fire({
@@ -293,25 +293,24 @@ function validarFormularioCliente(event) {
       });
     });
 }
-function verificarDuplicadoCliente(cliente) {
+function verificarDuplicadoCliente(cliente, papellido, sapellido) {
   //console.log("Nombre verificar:", cliente);
 
   return fetch("cruds/verificar_nombre_cliente.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cliente }),
+    body: JSON.stringify({ cliente, papellido, sapellido }),
   })
     .then((response) => response.json())
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
         Swal.fire({
-          title: "Error",
-          text: data.message, // Mostrar el mensaje específico si existe
-          icon: "error",
+          title: "Atención",
+          text: "Ya existe un cliente con este nombre y apellidos.",
+          icon: "warning",
           showConfirmButton: false,
           timer: 1500,
-          timerProgressBar: true,
         });
       }
       return data.existe;
@@ -417,13 +416,13 @@ function mostrarAlerta(tipo, titulo, mensaje) {
 }
 
 //Validar duplicados en edicion cliente
-function verificarDuplicadoEditarCliente(cliente, id = 0) {
+function verificarDuplicadoEditarCliente(cliente, papellido, sapellido, id = 0) {
   //console.log("Validando duplicados. ID:", id, "Cliente:", cliente);
 
   return fetch("cruds/verificar_nombre_cliente.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cliente, id }),
+    body: JSON.stringify({ cliente, papellido, sapellido, id }),
   })
     .then((response) => response.json())
     .then((data) => {
@@ -527,8 +526,11 @@ async function validarFormularioEdicionCliente(formulario) {
   }
 
   // Verificar duplicado antes de enviar el formulario
-  const clienteInput = document.getElementById("editar-cliente");
   const idInput = document.getElementById("editar-idcliente");
+  const clienteInput = document.getElementById("editar-cliente");
+  const papellido = document.getElementById("editar-papellido").value.trim();
+  const sapellido = document.getElementById("editar-sapellido").value.trim();
+
   if (!clienteInput || !idInput) {
     console.log("Error: No se encontró el campo o ID.");
     return;
@@ -538,7 +540,7 @@ async function validarFormularioEdicionCliente(formulario) {
 
   try {
     //console.log("Verificando duplicado. ID:", id, "Cliente:", cliente);
-    const esDuplicado = await verificarDuplicadoEditarCliente(cliente, id);
+    const esDuplicado = await verificarDuplicadoEditarCliente(cliente, papellido, sapellido, id);
     if (esDuplicado) {
       return; // No enviar el formulario si hay duplicados
     } else {
