@@ -47,11 +47,21 @@ function procesarFormularioCliente(event, tipo) {
             <td>${data.cliente.cliente}</td>
             <td>${data.cliente.telefono}</td>
             <td>${data.cliente.email}</td>
+            <td><button class="btn ${
+              data.cliente.estatus == 0 ? "btn-success" : "btn-danger"
+            }">
+              ${data.cliente.estatus == 0 ? "Activo" : "Inactivo"}
+              </button>
+            </td>
             <td>
-              <button title="Editar" class="editarCliente fa-solid fa-pen-to-square" data-id="${data.cliente.id}"></button>
+              <button title="Editar" class="editarCliente fa-solid fa-pen-to-square" data-id="${
+                data.cliente.id
+              }"></button>
               </td>
               <td>
-              <button title="Eliminar" class="eliminarCliente fa-solid fa-trash" data-id="${data.cliente.id}"></button>
+              <button title="Eliminar" class="eliminarCliente fa-solid fa-trash" data-id="${
+                data.cliente.id
+              }"></button>
             </td>
           `;
 
@@ -778,7 +788,7 @@ function cargarClientesFiltrados() {
   fetch(`cruds/cargar_clientes.php?estatus=${estatusFiltro}`)
     .then((response) => response.json())
     .then((data) => {
-       //console.log("Filtrados: ",data);
+      //console.log("Filtrados: ",data);
       actualizarTablaClientes(data);
     })
     .catch((error) =>
