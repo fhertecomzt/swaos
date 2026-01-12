@@ -12,11 +12,11 @@ $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $offset = isset($_GET['offset']) ? intval($_GET['offset']) : 0;
 
 $sql = "SELECT
-            p.idproducto,
-            p.codbar_prod,
-            p.nom_prod,
-            p.costo_compra_prod,
-            p.precio1_venta_prod,
+            p.id_prod,
+            p.codebar_prod,
+            p.nombre_prod,
+            p.costo_prod,
+            p.precio,
             p.imagen,
             p.stock_minimo,
             invsuc.stock,
@@ -24,9 +24,9 @@ $sql = "SELECT
         FROM
             productos p
         LEFT JOIN
-            inventario_sucursal invsuc ON p.idproducto = invsuc.idproducto AND invsuc.idtienda = :idtienda";
+            inventario_sucursal invsuc ON p.id_prod = invsuc.id_prod AND invsuc.idtaller = :idtienda";
 
-$idTienda = $_SESSION['idtienda'];
+$idTienda = $_SESSION['taller_id'];
 $params = [':idtienda' => $idTienda];
 
 if ($estatus === 'activo') {

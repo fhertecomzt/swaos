@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-$roles_permitidos = ["SISTEMAS", "GERENCIA"];
+$roles_permitidos = ["superusuario", "gerencia"];
 
 //Includes
 include "../verificar_sesion.php";
@@ -12,18 +12,13 @@ include "../funciones/funciones.php";
 include "../funciones/activoinactivo.php";
 
 $estatusFiltroInicial = isset($_GET['estatus']) ? $_GET['estatus'] : '';
-$productos = obtenerProductosStock($dbh, "productos", "p.idproducto, p.codbar_prod, p.nom_prod, p.costo_compra_prod, p.precio1_venta_prod, p.imagen, p.stock_minimo, invsuc.stock, p.estatus", "ASC", "p.idproducto", $estatusFiltroInicial);
 
-$categorias = obtenerRegistros($dbh, "categorias", "idcategoria, nomcategoria", "ASC", "idcategoria");
-$marcas = obtenerRegistros($dbh, "marcas", "idmarca, nommarca", "ASC", "idmarca");
-$generos = obtenerRegistros($dbh, "generos", "idgenero, nomgenero", "ASC", "idgenero");
-$tallas = obtenerRegistros($dbh, "tallas", "idtalla, nomtalla", "ASC", "idtalla");
-$estilos = obtenerRegistros($dbh, "estilos", "idestilo, nomestilo", "ASC", "idestilo");
-$colores = obtenerRegistros($dbh, "colores", "idcolor, nomcolor", "ASC", "idcolor");
-
-$impuestos = obtenerRegistros($dbh, "impuestos", "idimpuesto, nomimpuesto, tasa", "ASC", "idimpuesto");
-$umedidas = obtenerRegistros($dbh, "umedidas", "idumedida, nomumedida", "ASC", "idumedida");
-$proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor", "ASC", "idproveedor");
+$categorias = obtenerRegistros($dbh, "categorias", "id_categoria, nombre_cat", "ASC", "id_categoria", 1000, 1, true);
+$marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca", "ASC", "id_marca", 1000, 1, true);
+$proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, contacto_prov", "ASC", "id_prov", 1000, 1, true);
+$impuestos = obtenerRegistros($dbh, "impuestos", "idimpuesto, nomimpuesto, tasa", "ASC", "idimpuesto", 1000, 1, true);
+$umedidas = obtenerRegistros($dbh, "unidades_med", "id_unidad, nom_unidad", "ASC", "id_unidad", 1000, 1, true);
+$productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod, p.nombre_prod, p.costo_prod, p.precio, p.stock_minimo, invsuc.stock, p.estatus", "ASC", "p.id_prod", $estatusFiltroInicial);
 
 ?>
 
@@ -71,10 +66,10 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor"
                 Sin imagen
               <?php endif; ?>
             </td>
-            <td data-lable="Código de barras:"><?php echo htmlspecialchars($u['codbar_prod']); ?></td>
-            <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nom_prod']); ?></td>
-            <td data-lable="Costo:"><?php echo htmlspecialchars($u['costo_compra_prod']); ?></td>
-            <td data-lable="Precio:"><?php echo htmlspecialchars($u['precio1_venta_prod']); ?></td>
+            <td data-lable="Código de barras:"><?php echo htmlspecialchars($u['codebar_prod']); ?>
+            <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre_prod']); ?></td>
+            <td data-lable="Costo:"><?php echo htmlspecialchars($u['costo_prod']); ?></td>
+            <td data-lable="Precio:"><?php echo htmlspecialchars($u['precio']); ?></td>
             <td data-lable="Stock Mínimo:"><?php echo htmlspecialchars($u['stock_minimo']); ?></td>
             <td data-lable="Stock:"><?php echo ($u['stock'] !== null) ? htmlspecialchars($u['stock']) : '0'; ?></td>
             <td data-lable="Estatus:">
@@ -84,10 +79,10 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor"
             </td>
 
             <td data-lable="Editar:">
-              <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="<?php echo $u['idproducto']; ?>"></button>&nbsp;&nbsp;&nbsp;
+              <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="<?php echo $u['id_prod']; ?>"></button>&nbsp;&nbsp;&nbsp;
             </td>
             <td data-lable="Eliminar:">
-              <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="<?php echo $u['idproducto']; ?>"></button>
+              <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="<?php echo $u['id_prod']; ?>"></button>
             </td>
           </tr>
         <?php endforeach; ?>
@@ -132,109 +127,54 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor"
           <select id="crear-categoria" name="categoria" required>
             <option value="">[Selecciona una categoría]</option>
             <?php foreach ($categorias as $categoria): ?>
-              <option value="<?php echo htmlspecialchars($categoria['idcategoria']); ?>">
-                <?php echo htmlspecialchars($categoria['nomcategoria']); ?>
+              <option value="<?php echo htmlspecialchars($categoria['id_categoria']); ?>">
+                <?php echo htmlspecialchars($categoria['nombre_cat']); ?>
               </option>
             <?php endforeach; ?>
           </select>
-        </div>
-
-        <!--Checkboxes para aparecer caracteristicas de los productos-->
-        <label style="margin-top: 7px;">Características:</label>
-        <div class="form-containernum">
-          <div class="checkbox-group laquinta">
-            <label for="check-marca">Marca
-              <input type="checkbox" id="check-marca" name="marcas" onchange="toggleCampo('marca')"></label>
-          </div>
-
-          <div class="checkbox-group laquinta">
-            <label for="check-genero">Género
-              <input type="checkbox" id="check-genero" name="generos" onchange="toggleCampo('genero')"></label>
-          </div>
-
-          <div class="checkbox-group laquinta">
-            <label for="check-talla">Talla
-              <input type="checkbox" id="check-talla" name="tallass" onchange="toggleCampo('talla')"></label>
-          </div>
-
-          <div class="checkbox-group laquinta">
-            <label for="check-estilo">Estilo
-              <input type="checkbox" id="check-estilo" name="estilos" onchange="toggleCampo('estilo')"></label>
-          </div>
-
-          <div class="checkbox-group laquinta">
-            <label for="check-color">Color
-              <input type="checkbox" id="check-color" name="colors" onchange="toggleCampo('color')"></label>
-          </div>
         </div>
 
         <!-- Selección de la Marca -->
-        <div class="form-group" id="campo-marca" style="display: none;">
+        <div class="form-group" id="campo-marca">
           <label for="crear-marca">Marca:</label>
-          <select id="crear-marca" name="marca">
+          <select id="crear-marca" name="marca" required>
             <option value="">[Selecciona una marca]</option>
             <?php foreach ($marcas as $marca): ?>
-              <option value="<?php echo htmlspecialchars($marca['idmarca']); ?>" <?php echo $marca['idmarca'] == 1 ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($marca['nommarca']); ?>
+              <option value="<?php echo htmlspecialchars($marca['id_marca']); ?>">
+                <?php echo htmlspecialchars($marca['nom_marca']); ?>
               </option>
             <?php endforeach; ?>
           </select>
         </div>
 
-        <!-- Selección de la Genero -->
-        <div class="form-group" id="campo-genero" style="display: none;">
-          <label for="crear-genero">Genero:</label>
-          <select id="crear-genero" name="genero">
-            <option value="">[Selecciona un género]</option>
-            <?php foreach ($generos as $genero): ?>
-              <option value="<?php echo htmlspecialchars($genero['idgenero']); ?>" <?php echo $genero['idgenero'] == 1 ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($genero['nomgenero']); ?>
+        <!-- Selección de Proveedor -->
+        <div class="form-group">
+          <label for="crear-proveedor">Proveedor:</label>
+          <select id="crear-proveedor" name="proveedor" required>
+            <option value="">[Selecciona un proveedor]</option>
+            <?php foreach ($proveedores as $proveedor): ?>
+              <option value="<?php echo htmlspecialchars($proveedor['id_prov']); ?>" <?php echo $proveedor['id_prov'] == 0 ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($proveedor['contacto_prov']); ?>
               </option>
             <?php endforeach; ?>
           </select>
         </div>
 
-        <!-- Selección de la Talla -->
-        <div class="form-group" id="campo-talla" style="display: none;">
-          <label for="crear-talla">Talla:</label>
-          <select id="crear-talla" name="talla">
-            <option value="">[Selecciona una talla]</option>
-            <?php foreach ($tallas as $talla): ?>
-              <option value="<?php echo htmlspecialchars($talla['idtalla']); ?>" <?php echo $talla['idtalla'] == 1 ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($talla['nomtalla']); ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-
-        <!-- Selección de la Estilo -->
-        <div class="form-group" id="campo-estilo" style="display: none;">
-          <label for="crear-estilo">Estilo:</label>
-          <select id="crear-estilo" name="estilo">
-            <option value="">[Selecciona una estilo]</option>
-            <?php foreach ($estilos as $estilo): ?>
-              <option value="<?php echo htmlspecialchars($estilo['idestilo']); ?>" <?php echo $estilo['idestilo'] == 1 ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($estilo['nomestilo']); ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-
-        <!-- Selección de Color -->
-        <div class="form-group" id="campo-color" style="display: none;">
-          <label for="crear-color">Color:</label>
-          <select id="crear-color" name="color">
-            <option value="">[Selecciona un color]</option>
-            <?php foreach ($colores as $color): ?>
-              <option value="<?php echo htmlspecialchars($color['idcolor']); ?>" <?php echo $color['idcolor'] == 1 ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($color['nomcolor']); ?>
+        <!-- Selección de U. Medida -->
+        <div class="form-group">
+          <label for="crear-umedida">Unidad de Medida:</label>
+          <select id="crear-umedida" name="umedida" required>
+            <option value="">[Selecciona una medida]</option>
+            <?php foreach ($umedidas as $umedid): ?>
+              <option value="<?php echo htmlspecialchars($umedid['id_unidad']); ?>" <?php echo $umedid['id_unidad'] == 0 ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($umedid['nom_unidad']); ?>
               </option>
             <?php endforeach; ?>
           </select>
         </div>
 
         <!-- Selección de Impuesto -->
-        <div class="form-group" style="margin-top: 7px;">
+        <div class="form-group">
           <label for="crear-impuesto">Impuesto:</label>
           <select id="crear-impuesto" name="idimpuesto" required>
             <option value="">[Selecciona un impuesto]</option>
@@ -244,8 +184,7 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor"
               ?>
               <option
                 value="<?php echo htmlspecialchars($impuesto['idimpuesto']); ?>"
-                data-tasa="<?php echo htmlspecialchars($valorImpuestoDecimal); ?>"
-                <?php echo $impuesto['idimpuesto'] == 2 ? 'selected' : ''; ?>>
+                data-tasa="<?php echo htmlspecialchars($valorImpuestoDecimal); ?>">
                 <?php echo htmlspecialchars($impuesto['nomimpuesto']); ?>
               </option>
             <?php endforeach; ?>
@@ -274,31 +213,7 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "idproveedor, nomproveedor"
               pattern="^\d+(\.\d{1,2})?$"
               title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" required>
           </div>
-          <!-- Selección de U. Medida -->
-          <div class="form-group">
-            <label for="crear-umedida">Unidad de Medida:</label>
-            <select id="crear-umedida" name="umedida" required>
-              <option value="">[Selecciona una medida]</option>
-              <?php foreach ($umedidas as $umedid): ?>
-                <option value="<?php echo htmlspecialchars($umedid['idumedida']); ?>" <?php echo $umedid['idumedida'] == 0 ? 'selected' : ''; ?>>
-                  <?php echo htmlspecialchars($umedid['nomumedida']); ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>
 
-          <!-- Selección de Proveedor -->
-          <div class="form-group">
-            <label for="crear-proveedor">Proveedor:</label>
-            <select id="crear-proveedor" name="proveedor" required>
-              <option value="">[Selecciona un proveedor]</option>
-              <?php foreach ($proveedores as $proveedor): ?>
-                <option value="<?php echo htmlspecialchars($proveedor['idproveedor']); ?>" <?php echo $proveedor['idproveedor'] == 0 ? 'selected' : ''; ?>>
-                  <?php echo htmlspecialchars($proveedor['nomproveedor']); ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>
 
           <div class="form-group laquinta">
             <label for="crear-stock_minimo">Stock mínimo:</label>

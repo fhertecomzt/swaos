@@ -7,7 +7,7 @@ $roles_permitidos = ["superusuario", "gerencia"];
 
 //Includes
 include "../verificar_sesion.php";
-include "../conexion.php";
+require "../conexion.php";
 include "../funciones/funciones.php";
 include "../funciones/activoinactivo.php";
 

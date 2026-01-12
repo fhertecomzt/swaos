@@ -40,7 +40,7 @@ include "verificar_sesion.php";
       </div>
     </div>
 
-    <div class="card" data-page="catalogos/3productos.php">
+    <div class="card" data-page="catalogos/productos.php">
       <div>
         <span class="card-numeros">0</span><br>
         <p><span class="card-nombre">Productos</span></p>

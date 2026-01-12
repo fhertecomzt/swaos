@@ -3056,8 +3056,7 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        // Vuelve a activar el scroll infinito
-        iniciarScrollProductos();
+
         cargarProductos(); // Cargar los productos sin filtro inmediatamente
         buscarProductosConFiltro(); // Buscar productos
       })
@@ -4015,131 +4014,6 @@ function cargarProductos() {
       actualizarTabla(data);
     })
     .catch((error) => console.error("Error al cargar productos:", error));
-}
-
-// ------------------------ SCROLL INFINITO ------------------------
-function cargarProductosScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltro = document
-    .getElementById("estatusFiltro")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_productos_scroll.php?page=${pagina}`;
-
-  if (filtroAplicado !== "" && filtroAplicado !== "Todos") {
-    url += `&estatus=${filtroAplicado}`; // Usa el filtro almacenado
-  }
-  //console.log("Cargando página:", pagina, "con filtro:", estatusFiltro);
-  //console.log("URL de la petición:", url);
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        //console.log("Datos recibidos:", data.length);
-        const tbody = document.querySelector("#tabla-productos tbody");
-        data.forEach((producto) => {
-          //Cambiamos de null a 0
-          let stockValue =
-            producto.stock === null ? 0 : parseInt(producto.stock);
-          const row = document.createElement("tr");
-
-          // Verificar si el stock es menor que el stock mínimo y aplicar la clase
-          if (stockValue < parseInt(producto.stock_minimo)) {
-            row.classList.add("bajo-stock");
-          }
-
-          row.innerHTML = `
-            <td data-lable="Imagen:"><img src="${
-              producto.imagen
-            }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
-            <td data-lable="Código de barras:">${producto.codbar_prod}</td>
-            <td data-lable="Nombre:">${producto.nom_prod}</td>
-            <td data-lable="Costo:">${producto.costo_compra_prod}</td>
-            <td data-lable="Precio:">${producto.precio1_venta_prod}</td>
-            <td data-lable="Stock mínimo:">${producto.stock_minimo}</td>  
-            <td data-lable="Stock:">${stockValue}</td>  
-                
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                producto.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${producto.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar:">
-              <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="${
-                producto.idproducto
-              }"></button>
-              </td>
-              <td data-lable="Eliminar:">
-              <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="${
-                producto.idproducto
-              }"></button>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Incrementar la página para la siguiente carga
-
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más productos.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => console.error("Error al cargar productos:", error));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("productos.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más productos
-    console.log("Reiniciando scroll y cargando productos en productos.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A productos.php
-    iniciarScrollProductos();
-  }
-});
-
-function iniciarScrollProductos() {
-  const scrollContainer = document.getElementById("scroll-container");
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      //console.log(" Scroll detectado, cargando más productos...");
-      cargarProductosScroll();
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en productos.php");
-}
-
-const observer = new MutationObserver(() => {
-  const productosSeccion = document.getElementById("scroll-container");
-  if (productosSeccion) {
-    observer.disconnect();
-    iniciarScrollProductos();
-  }
-});
-
-const contentArea = document.getElementById("content-area");
-if (contentArea) {
-  observer.observe(contentArea, { childList: true, subtree: true });
 }
 
 // Llamar Categorias **************************************************

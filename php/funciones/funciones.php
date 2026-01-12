@@ -1,29 +1,27 @@
 <?php
 
 //Obtener registros*******************************************
-function obtenerRegistros($dbh, $tabla, $campos = "*", $orden = "id DESC", $campoId = "id", $registrosPorPagina = 10, $pagina = 1)
+function obtenerRegistros($dbh, $tabla, $campos = "*", $orden = "id DESC", $campoId = "id", $registrosPorPagina = 10, $pagina = 1, $soloActivos = false)
 {
-  // Evita SQL Injection verificando que el nombre de la tabla sea válido
-  $tablasPermitidas = ['talleres', 'roles', 'productos', 'categorias', 'marcas', 'tiposervicios', 'estadosservicios',  'metodosdepago', 'impuestos', 'clientes', 'proveedores', 'estados'];
+  $tablasPermitidas = ['talleres', 'roles', 'productos', 'categorias', 'marcas', 'tiposervicios', 'estadosservicios',  'metodosdepago', 'impuestos', 'clientes', 'proveedores', 'estados', 'unidades_med'];
   if (!in_array($tabla, $tablasPermitidas)) {
-    return []; // Evita consultas en tablas no permitidas
+    return [];
   }
 
-  // Calcular el OFFSET para la paginación
   $offset = ($pagina - 1) * $registrosPorPagina;
 
-  // Consulta SQL con LIMIT y OFFSET para paginación
-  $sql = "SELECT $campos FROM $tabla ORDER BY $campoId $orden LIMIT :limit OFFSET :offset";
-  $stmt = $dbh->prepare($sql);
+  // Si se solicita solo activos, agregamos la cláusula WHERE
+  $clausulaWhere = $soloActivos ? "WHERE estatus = 0" : "";
 
-  // Bind de los parámetros para evitar SQL Injection
+  // Construcción de la SQL con el filtro de estatus
+  $sql = "SELECT $campos FROM $tabla $clausulaWhere ORDER BY $campoId $orden LIMIT :limit OFFSET :offset";
+
+  $stmt = $dbh->prepare($sql);
   $stmt->bindParam(':limit', $registrosPorPagina, PDO::PARAM_INT);
   $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
   $stmt->execute();
-  $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-  return $registros;
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Función adicional para obtener el total de registros
@@ -81,11 +79,11 @@ function obtenerUsuariosSup($dbh)
 
 function obtenerProductosStock($dbh, $tabla, $campos, $orden, $campoId, $estatus = '')
 {
-  $idTienda = $_SESSION['idtienda']; // sesión de tienda iniciada
+  $idTienda = $_SESSION['taller_id']; // sesión de tienda iniciada
 
   $sql = "SELECT $campos, invsuc.stock
             FROM $tabla p
-            LEFT JOIN inventario_sucursal invsuc ON p.idproducto = invsuc.idproducto AND invsuc.idtienda = :idtienda";
+            LEFT JOIN inventario_sucursal invsuc ON p.id_prod = invsuc.id_prod AND invsuc.idtaller = :idtienda";
 
   $whereClauses = [];
   $params = [':idtienda' => $idTienda];
