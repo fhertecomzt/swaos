@@ -990,7 +990,7 @@ document.addEventListener("click", function (event) {
   }
 });
 
-//Buscar en la tabla y filtrar tienda ******************************
+//Buscar en la tabla y filtrar taller ******************************
 document.addEventListener("DOMContentLoaded", function () {
   const observarDOM = new MutationObserver(function (mutations) {
     mutations.forEach((mutation) => {
@@ -1268,7 +1268,7 @@ function iniciarScrollTiendas() {
 const observerTiendas = new MutationObserver(() => {
   const tiendasSeccion = document.getElementById("scroll-container");
   if (tiendasSeccion) {
-    observer.disconnect();
+    observerTiendas.disconnect();
     iniciarScrollTiendas();
   }
 });
@@ -3037,7 +3037,7 @@ function iniciarScrollUsuarios() {
 const observerUsuarios = new MutationObserver(() => {
   const usuariosSeccion = document.getElementById("scroll-containerU");
   if (usuariosSeccion) {
-    observer.disconnect();
+    observerUsuarios.disconnect();
     iniciarScrollUsuarios();
   }
 });
