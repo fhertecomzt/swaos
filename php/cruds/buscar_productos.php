@@ -9,15 +9,15 @@ $estatus = isset($_GET['estatus']) ? trim($_GET['estatus']) : '';
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
-$idTienda = $_SESSION['idtienda'];
+$idTienda = $_SESSION['taller_id'];
 
 // Construimos la consulta SQL
 $sql = "SELECT
-            p.idproducto,
-            p.codbar_prod,
-            p.nom_prod,
-            p.costo_compra_prod,
-            p.precio1_venta_prod,
+            p.id_prod,
+            p.codebar_prod,
+            p.nombre_prod,
+            p.costo_prod,
+            p.precio,
             p.imagen,
             p.stock_minimo,
             invsuc.stock,
@@ -25,12 +25,12 @@ $sql = "SELECT
         FROM
             productos p
         LEFT JOIN
-            inventario_sucursal invsuc ON p.idproducto = invsuc.idproducto AND invsuc.idtienda = :idtienda
+            inventario_sucursal invsuc ON p.id_prod = invsuc.id_prod AND invsuc.idtaller = :idtienda
         WHERE 1=1 "; // Condición siempre verdadera
 
 // Si hay un término de búsqueda, añadir la condición de búsqueda
 if (!empty($q)) {
-  $sql .= " AND (UPPER(p.nom_prod) LIKE :q OR UPPER(p.codbar_prod) LIKE :q) ";
+  $sql .= " AND (UPPER(p.nombre_prod) LIKE :q OR UPPER(p.codebar_prod) LIKE :q) ";
 }
 
 // Si se pasa un estatus, agregar el filtro de estatus a la consulta

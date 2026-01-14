@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $id = $data['id'] ?? 0;
 
   if (!empty($codebar)) {
-    $stmt = $dbh->prepare("SELECT COUNT(*) FROM productos WHERE codbar_prod = :codebar AND idproducto != :id");
+    $stmt = $dbh->prepare("SELECT COUNT(*) FROM productos WHERE codebar_prod = :codebar AND id_prod != :id");
     $stmt->bindParam(':codebar', $codebar, PDO::PARAM_STR);
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->execute();

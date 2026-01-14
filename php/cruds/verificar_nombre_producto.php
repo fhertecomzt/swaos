@@ -25,18 +25,18 @@ try {
     $params = [];
 
     if ($nombre) {
-      $query .= "nom_prod = ? ";
+      $query .= "nombre_prod = ? ";
       $params[] = $nombre;
     }
 
     if ($codebar) {
       if (!empty($params)) $query .= " OR "; // Agregar OR si ya hay una condición
-      $query .= "codbar_prod = ? ";
+      $query .= "codebar_prod = ? ";
       $params[] = $codebar;
     }
 
     if ($id > 0) {
-      $query .= "AND idproducto != ?";
+      $query .= "AND id_prod != ?";
       $params[] = $id;
     }
 

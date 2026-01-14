@@ -3193,7 +3193,7 @@ function procesarFormularioProducto(event, tipo) {
   if (enviando) return; // Si ya se está enviando, detener la función
   enviando = true; // Marcar como "enviando" para evitar envíos repetidos
 
-  console.log("Interceptando envío del formulario2"); // Verifica si se ejecuta
+  //console.log("Interceptando envío del formulario2"); // Verifica si se ejecuta
 
   const formData = new FormData(document.getElementById("form-crearProducto"));
 
@@ -3203,13 +3203,13 @@ function procesarFormularioProducto(event, tipo) {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("Respuesta del servidor:", data);
+      //console.log("Respuesta del servidor:", data);
 
       if (!data.success) {
         throw new Error(data.message || "Error desconocido.");
       }
 
-      console.log("Imagen subida con éxito:", data.rutaImagen);
+      //console.log("Imagen subida con éxito:", data.rutaImagen);
 
       // Restablecer la variable después de recibir la respuesta del servidor
       enviando = false;
@@ -3314,14 +3314,6 @@ function validarFormularioProducto(event) {
 
   const idmarca = document.querySelector("[name='marca']").value.trim();
   //console.log("Marca seleccionado:", idmarca);
-  const idgenero = document.querySelector("[name='genero']").value.trim();
-  //console.log("Genero seleccionado:", idgenero);
-  const idtalla = document.querySelector("[name='talla']").value.trim();
-  //console.log("Talla seleccionado:", idtalla);
-  const idestilo = document.querySelector("[name='estilo']").value.trim();
-  //console.log("Estilo seleccionado:", idestilo);
-  const idcolor = document.querySelector("[name='color']").value.trim();
-  //console.log("Color seleccionado:", idcolor);
 
   const costo_compra = document
     .querySelector("[name='costo_compra']")
@@ -3376,7 +3368,10 @@ function validarFormularioProducto(event) {
     Swal.fire({
       title: "Errores en el formulario",
       html: errores.join("<br>"),
-      icon: "error",
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     });
     return;
   }
@@ -3876,10 +3871,10 @@ function actualizarTablaProducto(productos) {
       <td data-lable="Imagen:"><img src="${
         producto.imagen
       }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
-      <td data-lable="Código de barras:">${producto.codbar_prod}</td>
-      <td data-lable="Nombre:">${producto.nom_prod}</td>
-      <td data-lable="Costo:">${producto.costo_compra_prod}</td>
-      <td data-lable="Precio:">${producto.precio1_venta_prod}</td>
+      <td data-lable="Código de barras:">${producto.codebar_prod}</td>
+      <td data-lable="Nombre:">${producto.nombre_prod}</td>
+      <td data-lable="Costo:">${producto.costo_prod}</td>
+      <td data-lable="Precio:">${producto.precio}</td>
       <td data-lable="Stock mínimo:">${producto.stock_minimo}</td>
       <td data-lable="Stock:">${stockValue}</td>
       <td data-lable="Estatus:">
@@ -3891,11 +3886,11 @@ function actualizarTablaProducto(productos) {
       </td>
       <td>
         <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="${
-          producto.idproducto
+          producto.id_prod
         }"></button>
         &nbsp;&nbsp;&nbsp;
         <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="${
-          producto.idproducto
+          producto.id_prod
         }"></button>
       </td>
     `;
@@ -3975,10 +3970,10 @@ function actualizarTabla(productos) {
       <td data-lable="Imagen:"><img src="${
         producto.imagen
       }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
-      <td data-lable="Código de barras:">${producto.codbar_prod}</td>
-      <td data-lable="Nombre:">${producto.nom_prod}</td>
-      <td data-lable="Costo:">${producto.costo_compra_prod}</td>
-      <td data-lable="Precio:">${producto.precio1_venta_prod}</td>
+      <td data-lable="Código de barras:">${producto.codebar_prod}</td>
+      <td data-lable="Nombre:">${producto.nombre_prod}</td>
+      <td data-lable="Costo:">${producto.costo_prod}</td>
+      <td data-lable="Precio:">${producto.precio}</td>
       <td data-lable="Stock mínimo:">${producto.stock_minimo}</td>
       <td data-lable="Stock:">${stockValue}</td>
       <td data-lable="Estatus:">
@@ -3990,12 +3985,12 @@ function actualizarTabla(productos) {
       </td>
       <td data-lable="Editar:">
         <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="${
-          producto.idproducto
+          producto.id_prod
         }"></button>
         </td>
       <td data-lable="Eliminar:">
         <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="${
-          producto.idproducto
+          producto.id_prod
         }"></button>
       </td>
     `;

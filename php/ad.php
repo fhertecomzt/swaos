@@ -48,7 +48,7 @@ $_SESSION['last_token'] = $current_token;
     <meta charset="utf8mb4">
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Administrador AME</title>
+    <title>Administrador SWAOS</title>
     <link rel="icon" type="image/x-icon" href="../imgs/favicon/favicon.ico">
 
     <!-- CDn Font Awesome link fuente iconos-->

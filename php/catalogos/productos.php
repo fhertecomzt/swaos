@@ -90,7 +90,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
     </table>
   </div>
 
-  <!-- Modal para crear Producto -->
+  <!-- Modal para crear Producto ******************************* -->
   <div id="crear-modalProducto" class="modal" style="display: none;">
     <div class="modal-contentProductos">
       <span title="Cerrar" class="close" onclick="cerrarModalProducto('crear-modalProducto')">&times;</span>
@@ -102,7 +102,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
           <input type="text" id="crear-codebar" name="codebar" autocomplete="off"
             pattern="[a-zA-Z0-9]+"
             title="Solo se permiten letras y números."
-            oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" maxlength="13" required>
+            oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" maxlength="25" required>
         </div>
 
         <div class="form-group">
@@ -220,7 +220,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
             <input type="text" id="crear-stock_minimo" name="stock_minimo" autocomplete="off"
               pattern="^[0-9]"
               title="Solo se permiten números."
-              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size="10" min="0" required>
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size="10" min="0" value="0" required>
           </div>
 
           <div class="form-group">
@@ -239,12 +239,13 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
           </div>
 
           <button type="submit">Guardar</button>
+          <span class="cancelarModal" onclick="cerrarModalProducto('crear-modalProducto')" type=" submit">Cancelar</span>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Modal para editar Producto******************************** -->
+<!-- Modal para editar Producto ******************************** -->
 <div id="editar-modalProducto" class="modal" style="display: none;">
   <div class="modal-contentProductos">
     <span title="Cerrar" class="close" onclick="cerrarModalProducto('editar-modalProducto')">&times;</span>
