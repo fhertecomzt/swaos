@@ -208,7 +208,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
           </div>
 
           <div class="form-group laquinta">
-            <label for="crear-precio1">Precio 1:</label>
+            <label for="crear-precio1">Precio:</label>
             <input type="number" id="crear-precio1" name="precio1" autocomplete="off"
               pattern="^\d+(\.\d{1,2})?$"
               title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" required>
@@ -285,8 +285,8 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
         <select id="editar-categoria" name="categoria">
           <option value="">[Selecciona una categoría]</option>
           <?php foreach ($categorias as $categoria): ?>
-            <option value="<?php echo htmlspecialchars($categoria['idcategoria']); ?>">
-              <?php echo htmlspecialchars($categoria['nomcategoria']); ?>
+            <option value="<?php echo htmlspecialchars($categoria['id_categoria']); ?>">
+              <?php echo htmlspecialchars($categoria['nombre_cat']); ?>
             </option>
           <?php endforeach; ?>
         </select>
@@ -298,60 +298,53 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
         <select id="editar-marca" name="marca">
           <option value="">[Selecciona una marca]</option>
           <?php foreach ($marcas as $marca): ?>
-            <option value="<?php echo htmlspecialchars($marca['idmarca']); ?>">
-              <?php echo htmlspecialchars($marca['nommarca']); ?>
+            <option value="<?php echo htmlspecialchars($marca['id_marca']); ?>">
+              <?php echo htmlspecialchars($marca['nom_marca']); ?>
             </option>
           <?php endforeach; ?>
         </select>
       </div>
 
-      <!-- Selección de la Genero -->
-      <div class="form-group" id="campo-genero">
-        <label for="editar-genero">Genero:</label>
-        <select id="editar-genero" name="genero">
-          <option value="">[Selecciona un género]</option>
-          <?php foreach ($generos as $genero): ?>
-            <option value="<?php echo htmlspecialchars($genero['idgenero']); ?>">
-              <?php echo htmlspecialchars($genero['nomgenero']); ?>
+      <!-- Selección de Proveedor -->
+      <div class="form-group">
+        <label for="editar-proveedor">Proveedor:</label>
+        <select id="editar-proveedor" name="proveedor">
+          <option value="">[Selecciona un proveedor]</option>
+          <?php foreach ($proveedores as $proveedor): ?>
+            <option value="<?php echo htmlspecialchars($proveedor['id_prov']); ?>">
+              <?php echo htmlspecialchars($proveedor['contacto_prov']); ?>
             </option>
           <?php endforeach; ?>
         </select>
       </div>
 
-      <!-- Selección de la Talla -->
-      <div class="form-group" id="campo-talla">
-        <label for="editar-talla">Talla:</label>
-        <select id="editar-talla" name="talla">
-          <option value="">[Selecciona una talla]</option>
-          <?php foreach ($tallas as $talla): ?>
-            <option value="<?php echo htmlspecialchars($talla['idtalla']); ?>">
-              <?php echo htmlspecialchars($talla['nomtalla']); ?>
+      <!-- Selección de U. Medida -->
+      <div class="form-group">
+        <label for="editar-umedida">Unidad de Medida:</label>
+        <select id="editar-umedida" name="umedida">
+          <option value="">[Selecciona una umedida]</option>
+          <?php foreach ($umedidas as $umedida): ?>
+            <option value="<?php echo htmlspecialchars($umedida['id_unidad']); ?>">
+              <?php echo htmlspecialchars($umedida['nom_unidad']); ?>
             </option>
           <?php endforeach; ?>
         </select>
       </div>
 
-      <!-- Selección de la Estilo -->
-      <div class="form-group" id="campo-estilo">
-        <label for="editar-estilo">Estilo:</label>
-        <select id="editar-estilo" name="estilo">
-          <option value="">[Selecciona una estilo]</option>
-          <?php foreach ($estilos as $estilo): ?>
-            <option value="<?php echo htmlspecialchars($estilo['idestilo']); ?>" <?php echo $estilo['idestilo'] == 1 ? 'selected' : ''; ?>>
-              <?php echo htmlspecialchars($estilo['nomestilo']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Selección de Color -->
-      <div class="form-group" id="campo-color">
-        <label for="editar-color">Color:</label>
-        <select id="editar-color" name="color">
-          <option value="">[Selecciona un color]</option>
-          <?php foreach ($colores as $color): ?>
-            <option value="<?php echo htmlspecialchars($color['idcolor']); ?>">
-              <?php echo htmlspecialchars($color['nomcolor']); ?>
+      <!-- Selección de Impuesto -->
+      <div class="form-group" style="margin-top: 7px;">
+        <label for="editar-impuesto">Impuesto:</label>
+        <select id="editar-impuesto" name="idimpuesto" required>
+          <option value="">[Selecciona un impuesto]</option>
+          <?php foreach ($impuestos as $impuesto): ?>
+            <?php
+            $valorImpuestoDecimal = $impuesto['tasa'] / 100;
+            ?>
+            <option
+              value="<?php echo htmlspecialchars($impuesto['idimpuesto']); ?>"
+              data-tasa="<?php echo htmlspecialchars($valorImpuestoDecimal); ?>"
+              <?php echo $impuesto['idimpuesto'] == 2 ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($impuesto['nomimpuesto']); ?>
             </option>
           <?php endforeach; ?>
         </select>
@@ -376,57 +369,12 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
         </div>
 
         <div class="form-group laquinta">
-          <label for="editar-precio1">Precio 1:</label>
+          <label for="editar-precio1">Precio:</label>
           <input type="text" id="editar-precio1" name="precio1" autocomplete="off"
             pattern="^\d+(\.\d{1,3})?$"
             title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
             oninput="this.value = this.value.replace(/[^0-9]/g, '')" min="0" maxlength="10" required>
         </div>
-      </div>
-
-      <!-- Selección de Impuesto -->
-      <div class="form-group" style="margin-top: 7px;">
-        <label for="editar-impuesto">Impuesto:</label>
-        <select id="editar-impuesto" name="idimpuesto" required>
-          <option value="">[Selecciona un impuesto]</option>
-          <?php foreach ($impuestos as $impuesto): ?>
-            <?php
-            $valorImpuestoDecimal = $impuesto['tasa'] / 100;
-            ?>
-            <option
-              value="<?php echo htmlspecialchars($impuesto['idimpuesto']); ?>"
-              data-tasa="<?php echo htmlspecialchars($valorImpuestoDecimal); ?>"
-              <?php echo $impuesto['idimpuesto'] == 2 ? 'selected' : ''; ?>>
-              <?php echo htmlspecialchars($impuesto['nomimpuesto']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Selección de U. Medida -->
-      <div class="form-group">
-        <label for="editar-umedida">Unidad de Medida:</label>
-        <select id="editar-umedida" name="umedida">
-          <option value="">[Selecciona una umedida]</option>
-          <?php foreach ($umedidas as $umedida): ?>
-            <option value="<?php echo htmlspecialchars($umedida['idumedida']); ?>">
-              <?php echo htmlspecialchars($umedida['nomumedida']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Selección de Proveedor -->
-      <div class="form-group">
-        <label for="editar-proveedor">Proveedor:</label>
-        <select id="editar-proveedor" name="proveedor">
-          <option value="">[Selecciona un proveedor]</option>
-          <?php foreach ($proveedores as $proveedor): ?>
-            <option value="<?php echo htmlspecialchars($proveedor['idproveedor']); ?>">
-              <?php echo htmlspecialchars($proveedor['nomproveedor']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
       </div>
 
       <div class="form-group laquinta">
@@ -454,6 +402,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
       </div>
 
       <button type="submit">Actualizar</button>
+      <span class="cancelarModal" onclick="cerrarModalProducto('editar-modalProducto')" type=" submit">Cancelar</span>
     </form>
   </div>
 </div>

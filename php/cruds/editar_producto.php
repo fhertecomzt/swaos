@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 include "../conexion.php";
 
@@ -16,16 +13,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $descprod = $_POST["descprod"] ?? null;
   $categoria = $_POST["categoria"] ?? null;
   $marca = $_POST["marca"] ?? null;
-  $genero = $_POST["genero"] ?? null;
-  $talla = $_POST["talla"] ?? null;
-  $estilo = $_POST["estilo"] ?? null;
-  $color = $_POST["color"] ?? null;
+  $proveedor = $_POST["proveedor"] ?? null;
+  $umedida = $_POST["umedida"] ?? null;
+  $impuesto = $_POST["idimpuesto"] ?? null;
   $costo_compra = $_POST["costo_compra"] ?? null;
   $ganancia = $_POST["ganancia"] ?? null;
   $precio1 = $_POST["precio1"] ?? null;
-  $impuesto = $_POST["idimpuesto"] ?? null;
-  $umedida = $_POST["umedida"] ?? null;
-  $proveedor = $_POST["proveedor"] ?? null;
   $stock_minimo = $_POST["stock_minimo"] ?? null;
   // Imagen
   $imagen = $_FILES["imagen"]["name"] ?? null;
@@ -44,12 +37,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   // Verificar si $categoria es un ID o un nombre
   if (!is_numeric($categoria)) {
     // Buscar el ID del categoria por nombre
-    $consulta_categoria = $dbh->prepare("SELECT idcategoria FROM categorias WHERE nomcategoria = ?");
+    $consulta_categoria = $dbh->prepare("SELECT id_categoria FROM categorias WHERE nombre_cat = ?");
     $consulta_categoria->execute([$categoria]);
     $categoria_data = $consulta_categoria->fetch(PDO::FETCH_ASSOC);
 
     if ($categoria_data) {
-      $categoria = $categoria_data['idcategoria'];
+      $categoria = $categoria_data['id_categoria'];
     } else {
       // Manejar el error si no se encuentra el categoria
       echo json_encode(['success' => false, 'message' => 'categoria no encontrada.']);
@@ -60,12 +53,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   // Verificar si $marca es un ID o un nombre
   if (!is_numeric($marca)) {
     // Buscar el ID del marca por nombre
-    $consulta_marca = $dbh->prepare("SELECT idmarca FROM marcas WHERE nommarca = ?");
+    $consulta_marca = $dbh->prepare("SELECT id_marca FROM marcas WHERE nom_marca = ?");
     $consulta_marca->execute([$marca]);
     $marca_data = $consulta_marca->fetch(PDO::FETCH_ASSOC);
 
     if ($marca_data) {
-      $marca = $marca_data['idmarca'];
+      $marca = $marca_data['id_marca'];
     } else {
       // Manejar el error si no se encuentra el marca
       echo json_encode(['success' => false, 'message' => 'marca no encontrado.']);
@@ -75,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   try {
     // Obtener el producto actual para verificar la imagen
-    $stmt = $dbh->prepare("SELECT imagen FROM productos WHERE idproducto = :idproducto");
+    $stmt = $dbh->prepare("SELECT imagen FROM productos WHERE id_prod = :idproducto");
     $stmt->execute([":idproducto" => $idproducto]);
     $productoActual = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -116,25 +109,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Preparar la consulta SQL
     $stmt = $dbh->prepare(
       "UPDATE productos 
-             SET codbar_prod = :codbar_prod,
-                 nom_prod = :nom_prod,
+             SET codebar_prod = :codbar_prod,
+                 nombre_prod = :nom_prod,
                  desc_prod = :desc_prod,
-                 idcategoria = :idcategoria,
-                 idmarca = :idmarca,
-                 idgenero = :idgenero,
-                 idtalla = :idtalla,
-                 idestilo = :idestilo,
-                 idcolor = :idcolor,
-                 costo_compra_prod = :costo_compra_prod,
+                 id_cat = :idcategoria,
+                 id_marca = :idmarca,
+                 id_prov = :idproveedor,
+                 id_unidad = :idumedida,
+                 id_impuesto = :idimpuesto,
+                 costo_prod = :costo_compra_prod,
                  ganancia_prod = :ganancia_prod,
-                 precio1_venta_prod = :precio1_venta_prod,
-                 idimpuesto = :idimpuesto,
-                 idumedida = :idumedida,
-                 idproveedor = :idproveedor,
+                 precio = :precio1_venta_prod,
                  stock_minimo = :stock_minimo,
                  imagen = :imagen,
                  estatus = :estatus
-            WHERE idproducto = :idproducto"
+            WHERE id_prod = :idproducto"
     );
 
     // Ejecutar la consulta con los parámetros
@@ -144,16 +133,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       ":desc_prod" => $descprod,
       ":idcategoria" => $categoria,
       ":idmarca" => $marca,
-      ":idgenero" => $genero,
-      ":idtalla" => $talla,
-      ":idestilo" => $estilo,
-      ":idcolor" => $color,
+      ":idproveedor" => $proveedor,
+      ":idumedida" => $umedida,
+      ":idimpuesto" => $impuesto,
       ":costo_compra_prod" => $costo_compra,
       ":precio1_venta_prod" => $precio1,
       ":ganancia_prod" => $ganancia,
-      ":idimpuesto" => $impuesto,
-      ":idumedida" => $umedida,
-      ":idproveedor" => $proveedor,
       ":stock_minimo" => $stock_minimo,
       ":imagen" => $rutaImagen,
       ":estatus" => $estatus,

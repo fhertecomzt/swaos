@@ -3454,16 +3454,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 "descprod",
                 "categoria",
                 "marca",
-                "genero",
-                "talla",
-                "estilo",
-                "color",
+                "proveedor",
+                "umedida",
+                "impuesto",
                 "costo_compra",
                 "ganancia",
                 "precio1",
-                "impuesto",
-                "umedida",
-                "proveedor",
                 "stock_minimo",
                 "estatus",
               ];
@@ -3556,7 +3552,7 @@ function verificarDuplicadoEditarProducto(producto, id = 0) {
         //mostrarAlerta("error", "Error", "El nombre ya existe.");
         Swal.fire({
           title: "¡Duplicado!",
-          text: data.message || "El nombre ya existe.",
+          text: data.message || "El nombre o código de barras ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
