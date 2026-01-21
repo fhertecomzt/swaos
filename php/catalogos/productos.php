@@ -251,7 +251,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
     <span title="Cerrar" class="close" onclick="cerrarModalProducto('editar-modalProducto')">&times;</span>
     <h2 class="tittle">Editar Producto</h2>
 
-    <form id="form-editarProducto" onsubmit="validarFormularioProducto(event, 'editar')">
+    <form id="form-editarProducto" enctype="multipart/form-data">
       <input type="hidden" id="editar-idproducto" name="editar-idproducto" value="" />
 
       <div class="form-group">
@@ -259,7 +259,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
         <input type="text" id="editar-codebar" name="codebar" autocomplete="off"
           pattern="[a-zA-Z0-9]+"
           title="Solo se permiten letras y números."
-          oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" maxlength="13" required>
+          oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" maxlength="25" required>
       </div>
 
       <div class="form-group">

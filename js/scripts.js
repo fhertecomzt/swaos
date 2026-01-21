@@ -254,7 +254,7 @@ function validarFormularioTienda(event) {
 
   if (razonsocial.length < 3) {
     errores.push(
-      "La denominación o razón social: debe tener al menos 3 caracteres."
+      "La denominación o razón social: debe tener al menos 3 caracteres.",
     );
     const inputrazonsocial = document.querySelector("#crear-razonsocial");
     inputrazonsocial.focus();
@@ -473,7 +473,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 idEstadoDB,
                 idMunicipioDB,
                 idColoniaDB,
-                cpDB
+                cpDB,
               );
 
               // --- FIN: NUEVA LÓGICA DE POBLADO ---
@@ -486,7 +486,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el taller."
+              data.message || "No se pudo cargar el taller.",
             );
           }
         })
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -761,7 +761,7 @@ async function cargarMunicipios(
   idEstado,
   idSelectMunicipio,
   idSelectColonia,
-  idInputCP
+  idInputCP,
 ) {
   const selectMunicipio = document.getElementById(idSelectMunicipio);
   const selectColonia = document.getElementById(idSelectColonia);
@@ -863,7 +863,7 @@ document.addEventListener("change", function (event) {
       event.target.value,
       "municipio",
       "colonia",
-      "codigo_postal"
+      "codigo_postal",
     );
   }
   if (event.target.id === "municipio") {
@@ -879,14 +879,14 @@ document.addEventListener("change", function (event) {
       event.target.value,
       "editar-municipio",
       "editar-colonia",
-      "editar-codigo_postal"
+      "editar-codigo_postal",
     );
   }
   if (event.target.id === "editar-municipio") {
     cargarColonias(
       event.target.value,
       "editar-colonia",
-      "editar-codigo_postal"
+      "editar-codigo_postal",
     );
   }
   if (event.target.id === "editar-colonia") {
@@ -905,7 +905,7 @@ async function cargarYSeleccionarUbicacionEditar(
   idEstadoDB,
   idMunicipioDB,
   idColoniaDB,
-  cpDB
+  cpDB,
 ) {
   const selectEstado = document.getElementById("editar-estado");
   const selectMunicipio = document.getElementById("editar-municipio");
@@ -921,7 +921,7 @@ async function cargarYSeleccionarUbicacionEditar(
     idEstadoDB,
     "editar-municipio",
     "editar-colonia",
-    "editar-codigo_postal"
+    "editar-codigo_postal",
   );
   selectMunicipio.value = idMunicipioDB; // ¡Seleccionar!
 
@@ -973,7 +973,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -981,7 +981,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar la tienda:", error);
           });
@@ -1110,7 +1110,7 @@ function cargarTiendasFiltradas() {
       actualizarTablaTiendas(data);
     })
     .catch((error) =>
-      console.error("Error al cargar tiendas filtradas:", error)
+      console.error("Error al cargar tiendas filtradas:", error),
     );
 }
 
@@ -1507,7 +1507,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el Rol."
+              data.message || "No se pudo cargar el Rol.",
             );
           }
         })
@@ -1516,7 +1516,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -1743,7 +1743,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -1751,7 +1751,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar la tienda:", error);
           });
@@ -2241,25 +2241,25 @@ function validarFormularioUser(event) {
   if (usuario.length < 3) {
     mostrarError(
       "#crear-usuario",
-      "El usuario debe tener al menos 3 caracteres."
+      "El usuario debe tener al menos 3 caracteres.",
     );
   }
   if (nombre.length < 3) {
     mostrarError(
       "#crear-nombre",
-      "El nombre debe tener al menos 3 caracteres."
+      "El nombre debe tener al menos 3 caracteres.",
     );
   }
   if (papellido.length < 3) {
     mostrarError(
       "#crear-papellido",
-      "El primer apellido debe tener al menos 3 caracteres."
+      "El primer apellido debe tener al menos 3 caracteres.",
     );
   }
   if (sapellido.length < 3) {
     mostrarError(
       "#crear-sapellido",
-      "El segundo apellido debe tener al menos 3 caracteres."
+      "El segundo apellido debe tener al menos 3 caracteres.",
     );
   }
 
@@ -2335,7 +2335,7 @@ function validarContrasenasInterno(password1, password2) {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
   if (!regex.test(password1)) {
     errores.push(
-      "La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial."
+      "La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial.",
     );
   }
 
@@ -2366,7 +2366,7 @@ document.addEventListener("input", (event) => {
       if (
         event.target.value.length >= 6 &&
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(
-          event.target.value
+          event.target.value,
         )
       ) {
         event.target.classList.remove("input-error");
@@ -2466,7 +2466,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   }
                 } else {
                   console.warn(
-                    `El campo editar-${campo} no existe en el formulario.`
+                    `El campo editar-${campo} no existe en el formulario.`,
                   );
                 }
               });
@@ -2478,7 +2478,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el campo."
+              data.message || "No se pudo cargar el campo.",
             );
           }
         })
@@ -2487,7 +2487,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -2728,7 +2728,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -2736,7 +2736,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar la tienda:", error);
           });
@@ -2793,7 +2793,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const buscarBox = event.target; // El input dinámico
       const filtro = buscarBox.value.toLowerCase();
       const limpiarBusquedaUsuario = document.getElementById(
-        "limpiar-busquedaUsuario"
+        "limpiar-busquedaUsuario",
       ); // Botón dinámico
       const filas = document.querySelectorAll("#tabla-usuarios tbody tr");
       const mensajeVacio = document.getElementById("mensaje-vacio");
@@ -2867,7 +2867,7 @@ function cargarUsuariosFiltrados() {
       actualizarTablaUsuarios(data);
     })
     .catch((error) =>
-      console.error("Error al cargar usuarios filtradas:", error)
+      console.error("Error al cargar usuarios filtradas:", error),
     );
 }
 
@@ -3071,16 +3071,16 @@ function abrirModalProducto(id) {
 
   // Obtener los elementos del formulario de CREAR producto (si el modal es de creación)
   const crearCostoCompraInput = document.querySelector(
-    "#crear-modalProducto #crear-costo_compra"
+    "#crear-modalProducto #crear-costo_compra",
   );
   const crearGananciaInput = document.querySelector(
-    "#crear-modalProducto #crear-ganancia"
+    "#crear-modalProducto #crear-ganancia",
   );
   const crearImpuestoSelect = document.querySelector(
-    "#crear-modalProducto #crear-impuesto"
+    "#crear-modalProducto #crear-impuesto",
   );
   const crearPrecio1Input = document.querySelector(
-    "#crear-modalProducto #crear-precio1"
+    "#crear-modalProducto #crear-precio1",
   );
 
   // Adjuntar event listeners al formulario de CREAR si los elementos existen
@@ -3095,39 +3095,39 @@ function abrirModalProducto(id) {
         crearCostoCompraInput,
         crearGananciaInput,
         crearImpuestoSelect,
-        crearPrecio1Input
-      )
+        crearPrecio1Input,
+      ),
     );
     crearGananciaInput.addEventListener("input", () =>
       calcularPrecio(
         crearCostoCompraInput,
         crearGananciaInput,
         crearImpuestoSelect,
-        crearPrecio1Input
-      )
+        crearPrecio1Input,
+      ),
     );
     crearImpuestoSelect.addEventListener("change", () =>
       calcularPrecio(
         crearCostoCompraInput,
         crearGananciaInput,
         crearImpuestoSelect,
-        crearPrecio1Input
-      )
+        crearPrecio1Input,
+      ),
     );
   }
 
   // Obtener los elementos del formulario de EDITAR producto (si el modal es de edición)
   const editarCostoCompraInput = document.querySelector(
-    "#editar-modalProducto #editar-costo_compra"
+    "#editar-modalProducto #editar-costo_compra",
   );
   const editarGananciaInput = document.querySelector(
-    "#editar-modalProducto #editar-ganancia"
+    "#editar-modalProducto #editar-ganancia",
   );
   const editarImpuestoSelect = document.querySelector(
-    "#editar-modalProducto #editar-impuesto"
+    "#editar-modalProducto #editar-impuesto",
   );
   const editarPrecio1Input = document.querySelector(
-    "#editar-modalProducto #editar-precio1"
+    "#editar-modalProducto #editar-precio1",
   );
 
   // Adjuntar event listeners al formulario de EDITAR si los elementos existen
@@ -3142,24 +3142,24 @@ function abrirModalProducto(id) {
         editarCostoCompraInput,
         editarGananciaInput,
         editarImpuestoSelect,
-        editarPrecio1Input
-      )
+        editarPrecio1Input,
+      ),
     );
     editarGananciaInput.addEventListener("input", () =>
       calcularPrecio(
         editarCostoCompraInput,
         editarGananciaInput,
         editarImpuestoSelect,
-        editarPrecio1Input
-      )
+        editarPrecio1Input,
+      ),
     );
     editarImpuestoSelect.addEventListener("change", () =>
       calcularPrecio(
         editarCostoCompraInput,
         editarGananciaInput,
         editarImpuestoSelect,
-        editarPrecio1Input
-      )
+        editarPrecio1Input,
+      ),
     );
   }
 }
@@ -3168,7 +3168,7 @@ function calcularPrecio(
   costoInput,
   gananciaInput,
   impuestoSelect,
-  precioInput
+  precioInput,
 ) {
   const costoCompra = parseFloat(costoInput.value) || 0;
   const gananciaPorcentaje = parseFloat(gananciaInput.value) || 0;
@@ -3239,10 +3239,10 @@ function procesarFormularioProducto(event, tipo) {
             <td data-lable"Código de barras:">${data.producto.codebar}</td>
             <td data-lable"Nombre:">${data.producto.producto}</td>
             <td data-lable"Costo:">${parseFloat(
-              data.producto.costo_compra
+              data.producto.costo_compra,
             ).toFixed(2)}</td>
             <td data-lable"Precio:">${parseFloat(data.producto.precio1).toFixed(
-              2
+              2,
             )}</td> 
             <td data-lable"Stock mínimo:">${data.producto.stock_minimo}</td>
             <td data-lable"Stock:">0</td>
@@ -3444,7 +3444,7 @@ document.addEventListener("DOMContentLoaded", function () {
           //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
             const formularioProducto = document.getElementById(
-              "form-editarProducto"
+              "form-editarProducto",
             );
             if (formularioProducto) {
               const campos = [
@@ -3471,7 +3471,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   input.value = data.producto[campo] || "";
                 } else {
                   console.warn(
-                    `El campo editar-${campo} no existe en el formulario.`
+                    `El campo editar-${campo} no existe en el formulario.`,
                   );
                 }
               });
@@ -3483,7 +3483,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el campo."
+              data.message || "No se pudo cargar el campo.",
             );
           }
         })
@@ -3492,7 +3492,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -3640,7 +3640,7 @@ async function validarFormularioEdicionProducto(formulario) {
   try {
     const esNombreDuplicado = await verificarDuplicadoEditarProducto(
       producto,
-      id
+      id,
     );
     if (esNombreDuplicado) {
       return; // No enviar si el nombre está duplicado
@@ -3657,7 +3657,7 @@ async function validarFormularioEdicionProducto(formulario) {
     try {
       const esCodebarDuplicado = await verificarDuplicadoEditarCodebar(
         codebar,
-        id
+        id,
       );
       if (esCodebarDuplicado) {
         return; // No enviar si el código de barras está duplicado
@@ -3665,7 +3665,7 @@ async function validarFormularioEdicionProducto(formulario) {
     } catch (error) {
       console.error(
         "Error al verificar duplicado del código de barras:",
-        error
+        error,
       );
       return;
     }
@@ -3772,7 +3772,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -3780,7 +3780,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar:", error);
           });
@@ -3811,7 +3811,7 @@ function cargarProductosPorEstatus() {
       // Reiniciar paginación si es necesario
     })
     .catch((error) =>
-      console.error("Error al cargar productos por estatus:", error)
+      console.error("Error al cargar productos por estatus:", error),
     );
 }
 
@@ -3942,7 +3942,7 @@ function cargarProductosFiltrados() {
       actualizarTabla(data);
     })
     .catch((error) =>
-      console.error("Error al cargar productos filtrados:", error)
+      console.error("Error al cargar productos filtrados:", error),
     );
 }
 
@@ -4245,7 +4245,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar la Categoría."
+              data.message || "No se pudo cargar la Categoría.",
             );
           }
         })
@@ -4254,7 +4254,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -4419,7 +4419,7 @@ function enviarFormularioEdicionCat(formulario) {
       mostrarAlerta(
         "error",
         "Error",
-        "Ocurrió un problema al actualizar la Categoría."
+        "Ocurrió un problema al actualizar la Categoría.",
       );
     });
 }
@@ -4478,7 +4478,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -4486,7 +4486,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar la tienda:", error);
           });
@@ -4615,7 +4615,7 @@ function cargarCatFiltradas() {
       actualizarTablaCategorias(data);
     })
     .catch((error) =>
-      console.error("Error al cargar categorias filtradas:", error)
+      console.error("Error al cargar categorias filtradas:", error),
     );
 }
 
@@ -5010,7 +5010,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar la Marca."
+              data.message || "No se pudo cargar la Marca.",
             );
           }
         })
@@ -5019,7 +5019,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -5183,7 +5183,7 @@ function enviarFormularioEdicionMarca(formulario) {
       mostrarAlerta(
         "error",
         "Error",
-        "Ocurrió un problema al actualizar la marca."
+        "Ocurrió un problema al actualizar la marca.",
       );
     });
 }
@@ -5231,7 +5231,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "¡Eliminado!",
                 "El registro ha sido eliminado correctamente.",
-                "success"
+                "success",
               );
               Swal.fire({
                 title: "¡Eliminado!",
@@ -5247,7 +5247,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -5255,7 +5255,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar la Marca:", error);
           });
@@ -5312,7 +5312,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const buscarBox = event.target; // El input dinámico
       const filtro = buscarBox.value.toLowerCase();
       const limpiarBusquedaMarca = document.getElementById(
-        "limpiar-busquedaMarca"
+        "limpiar-busquedaMarca",
       ); // Botón dinámico
       const filas = document.querySelectorAll("#tabla-marcas tbody tr");
       const mensajeVacio = document.getElementById("mensaje-vacio");
@@ -5386,7 +5386,7 @@ function cargarMarcasFiltradas() {
       actualizarTablaMarcas(data);
     })
     .catch((error) =>
-      console.error("Error al cargar marcas filtrados:", error)
+      console.error("Error al cargar marcas filtrados:", error),
     );
 }
 
@@ -5774,7 +5774,7 @@ document.addEventListener("DOMContentLoaded", function () {
           //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
             const formularioTiposervicios = document.getElementById(
-              "form-editarTiposervicio"
+              "form-editarTiposervicio",
             );
             if (formularioTiposervicios) {
               const campos = [
@@ -5796,7 +5796,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el tipo de servicio."
+              data.message || "No se pudo cargar el tipo de servicio.",
             );
           }
         })
@@ -5805,7 +5805,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -5919,7 +5919,7 @@ async function validarFormularioEdicionTiposervicio(formulario) {
     //console.log("Verificando duplicado. ID:", id, "Tiposervicios:", tiposervicios);
     const esDuplicado = await verificarDuplicadoEditarTiposervicio(
       tiposervicios,
-      id
+      id,
     );
     if (esDuplicado) {
       return; // No enviar el formulario si hay duplicados
@@ -5973,7 +5973,7 @@ function enviarFormularioEdicionTiposervicio(formulario) {
       mostrarAlerta(
         "error",
         "Error",
-        "Ocurrió un problema al actualizar la Tipo de servicio."
+        "Ocurrió un problema al actualizar la Tipo de servicio.",
       );
     });
 }
@@ -6032,7 +6032,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -6040,7 +6040,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar la tienda:", error);
           });
@@ -6097,7 +6097,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const buscarBox = event.target; // El input dinámico
       const filtro = buscarBox.value.toLowerCase();
       const limpiarBusquedaTiposervicio = document.getElementById(
-        "limpiar-busquedaTiposervicio"
+        "limpiar-busquedaTiposervicio",
       ); // Botón dinámico
       const filas = document.querySelectorAll("#tabla-tiposervicios tbody tr");
       const mensajeVacio = document.getElementById("mensaje-vacio");
@@ -6171,7 +6171,7 @@ function cargarTiposerviciosFiltrados() {
       actualizarTablaTiposervicios(data);
     })
     .catch((error) =>
-      console.error("Error al cargar tipo servicios filtrados:", error)
+      console.error("Error al cargar tipo servicios filtrados:", error),
     );
 }
 
@@ -6290,7 +6290,7 @@ function cargarTiposerviciosScroll() {
       }
     })
     .catch((error) =>
-      console.error("Error al cargar Tipo de servicios:", error)
+      console.error("Error al cargar Tipo de servicios:", error),
     );
 }
 
@@ -6307,7 +6307,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function iniciarScrollTiposervicios() {
   const scrollContainer = document.getElementById(
-    "scroll-containerTiposervicios"
+    "scroll-containerTiposervicios",
   );
   if (!scrollContainer) return;
 
@@ -6327,7 +6327,7 @@ function iniciarScrollTiposervicios() {
 
 const observerTiposervicios = new MutationObserver(() => {
   const tiposerviciosSeccion = document.getElementById(
-    "scroll-containerTiposervicios"
+    "scroll-containerTiposervicios",
   );
   if (tiposerviciosSeccion) {
     observerTiposervicios.disconnect();
@@ -6570,7 +6570,7 @@ document.addEventListener("DOMContentLoaded", function () {
           //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
             const formularioEstadoservicios = document.getElementById(
-              "form-editarEstadoservicio"
+              "form-editarEstadoservicio",
             );
             if (formularioEstadoservicios) {
               const campos = [
@@ -6592,7 +6592,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el Estado de servicio."
+              data.message || "No se pudo cargar el Estado de servicio.",
             );
           }
         })
@@ -6601,7 +6601,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -6715,7 +6715,7 @@ async function validarFormularioEdicionEstadoservicio(formulario) {
     //console.log("Verificando duplicado. ID:", id, "Estadoservicios:", Estadoservicios);
     const esDuplicado = await verificarDuplicadoEditarEstadoservicio(
       Estadoservicios,
-      id
+      id,
     );
     if (esDuplicado) {
       return; // No enviar el formulario si hay duplicados
@@ -6769,7 +6769,7 @@ function enviarFormularioEdicionEstadoservicio(formulario) {
       mostrarAlerta(
         "error",
         "Error",
-        "Ocurrió un problema al actualizar la Estado de servicio."
+        "Ocurrió un problema al actualizar la Estado de servicio.",
       );
     });
 }
@@ -6777,7 +6777,7 @@ function enviarFormularioEdicionEstadoservicio(formulario) {
 function actualizarFilaTablaEstadoservicio(formData) {
   const fila = document
     .querySelector(
-      `button[data-id="${formData.get("editar-idestadoservicio")}"]`
+      `button[data-id="${formData.get("editar-idestadoservicio")}"]`,
     )
     .closest("tr");
   console.log(formData.get("editar-idestadoservicio"));
@@ -6830,7 +6830,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -6838,7 +6838,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar la tienda:", error);
           });
@@ -6895,7 +6895,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const buscarBox = event.target; // El input dinámico
       const filtro = buscarBox.value.toLowerCase();
       const limpiarBusquedaEstadoservicio = document.getElementById(
-        "limpiar-busquedaEstadoservicio"
+        "limpiar-busquedaEstadoservicio",
       ); // Botón dinámico
       const filas = document.querySelectorAll("#tabla-estadoservicio tbody tr");
       const mensajeVacio = document.getElementById("mensaje-vacio");
@@ -6969,7 +6969,7 @@ function cargarestadoserviciosFiltrados() {
       actualizarTablaEstadoservicios(data);
     })
     .catch((error) =>
-      console.error("Error al cargar tipo servicios filtrados:", error)
+      console.error("Error al cargar tipo servicios filtrados:", error),
     );
 }
 
@@ -7088,7 +7088,7 @@ function cargarestadoserviciosScroll() {
       }
     })
     .catch((error) =>
-      console.error("Error al cargar Estado de servicios:", error)
+      console.error("Error al cargar Estado de servicios:", error),
     );
 }
 
@@ -7105,7 +7105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function iniciarScrollEstadoservicios() {
   const scrollContainer = document.getElementById(
-    "scroll-containerEstadoservicios"
+    "scroll-containerEstadoservicios",
   );
   if (!scrollContainer) return;
 
@@ -7125,7 +7125,7 @@ function iniciarScrollEstadoservicios() {
 
 const observerEstadoservicios = new MutationObserver(() => {
   const EstadoserviciosSeccion = document.getElementById(
-    "scroll-containerEstadoservicios"
+    "scroll-containerEstadoservicios",
   );
   if (EstadoserviciosSeccion) {
     observerEstadoservicios.disconnect();
@@ -7373,7 +7373,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el campo."
+              data.message || "No se pudo cargar el campo.",
             );
           }
         })
@@ -7382,7 +7382,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -7603,7 +7603,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -7611,7 +7611,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar:", error);
           });
@@ -7668,7 +7668,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const buscarBox = event.target; // El input dinámico
       const filtro = buscarBox.value.toLowerCase();
       const limpiarBusquedaMpago = document.getElementById(
-        "limpiar-busquedaMpago"
+        "limpiar-busquedaMpago",
       ); // Botón dinámico
       const filas = document.querySelectorAll("#tabla-mpagos tbody tr");
       const mensajeVacio = document.getElementById("mensaje-vacio");
@@ -7741,7 +7741,7 @@ function cargarMpagosFiltrados() {
       actualizarTablaMpagos(data);
     })
     .catch((error) =>
-      console.error("Error al cargar métodos de pago filtrados:", error)
+      console.error("Error al cargar métodos de pago filtrados:", error),
     );
 }
 
@@ -8121,7 +8121,7 @@ document.addEventListener("DOMContentLoaded", function () {
           //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
             const formularioImpuesto = document.getElementById(
-              "form-editarImpuesto"
+              "form-editarImpuesto",
             );
             if (formularioImpuesto) {
               const campos = ["idimpuesto", "impuesto", "tasa", "estatus"];
@@ -8138,7 +8138,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el campo."
+              data.message || "No se pudo cargar el campo.",
             );
           }
         })
@@ -8147,7 +8147,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -8364,7 +8364,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -8372,7 +8372,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar:", error);
           });
@@ -8429,7 +8429,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const buscarBox = event.target; // El input dinámico
       const filtro = buscarBox.value.toLowerCase();
       const limpiarBusquedaImpuesto = document.getElementById(
-        "limpiar-busquedaImpuesto"
+        "limpiar-busquedaImpuesto",
       ); // Botón dinámico
       const filas = document.querySelectorAll("#tabla-impuestos tbody tr");
       const mensajeVacio = document.getElementById("mensaje-vacio");
@@ -8503,7 +8503,7 @@ function cargarImpuestosFiltrados() {
       actualizarTablaImpuestos(data);
     })
     .catch((error) =>
-      console.error("Error al cargar impuestos filtrados:", error)
+      console.error("Error al cargar impuestos filtrados:", error),
     );
 }
 
@@ -8922,7 +8922,7 @@ document.addEventListener("DOMContentLoaded", function () {
           //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
             const formularioProveedor = document.getElementById(
-              "form-editarProveedor"
+              "form-editarProveedor",
             );
             if (formularioProveedor) {
               const campos = [
@@ -8944,7 +8944,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   input.value = data.proveedor[campo] || "";
                 } else {
                   console.warn(
-                    `El campo editar-${campo} no existe en el formulario.`
+                    `El campo editar-${campo} no existe en el formulario.`,
                   );
                 }
               });
@@ -8956,7 +8956,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarAlerta(
               "error",
               "Error",
-              data.message || "No se pudo cargar el campo."
+              data.message || "No se pudo cargar el campo.",
             );
           }
         })
@@ -8965,7 +8965,7 @@ document.addEventListener("DOMContentLoaded", function () {
           mostrarAlerta(
             "error",
             "Error",
-            "Ocurrió un problema al obtener los datos."
+            "Ocurrió un problema al obtener los datos.",
           );
         });
     }
@@ -9194,7 +9194,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -9202,7 +9202,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar:", error);
           });
@@ -9259,7 +9259,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const buscarBox = event.target; // El input dinámico
       const filtro = buscarBox.value.toLowerCase();
       const limpiarBusquedaCliente = document.getElementById(
-        "limpiar-busquedaCliente"
+        "limpiar-busquedaCliente",
       ); // Botón dinámico
       const filas = document.querySelectorAll("#tabla-proveedores tbody tr");
       const mensajeVacio = document.getElementById("mensaje-vacio");
@@ -9333,7 +9333,7 @@ function cargarProvFiltrados() {
       actualizarTablaProveedores(data);
     })
     .catch((error) =>
-      console.error("Error al cargar Proveedores filtrados:", error)
+      console.error("Error al cargar Proveedores filtrados:", error),
     );
 }
 
@@ -9396,7 +9396,7 @@ function cargarProveedores() {
 document.addEventListener("DOMContentLoaded", function () {
   // Llamar a la función para adjuntar listeners a los botones del menú SOLO UNA VEZ
   const botonesMovimiento = document.querySelectorAll(
-    ".menu-movimientosm button"
+    ".menu-movimientosm button",
   );
   botonesMovimiento.forEach((boton) => {
     boton.addEventListener("click", function () {
@@ -9413,7 +9413,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "Tipo para botón:",
         tipoParaMostrar,
         "Texto del botón:",
-        boton.textContent
+        boton.textContent,
       );
       mostrarFormulario(tipoParaMostrar);
     });
@@ -9471,13 +9471,13 @@ function mostrarFormulario(tipo) {
   const formulario = document.getElementById("formulario-movimiento");
   const formularioTitulo = formulario.querySelector("h2");
   const tipoMovimientoInput = document.getElementById(
-    "tipo_movimiento_multiple"
+    "tipo_movimiento_multiple",
   );
   const tablaProductosContainer = document.getElementById(
-    "tabla-productos-container"
+    "tabla-productos-container",
   );
   const camposEspecificosDiv = document.getElementById(
-    "campos-especificos-multiple"
+    "campos-especificos-multiple",
   );
 
   if (
@@ -9552,7 +9552,7 @@ function ocultarFormularioMultiple() {
     ?.getElementsByTagName("tbody")[0];
   if (tablaProductosBody) tablaProductosBody.innerHTML = "";
   const camposEspecificos = document.getElementById(
-    "campos-especificos-multiple"
+    "campos-especificos-multiple",
   );
   if (camposEspecificos) camposEspecificos.innerHTML = "";
   const mensajeDiv = document.getElementById("mensaje");
@@ -9562,7 +9562,7 @@ function ocultarFormularioMultiple() {
 function registrarMovimientoMultiple() {
   //console.log("registrarMovimientoMultiple llamado");
   const tipoMovimiento = document.getElementById(
-    "tipo_movimiento_multiple"
+    "tipo_movimiento_multiple",
   ).value;
   const tablaProductos = document.getElementById("tabla-productos");
   const filasProductos = tablaProductos.getElementsByTagName("tbody")[0].rows;
@@ -9585,10 +9585,10 @@ function registrarMovimientoMultiple() {
 
   for (let i = 0; i < filasProductos.length; i++) {
     const codbarProdInput = filasProductos[i].querySelector(
-      'input[name="productos[][codbar_prod]"]' // Cambiado a codbar_prod
+      'input[name="productos[][codbar_prod]"]', // Cambiado a codbar_prod
     );
     const cantidadInput = filasProductos[i].querySelector(
-      'input[name="productos[][cantidad]"]'
+      'input[name="productos[][cantidad]"]',
     );
 
     if (codbarProdInput && cantidadInput) {
@@ -9669,18 +9669,18 @@ function registrarMovimientoMultiple() {
 function asignarControladorFormularioMovimiento() {
   //console.log("asignarControladorFormularioMovimiento() llamada (para botones del formulario)");
   const botonRegistrarMultiple = document.getElementById(
-    "registrar-movimiento-btn"
+    "registrar-movimiento-btn",
   ); // Asigna un ID a tu botón en movimientos.php
   if (botonRegistrarMultiple && !botonRegistrarMultiple.hasRegistrarListener) {
     botonRegistrarMultiple.addEventListener(
       "click",
-      registrarMovimientoMultiple
+      registrarMovimientoMultiple,
     );
     botonRegistrarMultiple.hasRegistrarListener = true;
   }
 
   const botonCancelarMultiple = document.querySelector(
-    '#form-movimiento-multiple button[onclick="ocultarFormularioMultiple()"]'
+    '#form-movimiento-multiple button[onclick="ocultarFormularioMultiple()"]',
   );
   if (botonCancelarMultiple && !botonCancelarMultiple.hasCancelarListener) {
     botonCancelarMultiple.addEventListener("click", ocultarFormularioMultiple);
@@ -9692,7 +9692,7 @@ function asignarControladorFormularioMovimiento() {
 
 function cargarTraspasosPendientes() {
   const listaTraspasosDiv = document.getElementById(
-    "lista-traspasos-pendientes"
+    "lista-traspasos-pendientes",
   );
   if (listaTraspasosDiv) {
     listaTraspasosDiv.innerHTML = "<p>Cargando traspasos pendientes...</p>";
@@ -9942,7 +9942,7 @@ function limpiarFormularioAjusteinvt() {
 
   // Seleccionar todos los elementos input de texto y ocultos
   const campos = document.querySelectorAll(
-    '#frmAjusteinvt input[type="hidden"], #frmAjusteinvt[type="text"], #frmAjusteinvt input[type="email"], #frmEAjusteinvt input[type="number"]'
+    '#frmAjusteinvt input[type="hidden"], #frmAjusteinvt[type="text"], #frmAjusteinvt input[type="email"], #frmEAjusteinvt input[type="number"]',
   );
   campos.forEach((campo) => (campo.value = ""));
 
@@ -10001,7 +10001,7 @@ function cargarEditarAbonoProveedor(id) {
 function eliminarAbono(id) {
   if (confirm("¿Estás seguro de que deseas eliminar este abono?")) {
     fetch(
-      "../php/operaciones/abonosproveedores.php?action=delete&idabono=" + id
+      "../php/operaciones/abonosproveedores.php?action=delete&idabono=" + id,
     )
       .then((response) => response.text())
       .then((html) => {
@@ -10031,7 +10031,7 @@ function limpiarFormularioAbonoProveedor() {
 
   // Seleccionar todos los elementos input de texto y ocultos
   const campos = document.querySelectorAll(
-    '#frmAbonosProveedor input[type="hidden"], #frmAbonosProveedor[type="text"], #frmAbonosProveedor input[type="email"], #frmAbonosProveedor input[type="number"]'
+    '#frmAbonosProveedor input[type="hidden"], #frmAbonosProveedor[type="text"], #frmAbonosProveedor input[type="email"], #frmAbonosProveedor input[type="number"]',
   );
   campos.forEach((campo) => (campo.value = ""));
 
@@ -10118,7 +10118,7 @@ function limpiarFormularioAjusteinvt() {
 
   // Seleccionar todos los elementos input de texto y ocultos
   const campos = document.querySelectorAll(
-    '#frmAjusteinvt input[type="hidden"], #frmAjusteinvt[type="text"], #frmAjusteinvt input[type="email"], #frmEAjusteinvt input[type="number"]'
+    '#frmAjusteinvt input[type="hidden"], #frmAjusteinvt[type="text"], #frmAjusteinvt input[type="email"], #frmEAjusteinvt input[type="number"]',
   );
   campos.forEach((campo) => (campo.value = ""));
 
@@ -10205,7 +10205,7 @@ function limpiarFormularioInformes() {
 
   // Seleccionar todos los elementos input de texto y ocultos
   const campos = document.querySelectorAll(
-    '#frmInformes input[type="hidden"], #frmInformes[type="text"], #frmInformes input[type="email"], #frmInformes input[type="number"]'
+    '#frmInformes input[type="hidden"], #frmInformes[type="text"], #frmInformes input[type="email"], #frmInformes input[type="number"]',
   );
   campos.forEach((campo) => (campo.value = ""));
 
