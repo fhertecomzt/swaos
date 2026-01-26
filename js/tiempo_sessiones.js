@@ -1,38 +1,104 @@
-// Tiempo máximo de inactividad en segundos (sincronizado con el servidor)
-const tiempoInactividad = 3600; //poner 120
-let tiempoUltimaActividad = Date.now();
-let advertenciaMostrada = false; // Bandera para evitar mostrar múltiples advertencias
+// Configuración de tiempos (en milisegundos)
+//const TIEMPO_INACTIVIDAD = 30 * 60 * 1000; // 30 minutos totales
+//const TIEMPO_ADVERTENCIA = 60 * 1000; // Mostrar alerta 60 segundos antes de cerrar
+const TIEMPO_INACTIVIDAD = 60 * 1000; // 60 segundos total
+const TIEMPO_ADVERTENCIA = 15 * 1000; // Alerta a los 15 segundos
+const TIEMPO_ESPERA_ALERTA = TIEMPO_INACTIVIDAD - TIEMPO_ADVERTENCIA;
 
-// Actualizar el tiempo de última actividad
-function actualizarActividad() {
-  tiempoUltimaActividad = Date.now();
-  advertenciaMostrada = false; // Reinicia la bandera al detectar actividad
+let timerInactividad;
+let alertaVisible = false; // Bandera para saber si el SweetAlert está abierto
+
+document.addEventListener("DOMContentLoaded", () => {
+  iniciarTemporizador();
+
+  // Eventos que reinician el temporizador (solo si no hay alerta visible)
+  const eventos = ["mousemove", "keypress", "click", "scroll"];
+  eventos.forEach((evento) => {
+    document.addEventListener(evento, () => {
+      if (!alertaVisible) {
+        reiniciarTemporizador();
+      }
+    });
+  });
+});
+
+function iniciarTemporizador() {
+  // Limpiamos cualquier timer previo
+  if (timerInactividad) clearTimeout(timerInactividad);
+
+  // Programamos la aparición de la alerta
+  timerInactividad = setTimeout(() => {
+    mostrarAlertaCierre();
+  }, TIEMPO_ESPERA_ALERTA);
 }
 
-// Escuchar eventos de interacción del usuario
-document.addEventListener("mousemove", actualizarActividad);
-document.addEventListener("keypress", actualizarActividad);
-document.addEventListener("click", actualizarActividad);
-document.addEventListener("scroll", actualizarActividad);
-
-// Verificar periódicamente si se excedió el tiempo de inactividad
-setInterval(() => {
-  const tiempoActual = Date.now();
-  const tiempoInactivo = (tiempoActual - tiempoUltimaActividad) / 1000;
-
-  // Mostrar advertencia antes de la redirección
-  if (tiempoInactivo > tiempoInactividad - 3500 && !advertenciaMostrada) {
-    //Poner 80
-    //console.log("Tu sesión está a punto de expirar.");
-    alert("Tu sesión está a punto de expirar en menos de un minuto.");
-    advertenciaMostrada = true; // Asegura que solo se muestre una vez
+function reiniciarTemporizador() {
+  // Solo reiniciamos si la alerta NO está en pantalla
+  if (!alertaVisible) {
+    iniciarTemporizador();
   }
+}
 
-  // Redirigir si se excede el tiempo de inactividad
-  if (tiempoInactivo > tiempoInactividad) {
-    alert(
-      "Has estado inactivo demasiado tiempo. Serás redirigido al inicio de sesión."
-    );
-    window.location.href = "../php/logout.php"; // Redirigir al inicio de sesión
-  }
-}, 1000); // Verificar cada segundo
+function mostrarAlertaCierre() {
+  alertaVisible = true; // Bloqueamos los reinicios por movimiento de mouse
+
+  let tiempoRestante = TIEMPO_ADVERTENCIA / 1000; // Convertir a segundos para mostrar
+
+  Swal.fire({
+    title: "Tu sesión está por caducar",
+    html: `Cerrando sesión en <b>${tiempoRestante}</b> segundos por inactividad.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Mantener sesión",
+    cancelButtonText: "Cerrar ahora",
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    timer: TIEMPO_ADVERTENCIA,
+    timerProgressBar: true,
+    allowOutsideClick: false, // Evita que den clic fuera para cerrar
+    allowEscapeKey: false,
+    didOpen: () => {
+      const b = Swal.getHtmlContainer().querySelector("b");
+      // Actualizar el contador cada segundo visualmente
+      timerInterval = setInterval(() => {
+        tiempoRestante--;
+        if (b) {
+          b.textContent = tiempoRestante;
+        }
+      }, 1000);
+    },
+    willClose: () => {
+      clearInterval(timerInterval); // Limpiar el intervalo visual al cerrar
+    },
+  }).then((result) => {
+    /*
+      Manejo de resultados:
+      1. Si confirma (Botón Azul): Reinicia sesión.
+      2. Si el timer se acaba (dismiss === timer): Cierra sesión.
+      3. Si cancela (Botón Rojo): Cierra sesión.
+    */
+    if (result.isConfirmed) {
+      alertaVisible = false;
+      iniciarTemporizador();
+      // Opcional: Hacer un fetch pequeño al servidor para renovar la cookie de PHP
+      fetch("verificar_sesion.php");
+
+      Swal.fire({
+        title: "Sesión extendida",
+        text: "Puedes continuar trabajando.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } else if (
+      result.dismiss === Swal.DismissReason.timer ||
+      result.dismiss === Swal.DismissReason.cancel
+    ) {
+      cerrarSesion();
+    }
+  });
+}
+
+function cerrarSesion() {
+  window.location.href = "logout.php"; // Asegúrate que esta ruta sea correcta
+}
