@@ -1,8 +1,8 @@
 // Configuración de tiempos (en milisegundos)
-//const TIEMPO_INACTIVIDAD = 30 * 60 * 1000; // 30 minutos totales
-//const TIEMPO_ADVERTENCIA = 60 * 1000; // Mostrar alerta 60 segundos antes de cerrar
-const TIEMPO_INACTIVIDAD = 60 * 1000; // 60 segundos total
-const TIEMPO_ADVERTENCIA = 15 * 1000; // Alerta a los 15 segundos
+const TIEMPO_INACTIVIDAD = 30 * 60 * 1000; // 30 minutos totales
+const TIEMPO_ADVERTENCIA = 60 * 1000; // Mostrar alerta 60 segundos antes de cerrar
+// const TIEMPO_INACTIVIDAD = 60 * 1000; // 60 segundos total
+// const TIEMPO_ADVERTENCIA = 15 * 1000; // Alerta a los 15 segundos
 const TIEMPO_ESPERA_ALERTA = TIEMPO_INACTIVIDAD - TIEMPO_ADVERTENCIA;
 
 let timerInactividad;

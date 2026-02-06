@@ -194,30 +194,12 @@ $_SESSION['last_token'] = $current_token;
                 </a>
                 <ul>
                     <li>
-                        <a href="#" id="movimientos-link">
+                        <a href="#" id="ordenes-link">
                             <i class="fa-solid fa-list-check"></i>
-                            <span>MOVIMIENTOS</span>
+                            <span>ORDENES</span>
                         </a>
                     </li>
 
-                    <li>
-                        <a href="#" id="etiquetas-link">
-                            <i class="fa-solid fa-barcode"></i>
-                            <span>ETIQUETAS</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" id="ajustesinventario-link" class="disabled-link" onclick="return false;">
-                            <i class=" fa-solid fa-sliders"></i>
-                            <span>AJUSTES INVENTARIO</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" id="abonosproveedor-link" class="disabled-link" onclick="return false;">
-                            <i class=" fa-solid fa-money-bill-1-wave"></i>
-                            <span>ABONOS A PROVEEDOR</span>
-                        </a>
-                    </li>
                 </ul>
             </li>
 
@@ -317,7 +299,7 @@ $_SESSION['last_token'] = $current_token;
 
                     <!-- Contenido del Dropdown Perfil -->
                     <div id="perfilDropdown" class="dropdown-content">
-                        <div class="perfil-info">                            
+                        <div class="perfil-info">
                             <img id="header-user-image" src="<?php echo $_SESSION['imagen']; ?>" alt="Imagen de perfil" width="80" height="80">
                             <p><strong><?php echo $_SESSION['usuario']; ?></strong></p>
                             <p><?php echo $_SESSION['nombre'] . " " . $_SESSION['appaterno'] . " " . $_SESSION['apmaterno']; ?></p>
@@ -341,6 +323,8 @@ $_SESSION['last_token'] = $current_token;
     </div>
 
     <!--Scripts JS-->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script src="../js/dashboard.js"></script>
 

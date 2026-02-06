@@ -9392,742 +9392,320 @@ function cargarProveedores() {
     .catch((error) => console.error("Error al cargar proveedores:", error));
 }
 
-// Llamar movimientos ********************************************
-document.addEventListener("DOMContentLoaded", function () {
-  // Llamar a la función para adjuntar listeners a los botones del menú SOLO UNA VEZ
-  const botonesMovimiento = document.querySelectorAll(
-    ".menu-movimientosm button",
-  );
-  botonesMovimiento.forEach((boton) => {
-    boton.addEventListener("click", function () {
-      const tipoMovimiento = this.textContent
-        .toLowerCase()
-        .replace("registrar ", "")
-        .replace(" múltiple", "")
-        .replace(" por", "")
-        .replace(" de", "_");
-      const tipoParaMostrar =
-        tipoMovimiento +
-        (boton.textContent.includes("Múltiple") ? "_multiple" : "");
-      console.log(
-        "Tipo para botón:",
-        tipoParaMostrar,
-        "Texto del botón:",
-        boton.textContent,
-      );
-      mostrarFormulario(tipoParaMostrar);
-    });
-  });
-
-  // El listener para el enlace de movimientos ahora solo carga el contenido
-  document
-    .getElementById("movimientos-link")
-    .addEventListener("click", function (event) {
-      event.preventDefault();
-      fetch("../php/operaciones/movimientos.php")
-        .then((response) => response.text())
-        .then((html) => {
-          document.getElementById("content-area").innerHTML = html;
-          // Ahora, asignar los controladores SOLO a los botones del FORMULARIO
-          asignarControladorFormularioMovimiento();
-          // **LLAMAR A cargarTraspasosPendientes() AQUÍ, DESPUÉS DE CARGAR EL HTML**
-          cargarTraspasosPendientes();
-        })
-        .catch((error) => {
-          console.error("Error al cargar el contenido:", error);
-        });
-    });
+// Llamar Ordenes de servicio *************************************************
+// 1. CARGA DE MÓDULOS (AJAX)
+document.getElementById("ordenes-link").addEventListener("click", function (event) {
+    event.preventDefault();
+    fetch("catalogos/ordenes.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+      })
+      .catch((error) => console.error("Error al cargar contenido:", error));
 });
 
-function agregarFilaProducto() {
-  const tablaProductos = document
-    .getElementById("tabla-productos")
-    .getElementsByTagName("tbody")[0];
-  const newRow = tablaProductos.insertRow();
 
-  const cellCodbarProd = newRow.insertCell();
-  cellCodbarProd.innerHTML =
-    '<input type="text" name="productos[][codbar_prod]" required>'; // Cambiado a codbar_prod
+// 2. BUSCADOR DE CLIENTES (AUTOCOMPLETE)
+let timeoutBusquedaCliente;
 
-  const cellCantidad = newRow.insertCell();
-  cellCantidad.innerHTML =
-    '<input type="number" name="productos[][cantidad]" size="15" min="0" required>';
+document.addEventListener('input', function(e) {
+    if (e.target && e.target.id === 'busqueda-cliente') {
+        const inputBusqueda = e.target;
+        const termino = inputBusqueda.value.trim();
+        const contenedor = inputBusqueda.closest('.autocomplete-container');
+        const listaResultados = contenedor.querySelector('.lista-autocomplete');
+        
+        clearTimeout(timeoutBusquedaCliente);
+        listaResultados.innerHTML = '';
 
-  /*pattern="^[0-9]"
-    title="Solo se permiten números."
-    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size="10" min="0" */
-
-  const cellAcciones = newRow.insertCell();
-  cellAcciones.innerHTML =
-    '<button type="button" onclick="eliminarFilaProducto(this)"><i style="color: #d33; font-size: 17px;" class="fa-solid fa-trash"></i></button>';
-}
-function eliminarFilaProducto(button) {
-  const row = button.parentNode.parentNode;
-  row.parentNode.removeChild(row);
-}
-
-function mostrarFormulario(tipo) {
-  //console.log("mostrarFormulario() llamada con tipo:", tipo);
-  const formulario = document.getElementById("formulario-movimiento");
-  const formularioTitulo = formulario.querySelector("h2");
-  const tipoMovimientoInput = document.getElementById(
-    "tipo_movimiento_multiple",
-  );
-  const tablaProductosContainer = document.getElementById(
-    "tabla-productos-container",
-  );
-  const camposEspecificosDiv = document.getElementById(
-    "campos-especificos-multiple",
-  );
-
-  if (
-    !formulario ||
-    !formularioTitulo ||
-    !tipoMovimientoInput ||
-    !tablaProductosContainer ||
-    !camposEspecificosDiv
-  ) {
-    console.error("Elementos del formulario no encontrados.");
-    return;
-  }
-
-  formulario.style.display = "block";
-  tipoMovimientoInput.value = tipo;
-  tablaProductosContainer.style.display = "none"; // Ocultar por defecto
-  camposEspecificosDiv.innerHTML = ""; // Limpiar campos específicos
-  document
-    .getElementById("tabla-productos")
-    .getElementsByTagName("tbody")[0].innerHTML = ""; // Limpiar filas de productos
-
-  switch (tipo) {
-    case "entrada_multiple":
-      formularioTitulo.textContent = "Registrar Entrada Múltiple de Inventario";
-      tablaProductosContainer.style.display = "block";
-      formularioTitulo.classList.add("formulario-movimiento");
-      break;
-    case "salida_multiple":
-      formularioTitulo.textContent = "Registrar Salida Múltiple de Inventario";
-      tablaProductosContainer.style.display = "block"; // Asegúrate de que esto sea correcto para salidas
-      break;
-    case "devolucion_multiple":
-      formularioTitulo.textContent =
-        "Registrar Devolución Múltiple de Inventario (Salida)";
-      tablaProductosContainer.style.display = "block";
-      // Podrías agregar un campo específico para el motivo de la devolución aquí si es necesario
-      break;
-    case "devolucion_cliente_multiple":
-      formularioTitulo.textContent =
-        "Registrar Devolución Múltiple de cliente (Entrada)";
-      tablaProductosContainer.style.display = "block";
-      // Podrías agregar un campo específico para el motivo de la devolución aquí si es necesario
-      break;
-    case "entrada_traspaso_multiple":
-      formularioTitulo.textContent = "Registrar Entrada por Traspaso Múltiple";
-      tablaProductosContainer.style.display = "block";
-      const tiendaOrigenEntrada = document.createElement("div");
-      tiendaOrigenEntrada.classList.add("form-group");
-      tiendaOrigenEntrada.innerHTML =
-        '<label for="idtienda_origen">ID Tienda Origen:</label><input type="number" id="idtienda_origen" name="idtienda_origen" required>';
-      camposEspecificosDiv.appendChild(tiendaOrigenEntrada);
-      break;
-    case "salida_traspaso_multiple":
-      formularioTitulo.textContent = "Registrar Salida por Traspaso Múltiple";
-      tablaProductosContainer.style.display = "block";
-      const tiendaDestinoSalida = document.createElement("div");
-      tiendaDestinoSalida.classList.add("form-group");
-      tiendaDestinoSalida.innerHTML =
-        '<label for="idtienda_destino">ID Tienda Destino:</label><input type="number" id="idtienda_destino" name="idtienda_destino" required>';
-      camposEspecificosDiv.appendChild(tiendaDestinoSalida);
-      break;
-  }
-}
-
-function ocultarFormularioMultiple() {
-  const formulario = document.getElementById("formulario-movimiento");
-  if (formulario) formulario.style.display = "none";
-  const form = document.getElementById("form-movimiento-multiple");
-  if (form) form.reset();
-  const tablaProductosBody = document
-    .getElementById("tabla-productos")
-    ?.getElementsByTagName("tbody")[0];
-  if (tablaProductosBody) tablaProductosBody.innerHTML = "";
-  const camposEspecificos = document.getElementById(
-    "campos-especificos-multiple",
-  );
-  if (camposEspecificos) camposEspecificos.innerHTML = "";
-  const mensajeDiv = document.getElementById("mensaje");
-  if (mensajeDiv) mensajeDiv.style.display = "none";
-}
-
-function registrarMovimientoMultiple() {
-  //console.log("registrarMovimientoMultiple llamado");
-  const tipoMovimiento = document.getElementById(
-    "tipo_movimiento_multiple",
-  ).value;
-  const tablaProductos = document.getElementById("tabla-productos");
-  const filasProductos = tablaProductos.getElementsByTagName("tbody")[0].rows;
-  const mensajeDiv = document.getElementById("mensaje");
-  console.log("Número de filas encontradas:", filasProductos.length);
-  let productos = [];
-
-  if (!mensajeDiv) {
-    console.error("Elemento de mensaje no encontrado.");
-    return;
-  }
-
-  if (filasProductos.length === 0) {
-    mensajeDiv.textContent = "Debes agregar al menos un producto.";
-    mensajeDiv.className = "mensaje-error";
-    mensajeDiv.style.display = "block";
-    setTimeout(() => (mensajeDiv.style.display = "none"), 3000);
-    return;
-  }
-
-  for (let i = 0; i < filasProductos.length; i++) {
-    const codbarProdInput = filasProductos[i].querySelector(
-      'input[name="productos[][codbar_prod]"]', // Cambiado a codbar_prod
-    );
-    const cantidadInput = filasProductos[i].querySelector(
-      'input[name="productos[][cantidad]"]',
-    );
-
-    if (codbarProdInput && cantidadInput) {
-      productos.push({
-        codbar_prod: codbarProdInput.value, // Usar el valor del codbar_prod
-        cantidad: parseInt(cantidadInput.value),
-      });
-    }
-  }
-
-  let data = {
-    tipo_movimiento: tipoMovimiento,
-    productos: productos,
-  };
-
-  // Recopilar campos específicos según el tipo de movimiento
-  switch (tipoMovimiento) {
-    case "devolucion_multiple":
-      // Si agregaste un campo de motivo, recógelo aquí
-      break;
-    case "devolucion_multiple":
-      // Si agregaste un campo de motivo, recógelo aquí
-      break;
-    case "entrada_traspaso_multiple":
-      const tiendaOrigenInput = document.getElementById("idtienda_origen");
-      if (tiendaOrigenInput)
-        data.idtienda_origen = parseInt(tiendaOrigenInput.value);
-      break;
-    case "salida_traspaso_multiple":
-      const tiendaDestinoInput = document.getElementById("idtienda_destino");
-      if (tiendaDestinoInput)
-        data.idtienda_destino = parseInt(tiendaDestinoInput.value);
-      break;
-  }
-
-  console.log("Datos a enviar al backend (múltiple):", data);
-
-  // **INICIO: Llamada al backend con fetch**
-  fetch("../php/funciones/tu_api_endpoint_para_movimientos.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json", // Ajusta esto según cómo tu backend espera los datos
-    },
-    body: JSON.stringify(data), // Envía los datos como JSON
-  })
-    .then((response) => response.json()) // Espera una respuesta JSON del backend
-    .then((responseData) => {
-      // Manejar la respuesta del backend (éxito o error)
-      console.log("Respuesta del backend:", responseData);
-      if (responseData.success) {
-        mensajeDiv.textContent =
-          responseData.message ||
-          `Movimiento múltiple de ${tipoMovimiento} registrado exitosamente.`;
-        mensajeDiv.className = "mensaje-exito";
-        mensajeDiv.style.display = "block";
-        setTimeout(() => {
-          mensajeDiv.style.display = "none";
-          ocultarFormularioMultiple();
-        }, 3000);
-      } else {
-        mensajeDiv.textContent =
-          responseData.error ||
-          `Error al registrar el movimiento múltiple de ${tipoMovimiento}.`;
-        mensajeDiv.className = "mensaje-error";
-        mensajeDiv.style.display = "block";
-      }
-    })
-    .catch((error) => {
-      // Manejar errores de la llamada fetch
-      console.error("Error al enviar datos al backend:", error);
-      mensajeDiv.textContent = "Error de conexión con el servidor.";
-      mensajeDiv.className = "mensaje-error";
-      mensajeDiv.style.display = "block";
-    });
-  // **FIN: Llamada al backend con fetch**
-}
-
-function asignarControladorFormularioMovimiento() {
-  //console.log("asignarControladorFormularioMovimiento() llamada (para botones del formulario)");
-  const botonRegistrarMultiple = document.getElementById(
-    "registrar-movimiento-btn",
-  ); // Asigna un ID a tu botón en movimientos.php
-  if (botonRegistrarMultiple && !botonRegistrarMultiple.hasRegistrarListener) {
-    botonRegistrarMultiple.addEventListener(
-      "click",
-      registrarMovimientoMultiple,
-    );
-    botonRegistrarMultiple.hasRegistrarListener = true;
-  }
-
-  const botonCancelarMultiple = document.querySelector(
-    '#form-movimiento-multiple button[onclick="ocultarFormularioMultiple()"]',
-  );
-  if (botonCancelarMultiple && !botonCancelarMultiple.hasCancelarListener) {
-    botonCancelarMultiple.addEventListener("click", ocultarFormularioMultiple);
-    botonCancelarMultiple.hasCancelarListener = true;
-  }
-}
-
-// **NUEVAS FUNCIONES PARA GESTIONAR TRASPASOS PENDIENTES**
-
-function cargarTraspasosPendientes() {
-  const listaTraspasosDiv = document.getElementById(
-    "lista-traspasos-pendientes",
-  );
-  if (listaTraspasosDiv) {
-    listaTraspasosDiv.innerHTML = "<p>Cargando traspasos pendientes...</p>";
-
-    fetch("../php/funciones/gestionar_traspasos.php?action=listar_pendientes", {
-      method: "GET",
-      headers: {
-        "X-Requested-With": "XMLHttpRequest",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        listaTraspasosDiv.innerHTML = "";
-        if (data.success && data.data.length > 0) {
-          const tabla = document.createElement("table");
-          tabla.innerHTML = `
-                    <thead>
-                        <tr>
-                            <th>ID Traspaso</th>
-                            <th>Tienda Origen</th>
-                            <th>Fecha Envío</th>
-                            <th>Productos</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                `;
-          const tbody = tabla.querySelector("tbody");
-
-          data.data.forEach((traspaso) => {
-            const row = tbody.insertRow();
-            row.insertCell().textContent = traspaso.idtraspaso;
-            row.insertCell().textContent = traspaso.nomtienda_origen;
-            row.insertCell().textContent = traspaso.fecha_envio;
-
-            let productosHTML = "<ul>";
-            traspaso.detalles.forEach((detalle) => {
-              productosHTML += `<li>${detalle.nom_prod} - Cantidad: ${detalle.cantidad}</li>`;
-            });
-            productosHTML += "</ul>";
-            row.insertCell().innerHTML = productosHTML;
-
-            const accionesCell = row.insertCell();
-            const confirmarBtn = document.createElement("button");
-            confirmarBtn.textContent = "Confirmar";
-            confirmarBtn.onclick = () => confirmarTraspaso(traspaso.idtraspaso);
-            accionesCell.appendChild(confirmarBtn);
-
-            const rechazarBtn = document.createElement("button");
-            rechazarBtn.textContent = "Rechazar";
-            rechazarBtn.onclick = () => rechazarTraspaso(traspaso.idtraspaso);
-            accionesCell.appendChild(rechazarBtn);
-          });
-
-          listaTraspasosDiv.appendChild(tabla);
-        } else if (data.success) {
-          listaTraspasosDiv.innerHTML =
-            "<p>No hay traspasos pendientes por recibir.</p>";
-        } else {
-          listaTraspasosDiv.innerHTML = `<p class="mensaje-error">Error al cargar traspasos pendientes: ${
-            data.error || "Desconocido"
-          }</p>`;
+        if (termino.length < 2) {
+            listaResultados.style.display = 'none';
+            return;
         }
-      })
-      .catch((error) => {
-        listaTraspasosDiv.innerHTML = `<p class="mensaje-error">Error de conexión: ${error.message}</p>`;
-      });
-  }
+
+        timeoutBusquedaCliente = setTimeout(() => {
+            fetch(`cruds/buscar_clientes_select.php?q=${encodeURIComponent(termino)}`)
+                .then(res => res.json())
+                .then(data => {
+                    listaResultados.innerHTML = ''; 
+                    
+                    if (data.length > 0) {
+                        listaResultados.style.display = 'block';
+                        data.forEach(cliente => {
+                            const li = document.createElement('li');
+                            li.style.padding = "10px"; 
+                            li.style.cursor = "pointer";
+                            li.style.borderBottom = "1px solid #eee";
+                            li.textContent = `${cliente.nombre_cliente} ${cliente.papellido_cliente} (${cliente.tel_cliente})`;
+                            
+                            li.dataset.id = cliente.id_cliente;
+                            li.dataset.nombre = `${cliente.nombre_cliente} ${cliente.papellido_cliente}`;
+                            
+                            listaResultados.appendChild(li);
+                        });
+                    } else {
+                        // Mensaje de Cliente No Encontrado
+                        listaResultados.style.display = 'block';
+                        const liError = document.createElement('li');
+                        liError.style.color = 'red';
+                        liError.style.padding = '10px';
+                        liError.style.textAlign = 'center';
+                        liError.innerHTML = `
+                            <i class="fa-solid fa-circle-exclamation"></i> Cliente no encontrado.<br>
+                            <strong style="color: blue; cursor: pointer; text-decoration: underline;" 
+                                    onclick="abrirModalClienteExpress()">
+                                + ¡Regístralo aquí!
+                            </strong>
+                        `;
+                        listaResultados.appendChild(liError);
+                    }
+                })
+                .catch(err => console.error("Error búsqueda:", err));
+        }, 300);
+    }
+});
+
+// Selección de Cliente (Delegación)
+document.addEventListener('click', function(e) {
+    // Seleccionar item de la lista
+    if (e.target && e.target.tagName === 'LI' && e.target.closest('.lista-autocomplete') && !e.target.closest('strong')) {
+        const li = e.target;
+        const contenedor = li.closest('.autocomplete-container');
+        const inputBusqueda = contenedor.querySelector('#busqueda-cliente');
+        const inputHidden = contenedor.querySelector('#id_cliente_seleccionado');
+        const listaResultados = contenedor.querySelector('.lista-autocomplete');
+        const btnLimpiar = contenedor.querySelector('#limpiar-cliente');
+
+        inputBusqueda.value = li.dataset.nombre;
+        inputBusqueda.disabled = true; 
+        inputHidden.value = li.dataset.id;
+        listaResultados.style.display = 'none';
+        btnLimpiar.style.display = 'inline';
+    }
+
+    // Limpiar selección
+    if (e.target && e.target.id === 'limpiar-cliente') {
+        const btnLimpiar = e.target;
+        const contenedor = btnLimpiar.closest('.autocomplete-container');
+        const inputBusqueda = contenedor.querySelector('#busqueda-cliente');
+        const inputHidden = contenedor.querySelector('#id_cliente_seleccionado');
+
+        inputBusqueda.value = '';
+        inputBusqueda.disabled = false;
+        inputHidden.value = '';
+        btnLimpiar.style.display = 'none';
+        inputBusqueda.focus();
+    }
+
+    // Cerrar lista al hacer clic fuera
+    if (!e.target.closest('.autocomplete-container')) {
+        document.querySelectorAll('.lista-autocomplete').forEach(l => l.style.display = 'none');
+    }
+});
+
+
+// 3. FUNCIONES DE UTILIDAD (GLOBALES)
+function abrirModalOrden(id) { document.getElementById(id).style.display = 'flex'; }
+function cerrarModalOrden(id) { document.getElementById(id).style.display = 'none'; }
+function abrirModalClienteExpress() {
+    document.getElementById('modalClienteExpress').style.display = 'block';
+    document.getElementById('form-cliente-express').reset();
+}
+function cerrarModalClienteExpress() { document.getElementById('modalClienteExpress').style.display = 'none'; }
+
+function calcularSaldoOrden() {
+    const costo = parseFloat(document.getElementById('crear-costo').value) || 0;
+    const anticipo = parseFloat(document.getElementById('crear-anticipo').value) || 0;
+    document.getElementById('crear-saldo').value = (costo - anticipo).toFixed(2);
 }
 
-function confirmarTraspaso(idTraspaso) {
-  const mensajeTraspasoDiv = document.getElementById("mensaje-traspaso");
-  mensajeTraspasoDiv.textContent = "Confirmando traspaso...";
-  mensajeTraspasoDiv.className = "mensaje-info";
-  mensajeTraspasoDiv.style.display = "block";
+function previewEvidencia(input) {
+    const container = document.getElementById('preview-container');
+    container.innerHTML = ''; 
+    if (input.files) {
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '50px'; img.style.height = '50px'; img.style.objectFit = 'cover';
+                img.style.borderRadius = '4px'; img.style.border = '1px solid #ddd';
+                container.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        });
+    }
+}
 
-  const datosConfirmacion = {
-    id_traspaso_pendiente: idTraspaso,
-  };
 
-  fetch("../php/funciones/confirmar_traspaso.php", {
-    // Asegúrate de que la ruta sea correcta
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json", // Indica que enviamos JSON
-      "X-Requested-With": "XMLHttpRequest", // Mantén esto si tu backend lo verifica
-    },
-    body: JSON.stringify(datosConfirmacion), // Envía los datos como JSON
-  })
+// 4. LÓGICA DE CÁMARA WEB
+let streamCamara = null;
+let fotosCapturadas = [];
+
+document.addEventListener('click', function(e) {
+    // Activar
+    if(e.target && e.target.id === 'btn-activar-camara') {
+        const video = document.getElementById('video-webcam');
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                streamCamara = stream;
+                video.srcObject = stream;
+                video.play();
+                document.getElementById('camera-preview').style.display = 'block';
+                e.target.style.display = 'none';
+                document.getElementById('btn-tomar-foto').style.display = 'inline-block';
+            })
+            .catch(err => Swal.fire('Error', 'No se pudo acceder a la cámara.', 'error'));
+    }
+    
+    // Capturar
+    if(e.target && e.target.id === 'btn-tomar-foto') {
+        const video = document.getElementById('video-webcam');
+        const canvas = document.getElementById('canvas-webcam');
+        const container = document.getElementById('preview-container');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        canvas.toBlob(function(blob) {
+            const archivo = new File([blob], "foto_webcam_" + Date.now() + ".jpg", { type: "image/jpeg" });
+            fotosCapturadas.push(archivo);
+            
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(blob);
+            img.style.width = '50px'; img.style.height = '50px'; img.style.objectFit = 'cover';
+            img.style.border = '1px solid #28a745'; img.style.borderRadius = '4px';
+            container.appendChild(img);
+            
+            // Efecto flash
+            video.style.opacity = 0.5;
+            setTimeout(() => video.style.opacity = 1, 100);
+        }, 'image/jpeg', 0.95);
+    }
+});
+
+
+// 5. ENVÍO DE FORMULARIOS (DELEGACIÓN DE EVENTOS)
+document.addEventListener('submit', function(e) {
+    
+    // A) GUARDAR CLIENTE EXPRESS
+    if (e.target && e.target.id === 'form-cliente-express') {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const formData = new FormData(e.target);
+
+        fetch('cruds/guardar_cliente_express.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                cerrarModalClienteExpress();
+                const inputBusqueda = document.getElementById('busqueda-cliente');
+                const inputHidden = document.getElementById('id_cliente_seleccionado');
+                const btnLimpiar = document.getElementById('limpiar-cliente');
+                const listaResultados = document.getElementById('lista-resultados-clientes');
+
+                if (inputBusqueda && inputHidden) {
+                    inputBusqueda.value = `${data.nombre_completo} (${data.telefono})`;
+                    inputBusqueda.disabled = true; 
+                    inputHidden.value = data.id;   
+                    if (btnLimpiar) btnLimpiar.style.display = 'inline';
+                    if (listaResultados) listaResultados.style.display = 'none';
+                }
+                Swal.fire({ icon: 'success', title: 'Cliente creado', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        });
+    }
+
+    // B) CREAR ORDEN (INCLUYE FOTOS WEBCAM)
+    if (e.target && e.target.id === 'form-crearOrden') {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        // Agregar fotos de webcam si existen
+        if (typeof fotosCapturadas !== 'undefined' && fotosCapturadas.length > 0) {
+            fotosCapturadas.forEach((foto, index) => {
+                formData.append('evidencias[]', foto, `webcam_foto_${index}.jpg`);
+            });
+        }
+
+        Swal.fire({ title: 'Procesando...', text: 'Generando orden...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        fetch('cruds/procesar_crear_orden.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                cerrarModalOrden('crear-modalOrden');
+                form.reset();
+                document.getElementById('preview-container').innerHTML = '';
+                
+                // Reset Cámara
+                fotosCapturadas = []; 
+                if(streamCamara) streamCamara.getTracks().forEach(track => track.stop());
+                document.getElementById('camera-preview').style.display = 'none';
+                document.getElementById('btn-activar-camara').style.display = 'inline-block';
+                document.getElementById('btn-tomar-foto').style.display = 'none';
+
+                // Reset Buscador Cliente
+                const inputBusqueda = document.getElementById('busqueda-cliente');
+                if(inputBusqueda) { inputBusqueda.value = ''; inputBusqueda.disabled = false; }
+                if(document.getElementById('limpiar-cliente')) document.getElementById('limpiar-cliente').style.display = 'none';
+                
+                // ALERTA DE ÉXITO CON QR
+                Swal.fire({
+                    title: '¡Orden Creada!',
+                    html: `<p>${data.message}</p>
+                           <div style="display: flex; justify-content: center; margin: 15px 0;">
+                               <div id="qrcode-container"></div>
+                           </div>
+                           <p style="font-size: 12px; color: #666;">Escanea para ver el rastreo</p>`,
+                    icon: 'success',
+                    confirmButtonText: '<i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cerrar',
+                    didOpen: () => {
+                         new QRCode(document.getElementById("qrcode-container"), {
+                            text: data.token_qr, width: 128, height: 128
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const tel = data.datos_whatsapp.telefono.replace(/\D/g,'');
+                        const msg = encodeURIComponent(data.datos_whatsapp.mensaje);
+                        window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
+                    }
+                    if(document.getElementById("ordenes-link")) document.getElementById("ordenes-link").click(); 
+                });
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            Swal.fire('Error', 'Fallo en el servidor', 'error');
+        });
+    }
+});
+
+//Función para cargar los primeras 10 ordenes por defecto
+function cargarOrdenes() {
+  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
+  cargando = false; //Asegurar que el scroll pueda volver a activarse
+
+  fetch("cruds/cargar_ordenes.php?limit=10&offset=0")
     .then((response) => response.json())
     .then((data) => {
-      mensajeTraspasoDiv.style.display = "none";
-      if (data.success) {
-        mensajeTraspasoDiv.textContent = data.message;
-        mensajeTraspasoDiv.className = "mensaje-exito";
-        mensajeTraspasoDiv.style.display = "block";
-        cargarTraspasosPendientes(); // Recargar la lista después de confirmar
-        setTimeout(() => (mensajeTraspasoDiv.style.display = "none"), 3000);
-      } else {
-        mensajeTraspasoDiv.textContent =
-          data.error || "Error al confirmar el traspaso.";
-        mensajeTraspasoDiv.className = "mensaje-error";
-        mensajeTraspasoDiv.style.display = "block";
-        setTimeout(() => (mensajeTraspasoDiv.style.display = "none"), 3000);
-      }
+      actualizarTablaOrdenes(data);
     })
-    .catch((error) => {
-      mensajeTraspasoDiv.textContent = `Error de conexión: ${error.message}`;
-      mensajeTraspasoDiv.className = "mensaje-error";
-      mensajeTraspasoDiv.style.display = "block";
-      setTimeout(() => (mensajeTraspasoDiv.style.display = "none"), 3000);
-    });
+    .catch((error) => console.error("Error al cargar ordenes:", error));
 }
 
-function rechazarTraspaso(idTraspaso) {
-  const mensajeTraspasoDiv = document.getElementById("mensaje-traspaso");
-  mensajeTraspasoDiv.textContent = "Rechazando traspaso...";
-  mensajeTraspasoDiv.className = "mensaje-warning";
-  mensajeTraspasoDiv.style.display = "block";
-
-  const formData = new FormData();
-  formData.append("action", "rechazar_traspaso");
-  formData.append("idtraspaso", idTraspaso);
-
-  fetch("../php/funciones/gestionar_traspasos.php", {
-    method: "POST",
-    headers: {
-      "X-Requested-With": "XMLHttpRequest", // Indica que es una petición AJAX
-    },
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      mensajeTraspasoDiv.style.display = "none";
-      if (data.success) {
-        mensajeTraspasoDiv.textContent = data.message;
-        mensajeTraspasoDiv.className = "mensaje-exito";
-        mensajeTraspasoDiv.style.display = "block";
-        cargarTraspasosPendientes(); // Recargar la lista después de rechazar
-        setTimeout(() => (mensajeTraspasoDiv.style.display = "none"), 3000);
-      } else {
-        mensajeTraspasoDiv.textContent =
-          data.error || "Error al rechazar el traspaso.";
-        mensajeTraspasoDiv.className = "mensaje-error";
-        mensajeTraspasoDiv.style.display = "block";
-        setTimeout(() => (mensajeTraspasoDiv.style.display = "none"), 3000);
-      }
-    })
-    .catch((error) => {
-      mensajeTraspasoDiv.textContent = `Error de conexión: ${error.message}`;
-      mensajeTraspasoDiv.className = "mensaje-error";
-      mensajeTraspasoDiv.style.display = "block";
-      setTimeout(() => (mensajeTraspasoDiv.style.display = "none"), 3000);
-    });
-}
-
-// Llamar generador de etiquetas***************************************************************************
-document
-  .getElementById("etiquetas-link")
-  .addEventListener("click", function (event) {
-    event.preventDefault(); // Evita la acción por defecto del enlace
-    fetch("../php/operaciones/etiquetas.php")
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-      })
-      .catch((error) => {
-        console.error("Error al cargar el contenido:", error);
-      });
-  });
-
-// Llamar ajuste de inventario
-document
-  .getElementById("ajustesinventario-link")
-  .addEventListener("click", function (event) {
-    event.preventDefault(); // Evita la acción por defecto del enlace
-    fetch("../php/operaciones/ajusteinvt.php")
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        asignarControladorFormularioAjusteinvt(); // Asigna el controlador después de cargar el contenido
-      })
-      .catch((error) => {
-        console.error("Error al cargar el contenido:", error);
-      });
-  });
-
-// Guardar Etiqueta
-function enviarFormularioAjusteinvt(event) {
-  event.preventDefault(); // Evita la recarga de la página
-
-  const formData = new FormData(event.target); // Obtiene los datos del formulario
-  fetch("../php/operaciones/ajusteinvt.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.text())
-    .then((html) => {
-      document.getElementById("content-area").innerHTML = html; // Actualiza el contenido
-      asignarControladorFormularioAjusteinvt(); // Vuelve a asignar el controlador para el nuevo contenido
-    })
-    .catch((error) => {
-      console.error("Error al enviar el formulario:", error);
-    });
-}
-//Cargamos datos para editar
-function cargarEditarAjusteinvt(id) {
-  fetch("../php/operaciones/ajusteinvt.php?idajuste=" + id)
-    .then((response) => response.text())
-    .then((html) => {
-      document.getElementById("content-area").innerHTML = html;
-      asignarControladorFormularioAjusteinvt();
-    })
-    .catch((error) => {
-      console.error("Error al cargar el contenido:", error);
-    });
-}
-//Eliminamos Etiqueta db
-function eliminaAjusteinvt(id) {
-  if (confirm("¿Estás seguro de que deseas eliminar este ajuste?")) {
-    fetch("../php/operaciones/ajusteinvt.php?action=delete&ididajuste=" + id)
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        asignarControladorFormularioAjusteinvt();
-      })
-      .catch((error) => {
-        console.error("Error al eliminar el Ajuste:", error);
-      });
-  }
-}
-// Inicializar al cargar la página
-document.addEventListener("DOMContentLoaded", function () {
-  asignarControladorFormularioAjusteinvt(); // Asigna el controlador cuando el DOM esté listo
-});
-
-// Asignar controlador al formulario
-function asignarControladorFormularioAjusteinvt() {
-  const form = document.querySelector("form"); // Selecciona el formulario dentro del nuevo contenido
-  if (form) {
-    form.addEventListener("submit", enviarFormularioAjusteinvt); // Asigna el evento submit
-  }
-}
-// Función para limpiar el formulario Ajustes de inventario
-function limpiarFormularioAjusteinvt() {
-  console.log("Limpiando el formulario de ajuste de inventario..."); // Para depuración
-
-  // Seleccionar todos los elementos input de texto y ocultos
-  const campos = document.querySelectorAll(
-    '#frmAjusteinvt input[type="hidden"], #frmAjusteinvt[type="text"], #frmAjusteinvt input[type="email"], #frmEAjusteinvt input[type="number"]',
-  );
-  campos.forEach((campo) => (campo.value = ""));
-
-  // Seleccionar todos los elementos select del formulario
-  const selects = document.querySelectorAll("#frmAjusteinvt select");
-  selects.forEach((select) => (select.selectedIndex = 0)); // Reinicia el select al primer valor (generalmente un placeholder)
-}
-
-// Llamar abono a proveedores
-document
-  .getElementById("abonosproveedor-link")
-  .addEventListener("click", function (event) {
-    event.preventDefault(); // Evita la acción por defecto del enlace
-    fetch("../php/operaciones/abonosproveedores.php")
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        asignarControladorFormularioAbonoProveedor(); // Asigna el controlador después de cargar el contenido
-      })
-      .catch((error) => {
-        console.error("Error al cargar el contenido:", error);
-      });
-  });
-
-// Guardar abono
-function enviarFormularioAbonoProveedor(event) {
-  event.preventDefault(); // Evita la recarga de la página
-
-  const formData = new FormData(event.target); // Obtiene los datos del formulario
-  fetch("../php/operaciones/abonosproveedores.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.text())
-    .then((html) => {
-      document.getElementById("content-area").innerHTML = html; // Actualiza el contenido
-      asignarControladorFormularioAbonoProveedor(); // Vuelve a asignar el controlador para el nuevo contenido
-    })
-    .catch((error) => {
-      console.error("Error al enviar el formulario:", error);
-    });
-}
-//Cargamos datos para editar
-function cargarEditarAbonoProveedor(id) {
-  fetch("../php/operaciones/ajusteinvt.php?idajuste=" + id)
-    .then((response) => response.text())
-    .then((html) => {
-      document.getElementById("content-area").innerHTML = html;
-      asignarControladorFormularioAbonoProveedor();
-    })
-    .catch((error) => {
-      console.error("Error al cargar el contenido:", error);
-    });
-}
-//Eliminamos el Abono
-function eliminarAbono(id) {
-  if (confirm("¿Estás seguro de que deseas eliminar este abono?")) {
-    fetch(
-      "../php/operaciones/abonosproveedores.php?action=delete&idabono=" + id,
-    )
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        asignarControladorFormularioAbonoProveedor();
-      })
-      .catch((error) => {
-        console.error("Error al eliminar el Abono:", error);
-      });
-  }
-}
-// Inicializar al cargar la página
-document.addEventListener("DOMContentLoaded", function () {
-  asignarControladorFormularioAbonoProveedor(); // Asigna el controlador cuando el DOM esté listo
-});
-
-// Asignar controlador al formulario
-function asignarControladorFormularioAbonoProveedor() {
-  const form = document.querySelector("form"); // Selecciona el formulario dentro del nuevo contenido
-  if (form) {
-    form.addEventListener("submit", enviarFormularioAbonoProveedor); // Asigna el evento submit
-  }
-}
-// Función para limpiar el formulario Abono Proveedor
-function limpiarFormularioAbonoProveedor() {
-  console.log("Limpiando el formulario de abono a proveedor..."); // Para depuración
-
-  // Seleccionar todos los elementos input de texto y ocultos
-  const campos = document.querySelectorAll(
-    '#frmAbonosProveedor input[type="hidden"], #frmAbonosProveedor[type="text"], #frmAbonosProveedor input[type="email"], #frmAbonosProveedor input[type="number"]',
-  );
-  campos.forEach((campo) => (campo.value = ""));
-
-  // Seleccionar todos los elementos select del formulario
-  const selects = document.querySelectorAll("#frmAbonosProveedor select");
-  selects.forEach((select) => (select.selectedIndex = 0)); // Reinicia el select al primer valor (generalmente un placeholder)
-}
-
-// Llamar ajuste de inventario
-document
-  .getElementById("ajustesinventario-link")
-  .addEventListener("click", function (event) {
-    event.preventDefault(); // Evita la acción por defecto del enlace
-    fetch("../php/operaciones/ajusteinvt.php")
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        asignarControladorFormularioAjusteinvt(); // Asigna el controlador después de cargar el contenido
-      })
-      .catch((error) => {
-        console.error("Error al cargar el contenido:", error);
-      });
-  });
-
-// Guardar Etiqueta
-function enviarFormularioAjusteinvt(event) {
-  event.preventDefault(); // Evita la recarga de la página
-
-  const formData = new FormData(event.target); // Obtiene los datos del formulario
-  fetch("../php/operaciones/ajusteinvt.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.text())
-    .then((html) => {
-      document.getElementById("content-area").innerHTML = html; // Actualiza el contenido
-      asignarControladorFormularioAjusteinvt(); // Vuelve a asignar el controlador para el nuevo contenido
-    })
-    .catch((error) => {
-      console.error("Error al enviar el formulario:", error);
-    });
-}
-//Cargamos datos para editar
-function cargarEditarAjusteinvt(id) {
-  fetch("../php/operaciones/ajusteinvt.php?idajuste=" + id)
-    .then((response) => response.text())
-    .then((html) => {
-      document.getElementById("content-area").innerHTML = html;
-      asignarControladorFormularioAjusteinvt();
-    })
-    .catch((error) => {
-      console.error("Error al cargar el contenido:", error);
-    });
-}
-//Eliminamos Etiqueta db
-function eliminaAjusteinvt(id) {
-  if (confirm("¿Estás seguro de que deseas eliminar este ajuste?")) {
-    fetch("../php/operaciones/ajusteinvt.php?action=delete&ididajuste=" + id)
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        asignarControladorFormularioAjusteinvt();
-      })
-      .catch((error) => {
-        console.error("Error al eliminar el Ajuste:", error);
-      });
-  }
-}
-// Inicializar al cargar la página
-document.addEventListener("DOMContentLoaded", function () {
-  asignarControladorFormularioAjusteinvt(); // Asigna el controlador cuando el DOM esté listo
-});
-
-// Asignar controlador al formulario
-function asignarControladorFormularioAjusteinvt() {
-  const form = document.querySelector("form"); // Selecciona el formulario dentro del nuevo contenido
-  if (form) {
-    form.addEventListener("submit", enviarFormularioAjusteinvt); // Asigna el evento submit
-  }
-}
-// Función para limpiar el formulario Ajustes de inventario
-function limpiarFormularioAjusteinvt() {
-  console.log("Limpiando el formulario de ajuste de inventario..."); // Para depuración
-
-  // Seleccionar todos los elementos input de texto y ocultos
-  const campos = document.querySelectorAll(
-    '#frmAjusteinvt input[type="hidden"], #frmAjusteinvt[type="text"], #frmAjusteinvt input[type="email"], #frmEAjusteinvt input[type="number"]',
-  );
-  campos.forEach((campo) => (campo.value = ""));
-
-  // Seleccionar todos los elementos select del formulario
-  const selects = document.querySelectorAll("#frmAjusteinvt select");
-  selects.forEach((select) => (select.selectedIndex = 0)); // Reinicia el select al primer valor (generalmente un placeholder)
-}
-
-// Llamar informes
+// Llamar informes *****************************************************************
 document
   .getElementById("informes-link")
   .addEventListener("click", function (event) {

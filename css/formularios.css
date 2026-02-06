@@ -616,12 +616,12 @@ form .button input {
   margin-left: 20px;
   margin-bottom: 25px;
 }
-.formulario-movimiento{
+.formulario-movimiento {
   color: #7c52f0 !important;
   text-align: center;
   margin-bottom: 15px;
 }
-#lista-traspasos-pendientes{
+#lista-traspasos-pendientes {
   color: #d33;
 }
 
@@ -673,16 +673,44 @@ form .button input {
   background: #7c52f0;
 }
 /*Modal ventas*/
-  #resumen-compra {
-        margin-bottom: 10px;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 10px;
-    }
+#resumen-compra {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
 
-    #cambio {
-        margin-top: 10px;
-        font-weight: bold;
-    }
+#cambio {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.lista-autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000; /* Para que flote encima de todo */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.lista-autocomplete li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.lista-autocomplete li:hover {
+  background-color: #f0f0f0;
+  color: #007bff;
+}
 
 /* Estilos cuando el modo oscuro está activado ***************************/
 
@@ -711,8 +739,12 @@ form .button input {
   color: #e77575;
 }
 
-.darkmode .modal-content, .darkmode .modal-contentProductos,
-.darkmode .modal-contentUsuarios, .darkmode .modal-contentPerfilUsuario , .darkmode .swal2-container, .darkmode .imagen-preview-container {
+.darkmode .modal-content,
+.darkmode .modal-contentProductos,
+.darkmode .modal-contentUsuarios,
+.darkmode .modal-contentPerfilUsuario,
+.darkmode .swal2-container,
+.darkmode .imagen-preview-container {
   background-color: #444446;
   color: white;
 }
@@ -755,7 +787,7 @@ form .button input {
 .darkmode .carrito-total .btn-pagar:hover {
   background: #2f9a2a;
 }
-.darkmode h2{
+.darkmode h2 {
   color: #a667bc;
 }
 

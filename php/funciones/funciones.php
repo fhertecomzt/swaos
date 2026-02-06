@@ -3,7 +3,7 @@
 //Obtener registros*******************************************
 function obtenerRegistros($dbh, $tabla, $campos = "*", $orden = "id DESC", $campoId = "id", $registrosPorPagina = 10, $pagina = 1, $soloActivos = false)
 {
-  $tablasPermitidas = ['talleres', 'roles', 'productos', 'categorias', 'marcas', 'tiposervicios', 'estadosservicios',  'metodosdepago', 'impuestos', 'clientes', 'proveedores', 'estados', 'unidades_med'];
+  $tablasPermitidas = ['talleres', 'roles', 'productos', 'categorias', 'marcas', 'equipos', 'tiposervicios', 'estadosservicios',  'metodosdepago', 'impuestos', 'clientes', 'proveedores', 'estados', 'unidades_med'];
   if (!in_array($tabla, $tablasPermitidas)) {
     return [];
   }
@@ -134,4 +134,27 @@ function existeInventario($dbh, $id_producto, $id_tienda)
   $stmt = $dbh->prepare("SELECT COUNT(*) FROM inventario_sucursal WHERE idproducto = ? AND idtienda = ?");
   $stmt->execute([$id_producto, $id_tienda]);
   return (bool) $stmt->fetchColumn();
+}
+
+// Obtener Órdenes con detalles (JOINs)
+function obtenerOrdenesDashboard($dbh, $limit = 20)
+{
+  try {
+    $sql = "SELECT o.id_orden, c.nombre_cliente, c.papellido_cliente, 
+                       e.nombre_equipo, o.modelo, o.falla, o.costo_servicio, 
+                       es.nombre_estado, o.token_hash, o.creado_servicio
+                FROM ordenesservicio o
+                JOIN clientes c ON o.id_cliente = c.id_cliente
+                JOIN equipos e ON o.id_equipo = e.id_equipo
+                JOIN estadosservicios es ON o.id_estado_servicio = es.id_estado_servicio
+                ORDER BY o.id_orden DESC LIMIT :limit";
+
+    $stmt = $dbh->prepare($sql);
+    $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  } catch (PDOException $e) {
+    error_log("Error en obtenerOrdenesDashboard: " . $e->getMessage());
+    return [];
+  }
 }
