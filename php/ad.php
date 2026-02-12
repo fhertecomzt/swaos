@@ -207,7 +207,7 @@ $_SESSION['last_token'] = $current_token;
             <li>
                 <a href="#" id="ventas-link">
                     <i class="fa-solid fa-cash-register"></i>
-                    <span class="titles_btns">VENTAS</span>
+                    <span class="titles_btns disabled-link">VENTAS</span>
                 </a>
             </li>
 
@@ -215,7 +215,7 @@ $_SESSION['last_token'] = $current_token;
             <li>
                 <a href="#" id="ventas-link">
                     <i class="fa-solid fa-cash-register"></i>
-                    <span class="titles_btns">COTIZACIONES</span>
+                    <span class="titles_btns disabled-link">COTIZACIONES</span>
                 </a>
             </li>
 
@@ -223,7 +223,7 @@ $_SESSION['last_token'] = $current_token;
             <li>
                 <a href="#" id="ventas-link">
                     <i class="fa-solid fa-cash-register"></i>
-                    <span class="titles_btns">CITAS</span>
+                    <span class="titles_btns disabled-link">CITAS</span>
                 </a>
             </li>
 
@@ -231,14 +231,14 @@ $_SESSION['last_token'] = $current_token;
             <li>
                 <a href="#" id="ventas-link">
                     <i class="fa-solid fa-cash-register"></i>
-                    <span class="titles_btns">CLIENTE</span>
+                    <span class="titles_btns disabled-link">CLIENTE</span>
                 </a>
             </li>
 
             <!--Reportes-->
             <li><a href="#" id="informes-link" class="disabled-link" onclick="return false;">
                     <i class=" fa-solid fa-sheet-plastic"></i>
-                    <span class="titles_btns">REPORTES</span>
+                    <span class="titles_btns disabled-link">REPORTES</span>
                 </a>
             </li>
 
@@ -324,10 +324,13 @@ $_SESSION['last_token'] = $current_token;
 
     <!--Scripts JS-->
 
+    <!--Sortable libreria para mover los cards del dashboard-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <!--Libreria para Qrcode-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script src="../js/dashboard.js"></script>
-
     <script src="../js/scripts.js"></script>
     <script src="../js/scriptssup.js"></script>
     <script src="../js/clientes.js"></script>

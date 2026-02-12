@@ -1,6 +1,6 @@
 /*Dashboard*/
 .container_dashboard {
-  background: #fff;
+  background: #e1e1e1;
   border-radius: 10px;
   box-shadow: 0 7px 7px rgba(0, 0, 0, 0.5);
   left: 16px;
@@ -19,41 +19,61 @@
   position: relative;
   width: 100%;
 }
+/* Estilo Base de la Tarjeta */
 .cards .card {
   position: relative;
-  background: #40a6d7;
-  padding: 30px;
-  border-radius: 20px;
+  border-radius: 12px;
+  padding: 25px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   cursor: pointer;
-  transition: 0.4s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); 
+  transition: transform 0.3s ease;
+  overflow: hidden; 
 }
+
 .cards .card:hover {
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.4);
-  background: #5ac8ff;
+    background: #ffffff !important; 
+    transform: translateY(-5px);    
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); 
+}
+
+.cards .card .card-numeros,
+.cards .card .card-nombre,
+.cards .card .card-icono {
+  color: #0f161c ;  
 }
 
 .cards .card .card-numeros {
-  position: relative;
-  font-weight: 700;
-  font-size: 2.5rem;
-  color: #1b4357;
+  font-size: 3rem;
+  font-weight: 800;
 }
+
 .cards .card .card-nombre {
-  color: #1b4357;
-  font-size: 1.1em;
-  margin-top: 5px;
-  margin-right: 80px;
+  font-size: 1.1rem;
+  opacity: 0.9; 
 }
+
 .cards .card .card-icono {
-  font-size: 3.5em;
-  color: #1b4357;
+  font-size: 4rem;
+  opacity: 0.4; 
 }
-.cards .card:hover .card-numeros,
-.cards .card:hover .card-nombre,
-.cards .card:hover .card-icono {
-  color: #ffffff;
+
+/* Cursor de manita para indicar que se puede mover */
+.cards .card {
+    cursor: grab; /* Manita abierta */
+}
+
+.cards .card:active {
+    cursor: grabbing; /* Manita cerrada al agarrar */
+}
+
+/* Estilo del "fantasma" (el espacio donde va a caer la tarjeta) */
+.tarjeta-fantasma {
+    opacity: 0.4;
+    background-color: #e0e0e0;
+    border: 2px dashed #999;
 }
 
 /* Estilos cuando el modo oscuro está activado */
@@ -76,7 +96,7 @@
 .darkmode .cards .card:hover .card-numeros,
 .darkmode .cards .card:hover .card-nombre,
 .darkmode .cards .card:hover .card-icono {
-  color: #3ca2fb;
+  color: white !important;
 }
 
 @media (max-width: 1450px) {

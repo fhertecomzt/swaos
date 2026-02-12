@@ -42,14 +42,14 @@ $_SESSION['captcha_result'] = $num1 + $num2;
                 <div class="information">
                     <div class="logomovil"></div>
                     <div class="info-childs">
-                        <h2>Bienvenido</h2>
-                        <p>SWAOS el sistema web de administración para órdenes de servicio</p>
+                        <h2>SWAOS</h2>
+                        <p>Sistema web de administración para órdenes de servicio</p>
                     </div>
                 </div>
 
                 <div class="form-information">
                     <div class="form-information-childs">
-                        <h2>Iniciar sesión</h2>
+                        <h2>Inicio de sesión</h2>
                         <form class="form" action="php/validarlogin.php" method="POST">
 
                             <div class="input-wrapper">
@@ -74,7 +74,7 @@ $_SESSION['captcha_result'] = $num1 + $num2;
                                 <?php endif; ?>
                             </div>
 
-                            <button type="submit" name="btn_iniciar" class="btn_iniciar" id="botoniniciar">Iniciar sesión</button>
+                            <button type="submit" name="btn_iniciar" class="btn_iniciar" id="botoniniciar">ENTRAR</button>
                         </form>
                         <!-- Mostrar el error si existe -->
                         <div style="width: 400px;">

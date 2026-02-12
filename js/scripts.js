@@ -81,34 +81,78 @@ function mostrarAlerta(tipo, titulo, mensaje) {
   Swal.fire({ title: titulo, text: mensaje, icon: tipo });
 }
 
-//cargar dashboard al inicio
+// Carga Dashboard y los cards movibles
 document.addEventListener("DOMContentLoaded", function () {
-  // Verifica si es la primera carga y si el contenedor existe
   let contentArea = document.getElementById("content-area");
+  
   if (contentArea) {
-    fetch("../php/dashboard.php")
+    fetch("../php/dashboard.php") 
       .then((response) => response.text())
       .then((data) => {
-        contentArea.innerHTML = data; // Carga el dashboard automáticamente
+        contentArea.innerHTML = data; 
+        
+        // -Llamar función de los cards movibles
+        iniciarDashboardSortable(); 
       })
       .catch((error) => console.error("Error al cargar el dashboard:", error));
   }
 });
 
-//Llamar Dashboard****************
-document
-  .getElementById("dashboard-link")
-  .addEventListener("click", function (event) {
-    event.preventDefault(); // Evita la acción por defecto del enlace
-    fetch("dashboard.php")
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-      })
-      .catch((error) => {
-        console.error("Error al cargar el contenido:", error);
-      });
-  });
+// Cargar por clic en el menu
+const dashboardLink = document.getElementById("dashboard-link");
+if (dashboardLink) {
+    dashboardLink.addEventListener("click", function (event) {
+        event.preventDefault(); 
+        fetch("dashboard.php")
+        .then((response) => response.text())
+        .then((html) => {
+            document.getElementById("content-area").innerHTML = html;
+
+            // Aquí sí la tenías puesta
+            iniciarDashboardSortable();
+        })
+        .catch((error) => {
+            console.error("Error al cargar el contenido:", error);
+        });
+    });
+}
+
+// Función de movimientos
+function iniciarDashboardSortable() {
+    // HTML el contenedor tenga id="dashboard-cards"
+    var el = document.getElementById('dashboard-cards');
+
+    if (!el) return; 
+
+    // A. Recuperar orden guardado
+    var ordenGuardado = localStorage.getItem('ordenDashboard');
+    if (ordenGuardado) {
+        var ordenArray = ordenGuardado.split('|');
+        ordenArray.forEach(function(id) {
+            var card = el.querySelector(`.card[data-id="${id}"]`);
+            if (card) {
+                el.appendChild(card); 
+            }
+        });
+    }
+
+    // B. Activar Sortable (Evitamos duplicados con la validación)
+    if (el.getAttribute('data-sortable-initialized')) return;
+    
+    Sortable.create(el, {
+        animation: 150,
+        ghostClass: 'tarjeta-fantasma',
+        onEnd: function (evt) {
+            var orden = [];
+            el.querySelectorAll('.card').forEach(function(card) {
+                orden.push(card.getAttribute('data-id'));
+            });
+            localStorage.setItem('ordenDashboard', orden.join('|'));
+        }
+    });
+    
+    el.setAttribute('data-sortable-initialized', 'true');
+}
 
 //Llamar Talleres *********************************************
 document
