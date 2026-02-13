@@ -11,7 +11,7 @@
   background: #e1e1e1;
   border-radius: 10px;
   box-shadow: 0 7px 7px rgba(0, 0, 0, 0.5);
-  min-height: 73vh;
+  min-height: 70vh;
   left: 16px;
   position: absolute;
   top: 160px;
@@ -805,6 +805,7 @@ form .button input {
 }
 @media (max-width: 768px) {
   .boton {
+    margin-top: auto;
     width: 75px;
   }
   .buscarlabel {

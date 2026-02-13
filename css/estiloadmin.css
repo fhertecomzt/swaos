@@ -6,99 +6,116 @@
   box-sizing: border-box;
   font-family: "Arial";
 }
+
 body {
-  display: flex;
+  background-color: #eef2f5;
+  overflow-x: hidden; 
 }
-/*Menu*/
+
+/*  MENU PRINCIPAL (ESTADO PC)*/
 .navbar {
-  background-color: #2c3e50; /* Un azul marino oscuro/grisáceo. Antes era #387ebf */
+  background-color: #2c3e50; 
+  position: fixed; /* Cambiado de sticky a fixed para mejor control */
   bottom: 0;
   height: 100vh;
   left: 0;
-  overflow: hidden;
-  position: sticky;
   top: 0;
-  transition: all 0.5s linear;
+  transition: all 0.4s ease;
   width: 240px;
-}
-.navbar:hover {
-  width: 250px; /*240px para que se mueva el menu y 200px para que quede fijo*/
-  transition: 0.5s;
-}
-nav ul {
-  /*Comprime, esconde los botones interntos*/
-  height: 0px;
-  overflow: hidden;
-  transition: 0.4s;
-}
-/*Personalización menú*/
-/*Botones externos del menu*/
-
-.titles_btns:hover {
-  font-weight: 600;
-}
-ul a {
-  /*Botones externos*/
-  box-sizing: border-box;
-  background-color: #29435d;
-  display: block;
-  width: 100%;
-  padding: 2px 5px;
-  text-decoration: none;
-  border-radius: 25px;
-}
-nav ul li:hover ul {
-  /*Expande botones internos del menu*/
-  height: auto;
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/*Botones internos del menu*/
-.menu li i,
-span {
-  margin-left: 10px;
-  color: #ffffff;
-  font-size: 13px;
-}
-.nav__icon {
-  display: none;
-}
-
-/*Logo del menú*/
 .logo {
   height: 90px;
   padding: 10px;
   text-align: center;
 }
+
 .nav__logo {
   border-radius: 11%;
   height: 50px;
   width: 50px;
 }
 
-/*Sección del cuerpo del menu */
+.nav__icon {
+  display: none; /* Oculto en PC */
+}
+
+/* Enlaces del menú */
 .menu {
-  height: 80%;
-  position: relative;
   list-style: none;
   padding: 0;
 }
-.menu li {
-  padding: 0.5rem;
-  transition: all 0.5s ease-in-out;
+
+.menu > li {
+  padding: 0;
+  transition: all 0.3s ease;
 }
-.menu a:hover {
+
+/* Botones externos */
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.nav-link:hover {
   background-color: rgba(128, 43, 255, 0.52);
 }
 
-/*Contenido area*/
+.menu li i {
+  font-size: 18px;
+  min-width: 35px; /* Ancho fijo para centrar iconos */
+  text-align: center;
+}
+
+.titles_btns {
+  font-size: 14px;
+  margin-left: 10px;
+  white-space: nowrap; /* Evita que el texto se parta */
+}
+
+/* Submenús */
+.has-submenu ul {
+  background-color: #1a252f;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.has-submenu ul.show {
+  max-height: 500px; /* Se abre con JS */
+}
+
+.has-submenu ul li a {
+  display: block;
+  padding: 10px 20px 10px 65px; /* Sangría interna */
+  color: #bdc3c7;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.has-submenu ul li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* CONTENIDO PRINCIPAL  */
 .main--content {
   position: relative;
-  background-color: #5f7089; /* Antes era #6a92b8 */
-  width: 100%;
+  margin-left: 240px; /* Empujado por el menú */
+  width: calc(100% - 240px);
   padding: 0.9rem;
-  transition: all 0.5s linear;
+  transition: all 0.4s ease;
+  min-height: 100vh;
 }
-/*Header principal*/
+
+/* Header, Perfil, Darkmode */
 .header--wrapper {
   display: flex;
   justify-content: space-between;
@@ -129,25 +146,20 @@ span {
   border: 2px solid  rgba(128, 43, 255, 0.52);
 }
 
-/*Estilo para el modal del Perfil **********************************************************/
 .Perfilmodal {
-  display: none; /* Oculto por defecto */
+  display: none; 
   position: absolute;
-  top: 9%; /* Ajusta esta distancia según la altura de tu header */
+  top: 9%; 
   left: 70%;
-
   background-color: white;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  width: 395px; /* Ajusta el tamaño del modal */
+  width: 395px; 
   padding: 15px;
-  z-index: 1000; /* Asegura que esté sobre otros elementos */
+  z-index: 1000; 
 }
 
-.modal-contentPerfil {
-  text-align: left;
-}
-
+.modal-contentPerfil { text-align: left; }
 .closePerfil {
   background-color: #ebedf0;
   border-radius: 100%;
@@ -160,198 +172,129 @@ span {
   width: 24px;
   margin-right: 10px;
 }
-.closePerfil:hover {
-  background-color: #ff0000;
-  color: #ffffff;
-  text-decoration: none;
+.closePerfil:hover { background-color: #ff0000; color: #ffffff; text-decoration: none; }
+.perfil-dropdown { position: relative; display: inline-block; }
+.perfil-btn { background: none; border: none; cursor: pointer; padding: 0; }
+.perfil-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #ccc; }
+.dropdown-content { display: none; position: absolute; right: 0; background-color: white; min-width: 250px; box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); padding: 15px; z-index: 1; border-radius: 10px; }
+.dropdown-content .perfil-info { text-align: left; font-size: 14px; margin-bottom: 10px; }
+.dropdown-content img { border-radius: 50%; margin-bottom: 10px; }
+.logout-btn { display: block; text-align: center; background-color: #e74c3c; color: white; padding: 8px; border-radius: 5px; text-decoration: none; }
+.logout-btn:hover { background-color: #c0392b; }
+
+.darkmodebtn { bottom: 20px; margin-left: 65px; position: absolute; width: 180px; }
+.darkmodebtn button { background: none; color: #fff; font-size: 15px; cursor: pointer; }
+.darkmode { background-color: #444446 !important; }
+.content-area.darkmode { background: #353839 !important; }
+i.darkmode, p.darkmode { color: rgb(0, 0, 0); }
+.main--content.darkmode { background-color: #353839 !important; }
+.header--title.darkmode h2, .header--title.darkmode span { color: #ffffff !important; }
+.darkmode .nav-link:hover { background-color: #626268; }
+
+.disabled-link { pointer-events: none; color: gray !important; cursor: not-allowed; }
+
+/* =========================================================
+    MEDIA QUERIES 
+   ========================================================= */
+
+/* --- MODO TABLET (Solo Iconos) --- */
+@media (max-width: 1024px) {
+  .navbar { width: 80px; }
+  .main--content { margin-left: 80px; width: calc(100% - 80px); }
+  
+  .titles_btns, .logo { display: none; } /* Ocultar textos */
+  .nav-link { padding: 15px 0; justify-content: center; }
+  .menu li i { margin: 0; font-size: 22px; }
+
+  /* Hover expansivo */
+  .navbar:hover { width: 240px; }
+  .navbar:hover .titles_btns, .navbar:hover .logo { display: inline-block; }
+  .navbar:hover .nav-link { justify-content: flex-start; padding: 15px 20px; }
+  .navbar:hover .menu li i { margin-right: 10px; }
 }
 
-.perfil-dropdown {
-  position: relative;
-  display: inline-block;
-}
+/* --- MODO CELULAR (Menú Oculto y Botón Hamburguesa) --- */
+@media (max-width: 768px) {
+  
+  /* El contenido ocupa toda la pantalla */
+  .main--content { margin-left: 0; width: 100%; padding-top: 60px; }
 
-.perfil-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
+  /* Menú a la izquierda fuera de pantalla */
+  .navbar {
+    width: 250px;
+    left: -250px; 
+    background-color: rgba(44, 62, 80, 0.98);
+  }
+  
+  /* Clase que activa el JS para que entre el menú */
+  .navbar.open { left: 0; }
 
-.perfil-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ccc;
-}
+  /* Textos visibles siempre en celular */
+  .titles_btns, .logo { display: inline-block; }
+  .nav-link { justify-content: flex-start; padding: 15px 20px; }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  background-color: white;
-  min-width: 250px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  padding: 15px;
-  z-index: 1;
-  border-radius: 10px;
-}
-
-.dropdown-content .perfil-info {
-  text-align: left;
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-.dropdown-content img {
-  border-radius: 50%;
-  margin-bottom: 10px;
-}
-
-.logout-btn {
-  display: block;
-  text-align: center;
-  background-color: #e74c3c;
-  color: white;
-  padding: 8px;
-  border-radius: 5px;
-  text-decoration: none;
-}
-
-.logout-btn:hover {
-  background-color: #c0392b;
-}
-
-/*Boton Modo oscuro******************/
-.darkmodebtn {
-  bottom: 20px;
-  margin-left: 65px;
-  position: absolute;
-  width: 180px;
-}
-.darkmodebtn button {
-  background: none;
-  color: #fff;
-  font-size: 15px;
-}
-/*Contenido darkmode***************************************/
-.darkmode {
-  background-color: #444446 !important;
-}
-.content-area.darkmode {
-  background: #353839 !important;
-}
-
-i.darkmode,
-p.darkmode {
-  color: rgb(0, 0, 0);
-}
-.main--content.darkmode {
-  background-color: #353839 !important;
-}
-.header--title.darkmode h2,
-.header--title.darkmode span {
-  color: #ffffff !important;
-}
-.darkmode ul a {
-  background-color: #626268;
-}
-
-/*Deshabilitados en gris opciones del menu*/
-.disabled-link {
-  pointer-events: none;
-  color: gray;
-  cursor: not-allowed;
-}
-
-/*Diseño responsive media querys************************/
-
-/*Moviles Tablets, celulares****************************/
-/* Moviles Tablets, celulares */
-/* Moviles Tablets, celulares */
-@media only screen and (max-width: 767px) {
+  /* El botón de Hamburguesa */
   .nav__icon {
     display: flex;
-    font-size: 1.5rem; /* Ajusta el tamaño del icono */
-    cursor: pointer;
-    color: #fff;
-    position: absolute; /* Para colocarlo encima del menú */
-    top: 15px; /* Ajusta la posición vertical */
-    right: 20px; /* Ajusta la posición horizontal */
-    z-index: 4; /* Asegura que esté por encima del menú */
-  }
-  .navbar {
-    background-color: #2c3e50; /* Un azul marino oscuro/grisáceo. Antes era #387ebf */
-    bottom: 0;
-    height: 100vh;
-    left: 0;
-    overflow: hidden;
-    position: sticky;
-    top: 0;
-    transition: all 0.5s linear;
-    width: 240px;
-  }
-  .nav__links {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    top: 60px; /* **IMPORTANTE:** Ajusta esto a la altura de tu navbar en móvil */
-    right: 0;
-    background-color: #11001c;
-    display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    padding-top: 20px; /* Espacio desde la parte superior */
-    transform: translateX(-100%); /* Oculta el menú inicialmente */
-    transition: transform 0.4s ease-in-out;
-    z-index: 2; /* Debe estar por debajo del icono */
-    overflow-y: auto; /* Permite scroll si el menú es muy largo */
+    font-size: 1.5rem; 
+    background-color: #2c3e50;
+    padding: 10px;
+    border-radius: 5px;
+    position: fixed; /* Siempre flotando */
+    top: 10px; 
+    right: 20px; 
+    z-index: 9999; /* Por encima de todo */
   }
-  .nav__links.open {
-    transform: translateX(0); /* Muestra el menú */
-  }
-  /* Remueve los estilos de hover del nav ul que expanden el menú en desktop */
-  nav ul {
-    height: auto; /* Anulamos la altura fija de desktop */
-    overflow: visible; /* Anulamos el overflow de desktop */
-  }
-  nav ul li:hover ul {
-    height: auto; /* Anulamos el comportamiento de hover de desktop */
-  }
+  
+  .nav__icon a { color: #fff; text-decoration: none; }
+}
 
-  .menu {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-  }
-  .menu > li > a {
-    /* Estilos para los títulos principales */
-    display: block;
-    padding: 10px 20px;
-    color: #fff;
-    text-decoration: none;
-  }
-  .menu li.has-submenu > a {
+/* Correccion de enlaces */
+.menu a {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-  }
-  .menu li ul {
-    list-style: none;
-    padding-left: 20px;
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease-in-out;
-    background-color: rgba(0, 0, 0, 0.2); /* Un fondo sutil para los submenús */
-  }
-  .menu li ul.show {
-    max-height: 500px; /* Ajusta según la altura estimada de tus submenús */
-  }
-  .menu li ul a {
-    display: block;
-    padding: 10px 20px;
-    color: #eee;
-    text-decoration: none;
-  }
+    padding: 12px 20px;
+    color: #bdc3c7 !important; 
+    text-decoration: none !important; 
+    transition: 0.3s;
+}
+
+.menu a:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-left: 4px solid #3498db;
+}
+
+/* sangría de los submenús */
+.has-submenu ul li a {
+    padding-left: 55px !important;
+    font-size: 13px !important;
+}
+
+/* BOTÓN DE MODO OSCURO */
+.darkmodebtn {
+    position: fixed !important; /* Lo ancla a la pantalla */
+    bottom: 20px;
+    left: 20px; 
+    z-index: 2000; /* Encima de absolutamente todo */
+    width: auto !important;
+}
+
+.darkmodebtn button {
+    background-color: #1a252f; 
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    color: #f1c40f; 
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s ease;
+}
+
+.darkmodebtn button:hover {
+    background-color: #34495e;
+    transform: scale(1.05); 
 }

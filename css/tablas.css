@@ -254,43 +254,47 @@ td img {
   background-color: #374151;
 }
 
-/*Moviles Tablets, celulares****************************/
+/*El responsive desing, Moviles Tablets, celulares****************************/
+/*TABLAS RESPONSIVAS (SCROLL HORIZONTAL) */
+
+/* 1. Deslizarse en la caja contenedora */
+.container_dashboard_tablas {
+  overflow-x: auto; /* Agrega scroll horizontal si el contenido desborda */
+  -webkit-overflow-scrolling: touch; /* Hace que el deslizamiento en celular sea suave */
+}
+
+/* Reglas para móviles */
 @media (max-width: 768px) {
+  
   .containerr {
     padding: 10px;
     width: 100%;
   }
+  
   .container_dashboard_tablas {
-    width: 95%;
+    width: 100%; /* Ocupa todo el ancho en celular */
+    left: 0;
+    margin-top: 47px;
   }
 
-  thead {
-    display: none;
+  /* FORZAMOS A LA TABLA A NO APLASTARSE */
+  table {
+    min-width: 700px; /* La tabla siempre medirá mínimo 700px. Si la pantalla es más chica, se activa el scroll */
+    margin: 0; /* Quitamos márgenes para ganar espacio */
   }
-  tr,
-  td {
-    display: block;
-    width: 100%;
+
+  th, td {
+    white-space: nowrap; /* Evita que el texto de las celdas baje de línea y haga las filas muy altas */
+    padding: 10px;
   }
-  tr {
-    margin-bottom: 1rem;
-  }
-  tbody tr td {
-    text-align: right;
-    position: relative;
-  }
-  .tbl td::before {
-    content: attr(data-lable);
-    position: absolute;
-    left: 0;
-    width: 50%;
-    text-align: left;
-    padding-left: 1.2rem;
-  }
+
   .btn-success,
   .btn-danger {
     border-radius: 5px !important;
   }
-}
-@media only screen and (max-width: 576px) {
+  
+  /* Ajuste de los botones de acción en celular */
+  .tbl button {
+    padding: 0.5rem;
+  }
 }

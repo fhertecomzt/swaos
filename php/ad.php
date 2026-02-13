@@ -76,9 +76,6 @@ $_SESSION['last_token'] = $current_token;
             <img class="nav__logo" src="../imgs/logo.png" alt="Mascomputación">
         </figure>
 
-        <div class="nav__icon">
-            <a href="#" id="menu-toggle">☰</a>
-        </div>
 
         <div class="nav__links" id="menu">
             <ul class="menu nav_target">
@@ -116,7 +113,7 @@ $_SESSION['last_token'] = $current_token;
                         </li>
                         <li>
                             <a href="#" id="usuariossup-link" class="nav-link">
-                                <i class="fas fa-user"></i>
+                                <i class="fa-solid fa-user-shield"></i>
                                 <span>SUP-USUARIOS</span>
                             </a>
                         </li>
@@ -188,13 +185,14 @@ $_SESSION['last_token'] = $current_token;
             </ul>
 
             <!--Órdenes de servicio-->
-            <li><a href="#">
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
                     <i class="fa-solid fa-address-card"></i>
                     <span class="titles_btns">ÓRDENES DE SERVICIO</span>
                 </a>
                 <ul>
                     <li>
-                        <a href="#" id="ordenes-link">
+                        <a href="#" id="ordenes-link" class="nav-link">
                             <i class="fa-solid fa-list-check"></i>
                             <span>ORDENES</span>
                         </a>
@@ -205,7 +203,7 @@ $_SESSION['last_token'] = $current_token;
 
             <!--Ventas-->
             <li>
-                <a href="#" id="ventas-link">
+                <a href="#" id="ventas-link" class="nav-link">
                     <i class="fa-solid fa-cash-register"></i>
                     <span class="titles_btns disabled-link">VENTAS</span>
                 </a>
@@ -213,37 +211,39 @@ $_SESSION['last_token'] = $current_token;
 
             <!--Cotizaciones-->
             <li>
-                <a href="#" id="ventas-link">
-                    <i class="fa-solid fa-cash-register"></i>
+                <a href="#" id="ventas-link" class="nav-link">
+                    <i class="fa-solid fa-magnifying-glass-dollar"></i>
                     <span class="titles_btns disabled-link">COTIZACIONES</span>
                 </a>
             </li>
 
             <!--Citas-->
             <li>
-                <a href="#" id="ventas-link">
-                    <i class="fa-solid fa-cash-register"></i>
+                <a href="#" id="ventas-link" class="nav-link">
+                    <i class="fa-solid fa-calendar"></i>
                     <span class="titles_btns disabled-link">CITAS</span>
                 </a>
             </li>
 
             <!--Cliente-->
             <li>
-                <a href="#" id="ventas-link">
-                    <i class="fa-solid fa-cash-register"></i>
+                <a href="#" id="ventas-link" class="nav-link">
+                    <i class="fa-solid fa-user-tie"></i>
                     <span class="titles_btns disabled-link">CLIENTE</span>
                 </a>
             </li>
 
             <!--Reportes-->
-            <li><a href="#" id="informes-link" class="disabled-link" onclick="return false;">
+            <li>
+                <a href="#" id="informes-link" class="nav-link" onclick="return false;">
                     <i class=" fa-solid fa-sheet-plastic"></i>
                     <span class="titles_btns disabled-link">REPORTES</span>
                 </a>
             </li>
 
             <!--Mi cuenta-->
-            <li><a href="#">
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
                     <i class="fa-solid fa-address-card"></i>
                     <span class="titles_btns">MI CUENTA</span>
                 </a>
@@ -255,13 +255,13 @@ $_SESSION['last_token'] = $current_token;
                         </a>
                     </li>
                     <li>
-                        <a href="logout.php" id="">
+                        <a href="logout.php" id="" class="nav-link">
                             <i class="fa-solid fa-rotate"></i>
                             <span>CAMBIAR DE USUARIO</span>
                         </a>
                     </li>
                     <li>
-                        <a href="logout.php" id="">
+                        <a href="logout.php" id="" class="nav-link">
                             <i class="fa-solid fa-right-from-bracket"></i>
                             <span>SALIR</span>
                         </a>
@@ -282,9 +282,9 @@ $_SESSION['last_token'] = $current_token;
 
     <div class="main--content" id="main-content">
         <div class="header--wrapper">
-            <!-- <a href="#menu" class="nav_target">
-                <img src="../imgs/menu.svg" alt="Mi menú" class="nav__icon" style="height: 45px; width: 45px; padding: 5px; margin-right: 20px;" />
-            </a> -->
+            <div class="nav__icon">
+                <a href="#" id="menu-toggle">☰</a>
+            </div>
             <div class="header--title">
                 <!-- <h2>Taller: <?php echo $_SESSION['nombre_t'] . ", Id: " . $_SESSION['taller_id'] ?></h2> -->
                 <h2>Taller: <?php echo $_SESSION['nombre_t'] ?></h2>

@@ -1,53 +1,44 @@
 document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.getElementById("menu-toggle");
-  const menu = document.getElementById("menu");
-  const submenuLinks = document.querySelectorAll(".has-submenu > a"); // Los enlaces de los títulos de submenú
-  const allMenuLinks = document.querySelectorAll("#menu a.nav-link"); // Selecciona TODOS los enlaces dentro del menú, incluyendo los de submenú
+  const navbar = document.querySelector(".navbar"); // <--- Seleccionamos toda la barra
+  const submenuLinks = document.querySelectorAll(".has-submenu > a"); 
+  const allMenuLinks = document.querySelectorAll(".menu a.nav-link"); 
   const body = document.body;
 
-  if (menuToggle && menu) {
+  // 1. ABRIR / CERRAR MENÚ (Botón Hamburguesa)
+  if (menuToggle && navbar) {
     menuToggle.addEventListener("click", (e) => {
       e.preventDefault();
-      menu.classList.toggle("open");
-      body.classList.toggle("no-scroll");
+      navbar.classList.toggle("open"); // Hace entrar/salir el menú en celular
     });
 
-    // Este es el cambio clave: cierra el menú principal cuando se hace clic en CUALQUIER enlace dentro de él
+    // CERRAR AL TOCAR UN ENLACE (Solo si es un enlace final y estamos en celular)
     allMenuLinks.forEach((link) => {
       link.addEventListener("click", () => {
-        // Si el enlace pertenece a un submenú y el submenú no está desplegado, no cerrar el menú principal todavía
         const parentLi = link.closest("li");
-        if (
-          parentLi &&
-          parentLi.classList.contains("has-submenu") &&
-          !link.nextElementSibling.classList.contains("show")
-        ) {
-          // Si es un enlace de un submenú y el submenú no está abierto, no hacemos nada para cerrar el menú principal.
-          // Esto permite que el clic en el título del submenú lo despliegue.
-          return;
+        
+        // Si tocamos un título que tiene submenú, NO cerramos la barra
+        if (parentLi && parentLi.classList.contains("has-submenu")) {
+          return; 
         }
 
-        // Si es un enlace normal o un enlace dentro de un submenú ya desplegado, cierra el menú principal
-        menu.classList.remove("open");
-        body.classList.remove("no-scroll");
+        // Si tocamos un enlace normal (ej. Inicio, Ventas) en CELULAR, cerramos la barra
+        if (window.innerWidth <= 768) {
+          navbar.classList.remove("open");
+        }
       });
     });
   }
 
-  // Controlar el despliegue de los submenús
+  // ACORDEÓN DE SUBMENÚS 
   submenuLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      const submenu = link.nextElementSibling; // Usamos link.nextElementSibling directamente
+      const submenu = link.nextElementSibling; 
       if (submenu && submenu.tagName === "UL") {
-        // Cierra otros submenús abiertos al abrir uno nuevo
         submenuLinks.forEach((otherLink) => {
           const otherSubmenu = otherLink.nextElementSibling;
-          if (
-            otherSubmenu &&
-            otherSubmenu.classList.contains("show") &&
-            otherSubmenu !== submenu
-          ) {
+          if (otherSubmenu && otherSubmenu.classList.contains("show") && otherSubmenu !== submenu) {
             otherSubmenu.classList.remove("show");
           }
         });
