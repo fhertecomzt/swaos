@@ -25,8 +25,8 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca", "ASC", "nom_ma
 // Servicios
 $servicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servicio", "ASC", "nom_servicio", 100, 1, true);
 
-// ordenes
-$ordenes = obtenerOrdenesDashboard($dbh);
+// ordenes de servicio
+$ordenes = obtenerOrdenesDashboard($dbh, 50);
 ?>
 
 <div class="containerr">
@@ -63,8 +63,8 @@ $ordenes = obtenerOrdenesDashboard($dbh);
             <td data-lable="Costo">$<?php echo number_format($ord['costo_servicio'], 2); ?></td>
 
             <td data-lable="Estado">
-              <span class="badge-estado est-<?php echo strtolower($ord['nombre_estado']); ?>">
-                <?php echo htmlspecialchars($ord['nombre_estado']); ?>
+              <span class="badge-estado est-<?php echo strtolower($ord['estado_servicio']); ?>">
+                <?php echo htmlspecialchars($ord['estado_servicio']); ?>
               </span>
             </td>
 

@@ -137,12 +137,12 @@ function existeInventario($dbh, $id_producto, $id_tienda)
 }
 
 // Obtener Órdenes con detalles (JOINs)
-function obtenerOrdenesDashboard($dbh, $limit = 20)
+function obtenerOrdenesDashboard($dbh, $limit = 50)
 {
   try {
     $sql = "SELECT o.id_orden, c.nombre_cliente, c.papellido_cliente, 
                        e.nombre_equipo, o.modelo, o.falla, o.costo_servicio, 
-                       es.nombre_estado, o.token_hash, o.creado_servicio
+                       es.estado_servicio, o.token_hash, o.creado_servicio
                 FROM ordenesservicio o
                 JOIN clientes c ON o.id_cliente = c.id_cliente
                 JOIN equipos e ON o.id_equipo = e.id_equipo
