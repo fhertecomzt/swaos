@@ -1,9 +1,16 @@
+:root {
+  --color_sky: #0094fd;
+}
+*{
+  font-family: "Arial";
+}
 .container_dashboard_tablas h3 {
   /*Titulo de las tablas*/
-  color: #5fb3ef;
+  color: var(--color_sky);
+  font-size: 20px;
   padding: 10px;
-  width: 97%;
   margin: auto;
+  width: 97%;
 }
 table {
   background-color: rgb(230, 230, 230);

@@ -2,10 +2,10 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-                                                                          font-family: SFProDisplay-Regular, Helvetica, Arial, sans-serif;
+  font-family: SFProDisplay-Regular, Helvetica, Arial, sans-serif;
 }
 body {
-  background: #61747d;
+  background: #03020e;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -119,7 +119,6 @@ body {
   transform: scale(1.1);
   color: rgb(0, 47, 255);
 }
-
 .form-information .input-wrapper i {
   position: absolute;
   margin-left: 20px;

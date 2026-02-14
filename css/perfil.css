@@ -1,4 +1,8 @@
-* Contenedor principal que usa Flexbox */
+*{
+  font-family: "Arial";
+}
+
+/* Contenedor principal que usa Flexbox */
 .usuarios-layout-container {
   display: flex; /* Activa Flexbox */
   gap: 20px; /* Espacio entre la tabla y la imagen */

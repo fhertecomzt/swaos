@@ -13,12 +13,11 @@ include "funciones/activoinactivo.php";
 ?>
 
 <div class="containerr">
-    <!-- <button class="boton" onclick="abrirModalRol('crear-modalRol')">Nuevo</button> -->
     <!--Titulo perfil de usuario -->
-    <h2 style="margin: 15px;"><i class="fa-solid fa-user-pen"></i> Perfil de usuario</h2>
 </div>
 
 <div class="container_dashboard_tablas" id="perfil">
+    <h3 style="margin: 15px;"><i class="fa-solid fa-user-pen"></i> Perfil de usuario</h3>
     <div style="display: flex; margin:10%">
         <div style="width: 60%; ">
             <table id="tablaPerfilUsuarios">

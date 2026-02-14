@@ -1,3 +1,6 @@
+*{
+  font-family: "Arial";
+}
 /*Dashboard*/
 .container_dashboard {
   background: #e1e1e1;

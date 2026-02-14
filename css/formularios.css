@@ -1,6 +1,15 @@
+:root {
+  --color_sky: #0094fd;
+  --btn_cancelar: #d36060;
+}
+*{
+  font-family: "Arial";
+}
+
 .containerr {
-  background-color: #e1e1e1;
+  background-color: #e7e7e7;
   border-radius: 10px;
+  box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.5);
   display: flex;
   height: 60px;
   margin-bottom: 5px;
@@ -8,13 +17,13 @@
   width: 99%;
 }
 .container_dashboard_tablas {
-  background: #e1e1e1;
+  background-color: #e7e7e7;
   border-radius: 10px;
-  box-shadow: 0 7px 7px rgba(0, 0, 0, 0.5);
+  box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.5);
   min-height: 70vh;
   left: 16px;
   position: absolute;
-  top: 160px;
+  top: 167px;
   transition: 0.4s;
   width: 97%;
 }
@@ -25,7 +34,7 @@
 }
 .boton,
 .btn_movimientos {
-  background: #5fb3ef;
+  background: var(--color_sky);
   border: none;
   border-radius: 5px;
   color: #ffffff;
@@ -49,7 +58,6 @@
 }
 .buscar--box {
   align-items: center;
-  background: rgb(237, 237, 237);
   border-radius: 15px;
   color: rgba(113, 99, 186, 255);
   display: flex;
@@ -61,6 +69,10 @@
   padding: 5px 10px;
   width: 30%;
 }
+.buscar--box:focus {
+  border: solid 1px var(--color_sky);
+}
+
 .search--box input {
   background: transparent;
   padding: 10px;
@@ -117,7 +129,7 @@ select {
 }
 .form-group input:focus,
 .form-group input:valid {
-  border-color: skyblue;
+  border-color: var(--color_sky);
 }
 /*Para validaciones en tiempo real*/
 .form-group .crearNameIcon {
@@ -126,23 +138,6 @@ select {
   position: absolute;
   right: 39%;
   transform: translateY(17%);
-}
-form .button {
-  width: 40%;
-  height: 40px;
-  margin: 40px 0;
-}
-form .button input {
-  width: 100%;
-  height: 100%;
-  outline: none;
-  cursor: pointer;
-  background: linear-gradient(130deg, blue, skyblue);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 500;
-  border: none;
-  border-radius: 5px;
 }
 
 /*Hacer que noexterior e interior queden en la misma fila*/
@@ -225,7 +220,7 @@ form .button input {
 
 /* Opcional: Botones dentro del modal */
 .modal button {
-  background-color: #3085d6; /* Verde 4caf50*/
+  background-color: var(--color_sky);
   border: none;
   border-radius: 4px;
   font-size: 16px;
@@ -277,7 +272,7 @@ form .button input {
 
 /* Botón de cancelar */
 .cancelarModal {
-  background-color: #d33; /* Rojo */
+  background-color: var(--btn_cancelar);
   border: none;
   border-radius: 4px;
   font-size: 16px;

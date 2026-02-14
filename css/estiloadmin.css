@@ -8,13 +8,13 @@
 }
 
 body {
-  background-color: #eef2f5;
-  overflow-x: hidden; 
+  background-color: #4d6a7f;
+  overflow-x: hidden;
 }
 
 /*  MENU PRINCIPAL (ESTADO PC)*/
 .navbar {
-  background-color: #2c3e50; 
+  background-color: #2c3e50;
   position: fixed; /* Cambiado de sticky a fixed para mejor control */
   bottom: 0;
   height: 100vh;
@@ -117,12 +117,13 @@ body {
 
 /* Header, Perfil, Darkmode */
 .header--wrapper {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   background-color: #e1e1e1;
   border-radius: 10px;
+  box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   padding: 5px 2rem;
   margin-bottom: 1rem;
   width: 99%;
@@ -143,23 +144,25 @@ body {
   gap: 1rem;
 }
 .user--info img:hover {
-  border: 2px solid  rgba(128, 43, 255, 0.52);
+  border: 2px solid rgba(128, 43, 255, 0.52);
 }
 
 .Perfilmodal {
-  display: none; 
+  display: none;
   position: absolute;
-  top: 9%; 
+  top: 9%;
   left: 70%;
   background-color: white;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  width: 395px; 
+  width: 395px;
   padding: 15px;
-  z-index: 1000; 
+  z-index: 1000;
 }
 
-.modal-contentPerfil { text-align: left; }
+.modal-contentPerfil {
+  text-align: left;
+}
 .closePerfil {
   background-color: #ebedf0;
   border-radius: 100%;
@@ -172,26 +175,99 @@ body {
   width: 24px;
   margin-right: 10px;
 }
-.closePerfil:hover { background-color: #ff0000; color: #ffffff; text-decoration: none; }
-.perfil-dropdown { position: relative; display: inline-block; }
-.perfil-btn { background: none; border: none; cursor: pointer; padding: 0; }
-.perfil-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #ccc; }
-.dropdown-content { display: none; position: absolute; right: 0; background-color: white; min-width: 250px; box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); padding: 15px; z-index: 1; border-radius: 10px; }
-.dropdown-content .perfil-info { text-align: left; font-size: 14px; margin-bottom: 10px; }
-.dropdown-content img { border-radius: 50%; margin-bottom: 10px; }
-.logout-btn { display: block; text-align: center; background-color: #e74c3c; color: white; padding: 8px; border-radius: 5px; text-decoration: none; }
-.logout-btn:hover { background-color: #c0392b; }
+.closePerfil:hover {
+  background-color: #ff0000;
+  color: #ffffff;
+  text-decoration: none;
+}
+.perfil-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.perfil-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.perfil-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: white;
+  min-width: 250px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  z-index: 1;
+  border-radius: 10px;
+}
+.dropdown-content .perfil-info {
+  text-align: left;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.dropdown-content img {
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+.logout-btn {
+  display: block;
+  text-align: center;
+  background-color: #e74c3c;
+  color: white;
+  padding: 8px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+.logout-btn:hover {
+  background-color: #c0392b;
+}
 
-.darkmodebtn { bottom: 20px; margin-left: 65px; position: absolute; width: 180px; }
-.darkmodebtn button { background: none; color: #fff; font-size: 15px; cursor: pointer; }
-.darkmode { background-color: #444446 !important; }
-.content-area.darkmode { background: #353839 !important; }
-i.darkmode, p.darkmode { color: rgb(0, 0, 0); }
-.main--content.darkmode { background-color: #353839 !important; }
-.header--title.darkmode h2, .header--title.darkmode span { color: #ffffff !important; }
-.darkmode .nav-link:hover { background-color: #626268; }
+.darkmodebtn {
+  bottom: 20px;
+  margin-left: 65px;
+  position: absolute;
+  width: 180px;
+}
+.darkmodebtn button {
+  background: none;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.darkmode {
+  background-color: #444446 !important;
+}
+.content-area.darkmode {
+  background: #353839 !important;
+}
+i.darkmode,
+p.darkmode {
+  color: rgb(0, 0, 0);
+}
+.main--content.darkmode {
+  background-color: #353839 !important;
+}
+.header--title.darkmode h2,
+.header--title.darkmode span {
+  color: #ffffff !important;
+}
+.darkmode .nav-link:hover {
+  background-color: #626268;
+}
 
-.disabled-link { pointer-events: none; color: gray !important; cursor: not-allowed; }
+.disabled-link {
+  pointer-events: none;
+  color: gray !important;
+  cursor: not-allowed;
+}
 
 /* =========================================================
     MEDIA QUERIES 
@@ -199,102 +275,140 @@ i.darkmode, p.darkmode { color: rgb(0, 0, 0); }
 
 /* --- MODO TABLET (Solo Iconos) --- */
 @media (max-width: 1024px) {
-  .navbar { width: 80px; }
-  .main--content { margin-left: 80px; width: calc(100% - 80px); }
-  
-  .titles_btns, .logo { display: none; } /* Ocultar textos */
-  .nav-link { padding: 15px 0; justify-content: center; }
-  .menu li i { margin: 0; font-size: 22px; }
+  .navbar {
+    width: 80px;
+  }
+  .main--content {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+  }
+
+  .titles_btns,
+  .logo {
+    display: none;
+  } /* Ocultar textos */
+  .nav-link {
+    padding: 15px 0;
+    justify-content: center;
+  }
+  .menu li i {
+    margin: 0;
+    font-size: 22px;
+  }
 
   /* Hover expansivo */
-  .navbar:hover { width: 240px; }
-  .navbar:hover .titles_btns, .navbar:hover .logo { display: inline-block; }
-  .navbar:hover .nav-link { justify-content: flex-start; padding: 15px 20px; }
-  .navbar:hover .menu li i { margin-right: 10px; }
+  .navbar:hover {
+    width: 240px;
+  }
+  .navbar:hover .titles_btns,
+  .navbar:hover .logo {
+    display: inline-block;
+  }
+  .navbar:hover .nav-link {
+    justify-content: flex-start;
+    padding: 15px 20px;
+  }
+  .navbar:hover .menu li i {
+    margin-right: 10px;
+  }
 }
 
 /* --- MODO CELULAR (Menú Oculto y Botón Hamburguesa) --- */
 @media (max-width: 768px) {
-  
   /* El contenido ocupa toda la pantalla */
-  .main--content { margin-left: 0; width: 100%; padding-top: 60px; }
+  .main--content {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 60px;
+  }
 
   /* Menú a la izquierda fuera de pantalla */
   .navbar {
     width: 250px;
-    left: -250px; 
+    left: -250px;
     background-color: rgba(44, 62, 80, 0.98);
   }
-  
+
   /* Clase que activa el JS para que entre el menú */
-  .navbar.open { left: 0; }
+  .navbar.open {
+    left: 0;
+  }
 
   /* Textos visibles siempre en celular */
-  .titles_btns, .logo { display: inline-block; }
-  .nav-link { justify-content: flex-start; padding: 15px 20px; }
+  .titles_btns,
+  .logo {
+    display: inline-block;
+  }
+  .nav-link {
+    justify-content: flex-start;
+    padding: 15px 20px;
+  }
 
   /* El botón de Hamburguesa */
   .nav__icon {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.5rem; 
+    font-size: 1.5rem;
     background-color: #2c3e50;
     padding: 10px;
     border-radius: 5px;
     position: fixed; /* Siempre flotando */
-    top: 10px; 
-    right: 20px; 
+    top: 10px;
+    right: 20px;
     z-index: 9999; /* Por encima de todo */
   }
-  
-  .nav__icon a { color: #fff; text-decoration: none; }
+
+  .nav__icon a {
+    color: #fff;
+    text-decoration: none;
+  }
 }
 
 /* Correccion de enlaces */
 .menu a {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    color: #bdc3c7 !important; 
-    text-decoration: none !important; 
-    transition: 0.3s;
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #bdc3c7 !important;
+  text-decoration: none !important;
+  transition: 0.3s;
 }
 
 .menu a:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: white !important;
-    border-left: 4px solid #3498db;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  border-left: 4px solid #3498db;
 }
 
 /* sangría de los submenús */
 .has-submenu ul li a {
-    padding-left: 55px !important;
-    font-size: 13px !important;
+  padding-left: 55px !important;
+  font-size: 13px !important;
 }
 
 /* BOTÓN DE MODO OSCURO */
 .darkmodebtn {
-    position: fixed !important; /* Lo ancla a la pantalla */
-    bottom: 20px;
-    left: 20px; 
-    z-index: 2000; /* Encima de absolutamente todo */
-    width: auto !important;
+  position: fixed !important; /* Lo ancla a la pantalla */
+  bottom: 20px;
+  left: 20px;
+  z-index: 2000; /* Encima de absolutamente todo */
+  width: auto !important;
 }
 
 .darkmodebtn button {
-    background-color: #1a252f; 
-    padding: 10px 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    color: #f1c40f; 
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: 0.3s ease;
+  background-color: #1a252f;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  color: #f1c40f;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: 0.3s ease;
 }
 
 .darkmodebtn button:hover {
-    background-color: #34495e;
-    transform: scale(1.05); 
+  background-color: #34495e;
+  transform: scale(1.05);
 }
