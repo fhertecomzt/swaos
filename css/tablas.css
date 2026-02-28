@@ -261,6 +261,50 @@ td img {
   background-color: #374151;
 }
 
+/* =========================================================
+   ETIQUETAS DE ESTADO (BADGES) PARA ÓRDENES
+   ========================================================= */
+.badge-estado {
+    padding: 5px 10px;
+    border-radius: 20px; 
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
+    text-align: center;
+    min-width: 90px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Colores por estado (El PHP convierte el nombre a minúsculas) */
+/* Ejemplo: Estado "Pendiente" o "Recibido" (Amarillo/Naranja) */
+.est-revisión, .est-recibido {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+/* Ejemplo: Estado "En Reparación" o "Diagnosticando" (Azul) */
+.est-reparacion, .est-diagnósticado {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+/* Ejemplo: Estado "Listo" o "Entregado" (Verde) */
+.est-listo, .est-entregado, .est-terminado {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* Ejemplo: Estado "Cancelado" o "Sin Solución" (Rojo) */
+.est-cancelado, .est-devuelto {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
 /*El responsive desing, Moviles Tablets, celulares****************************/
 /*TABLAS RESPONSIVAS (SCROLL HORIZONTAL) */
 
