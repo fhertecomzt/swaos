@@ -1,6 +1,6 @@
 <?php
 // Rastreo público de órdenes
-require "php/conexion.php"; 
+require "php/conexion.php";
 
 $token = $_GET['t'] ?? '';
 
@@ -10,12 +10,14 @@ if (empty($token)) {
 }
 
 // Buscar la orden por el Token (Seguridad: No usamos ID, usamos el hash)
-$sql = "SELECT o.*, c.nombre_cliente, c.papellido_cliente, e.nombre_equipo, m.nom_marca, es.estado_servicio
+$sql = "SELECT o.*, c.nombre_cliente, c.papellido_cliente, e.nombre_equipo, m.nom_marca, es.estado_servicio, t.nombre_t
         FROM ordenesservicio o
         JOIN clientes c ON o.id_cliente = c.id_cliente
         JOIN equipos e ON o.id_equipo = e.id_equipo
         JOIN marcas m ON o.id_marca = m.id_marca
         JOIN estadosservicios es ON o.id_estado_servicio = es.id_estado_servicio
+        JOIN usuarios u ON o.id_usuario = u.id_usuario
+        JOIN talleres t ON u.taller_id = t.id_taller
         WHERE o.token_hash = ?";
 
 $stmt = $dbh->prepare($sql);
@@ -32,7 +34,7 @@ $stmtImg->execute([$orden['id_orden']]);
 $imagenes = $stmtImg->fetchAll(PDO::FETCH_ASSOC);
 
 // Configuración visual del estado (Progreso)
-$estado_actual = strtolower($orden['estado_servicio']); 
+$estado_actual = strtolower($orden['estado_servicio']);
 $progreso = 10;
 if (strpos($estado_actual, 'reparación') !== false) $progreso = 50;
 if (strpos($estado_actual, 'listo') !== false || strpos($estado_actual, 'entregado') !== false) $progreso = 100;
@@ -211,7 +213,7 @@ if (strpos($estado_actual, 'listo') !== false || strpos($estado_actual, 'entrega
 <body>
 
   <div class="header">
-    <h2><i class="fa-solid fa-wrench"></i> Tu Taller</h2>
+    <h2><i class="fa-solid fa-wrench"></i> <?php echo htmlspecialchars($orden['nombre_t']); ?></h2>
     <p>Seguimiento de Reparación</p>
   </div>
 
@@ -274,7 +276,7 @@ if (strpos($estado_actual, 'listo') !== false || strpos($estado_actual, 'entrega
     <?php endif; ?>
 
     <div class="card">
-      <h4>Resumen Financiero</h4>
+      <h4>Resumen</h4>
       <div class="info-row">
         <span class="label">Costo Total:</span>
         <span class="value">$<?php echo number_format($orden['costo_servicio'], 2); ?></span>

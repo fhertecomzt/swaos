@@ -9877,6 +9877,40 @@ document.addEventListener('click', function(e) {
         });
  */
 
+// LÓGICA PARA ENVIAR WHATSAPP DESDE LA TABLA
+function enviarWhatsOrden(telefono, folio, cliente, saldo, estado, taller) {
+    // 1. Limpiamos el teléfono
+    let tel = telefono.replace(/\D/g, '');
+    if (tel.length === 10) {
+        tel = '52' + tel;
+    }
+
+    // 2. Construimos el mensaje de texto limpio
+    let mensaje = `¡Hola ${cliente}! Te contactamos de *${taller}*.\n\n`;
+    mensaje += `Te informamos que tu orden de servicio con *Folio #${folio}* se encuentra actualmente en estado: *${estado.toUpperCase()}*.\n\n`;
+
+    // 3. Condicionamos el texto del saldo
+    let saldoNum = parseFloat(saldo);
+    if (saldoNum > 0) {
+        mensaje += `*Saldo pendiente:* $${saldoNum.toFixed(2)}\n\n`;
+    } else {
+        mensaje += `*Saldo:* Equipo pagado en su totalidad.\n\n`;
+    }
+
+    mensaje += `Si tienes alguna duda, responde a este mensaje. ¡Gracias por tu preferencia!`;
+
+    // 4. Codificamos el texto para la URL
+    let textoCodificado = encodeURIComponent(mensaje);
+
+    // 5. Abrimos WhatsApp
+    window.open(`https://wa.me/${tel}?text=${textoCodificado}`, '_blank');
+}
+// LÓGICA PARA IMPRIMIR DESDE LA TABLA
+function imprimirTicket(idOrden) {
+    // Abre una ventana pequeña de 400x600 pixeles
+    window.open(`cruds/imprimir_ticket.php?id=${idOrden}`, 'Ticket', 'width=400,height=600');
+}
+
 // Llamar informes *****************************************************************
 document
   .getElementById("informes-link")

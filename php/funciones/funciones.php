@@ -140,14 +140,14 @@ function existeInventario($dbh, $id_producto, $id_tienda)
 function obtenerOrdenesDashboard($dbh, $limit = 50)
 {
   try {
-    $sql = "SELECT o.id_orden, c.nombre_cliente, c.papellido_cliente, 
-                       e.nombre_equipo, o.modelo, o.falla, o.costo_servicio, 
-                       es.estado_servicio, o.token_hash, o.creado_servicio
-                FROM ordenesservicio o
-                JOIN clientes c ON o.id_cliente = c.id_cliente
-                JOIN equipos e ON o.id_equipo = e.id_equipo
-                JOIN estadosservicios es ON o.id_estado_servicio = es.id_estado_servicio
-                ORDER BY o.id_orden DESC LIMIT :limit";
+    $sql = "SELECT o.id_orden, c.nombre_cliente, c.papellido_cliente, c.tel_cliente, 
+                   e.nombre_equipo, o.modelo, o.falla, o.costo_servicio, o.saldo_servicio,
+                   es.estado_servicio, o.token_hash, o.creado_servicio
+            FROM ordenesservicio o
+            JOIN clientes c ON o.id_cliente = c.id_cliente
+            JOIN equipos e ON o.id_equipo = e.id_equipo
+            JOIN estadosservicios es ON o.id_estado_servicio = es.id_estado_servicio
+            ORDER BY o.id_orden DESC LIMIT :limit";
 
     $stmt = $dbh->prepare($sql);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);

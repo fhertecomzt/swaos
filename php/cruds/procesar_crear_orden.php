@@ -26,9 +26,7 @@ try {
 
   $dbh->beginTransaction();
 
-  // ==========================================
   // 1. VALIDAR USUARIO (TÉCNICO)
-  // ==========================================
 
   $id_usuario = 1; // Valor por defecto de seguridad (Admin)
 
@@ -36,9 +34,7 @@ try {
     $id_usuario = $_POST['id_usuario_sesion'];
   }
 
-  // ==========================================
   // 2. VALIDAR CLIENTE
-  // ==========================================
   $id_cliente = $_POST['id_cliente'] ?? null;
   if (empty($id_cliente)) {
     throw new Exception("Debes seleccionar un cliente.");
@@ -63,9 +59,7 @@ try {
     $es_cuenta_nueva = true;
   }
 
-  // ==========================================
   // 3. INSERTAR ORDEN
-  // ==========================================
   $token_hash = generarToken();
   $fecha_entrega = !empty($_POST['fecha_entrega_estimada']) ? $_POST['fecha_entrega_estimada'] : date('Y-m-d H:i:s', strtotime('+3 days'));
 
@@ -107,9 +101,7 @@ try {
 
   $id_orden = $dbh->lastInsertId();
 
-  // ==========================================
   // 4. SUBIR FOTOS
-  // ==========================================
   if (!empty($_FILES['evidencias']['name'][0])) {
     $dir = "../../imgs/ordenes/";
     if (!is_dir($dir)) mkdir($dir, 0777, true);
@@ -130,10 +122,8 @@ try {
 
   $dbh->commit();
 
-  // ==========================================
   // 5. RESPUESTA
-  // ==========================================
-  $link = "https://localhost/swaos/track.php?t=" . $token_hash;
+  $link = "https://swaos.rf.gd/track.php?t=" . $token_hash;
   $msg = "Hola *" . $datosCliente['nombre_cliente'] . "*,\nRecibimos tu equipo (Orden #$id_orden).\nVer estado: $link";
   if ($es_cuenta_nueva) $msg .= "\n\nTu clave de acceso: $pass_generada_texto";
 

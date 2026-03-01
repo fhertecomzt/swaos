@@ -73,9 +73,15 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
             <td data-lable="Fecha"><?php echo date('d/m/Y', strtotime($ord['creado_servicio'])); ?></td>
 
             <td data-lable="Acciones" style="display: flex; gap: 10px; justify-content: center;">
-              <button title="Enviar WhatsApp" class="btn-whatsapp"
-                onclick="enviarWhatsOrden('<?php echo $ord['token_hash']; ?>', '<?php echo $ord['id_orden']; ?>')">
-                <i class="fa-brands fa-whatsapp"></i>
+
+              <button title="Enviar WhatsApp" class="btn-whatsapp" style="background-color: #25D366; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;"
+                onclick="enviarWhatsOrden('<?php echo $ord['tel_cliente']; ?>', '<?php echo $ord['id_orden']; ?>', '<?php echo htmlspecialchars($ord['nombre_cliente']); ?>', '<?php echo $ord['saldo_servicio']; ?>', '<?php echo $ord['estado_servicio']; ?>', '<?php echo htmlspecialchars($_SESSION['nombre_t']); ?>')">
+                <i class="fa-brands fa-whatsapp pointer-events-none"></i>
+              </button>
+
+              <button title="Imprimir Ticket" class="btn-imprimir" style="background-color: #34495e; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;"
+                onclick="imprimirTicket('<?php echo $ord['id_orden']; ?>')">
+                <i class="fa-solid fa-print pointer-events-none"></i>
               </button>
 
               <button title="Ver QR" class="btn-qr"
