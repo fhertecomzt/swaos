@@ -9428,7 +9428,6 @@ function cargarProveedores() {
 }
 
 // Llamar Ordenes de servicio *************************************************
-// 1. CARGA DE MÓDULOS (AJAX)
 document.getElementById("ordenes-link").addEventListener("click", function (event) {
     event.preventDefault();
     fetch("catalogos/ordenes.php")
@@ -9440,7 +9439,7 @@ document.getElementById("ordenes-link").addEventListener("click", function (even
 });
 
 
-// 2. BUSCADOR DE CLIENTES (AUTOCOMPLETE)
+// BUSCADOR DE CLIENTES (AUTOCOMPLETE)
 let timeoutBusquedaCliente;
 
 document.addEventListener('input', function(e) {
@@ -9500,7 +9499,7 @@ document.addEventListener('input', function(e) {
     }
 });
 
-// Selección de Cliente (Delegación)
+// Selección de Cliente 
 document.addEventListener('click', function(e) {
     // Seleccionar item de la lista
     if (e.target && e.target.tagName === 'LI' && e.target.closest('.lista-autocomplete') && !e.target.closest('strong')) {
@@ -9539,7 +9538,7 @@ document.addEventListener('click', function(e) {
 });
 
 
-// 3. FUNCIONES DE UTILIDAD (GLOBALES)
+// FUNCIONES DE UTILIDAD (GLOBALES)
 function abrirModalOrden(id) { document.getElementById(id).style.display = 'flex'; }
 function cerrarModalOrden(id) { document.getElementById(id).style.display = 'none'; }
 function abrirModalClienteExpress() {
@@ -9571,9 +9570,7 @@ function previewEvidencia(input) {
         });
     }
 }
-
-
-// 4. LÓGICA DE CÁMARA WEB
+// LÓGICA DE CÁMARA WEB
 let streamCamara = null;
 let fotosCapturadas = [];
 
@@ -9620,8 +9617,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-
-// 5. ENVÍO DE FORMULARIOS (DELEGACIÓN DE EVENTOS)
 document.addEventListener('submit', function(e) {
     
     // A) GUARDAR CLIENTE EXPRESS
@@ -9655,7 +9650,7 @@ document.addEventListener('submit', function(e) {
         });
     }
 
-    // B) CREAR ORDEN (INCLUYE FOTOS WEBCAM)
+    // CREAR ORDEN (INCLUYE FOTOS WEBCAM)
     if (e.target && e.target.id === 'form-crearOrden') {
         e.preventDefault();
         
@@ -9739,6 +9734,148 @@ function cargarOrdenes() {
     })
     .catch((error) => console.error("Error al cargar ordenes:", error));
 }
+
+//Llamar editar ordenes 
+
+// Función para calcular el saldo en el modal de editar
+function calcularSaldoEdit() {
+    const costo = parseFloat(document.getElementById('edit-costo').value) || 0;
+    const anticipo = parseFloat(document.getElementById('edit-anticipo').value) || 0;
+    document.getElementById('edit-saldo').value = (costo - anticipo).toFixed(2);
+}
+
+//  ABRIR EL MODAL Y TRAER DATOS
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('editarOrden')) {
+        const idOrden = e.target.getAttribute('data-id');
+
+        // Mostramos cargando con SweetAlert
+        Swal.fire({ title: 'Cargando datos...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        fetch(`cruds/obtener_orden.php?id=${idOrden}`)
+        .then(res => res.json())
+        .then(data => {
+            Swal.close();
+            if(data.success) {
+                // Llenamos el formulario con los datos de la base de datos
+                document.getElementById('edit-id-orden').value = data.orden.id_orden;
+                document.getElementById('edit-folio-text').textContent = data.orden.id_orden;
+                document.getElementById('edit-estado').value = data.orden.id_estado_servicio;
+                document.getElementById('edit-falla').value = data.orden.falla;
+                document.getElementById('edit-diagnostico').value = data.orden.diagnostico;
+                document.getElementById('edit-costo').value = data.orden.costo_servicio;
+                document.getElementById('edit-anticipo').value = data.orden.anticipo_servicio || 0;
+
+                calcularSaldoEdit(); // Calculamos para que se vea rojo el saldo
+                
+                // Abrimos el modal
+                abrirModalOrden('editar-modalOrden');
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        })
+        .catch(err => {
+            Swal.close();
+            console.error(err);
+            Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+        });
+    }
+});
+
+// ENVIAR LOS DATOS ACTUALIZADOS AL SERVIDOR
+document.addEventListener('submit', function(e) {
+    if (e.target && e.target.id === 'form-editarOrden') {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        
+        Swal.fire({ title: 'Guardando cambios...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        // Vamos al PHP del Paso 3
+        fetch('cruds/procesar_editar_orden.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                cerrarModalOrden('editar-modalOrden');
+                
+                Swal.fire('¡Actualizado!', data.message, 'success').then(() => {
+                    // Simular clic en el menú para recargar la tabla automáticamente
+                    if(document.getElementById("ordenes-link")) {
+                        document.getElementById("ordenes-link").click(); 
+                    }
+                });
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            Swal.fire('Error', 'Ocurrió un problema en la red.', 'error');
+        });
+    }
+});
+// LÓGICA PARA ELIMINAR (CANCELAR) ÓRDENES
+document.addEventListener('click', function(e) {
+    // Detectamos si el clic fue en el botón rojo
+    const btnEliminar = e.target.closest('.eliminarOrden');
+    
+    if (btnEliminar) {
+        const idOrden = btnEliminar.getAttribute('data-id');
+
+        // Disparamos la alerta de confirmación (Prueba de Caja Negra)
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "La orden #" + idOrden + " será cancelada. No se borrará del historial financiero.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, cancelar orden',
+            cancelButtonText: 'No, regresar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Pantalla de carga
+                Swal.fire({ title: 'Procesando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                // Petición Fetch hacia tu nuevo PHP
+                fetch('cruds/procesar_eliminar_orden.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'id_orden=' + idOrden
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        // Mensaje de éxito
+                        Swal.fire('¡Cancelada!', data.message, 'success', ).then(() => {
+                            // Recargamos la tabla automáticamente simulando un clic en el menú
+                            if(document.getElementById("ordenes-link")) {
+                                document.getElementById("ordenes-link").click(); 
+                            }
+                        });
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire('Error', 'Fallo de conexión con el servidor.', 'error');
+                });
+            }
+        });
+    }
+});
+
+/*
+        Swal.fire({
+          title: "¡Éxito!",
+          text: data.message, // Usar el mensaje del backend
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+ */
 
 // Llamar informes *****************************************************************
 document

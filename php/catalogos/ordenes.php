@@ -27,6 +27,8 @@ $servicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servicio"
 
 // ordenes de servicio
 $ordenes = obtenerOrdenesDashboard($dbh, 50);
+// Estados de servicio (Para el modal de edición)
+$estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servicio, estado_servicio", "ASC", "id_estado_servicio", 100, 1, true);
 ?>
 
 <div class="containerr">
@@ -82,6 +84,10 @@ $ordenes = obtenerOrdenesDashboard($dbh, 50);
               </button>
 
               <button title="Editar" class="editarOrden fa-solid fa-pen-to-square" data-id="<?php echo $ord['id_orden']; ?>"></button>
+
+              <button title="Cancelar Orden" class="eliminarOrden" data-id="<?php echo $ord['id_orden']; ?>" style="background-color: #dc3545; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;">
+                <i class="fa-solid fa-trash pointer-events-none"></i>
+              </button>
             </td>
           </tr>
         <?php endforeach; ?>
@@ -247,7 +253,7 @@ $ordenes = obtenerOrdenesDashboard($dbh, 50);
     </form>
   </div>
 </div>
-
+<!-- Modal para crear un cliente express -->
 <div id="modalClienteExpress" class="modal" style="display: none; z-index: 2000; background-color: rgba(0,0,0,0.85);">
   <div class="modal-contentProductos" style="max-width: 500px; margin-top: 10%;">
     <span class="close" onclick="cerrarModalClienteExpress()">&times;</span>
@@ -277,6 +283,66 @@ $ordenes = obtenerOrdenesDashboard($dbh, 50);
       <div style="text-align: right; margin-top: 15px;">
         <button type="submit" class="boton-guardar">Guardar y Seleccionar</button>
         <span class="cancelarModal" onclick="cerrarModalClienteExpress()">Cancelar</span>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- Modal para editar Orden -->
+<div id="editar-modalOrden" class="modal" style="display: none; z-index: 1050;">
+  <div class="modal-contentProductos" style="width: 40%; max-width: 800px;">
+    <span class="close" onclick="cerrarModalOrden('editar-modalOrden')">&times;</span>
+    <h2 class="tittle">Actualizar Orden #<span id="edit-folio-text"></span></h2>
+
+    <form id="form-editarOrden">
+      <input type="hidden" id="edit-id-orden" name="id_orden">
+
+      <div class="form-grid-2">
+        <div class="seccion-form">
+          <h4>1. Estado y Diagnóstico</h4>
+
+          <div class="form-group" style="width: 100%;">
+            <label>Estado del Equipo:</label>
+            <select id="edit-estado" name="id_estado_servicio" required>
+              <option value="">Selecciona un estado...</option>
+              <?php foreach ($estados_servicio as $est): ?>
+                <option value="<?php echo $est['id_estado_servicio']; ?>"><?php echo $est['estado_servicio']; ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="form-group" style="width: 100%;">
+            <label>Falla Reportada Inicialmente:</label>
+            <textarea id="edit-falla" rows="2" readonly style="background:#eee;"></textarea>
+          </div>
+
+          <div class="form-group" style="width: 100%;">
+            <label>Diagnóstico Técnico / Solución:</label>
+            <textarea id="edit-diagnostico" name="diagnostico" rows="3" placeholder="Describe el trabajo realizado..."></textarea>
+          </div>
+        </div>
+
+        <div class="seccion-form">
+          <h4>2. Costos</h4>
+          <div class="form-containernum">
+            <div class="form-group laquinta" style="width: 100%;">
+              <label>Costo Total ($):</label>
+              <input type="number" id="edit-costo" name="costo_servicio" step="0.01" min="0" oninput="calcularSaldoEdit()">
+            </div>
+            <div class="form-group laquinta" style="width: 100%;">
+              <label>Anticipo Pagado ($):</label>
+              <input type="number" id="edit-anticipo" name="anticipo_servicio" step="0.01" min="0" oninput="calcularSaldoEdit()">
+            </div>
+            <div class="form-group laquinta" style="width: 100%;">
+              <label>Saldo Restante ($):</label>
+              <input type="text" id="edit-saldo" name="saldo_servicio" readonly style="background: #eee; font-weight: bold; color: red;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; text-align: right;">
+        <button type="submit" class="boton-guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
+        <span class="cancelarModal" onclick="cerrarModalOrden('editar-modalOrden')">Cancelar</span>
       </div>
     </form>
   </div>
