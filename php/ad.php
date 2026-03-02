@@ -330,6 +330,11 @@ $_SESSION['last_token'] = $current_token;
     <!--Libreria para Qrcode-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <!--Scripts Para el paginador y buscador -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
     <script src="../js/dashboard.js"></script>
     <script src="../js/scripts.js"></script>
     <script src="../js/scriptssup.js"></script>
@@ -345,6 +350,7 @@ $_SESSION['last_token'] = $current_token;
 
     <!--Scripts Selects anidados estado, ciudad, colonia y cp-->
     <script src="../js/peticionesedosmun.js"></script>
+
 </body>
 
 </html>

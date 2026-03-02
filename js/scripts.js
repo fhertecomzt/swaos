@@ -1207,69 +1207,7 @@ function cargarTiendas() {
     .catch((error) => console.error("Error al cargar tiendas:", error));
 }
 
-/* ------------------------ SCROLL INFINITO TIENDAS ------------------------*/
 
-function cargarTiendasScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltro = document
-    .getElementById("estatusFiltroT")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_tiendas_scroll.php?page=${pagina}`;
-
-  if (estatusFiltro !== "") {
-    url += `&estatus=${estatusFiltro}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-tiendas tbody");
-        data.forEach((tienda) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${tienda.nombre_t}</td>
-            <td>${tienda.razonsocial_t}</td>
-            <td>${tienda.rfc_t}</td>
-            <td>${tienda.tel_t}</td>
-            <td>
-              <button class="btn ${
-                tienda.estatus_t == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${tienda.estatus_t == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td>
-              <button title="Editar" class="editar fa-solid fa-pen-to-square" data-id="${
-                tienda.id_taller
-              }"></button>
-              &nbsp;&nbsp;&nbsp;
-              <button title="Eliminar" class="eliminar fa-solid fa-trash" data-id="${
-                tienda.id_taller
-              }"></button>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más talleres.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => console.error("Error al cargar talleres:", error));
-}
 
 document.addEventListener("DOMContentLoaded", function () {
   if (window.location.pathname.includes("tiendas.php")) {
@@ -1292,8 +1230,7 @@ function iniciarScrollTiendas() {
         scrollContainer.scrollHeight - 10 &&
       !cargando
     ) {
-      //console.log(" Scroll detectado, cargando más tiendas...");
-      cargarTiendasScroll();
+
     }
   });
 
@@ -9434,6 +9371,7 @@ document.getElementById("ordenes-link").addEventListener("click", function (even
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+        inicializarPaginador();
       })
       .catch((error) => console.error("Error al cargar contenido:", error));
 });
@@ -9727,7 +9665,7 @@ function cargarOrdenes() {
   pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
   cargando = false; //Asegurar que el scroll pueda volver a activarse
 
-  fetch("cruds/cargar_ordenes.php?limit=10&offset=0")
+  fetch("cruds/cargar_ordenes.php?limit=8&offset=0")
     .then((response) => response.json())
     .then((data) => {
       actualizarTablaOrdenes(data);
@@ -9772,8 +9710,15 @@ document.addEventListener('click', function(e) {
                 document.getElementById('edit-diagnostico').value = data.orden.diagnostico;
                 document.getElementById('edit-costo').value = data.orden.costo_servicio;
                 document.getElementById('edit-anticipo').value = data.orden.anticipo_servicio || 0;
+                document.getElementById('edit-nuevo-abono').value = '0';
 
                 calcularSaldoEdit(); // Calculamos para que se vea rojo el saldo
+
+                const formEditar = document.getElementById('form-editarOrden');
+                    formEditar.dataset.estadoOrig = data.orden.id_estado_servicio;
+                    // Usamos || '' por si el diagnóstico viene vacío (null) de la BD
+                    formEditar.dataset.diagOrig = data.orden.diagnostico || ''; 
+                    formEditar.dataset.costoOrig = parseFloat(data.orden.costo_servicio).toFixed(2);
                 
                 // Abrimos el modal
                 abrirModalOrden('editar-modalOrden');
@@ -9792,24 +9737,33 @@ document.addEventListener('click', function(e) {
 // ENVIAR LOS DATOS ACTUALIZADOS AL SERVIDOR
 document.addEventListener("submit", function (e) {
   if (e.target && e.target.id === "form-editarOrden") {
-    e.preventDefault();
+ e.preventDefault();
+        
+        const form = e.target; // Nuestro formulario
+        // NUEVA VALIDACIÓN: ¿HUBO CAMBIOS ?
+        // 1. Extraemos los valores actuales de las cajas
+        const estadoActual = document.getElementById('edit-estado').value;
+        const diagActual = document.getElementById('edit-diagnostico').value.trim();
+        const costoActual = parseFloat(document.getElementById('edit-costo').value || 0).toFixed(2);
+        const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
 
-    // --- NUEVA REGLA DE NEGOCIO: REVISAR SALDO ---
-    const saldoActual =
-      parseFloat(document.getElementById("edit-saldo").value) || 0;
-    const selectEstado = document.getElementById("edit-estado");
-    // Obtenemos el texto de la opción seleccionada (ej: "Entregado")
-    const textoEstado =
-      selectEstado.options[selectEstado.selectedIndex].text.toLowerCase();
-
-// Si el usuario elige entregado/finalizado/terminado pero aún hay saldo...
-        if ((textoEstado.includes('entregado') || textoEstado.includes('finalizado') || textoEstado.includes('terminado')) && saldoActual > 0) {
+        // 2. Comparamos los actuales contra la "fotografía" que guardamos
+        if (estadoActual === form.dataset.estadoOrig && 
+            diagActual === form.dataset.diagOrig && 
+            costoActual === form.dataset.costoOrig && 
+            nuevoAbono === 0) { // Si el abono es 0, tampoco hubo pago
+            
+            // Lanzamos alerta informativa y detenemos todo el proceso
             Swal.fire({
-                icon: 'warning',
-                title: 'Pago Pendiente',
-                text: 'No puedes marcar el equipo como Entregado. El cliente aún debe $' + saldoActual.toFixed(2)
+                icon: 'info',
+                title: 'Sin cambios',
+                text: 'No has modificado ningún dato ni ingresado un nuevo abono.',
+                icon: "warning",
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
             });
-            return; // ¡Detenemos todo el proceso aquí!
+            return; 
         }
 
     const formData = new FormData(e.target);
@@ -9827,12 +9781,19 @@ document.addEventListener("submit", function (e) {
         if (data.success) {
           cerrarModalOrden("editar-modalOrden");
 
-          Swal.fire("¡Actualizado!", data.message, "success").then(() => {
-            // Simular clic en el menú para recargar la tabla automáticamente
+  Swal.fire({
+            icon: "success", // Cambiamos a success porque todo salió bien
+            title: "¡Actualizado!",
+            text: data.message,
+            showConfirmButton: false,
+            timer: 2000,           
+            timerProgressBar: true    
+        }).then(() => {
+            // Esto se va a ejecutar automáticamente cuando los 2 segundos terminen
             if (document.getElementById("ordenes-link")) {
-              document.getElementById("ordenes-link").click();
+                document.getElementById("ordenes-link").click();
             }
-          });
+        });
         } else {
           Swal.fire("Error", data.message, "error");
         }
@@ -9851,7 +9812,6 @@ document.addEventListener('click', function(e) {
     if (btnEliminar) {
         const idOrden = btnEliminar.getAttribute('data-id');
 
-        // Disparamos la alerta de confirmación (Prueba de Caja Negra)
         Swal.fire({
             title: '¿Estás seguro?',
             text: "La orden #" + idOrden + " será cancelada. No se borrará del historial financiero.",
@@ -9894,17 +9854,6 @@ document.addEventListener('click', function(e) {
         });
     }
 });
-
-/*
-        Swal.fire({
-          title: "¡Éxito!",
-          text: data.message, // Usar el mensaje del backend
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
- */
 
 // LÓGICA PARA ENVIAR WHATSAPP DESDE LA TABLA
 function enviarWhatsOrden(telefono, folio, cliente, saldo, estado, taller) {
@@ -9958,6 +9907,41 @@ function verQrOrden(token) {
         confirmButtonText: 'Cerrar',
         confirmButtonColor: '#34495e'
     });
+}
+
+// INICIALIZACIÓN DE DATATABLES (PAGINADOR Y BUSCADOR)
+function inicializarPaginador() {
+    if ($('#tabla-ordenes').length) {
+        
+        if ($.fn.DataTable.isDataTable('#tabla-ordenes')) {
+            $('#tabla-ordenes').DataTable().destroy();
+        }
+
+        let tabla = $('#tabla-ordenes').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+            },
+            "pageLength": 8,
+            "order": [[ 0, "desc" ]],
+            
+            // Usamos 'rtip' (Le quitamos la 'l' al principio)
+            // Esto oculta el selector que DataTables pone por defecto arriba a la izquierda
+            "dom": 'rtip',
+            // ENCABEZADOS FIJOS NATIVOS DE DATATABLES
+            "scrollY": "60vh",      // La tabla medirá el 60% de la pantalla y luego hará scroll
+            "scrollCollapse": true  // Si hay poquitas órdenes (ej. 3), la tabla no deja espacio en blanco, se encoge
+        });
+
+        // 1. Conectamos la caja de búsqueda
+        $('#buscarboxorden').on('keyup', function() {
+            tabla.search(this.value).draw();
+        });
+
+        // 2.  Conectamos el selector de cantidades
+        $('#cantidad-registros').off('change').on('change', function() {
+            tabla.page.len(this.value).draw();
+        });
+    }
 }
 
 // Llamar informes *****************************************************************

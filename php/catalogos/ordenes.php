@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 $roles_permitidos = ["superusuario", "gerencia"];
 
-
 // Includes obligatorios
 include "../verificar_sesion.php";
 require "../conexion.php";
@@ -12,7 +11,6 @@ include "../funciones/funciones.php";
 
 // 1. OBTENCIÓN DE CATÁLOGOS USANDO FUNCIONES.PHP
 // El 'true' al final activa el filtro WHERE estatus = 0
-
 // Clientes (Traemos 2000 por si tienes muchos, página 1, solo activos)
 $clientes = obtenerRegistros($dbh, "clientes", "id_cliente, nombre_cliente, papellido_cliente", "ASC", "nombre_cliente", 2000, 1, true);
 
@@ -35,13 +33,22 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
   <button class="boton" onclick="abrirModalOrden('crear-modalOrden')">
     <i class="fa-solid fa-plus"></i> Nueva Orden
   </button>
+
+  <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+  <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+    <option value="8">8</option>
+    <option value="25">25</option>
+    <option value="50">50</option>
+    <option value="-1">Todos</option>
+  </select>
+
   <label class="buscarlabel" for="buscarboxorden">Buscar:</label>
-  <input class="buscar--box" id="buscarboxorden" type="search" placeholder="Buscar por cliente, folio o modelo..." autocomplete="off">
+  <input class="buscar--box" id="buscarboxorden" type="search" placeholder="Buscar por cliente, folio..." autocomplete="off">
 </div>
 
 <div class="container_dashboard_tablas" id="ordenes">
   <h3>Órdenes de Servicio</h3>
-  <div id="scroll-container" style="height: 65vh; overflow-y: auto;">
+  <div id="scroll-container">
     <table class="tbl" id="tabla-ordenes">
       <thead>
         <tr>
