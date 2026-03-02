@@ -34,10 +34,22 @@ $stmtImg->execute([$orden['id_orden']]);
 $imagenes = $stmtImg->fetchAll(PDO::FETCH_ASSOC);
 
 // Configuración visual del estado (Progreso)
-$estado_actual = strtolower($orden['estado_servicio']);
-$progreso = 10;
-if (strpos($estado_actual, 'reparación') !== false) $progreso = 50;
-if (strpos($estado_actual, 'listo') !== false || strpos($estado_actual, 'entregado') !== false) $progreso = 100;
+// 1. Limpiamos el texto (minúsculas y quitamos acentos por si acaso)
+$estado_actual = strtolower(trim($orden['estado_servicio']));
+$quitar_acentos = array('á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u');
+$estado_actual = strtr($estado_actual, $quitar_acentos);
+
+$progreso = 10; // Por defecto: Recibido
+
+// 2. Buscamos palabras clave amplias para el 50% (Reparando)
+if (strpos($estado_actual, 'reparan') !== false || strpos($estado_actual, 'proceso') !== false || strpos($estado_actual, 'revision') !== false) {
+  $progreso = 50;
+}
+
+// 3. Buscamos palabras clave amplias para el 100% (Listo/Entregado)
+if (strpos($estado_actual, 'listo') !== false || strpos($estado_actual, 'entregado') !== false || strpos($estado_actual, 'terminado') !== false) {
+  $progreso = 100;
+}
 ?>
 
 <!DOCTYPE html>
@@ -223,15 +235,17 @@ if (strpos($estado_actual, 'listo') !== false || strpos($estado_actual, 'entrega
       <p style="color:#666;"><?php echo $orden['nombre_equipo'] . " " . $orden['modelo']; ?></p>
 
       <div class="status-bar">
-        <div class="status-step completed">
+        <div class="status-step <?php echo ($progreso >= 50) ? 'completed' : 'active'; ?>">
           <div class="circle"><i class="fa-solid fa-check"></i></div>
           <div class="step-text">Recibido</div>
         </div>
-        <div class="status-step <?php echo ($progreso >= 50) ? 'active' : ''; ?>">
+
+        <div class="status-step <?php echo ($progreso >= 100) ? 'completed' : (($progreso >= 50) ? 'active' : ''); ?>">
           <div class="circle"><i class="fa-solid fa-microchip"></i></div>
           <div class="step-text">Reparando</div>
         </div>
-        <div class="status-step <?php echo ($progreso >= 100) ? 'active' : ''; ?>">
+
+        <div class="status-step <?php echo ($progreso == 100) ? 'completed' : ''; ?>">
           <div class="circle"><i class="fa-solid fa-box-open"></i></div>
           <div class="step-text">Listo</div>
         </div>

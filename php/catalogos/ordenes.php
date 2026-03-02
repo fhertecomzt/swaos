@@ -328,17 +328,21 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
         </div>
 
         <div class="seccion-form">
-          <h4>2. Costos</h4>
+          <h4>2. Costos y Abonos</h4>
           <div class="form-containernum">
-            <div class="form-group laquinta" style="width: 100%;">
+            <div class="form-group" style="width: 100%;">
               <label>Costo Total ($):</label>
               <input type="number" id="edit-costo" name="costo_servicio" step="0.01" min="0" oninput="calcularSaldoEdit()">
             </div>
-            <div class="form-group laquinta" style="width: 100%;">
-              <label>Anticipo Pagado ($):</label>
-              <input type="number" id="edit-anticipo" name="anticipo_servicio" step="0.01" min="0" oninput="calcularSaldoEdit()">
+            <div class="form-group" style="width: 100%;">
+              <label>Anticipo Acumulado ($):</label>
+              <input type="text" id="edit-anticipo" name="anticipo_servicio" readonly style="background: #eee;">
             </div>
-            <div class="form-group laquinta" style="width: 100%;">
+            <div class="form-group" style="width: 100%;">
+              <label style="color: green; font-weight: bold;">Ingresar Nuevo Abono ($):</label>
+              <input type="number" id="edit-nuevo-abono" name="nuevo_abono" step="0.01" min="0" value="0" oninput="calcularSaldoEdit()" style="border-color: green;">
+            </div>
+            <div class="form-group" style="width: 100%;">
               <label>Saldo Restante ($):</label>
               <input type="text" id="edit-saldo" name="saldo_servicio" readonly style="background: #eee; font-weight: bold; color: red;">
             </div>

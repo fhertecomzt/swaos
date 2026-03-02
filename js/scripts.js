@@ -9736,12 +9736,19 @@ function cargarOrdenes() {
 }
 
 //Llamar editar ordenes 
-
 // Función para calcular el saldo en el modal de editar
 function calcularSaldoEdit() {
     const costo = parseFloat(document.getElementById('edit-costo').value) || 0;
-    const anticipo = parseFloat(document.getElementById('edit-anticipo').value) || 0;
-    document.getElementById('edit-saldo').value = (costo - anticipo).toFixed(2);
+    const anticipoAcumulado = parseFloat(document.getElementById('edit-anticipo').value) || 0;
+    const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
+    
+    // El saldo es el costo menos lo que ya había dado, menos lo que está dando ahorita
+    let saldoFinal = costo - (anticipoAcumulado + nuevoAbono);
+    
+    // Evitamos que el saldo sea negativo visualmente
+    if (saldoFinal < 0) saldoFinal = 0; 
+    
+    document.getElementById('edit-saldo').value = saldoFinal.toFixed(2);
 }
 
 //  ABRIR EL MODAL Y TRAER DATOS
@@ -9783,36 +9790,58 @@ document.addEventListener('click', function(e) {
 });
 
 // ENVIAR LOS DATOS ACTUALIZADOS AL SERVIDOR
-document.addEventListener('submit', function(e) {
-    if (e.target && e.target.id === 'form-editarOrden') {
-        e.preventDefault();
-        
-        const formData = new FormData(e.target);
-        
-        Swal.fire({ title: 'Guardando cambios...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+document.addEventListener("submit", function (e) {
+  if (e.target && e.target.id === "form-editarOrden") {
+    e.preventDefault();
 
-        // Vamos al PHP del Paso 3
-        fetch('cruds/procesar_editar_orden.php', { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                cerrarModalOrden('editar-modalOrden');
-                
-                Swal.fire('¡Actualizado!', data.message, 'success').then(() => {
-                    // Simular clic en el menú para recargar la tabla automáticamente
-                    if(document.getElementById("ordenes-link")) {
-                        document.getElementById("ordenes-link").click(); 
-                    }
-                });
-            } else {
-                Swal.fire('Error', data.message, 'error');
+    // --- NUEVA REGLA DE NEGOCIO: REVISAR SALDO ---
+    const saldoActual =
+      parseFloat(document.getElementById("edit-saldo").value) || 0;
+    const selectEstado = document.getElementById("edit-estado");
+    // Obtenemos el texto de la opción seleccionada (ej: "Entregado")
+    const textoEstado =
+      selectEstado.options[selectEstado.selectedIndex].text.toLowerCase();
+
+// Si el usuario elige entregado/finalizado/terminado pero aún hay saldo...
+        if ((textoEstado.includes('entregado') || textoEstado.includes('finalizado') || textoEstado.includes('terminado')) && saldoActual > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pago Pendiente',
+                text: 'No puedes marcar el equipo como Entregado. El cliente aún debe $' + saldoActual.toFixed(2)
+            });
+            return; // ¡Detenemos todo el proceso aquí!
+        }
+
+    const formData = new FormData(e.target);
+
+    Swal.fire({
+      title: "Guardando cambios...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    // Vamos al PHP del Paso 3
+    fetch("cruds/procesar_editar_orden.php", { method: "POST", body: formData })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          cerrarModalOrden("editar-modalOrden");
+
+          Swal.fire("¡Actualizado!", data.message, "success").then(() => {
+            // Simular clic en el menú para recargar la tabla automáticamente
+            if (document.getElementById("ordenes-link")) {
+              document.getElementById("ordenes-link").click();
             }
-        })
-        .catch(err => {
-            console.error(err);
-            Swal.fire('Error', 'Ocurrió un problema en la red.', 'error');
-        });
-    }
+          });
+        } else {
+          Swal.fire("Error", data.message, "error");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        Swal.fire("Error", "Ocurrió un problema en la red.", "error");
+      });
+  }
 });
 // LÓGICA PARA ELIMINAR (CANCELAR) ÓRDENES
 document.addEventListener('click', function(e) {
@@ -9909,6 +9938,26 @@ function enviarWhatsOrden(telefono, folio, cliente, saldo, estado, taller) {
 function imprimirTicket(idOrden) {
     // Abre una ventana pequeña de 400x600 pixeles
     window.open(`cruds/imprimir_ticket.php?id=${idOrden}`, 'Ticket', 'width=400,height=600');
+}
+// LÓGICA PARA VER EL QR RÁPIDO EN PANTALLA
+function verQrOrden(token) {
+    // 1. Construimos la URL completa que el cliente va a visitar
+    const urlRastreo = `http://localhost/swaos/track.php?t=${token}`;
+    
+    // 2. Generamos la imagen del QR usando la API gratuita (tamaño grande para pantallas)
+    const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(urlRastreo)}`;
+
+    // 3. Lanzamos el SweetAlert con la imagen incrustada
+    Swal.fire({
+        title: 'Código de Rastreo',
+        text: 'Pide al cliente que escanee este código con su cámara.',
+        imageUrl: urlImagenQR,
+        imageWidth: 250,
+        imageHeight: 250,
+        imageAlt: 'Código QR de Rastreo',
+        confirmButtonText: 'Cerrar',
+        confirmButtonColor: '#34495e'
+    });
 }
 
 // Llamar informes *****************************************************************
