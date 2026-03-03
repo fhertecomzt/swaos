@@ -72,6 +72,41 @@ function mostrarAlerta(tipo, titulo, mensaje) {
   Swal.fire({ title: titulo, text: mensaje, icon: tipo });
 }
 
+// DATATABLES: FUNCIÓN MAESTRA UNIVERSAL PARA TODO EL SISTEMA
+// INICIALIZACIÓN DE DATATABLES (PAGINADOR Y BUSCADOR)
+function inicializarTablaGenerica(idTabla, idBuscador, idSelectorCantidad) {
+    // Verificamos si la tabla existe en la pantalla actual
+    if ($(idTabla).length) {
+        
+        // Si ya era DataTables, la limpiamos
+        if ($.fn.DataTable.isDataTable(idTabla)) {
+            $(idTabla).DataTable().destroy();
+        }
+
+        // Inicializamos la tabla
+        let tabla = $(idTabla).DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+            },
+            "pageLength": 8,
+            "order": [[ 0, "desc" ]], // Ordena por la primera columna de mayor a menor
+            "dom": 'rtip',            // Oculta los controles feos por defecto
+            "scrollY": "60vh",        // Encabezados fijos nativos
+            "scrollCollapse": true
+        });
+
+        // Conectamos TU caja de búsqueda personalizada
+        $(idBuscador).off('keyup').on('keyup', function() {
+            tabla.search(this.value).draw();
+        });
+
+        // Conectamos TU selector de cantidades personalizado
+        $(idSelectorCantidad).off('change').on('change', function() {
+            tabla.page.len(this.value).draw();
+        });
+    }
+}
+
 // Carga Dashboard y los cards movibles
 document.addEventListener("DOMContentLoaded", function () {
   let contentArea = document.getElementById("content-area");
@@ -3028,9 +3063,11 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-
-        cargarProductos(); // Cargar los productos sin filtro inmediatamente
-        buscarProductosConFiltro(); // Buscar productos
+            inicializarTablaGenerica(
+              "#tabla-productos",
+              "#buscarboxproducto",
+              "#cantidad-registros",
+            );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -3180,9 +3217,7 @@ function procesarFormularioProducto(event, tipo) {
       if (!data.success) {
         throw new Error(data.message || "Error desconocido.");
       }
-
       //console.log("Imagen subida con éxito:", data.rutaImagen);
-
       // Restablecer la variable después de recibir la respuesta del servidor
       enviando = false;
 
@@ -3198,51 +3233,10 @@ function procesarFormularioProducto(event, tipo) {
         event.target.reset();
 
         // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          //En la linea de estatus escribimos eso para que cuando
-          //se inserte en la tabla se convierta a texto y no a número con su botón
-
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable"Imagen:">${data.producto.imagen}</td>
-            <td data-lable"Código de barras:">${data.producto.codebar}</td>
-            <td data-lable"Nombre:">${data.producto.producto}</td>
-            <td data-lable"Costo:">${parseFloat(
-              data.producto.costo_compra,
-            ).toFixed(2)}</td>
-            <td data-lable"Precio:">${parseFloat(data.producto.precio1).toFixed(
-              2,
-            )}</td> 
-            <td data-lable"Stock mínimo:">${data.producto.stock_minimo}</td>
-            <td data-lable"Stock:">0</td>
-            <td data-lable"Estatus:">
-              <button class="btn ${
-                data.producto.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.producto.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            
-            <td data-lable"Editar:">
-              <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="${
-                data.producto.id
-              }"></button>
-              </td>
-              <td data-lable"Eliminar:">
-              <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="${
-                data.producto.id
-              }"></button>
-            </td>
-          `;
-
-          /* Agregar la nueva fila al final de la tabla
-          tbody.appendChild(newRow);*/
-
-          // Agregar la nueva fila al principio de la tabla
-          tbody.insertBefore(newRow, tbody.firstChild);
+       if (tipo === "crear") {
+            if (document.getElementById("productos-link")) {
+                document.getElementById("productos-link").click(); // Recarga la tabla limpia
+            }
         }
 
         // Mostrar un mensaje de éxito
@@ -3275,106 +3269,111 @@ function procesarFormularioProducto(event, tipo) {
   enviando = false; // Permitir nuevos envíos después de finalizar la solicitud
 }
 
+// VALIDACIÓN DEL FORMULARIO DE CREAR PRODUCTO
 function validarFormularioProducto(event) {
   event.preventDefault();
 
-  const codebar = document.querySelector("[name='codebar']").value.trim();
-  const producto = document.querySelector("[name='producto']").value.trim();
-  const descprod = document.querySelector("[name='descprod']").value.trim();
-  const idcategoria = document.querySelector("[name='categoria']").value.trim();
-  //console.log("Categoria seleccionado:", idcategoria);
-
-  const idmarca = document.querySelector("[name='marca']").value.trim();
-  //console.log("Marca seleccionado:", idmarca);
-
-  const costo_compra = document
-    .querySelector("[name='costo_compra']")
-    .value.trim();
-  const ganancia = document.querySelector("[name='ganancia']").value.trim();
-  const precio1 = document.querySelector("[name='precio1']").value.trim();
+  // 1. reglas para TODOS los campos en un solo lugar
+  const reglasValidacion = [
+    // Textos
+    { id: "crear-codebar", tipo: "texto", min: 3, mensaje: "El código de barras debe tener al menos 3 caracteres." },
+    { id: "crear-producto", tipo: "texto", min: 3, mensaje: "El nombre del producto debe tener al menos 3 caracteres." },
+    { id: "crear-descprod", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." },
+    
+    // Selects (Listas desplegables)
+    { id: "crear-categoria", tipo: "select", mensaje: "Debes seleccionar una Categoría." },
+    { id: "crear-marca", tipo: "select", mensaje: "Debes seleccionar una Marca." },
+    { id: "crear-proveedor", tipo: "select", mensaje: "Debes seleccionar un Proveedor." },
+    { id: "crear-umedida", tipo: "select", mensaje: "Debes seleccionar una Unidad de Medida." },
+    { id: "crear-impuesto", tipo: "select", mensaje: "Debes seleccionar un Impuesto." },
+    
+    // Números (Costos y Precios)
+    { id: "crear-costo_compra", tipo: "numero", minVal: 0.01, mensaje: "El costo de compra debe ser mayor a $0." },
+    { id: "crear-ganancia", tipo: "numero", minVal: 0, mensaje: "El porcentaje de ganancia no puede ser negativo." },
+    // { id: "crear-precio1", tipo: "numero", minVal: 0.01, mensaje: "El precio final debe ser mayor a $0 (calcula el costo y ganancia)." },
+    { id: "crear-stock_minimo", tipo: "numero", minVal: 0, mensaje: "El stock mínimo no puede ser negativo." }
+  ];
 
   const errores = [];
-  //Validaciones simples
-  if (codebar.length < 3) {
-    errores.push("El código debe tener al menos 3 caracteres.");
-    const inputcodebar = document.querySelector("#crear-codebar");
-    inputcodebar.focus();
-    inputcodebar.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputcodebar = document.querySelector("#crear-codebar");
-  inputcodebar.addEventListener("input", () => {
-    if (inputcodebar.value.length >= 3) {
-      inputcodebar.classList.remove("input-error"); // Quita la clase si el campo es válido
+  let primerCampoConError = null;
+
+  // 2. El "Motor" que revisa cada regla automáticamente
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return; // Si el campo no existe en el HTML, lo ignora
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+
+    // A) borde rojo desaparezca cuando el usuario corrija el error
+    if (regla.tipo === "select") {
+        // Los selects usan 'change' cuando eliges una opción
+        elemento.addEventListener("change", function() {
+            if (this.value.trim() !== "") this.classList.remove("input-error");
+        });
+    } else {
+        // Los inputs de texto/número usan 'input' cuando escribes
+        elemento.addEventListener("input", function() {
+            this.classList.remove("input-error");
+        });
     }
-  });
-  if (producto.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-producto");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-producto");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
+
+    // B) Evaluar si el campo pasa la prueba
+    if (regla.tipo === "texto") {
+        if (valor.length < regla.min) esValido = false;
+    } else if (regla.tipo === "select") {
+        if (valor === "") esValido = false;
+    } else if (regla.tipo === "numero") {
+        let num = parseFloat(valor);
+        if (isNaN(num) || num < regla.minVal) esValido = false;
+    }
+
+    // C) Aplicar el estilo rojo y guardar el mensaje si falló
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`); // Lo guardamos como elemento de lista HTML
+        elemento.classList.add("input-error");
+        
+        // Guardamos el primer elemento que falló para hacerle "focus" al final
+        if (!primerCampoConError) primerCampoConError = elemento; 
+    } else {
+        elemento.classList.remove("input-error"); // Por si estaba rojo de un error anterior
     }
   });
 
-  if (descprod.length < 3) {
-    errores.push("La descripción debe tener al menos 3 caracteres.");
-    const inputdesc = document.querySelector("#crear-descprod");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-descprod");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 3) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
+  // 3. Si se encontraron errores, mostrar la alerta estructurada
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
+      title: "Faltan datos",
+      // Unimos todos los errores en una lista <ul> para que se vea ordenado
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido' // Usamos un botón para que el usuario pueda leer la lista con calma
     });
-    return;
+    
+    // Movemos la pantalla y el cursor al primer campo que le faltó llenar
+    if (primerCampoConError) primerCampoConError.focus();
+    return; // Detenemos el envío
   }
 
-  // Verificar duplicados antes de proceder
+  // 4. Si pasa las validaciones visuales, verificamos duplicados en la BD
+  const codebar = document.getElementById("crear-codebar").value.trim();
+  const producto = document.getElementById("crear-producto").value.trim();
+
   verificarDuplicadoProducto(codebar, producto)
     .then((esDuplicado) => {
       if (esDuplicado) {
-        Swal.fire({
-          title: "Duplicado",
-          text: "El nombre o código de barras ya existen. Por favor, elige otro.",
-          icon: "error",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-        return; // Detener la ejecución si hay duplicados
+        return; // Detener la ejecución si hay duplicados (tu función ya lanza su propia alerta)
       }
-
-      // Si no hay errores, enviar el formulario
+      // 5. ¡Todo perfecto! Enviamos el formulario al servidor
       procesarFormularioProducto(event, "crear");
     })
     .catch((error) => {
       console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el producto.",
-        icon: "error",
-      });
+      Swal.fire("Error", "Ocurrió un problema al validar el producto en la base de datos.", "error");
     });
 }
+
 function verificarDuplicadoProducto(codebar, producto) {
   return fetch("cruds/verificar_nombre_producto.php", {
     method: "POST",
@@ -3538,131 +3537,130 @@ function verificarDuplicadoEditarProducto(producto, id = 0) {
       return true; // Asume duplicado en caso de error
     });
 }
-
-// Validación del formulario de edición Producto
+// =========================================================================
+// 1. VALIDACIÓN PROFESIONAL DEL FORMULARIO DE EDICIÓN PRODUCTO
+// =========================================================================
 async function validarFormularioEdicionProducto(formulario) {
-  const campos = [
-    {
-      nombre: "codebar",
-      min: 3,
-      mensaje: "El código de barras debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "producto",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "descprod",
-      min: 3,
-      mensaje: "La descripción debe tener al menos 3 caracteres.",
-    },
+  
+  // 1. Definimos las reglas exactas para los campos de EDICIÓN (id empieza con "editar-")
+  const reglasValidacion = [
+    // Textos
+    { id: "editar-codebar", tipo: "texto", min: 3, mensaje: "El código de barras debe tener al menos 3 caracteres." },
+    { id: "editar-producto", tipo: "texto", min: 3, mensaje: "El nombre del producto debe tener al menos 3 caracteres." },
+    { id: "editar-descprod", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." },
+    
+    // Selects (Listas desplegables)
+    { id: "editar-categoria", tipo: "select", mensaje: "Debes seleccionar una Categoría." },
+    { id: "editar-marca", tipo: "select", mensaje: "Debes seleccionar una Marca." },
+    { id: "editar-proveedor", tipo: "select", mensaje: "Debes seleccionar un Proveedor." },
+    { id: "editar-umedida", tipo: "select", mensaje: "Debes seleccionar una Unidad de Medida." },
+    { id: "editar-impuesto", tipo: "select", mensaje: "Debes seleccionar un Impuesto." },
+    
+    // Números (Costos y Precios)
+    { id: "editar-costo_compra", tipo: "numero", minVal: 0.01, mensaje: "El costo de compra debe ser mayor a $0." },
+    { id: "editar-ganancia", tipo: "numero", minVal: 0, mensaje: "El porcentaje de ganancia no puede ser negativo." },
+    { id: "editar-stock_minimo", tipo: "numero", minVal: 0, mensaje: "El stock mínimo no puede ser negativo." }
   ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
-    });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+  const errores = [];
+  let primerCampoConError = null;
+
+  // 2. El "Motor" que revisa cada regla automáticamente
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return; // Si no lo encuentra, lo salta para no romper el código
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+
+    // A) Programar que el borde rojo desaparezca al corregir
+    if (regla.tipo === "select") {
+        elemento.addEventListener("change", function() {
+            if (this.value.trim() !== "") this.classList.remove("input-error");
+        });
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.addEventListener("input", function() {
+            this.classList.remove("input-error");
+        });
+    }
+
+    // B) Evaluar si el campo pasa la prueba
+    if (regla.tipo === "texto") {
+        if (valor.length < regla.min) esValido = false;
+    } else if (regla.tipo === "select") {
+        if (valor === "") esValido = false;
+    } else if (regla.tipo === "numero") {
+        let num = parseFloat(valor);
+        if (isNaN(num) || num < regla.minVal) esValido = false;
+    }
+
+    // C) Aplicar el estilo rojo y guardar el mensaje si falló
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento; 
+    } else {
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
+
+  // 3. Si hay errores visuales, mostramos la alerta y detenemos todo
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
-    return;
+    
+    if (primerCampoConError) primerCampoConError.focus();
+    return; 
   }
 
-  // Verificar duplicado del nombre (tu código actual)
+  // 4. Validar duplicados en la Base de Datos (Backend)
   const productoInput = document.getElementById("editar-producto");
+  const codebarInput = document.getElementById("editar-codebar");
   const idInput = document.getElementById("editar-idproducto");
-  if (!productoInput || !idInput) {
-    console.log("Error: No se encontró el campo producto o ID.");
-    return;
-  }
+
+  if (!productoInput || !idInput || !codebarInput) return;
+
   const producto = productoInput.value.trim();
+  const codebar = codebarInput.value.trim();
   const id = idInput.value;
 
   try {
-    const esNombreDuplicado = await verificarDuplicadoEditarProducto(
-      producto,
-      id,
-    );
-    if (esNombreDuplicado) {
-      return; // No enviar si el nombre está duplicado
-    }
+    // Primero revisamos si el nombre ya lo tiene otro producto
+    const esNombreDuplicado = await verificarDuplicadoEditarProducto(producto, id);
+    if (esNombreDuplicado) return; // Se detiene porque ya saltó la alerta de duplicado
+
+    // Luego revisamos si el código de barras ya lo tiene otro
+    const esCodebarDuplicado = await verificarDuplicadoEditarCodebar(codebar, id);
+    if (esCodebarDuplicado) return; // Se detiene
+
   } catch (error) {
-    console.error("Error al verificar duplicado del nombre:", error);
+    console.error("Error validando duplicados:", error);
     return;
   }
 
-  // Verificar duplicado del código de barras
-  const codebarInput = document.getElementById("editar-codebar");
-  if (codebarInput) {
-    const codebar = codebarInput.value.trim();
-    try {
-      const esCodebarDuplicado = await verificarDuplicadoEditarCodebar(
-        codebar,
-        id,
-      );
-      if (esCodebarDuplicado) {
-        return; // No enviar si el código de barras está duplicado
-      }
-    } catch (error) {
-      console.error(
-        "Error al verificar duplicado del código de barras:",
-        error,
-      );
-      return;
-    }
-  }
-
-  // Si no hay errores de validación ni duplicados, enviar el formulario
+  // 5. ¡Paso todas las validaciones! Enviamos al servidor
   enviarFormularioEdicionProducto(formulario);
 }
 
-// Enviar formulario de edición Producto
+// 2. Enviar formulario de edición Producto (AQUÍ SÍ EXISTE 'data')
 function enviarFormularioEdicionProducto(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
+  
   const formData = new FormData(formulario);
 
+  // Hacemos la petición a PHP
   fetch("cruds/editar_producto.php", {
     method: "POST",
     body: formData,
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
-      //Mensajes de text: desde el backend
+      // AQUÍ ES DONDE NACE LA VARIABLE 'data' QUE MANDA EL SERVIDOR
       if (data.success) {
         Swal.fire({
           title: "¡Éxito!",
@@ -3671,9 +3669,15 @@ function enviarFormularioEdicionProducto(formulario) {
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Cuando termine la barrita, recargamos la tabla automáticamente
+          if (document.getElementById("productos-link")) {
+            document.getElementById("productos-link").click();
+          }
         });
-        actualizarFilaTablaProducto(formData);
+        
         cerrarModalProducto("editar-modalProducto");
+        
       } else {
         Swal.fire({
           title: "Atención",
@@ -3687,25 +3691,8 @@ function enviarFormularioEdicionProducto(formulario) {
     })
     .catch((error) => {
       console.error("Error al actualizar:", error);
-      mostrarAlerta("error", "Error", "Ocurrió un problema al actualizar.");
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
     });
-}
-// Actualizar fila de la tabla
-function actualizarFilaTablaProducto(formData) {
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idproducto")}"]`)
-    .closest("tr");
-  //console.log(formData.get("editar-idproducto"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("imagen");
-    fila.cells[1].textContent = formData.get("codebar");
-    fila.cells[2].textContent = formData.get("producto");
-    fila.cells[3].textContent = formData.get("costo_compra");
-    fila.cells[4].textContent = formData.get("precio1");
-    fila.cells[5].textContent = formData.get("stock_minimo");
-
-    cargarProductosFiltrados();
-  }
 }
 
 // Eliminar Productos****************************************************
@@ -3739,7 +3726,18 @@ document.addEventListener("click", function (event) {
                 timerProgressBar: true,
               });
               // Remover la fila de la tabla
-              event.target.closest("tr").remove();
+              Swal.fire({
+                title: "¡Eliminado!",
+                text: data.message,
+                icon: "success",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+            }).then(() => {
+                if (document.getElementById("productos-link")) {
+                    document.getElementById("productos-link").click();
+                }
+            });
             } else {
               Swal.fire(
                 "Error",
@@ -3760,227 +3758,6 @@ document.addEventListener("click", function (event) {
     });
   }
 });
-//Filtrar productos por estatus *************************************************
-document.addEventListener("DOMContentLoaded", function () {
-  const estatusFiltroElement = document.getElementById("estatusFiltro");
-  if (estatusFiltroElement) {
-    estatusFiltroElement.addEventListener("change", cargarProductosPorEstatus); // Nueva función para el filtro independiente
-  }
-});
-
-function cargarProductosPorEstatus() {
-  const estatus = document.getElementById("estatusFiltro").value;
-  let url = `cruds/cargar_productos.php`;
-  if (estatus && estatus !== "todos") {
-    // Asegurarse de no enviar "todos" como filtro
-    url += `?estatus=${estatus}`;
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTabla(data); // Usar actualizarTabla para la carga inicial y el filtro independiente
-      // Reiniciar paginación si es necesario
-    })
-    .catch((error) =>
-      console.error("Error al cargar productos por estatus:", error),
-    );
-}
-
-// Buscar productos***********************************************************************
-function buscarProductosConFiltro() {
-  let timeout;
-  const buscarBox = document.getElementById("buscarboxproducto");
-  const filtroEstatusElement = document.getElementById("estatusFiltro");
-
-  document.addEventListener("input", function (event) {
-    if (event.target && event.target.id === "buscarboxproducto") {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        const filtro = buscarBox.value.trim().toLowerCase();
-        const filtroEstatus = filtroEstatusElement.value;
-        buscarProductos(filtro, filtroEstatus); // Llamar a buscarProductos solo cuando hay búsqueda
-      }, 500);
-    }
-  });
-
-  // El listener para el cambio del filtro de estatus ahora llama a cargarProductosPorEstatus
-}
-
-function buscarProductos(filtro, estatus) {
-  let url = `cruds/buscar_productos.php?q=${encodeURIComponent(filtro)}`;
-  if (estatus) {
-    url += `&estatus=${estatus}`;
-  }
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaProducto(data); // Usar actualizarTablaProducto para los resultados de búsqueda
-    })
-    .catch((error) => console.error("Error en la búsqueda:", error));
-}
-
-function actualizarTablaProducto(productos) {
-  let tbody = document.getElementById("productos-lista");
-  tbody.innerHTML = "";
-
-  if (productos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='9' style='text-align: center; color: red;'>No se encontraron productos</td></tr>`;
-    return;
-  }
-
-  productos.forEach((producto) => {
-    let stockValue = producto.stock === null ? 0 : producto.stock;
-    const fila = document.createElement("tr");
-
-    // Verificar si el stock es menor que el stock mínimo y aplicar una clase CSS
-    if (stockValue < producto.stock_minimo) {
-      fila.classList.add("bajo-stock"); // Añadir una clase para resaltar
-    }
-
-    fila.innerHTML = `
-      <td data-lable="Imagen:"><img src="${
-        producto.imagen
-      }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
-      <td data-lable="Código de barras:">${producto.codebar_prod}</td>
-      <td data-lable="Nombre:">${producto.nombre_prod}</td>
-      <td data-lable="Costo:">${producto.costo_prod}</td>
-      <td data-lable="Precio:">${producto.precio}</td>
-      <td data-lable="Stock mínimo:">${producto.stock_minimo}</td>
-      <td data-lable="Stock:">${stockValue}</td>
-      <td data-lable="Estatus:">
-        <button class="btn ${
-          producto.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${producto.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td>
-        <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="${
-          producto.id_prod
-        }"></button>
-        &nbsp;&nbsp;&nbsp;
-        <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="${
-          producto.id_prod
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-// Asegúrate de llamar a buscarProductosConFiltro en el lugar correcto,
-// probablemente d
-
-//Filtrar productos por estatus usando delegación de eventos*************************************************
-document.addEventListener("DOMContentLoaded", function () {
-  //Delegación de eventos para el filtro de estatus
-  document.addEventListener("change", function (event) {
-    if (event.target && event.target.id === "estatusFiltro") {
-      cargarProductosFiltrados();
-    }
-  });
-
-  // Detectar cuando se agregan nuevos productos y volver a aplicar el filtro
-  const observer = new MutationObserver(() => {
-    //console.log("Productos actualizados, aplicando filtro...");
-    filtrarPorEstatus(); // Asegura que el filtro se mantenga cuando se cargan más productos con scroll
-  });
-
-  const productosLista = document.getElementById("productos-lista");
-  if (productosLista) {
-    observer.observe(productosLista, { childList: true, subtree: true });
-  }
-});
-
-//Función para filtrar productos desde el servidor
-function cargarProductosFiltrados() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltro")
-    .value.trim()
-    .toLowerCase();
-  filtroAplicado = estatusFiltro; // Almacena el filtro aplicado
-
-  if (!estatusFiltro) {
-    // Incluir "todos" como caso para cargar todos
-    cargarProductos(); // Si el usuario selecciona "Todos" o no hay filtro, cargamos los primeros 10 productos normales
-    return;
-  }
-  //console.log("Cargando productos filtrados del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_productos.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTabla(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar productos filtrados:", error),
-    );
-}
-
-//Función para actualizar la tabla con los productos filtrados
-function actualizarTabla(productos) {
-  let tbody = document.getElementById("productos-lista");
-  tbody.innerHTML = "";
-
-  if (productos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='9' style='text-align: center; color: red;'>No se encontraron productos</td></tr>`;
-    return;
-  }
-
-  productos.forEach((producto) => {
-    let stockValue = producto.stock === null ? 0 : producto.stock;
-    const fila = document.createElement("tr");
-
-    // Verificar si el stock es menor que el stock mínimo y aplicar una clase CSS
-    if (stockValue < producto.stock_minimo) {
-      fila.classList.add("bajo-stock"); // Añadir una clase para resaltar
-    }
-
-    fila.innerHTML = `
-      <td data-lable="Imagen:"><img src="${
-        producto.imagen
-      }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
-      <td data-lable="Código de barras:">${producto.codebar_prod}</td>
-      <td data-lable="Nombre:">${producto.nombre_prod}</td>
-      <td data-lable="Costo:">${producto.costo_prod}</td>
-      <td data-lable="Precio:">${producto.precio}</td>
-      <td data-lable="Stock mínimo:">${producto.stock_minimo}</td>
-      <td data-lable="Stock:">${stockValue}</td>
-      <td data-lable="Estatus:">
-        <button class="btn ${
-          producto.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${producto.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="${
-          producto.id_prod
-        }"></button>
-        </td>
-      <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="${
-          producto.id_prod
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 productos por defecto
-function cargarProductos() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_productos.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTabla(data);
-    })
-    .catch((error) => console.error("Error al cargar productos:", error));
-}
 
 // Llamar Categorias **************************************************
 document
@@ -9371,7 +9148,7 @@ document.getElementById("ordenes-link").addEventListener("click", function (even
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        inicializarPaginador();
+        inicializarTablaGenerica('#tabla-ordenes', '#buscarboxorden', '#cantidad-registros');
       })
       .catch((error) => console.error("Error al cargar contenido:", error));
 });
@@ -9907,41 +9684,6 @@ function verQrOrden(token) {
         confirmButtonText: 'Cerrar',
         confirmButtonColor: '#34495e'
     });
-}
-
-// INICIALIZACIÓN DE DATATABLES (PAGINADOR Y BUSCADOR)
-function inicializarPaginador() {
-    if ($('#tabla-ordenes').length) {
-        
-        if ($.fn.DataTable.isDataTable('#tabla-ordenes')) {
-            $('#tabla-ordenes').DataTable().destroy();
-        }
-
-        let tabla = $('#tabla-ordenes').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-            },
-            "pageLength": 8,
-            "order": [[ 0, "desc" ]],
-            
-            // Usamos 'rtip' (Le quitamos la 'l' al principio)
-            // Esto oculta el selector que DataTables pone por defecto arriba a la izquierda
-            "dom": 'rtip',
-            // ENCABEZADOS FIJOS NATIVOS DE DATATABLES
-            "scrollY": "60vh",      // La tabla medirá el 60% de la pantalla y luego hará scroll
-            "scrollCollapse": true  // Si hay poquitas órdenes (ej. 3), la tabla no deja espacio en blanco, se encoge
-        });
-
-        // 1. Conectamos la caja de búsqueda
-        $('#buscarboxorden').on('keyup', function() {
-            tabla.search(this.value).draw();
-        });
-
-        // 2.  Conectamos el selector de cantidades
-        $('#cantidad-registros').off('change').on('change', function() {
-            tabla.page.len(this.value).draw();
-        });
-    }
 }
 
 // Llamar informes *****************************************************************

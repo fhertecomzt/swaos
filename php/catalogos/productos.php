@@ -25,22 +25,24 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
 <div class="containerr">
   <!-- Abrir Modal crear productos -->
   <button class="boton" onclick="abrirModalProducto('crear-modalProducto')">Nuevo</button>
+
+  <!-- Filtro cantidaD -->
+  <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+  <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+    <option value="8">8</option>
+    <option value="25">25</option>
+    <option value="50">50</option>
+    <option value="-1">Todos</option>
+  </select>
+
   <!-- Input buscar productos -->
   <label class="buscarlabel" for="buscarboxproducto">Buscar:</label>
   <input class="buscar--box" id="buscarboxproducto" type="search" placeholder="¿Qué estas buscando?" autocomplete="off">
-
-  <!-- Filtro de estatus -->
-  <label class="buscarlabel" for="estatusFiltro">Filtrar por Estatus:</label>
-  <select class="buscar--box" id="estatusFiltro" onchange="cargarProductosFiltrados()" style="width: 100px;">
-    <option value="">Todos</option>
-    <option value="Activo">Activo</option>
-    <option value="Inactivo">Inactivo</option>
-  </select>
 </div>
 
 <div class="container_dashboard_tablas" id="productos">
   <h3>Lista de productos</h3>
-  <div id="scroll-container" style="height: 65vh; overflow-y: auto; position: relative;">
+  <div id="scroll-container">
     <table class="tbl" id="tabla-productos">
       <thead>
         <tr>
@@ -52,13 +54,23 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
           <th>Stock Mínimo</th>
           <th>Stock</th>
           <th>Estatus</th>
-          <th colspan="2" style="text-align: center;">Acciones</th>
+          <th style="text-align: center;">Acciones</th>
         </tr>
       </thead>
 
       <tbody id="productos-lista">
         <?php foreach ($productos as $u): ?>
-          <tr class="producto" data-estatus="<?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>">
+          <?php
+          // Nos aseguramos de que sean números reales (floats o enteros)
+          $stock_actual = floatval($u['stock'] ?? 0);
+          $stock_minimo = floatval($u['stock_minimo'] ?? 0);
+
+          // REGLA ESTRICTA: 
+          // - El producto debe tener un stock mínimo configurado mayor a 0
+          // - Y sus existencias actuales deben ser MENORES a ese mínimo
+          $clase_alerta = ($stock_minimo > 0 && $stock_actual < $stock_minimo) ? 'bajo-stock' : '';
+          ?>
+          <tr class="producto <?php echo $clase_alerta; ?>" data-estatus="<?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>">
 
             <td data-lable="Imagen"><?php if (!empty($u['imagen'])): ?>
                 <img src="<?= htmlspecialchars($u['imagen']) ?>" alt="Imagen de producto" width="50" height="50" onerror="this.src='../imgs/default.png'">
@@ -78,10 +90,9 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
               </button>
             </td>
 
-            <td data-lable="Editar:">
-              <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="<?php echo $u['id_prod']; ?>"></button>&nbsp;&nbsp;&nbsp;
-            </td>
-            <td data-lable="Eliminar:">
+            <td data-lable="Acciones" style="display: flex; gap: 10px; justify-content: center;">
+              <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="<?php echo $u['id_prod']; ?>"></button>
+
               <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="<?php echo $u['id_prod']; ?>"></button>
             </td>
           </tr>
@@ -95,7 +106,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
     <div class="modal-contentProductos">
       <span title="Cerrar" class="close" onclick="cerrarModalProducto('crear-modalProducto')">&times;</span>
       <h2 class="tittle">Crear Producto</h2>
-      <form id="form-crearProducto" onsubmit="validarFormularioProducto(event, 'crear');" enctype="multipart/form-data">
+      <form id="form-crearProducto" onsubmit="validarFormularioProducto(event, 'crear');" enctype="multipart/form-data" novalidate>
 
         <div class="form-group">
           <label for="crear-codebar">Código de barras:</label>
@@ -201,7 +212,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
           </div>
 
           <div class="form-group laquinta">
-            <label for="crear-ganancia">Ganancia:</label>
+            <label for="crear-ganancia">Ganancia en %:</label>
             <input type="text" id="crear-ganancia" name="ganancia" autocomplete="off"
               pattern="^\d+(\.\d{1,2})?$"
               title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" size="10" min="0" maxlength="10" required>
@@ -211,7 +222,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
             <label for="crear-precio1">Precio:</label>
             <input type="number" id="crear-precio1" name="precio1" autocomplete="off"
               pattern="^\d+(\.\d{1,2})?$"
-              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" required>
+              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" disabled required>
           </div>
 
 
@@ -251,7 +262,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
     <span title="Cerrar" class="close" onclick="cerrarModalProducto('editar-modalProducto')">&times;</span>
     <h2 class="tittle">Editar Producto</h2>
 
-    <form id="form-editarProducto" enctype="multipart/form-data">
+    <form id="form-editarProducto" enctype="multipart/form-data" novalidate>
       <input type="hidden" id="editar-idproducto" name="editar-idproducto" value="" />
 
       <div class="form-group">
@@ -361,7 +372,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
         </div>
 
         <div class="form-group laquinta">
-          <label for="editar-ganancia">Ganancia:</label>
+          <label for="editar-ganancia">Ganancia en %:</label>
           <input type="text" id="editar-ganancia" name="ganancia" autocomplete="off"
             pattern="^\d+(\.\d{1,2})?$"
             title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
@@ -373,7 +384,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
           <input type="text" id="editar-precio1" name="precio1" autocomplete="off"
             pattern="^\d+(\.\d{1,3})?$"
             title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')" min="0" maxlength="10" required>
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')" min="0" maxlength="10" disabled required>
         </div>
       </div>
 

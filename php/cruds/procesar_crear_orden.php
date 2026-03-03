@@ -123,7 +123,7 @@ try {
   $dbh->commit();
 
   // 5. RESPUESTA
-  $link = "https://swaos.rf.gd/track.php?t=" . $token_hash;
+  $link = "https://localhost/swaos/track.php?t=" . $token_hash;
   $msg = "Hola *" . $datosCliente['nombre_cliente'] . "*,\nRecibimos tu equipo (Orden #$id_orden).\nVer estado: $link";
   if ($es_cuenta_nueva) $msg .= "\n\nTu clave de acceso: $pass_generada_texto";
 
