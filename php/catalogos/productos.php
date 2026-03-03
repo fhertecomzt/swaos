@@ -54,7 +54,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
           <th>Stock Mínimo</th>
           <th>Stock</th>
           <th>Estatus</th>
-          <th style="text-align: center;">Acciones</th>
+          <th style="text-align: left;">Acciones</th>
         </tr>
       </thead>
 

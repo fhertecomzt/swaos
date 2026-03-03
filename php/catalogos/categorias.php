@@ -16,21 +16,23 @@ $categorias = obtenerRegistros($dbh, "categorias", "id_categoria, nombre_cat, de
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalCat('crear-modalCat')">Nuevo</button>
-    <label class="buscarlabel" for="buscarboxcat">Buscar:</label>
-    <input class="buscar--box" id="buscarboxcat" type="search" placeholder="Qué estas buscando?" autocomplete="off">
-
+    
     <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroCat">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroCat" onchange="cargarCatFiltradas()" style="width: 100px;">
-        <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+        <option value="8">8</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="-1">Todos</option>
     </select>
+
+    <label class="buscarlabel" for="buscarboxcat">Buscar:</label>
+    <input class="buscar--box" id="buscarboxcat" type="search" placeholder="¿Qué estas buscando?" autocomplete="off">
 </div>
 
 <div class="container_dashboard_tablas" id="categorias">
     <h3>Lista de Categorías</h3>
-    <div id="scroll-containerCat" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerCat">
 
         <table class="tbl" id="tabla-categorias">
             <thead>
@@ -38,7 +40,7 @@ $categorias = obtenerRegistros($dbh, "categorias", "id_categoria, nombre_cat, de
                     <th>Categoría</th>
                     <th>Descripción</th>
                     <th>Estatus</th>
-                    <th colspan="2" style="text-align: center;">Acciones</th>
+                    <th style="text-align: left;">Acciones</th>
                 </tr>
             </thead>
 
@@ -50,10 +52,8 @@ $categorias = obtenerRegistros($dbh, "categorias", "id_categoria, nombre_cat, de
                         <td data-lable="Estatus:"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
-                        <td data-lable="Editar:">
+                        <td data-lable="Acciones:">
                             <button title=" Editar" class="editarCat fa-solid fa-pen-to-square" data-id="<?php echo $u['id_categoria']; ?>"></button>
-                        </td>
-                        <td data-lable="Eliminar:">
                             <button title=" Eliminar" class="eliminarCat fa-solid fa-trash" data-id="<?php echo $u['id_categoria']; ?>"></button>
                         </td>
                     </tr>
@@ -69,7 +69,7 @@ $categorias = obtenerRegistros($dbh, "categorias", "id_categoria, nombre_cat, de
             <div class="modal-content" style="height: 269px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalCat('crear-modalCat')">&times;</span>
                 <h2 class="tittle">Crear Categoría</h2>
-                <form id="form-crearCat" onsubmit="validarFormularioCat(event, 'crear')">
+                <form id="form-crearCat" onsubmit="validarFormularioCat(event, 'crear')" novalidate>
 
                     <div class="form-group">
                         <label for="crear-cat">Nombre:</label>
@@ -105,7 +105,7 @@ $categorias = obtenerRegistros($dbh, "categorias", "id_categoria, nombre_cat, de
             <div class="modal-content" style="height: 269px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalCat('editar-modalCat')">&times;</span>
                 <h2 class="tittle">Editar Categoría</h2>
-                <form id="form-editarCat">
+                <form id="form-editarCat" novalidate>
                     <input type="hidden" id="editar-idcat" name="editar-idcat" value="" />
                     <div class="form-group">
                         <label for="editar-cat">Nombre:</label>

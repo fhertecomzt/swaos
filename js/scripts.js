@@ -3768,13 +3768,15 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+    //Funcion para filtrar y buscar
+    inicializarTablaGenerica('#tabla-categorias', '#buscarboxcat', '#cantidad-registros');
+
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-//Crear Categoria******************************************
 function abrirModalCat(id) {
   document.getElementById(id).style.display = "flex";
 }
@@ -3783,8 +3785,57 @@ function cerrarModalCat(id) {
   document.getElementById(id).style.display = "none";
 }
 
+// CREAR CATEGORÍA (Validación Profesional y Procesamiento) ******************************************
+function validarFormularioCat(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    { id: "crear-cat", tipo: "texto", min: 3, mensaje: "La categoría debe tener al menos 3 caracteres." },
+    { id: "crear-desc_cat", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  const cat = document.getElementById("crear-cat").value.trim();
+  verificarDuplicadoCat(cat).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioCat(event, "crear");
+  });
+}
+
 function procesarFormularioCat(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
+  event.preventDefault();
   const formData = new FormData(event.target);
 
   fetch(`cruds/procesar_${tipo}_cat.php`, {
@@ -3794,149 +3845,32 @@ function procesarFormularioCat(event, tipo) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Cerrar el modal
         cerrarModalCat(tipo + "-modalCat");
-        // Limpiar los campos del formulario
         event.target.reset();
 
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable="Nombre:">${data.cat.nombre}</td>
-            <td data-lable="Descripción:">${data.cat.descripcion}</td>
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                data.cat.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.cat.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            
-            <td data-lable="Editar:">
-              <button title="Editar:" class="editarCat fa-solid fa-pen-to-square" data-id="${
-                data.cat.id
-              }"></button>
-              </td>
-            <td data-lable="Eliminar:">
-              <button title="Eliminar:" class="eliminarCat fa-solid fa-trash" data-id="${
-                data.cat.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
         Swal.fire({
           title: "¡Éxito!",
-          text: "La acción se realizó correctamente.",
+          text: data.message || "La acción se realizó correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("categorias-link")) {
+            document.getElementById("categorias-link").click();
+          }
         });
       } else {
-        // Mostrar un mensaje de error
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
+        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
       }
     })
     .catch((error) => {
-      // Manejar errores inesperados
       console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
+      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
     });
 }
-function validarFormularioCat(event) {
-  event.preventDefault();
 
-  const cat = document.querySelector("[name='cat']").value.trim();
-  const desc_cat = document.querySelector("[name='desc_cat']").value.trim();
-
-  const errores = [];
-
-  if (cat.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-cat");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-cat");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (desc_cat.length < 3) {
-    errores.push("La descripción debe tener al menos 3 caracteres.");
-    const inputdesc = document.querySelector("#crear-desc_cat");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-desc_cat");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 3) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-  //Alerta de validaciones campos vacios categorias
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados al crear
-  verificarDuplicadoCat(cat)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "!Error¡",
-          text: "El nombre de la Categoría ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario
-        procesarFormularioCat(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
-    });
-}
 function verificarDuplicadoCat(cat) {
   //console.log("Nombre verificar duplicado:", nombre_cat);
 
@@ -4048,89 +3982,64 @@ function verificarDuplicadoEditarCat(cat, id = 0) {
       return true; // Asume duplicado en caso de error
     });
 }
-// Validación del formulario de edición Categoria
-async function validarFormularioEdicionCat(formulario) {
-  const campos = [
-    {
-      nombre: "cat",
-      min: 3,
-      mensaje: "La categoría debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "desc_cat",
-      min: 3,
-      mensaje: "La descripción debe tener al menos 3 caracteres.",
-    },
-  ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
+// =========================================================================
+// EDITAR CATEGORÍA (Validación Profesional y Procesamiento)
+// =========================================================================
+async function validarFormularioEdicionCat(formulario) {
+  const reglasValidacion = [
+    { id: "editar-cat", tipo: "texto", min: 3, mensaje: "La categoría debe tener al menos 3 caracteres." },
+    { id: "editar-desc_cat", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
     });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
+
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
+    if (primerCampoConError) primerCampoConError.focus();
     return;
   }
 
-  // Verificar duplicado antes de enviar el formulario
   const catInput = document.getElementById("editar-cat");
   const idInput = document.getElementById("editar-idcat");
-  if (!catInput || !idInput) {
-    console.log("Error: No se encontró el campo de Cat o ID.");
-    return;
-  }
-  const cat = catInput.value.trim();
-  const id = idInput.value;
+  if (!catInput || !idInput) return;
 
   try {
-    //console.log("Verificando duplicado. ID:", id, "Cat:", cat);
-    const esDuplicado = await verificarDuplicadoEditarCat(cat, id);
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      enviarFormularioEdicionCat(formulario); // Proceder si no hay duplicados
-    }
+    const esDuplicado = await verificarDuplicadoEditarCat(catInput.value.trim(), idInput.value);
+    if (!esDuplicado) enviarFormularioEdicionCat(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
 }
-// Enviar formulario de edición Cat
+
 function enviarFormularioEdicionCat(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
   const formData = new FormData(formulario);
 
   fetch("cruds/editar_cat.php", {
@@ -4139,23 +4048,26 @@ function enviarFormularioEdicionCat(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
         Swal.fire({
           title: "¡Actualizado!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "Categoría actualizada correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("categorias-link")) {
+            document.getElementById("categorias-link").click();
+          }
         });
-        // Actualizar la fila de la tabla sin recargar
-        actualizarFilaTablaCat(formData);
-        cerrarModal("editar-modalCat");
+        // Si tu función de cerrar modal se llama cerrarModalCat, asegúrate de que diga eso:
+        cerrarModalCat("editar-modalCat"); 
       } else {
         Swal.fire({
           title: "Atención",
-          text: data.message, // Usar el mensaje del backend no hubo cambios
+          text: data.message || "No hubo cambios.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -4164,33 +4076,11 @@ function enviarFormularioEdicionCat(formulario) {
       }
     })
     .catch((error) => {
-      console.error("Error al actualizar Categoría:", error);
-      mostrarAlerta(
-        "error",
-        "Error",
-        "Ocurrió un problema al actualizar la Categoría.",
-      );
+      console.error("Error al actualizar:", error);
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
     });
 }
-// Actualizar fila de la tabla categoria
-function actualizarFilaTablaCat(formData) {
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idcat")}"]`)
-    .closest("tr");
-  console.log(formData.get("editar-idcat"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("cat");
-    fila.cells[1].textContent = formData.get("desc_cat");
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
 
-    // Insertar el botón en la celda
-    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    cargarCatFiltradas();
-  }
-}
 // Eliminar Categorias*********************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarCat")) {
@@ -4212,17 +4102,19 @@ document.addEventListener("click", function (event) {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              //alert("Registro eliminado correctamente");
-              Swal.fire({
+             Swal.fire({
                 title: "¡Eliminada!",
-                text: data.message, // Usar el mensaje del backend
+                text: data.message, 
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
+              }).then(() => {
+                // Recargamos DataTables limpiamente
+                if (document.getElementById("categorias-link")) {
+                  document.getElementById("categorias-link").click();
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
             } else {
               Swal.fire(
                 "Error",
@@ -4243,289 +4135,6 @@ document.addEventListener("click", function (event) {
     });
   }
 });
-
-//Buscar en la tabla y filtrar categorias *************************
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboxcat");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarboxcat' encontrado dinámicamente");
-          agregarEventoBuscarCat(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboxcat");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboxcat' ya existe en el DOM");
-    agregarEventoBuscarCat(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarCat(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-categorias tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda *****************************
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboxcat") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaCat = document.getElementById("limpiar-busquedaCat"); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-categorias tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaCat") {
-      const buscarBox = document.getElementById("buscarboxcat");
-      const limpiarBusquedaCat = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaCat) {
-          limpiarBusquedaCat.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-categorias tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar categorias desde el servidor ******************************
-function cargarCatFiltradas() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroCat")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarCategorias(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
-    return;
-  }
-  //console.log("Cargando categorias filtrados del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_categorias.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log("Filtrados: ",data);
-      actualizarTablaCategorias(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar categorias filtradas:", error),
-    );
-}
-
-//Función para actualizar la tabla con las tiendas filtradas
-function actualizarTablaCategorias(categorias) {
-  let tbody = document.getElementById("categorias-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (categorias.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron categorias</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevas categorias
-  tbody.innerHTML = "";
-
-  categorias.forEach((categoria) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${categoria.nombre_cat}</td>
-      <td data-lable="Descripción:">${categoria.desc_cat}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          categoria.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${categoria.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarCat fa-solid fa-pen-to-square" data-id="${
-          categoria.id_categoria
-        }"></button>
-        </td>
-        <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarCat fa-solid fa-trash" data-id="${
-          categoria.id_categoria
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 categorias por defecto
-function cargarCategorias() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_categorias.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaCategorias(data);
-    })
-    .catch((error) => console.error("Error al cargar categorias:", error));
-}
-
-/* ---------------- SCROLL INFINITO Categorias----------------------*/
-
-function cargarCategoriasScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltroCat = document
-    .getElementById("estatusFiltroCat")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_categorias_scroll.php?page=${pagina}`;
-
-  if (estatusFiltroCat !== "") {
-    url += `&estatus=${estatusFiltroCat}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-categorias tbody");
-        data.forEach((categoria) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td data-lable="Nombre:">${categoria.nombre}</td>
-            <td data-lable="Descripción:">${categoria.descripcion}</td>
-            
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                categoria.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${categoria.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar">
-              <button title="Editar" class="editarCat fa-solid fa-pen-to-square" data-id="${
-                categoria.idcategoria
-              }"></button>
-            </td>
-        <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminarCat fa-solid fa-trash" data-id="${
-          categoria.idcategoria
-        }"></button>
-      </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más Categorías.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => console.error("Error al cargar Categorías:", error));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("categorías.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más categorías
-    console.log("Reiniciando scroll y cargando categorías en categorías.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A roles.php
-    iniciarScrollCategorias();
-  }
-});
-
-function iniciarScrollCategorias() {
-  const scrollContainer = document.getElementById("scroll-containerCat");
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      //console.log(" Scroll detectado, cargando más Roles...");
-      cargarCategoriasScroll();
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en roles.php");
-}
-
-const observerCategorias = new MutationObserver(() => {
-  const categoriasSeccion = document.getElementById("scroll-containerCat");
-  if (categoriasSeccion) {
-    observerCategorias.disconnect();
-    iniciarScrollCategorias();
-  }
-});
-
-const Categorias = document.getElementById("content-area");
-if (Categorias) {
-  observerCategorias.observe(Categorias, { childList: true, subtree: true });
-}
 
 // Llamar Marcas ********************************************
 document
