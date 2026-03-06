@@ -16,22 +16,24 @@ $mpagos = obtenerRegistros($dbh, "metodosdepago", "id_metpago, nombre_metpago, d
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalMpago('crear-modalMpago')">Nuevo</button>
-    <label class="buscarlabel" for="buscarboxmpago">Buscar:</label>
-    <input class="buscar--box" id="buscarboxmpago" type="search" placeholder="Qué estas buscando?">
 
     <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroMpago">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroMpago" onchange="cargarMpagosFiltrados()" style="width: 100px;">
-        <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+        <option value="8">8</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="-1">Todos</option>
     </select>
+
+    <label class="buscarlabel" for="buscarboxmpago">Buscar:</label>
+    <input class="buscar--box" id="buscarboxmpago" type="search" placeholder="Qué estas buscando?">
 
 </div>
 
 <div class="container_dashboard_tablas" id="mpagos">
     <h3>Lista de Métodos de pago</h3>
-    <div id="scroll-containerMpag" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerMpag">
 
         <table class="tbl" id="tabla-mpagos">
             <thead>
@@ -39,7 +41,7 @@ $mpagos = obtenerRegistros($dbh, "metodosdepago", "id_metpago, nombre_metpago, d
                     <th>Método de pago</th>
                     <th>Descripción</th>
                     <th>Estatus</th>
-                    <th colspan="2" style="text-align: center;">Acciones</th>
+                    <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="mpagos-lista">
@@ -52,10 +54,9 @@ $mpagos = obtenerRegistros($dbh, "metodosdepago", "id_metpago, nombre_metpago, d
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
 
-                        <td data-lable="Editar:">
+                        <td data-lable="Acciones:">
                             <button title="Editar" class="editarMpago fa-solid fa-pen-to-square" data-id="<?php echo $u['id_metpago']; ?>"></button>
-                        </td>
-                        <td data-lable="Eliminar:">
+
                             <button title="Eliminar" class="eliminarMpago fa-solid fa-trash" data-id="<?php echo $u['id_metpago']; ?>"></button>
                         </td>
                     </tr>
@@ -70,7 +71,7 @@ $mpagos = obtenerRegistros($dbh, "metodosdepago", "id_metpago, nombre_metpago, d
             <div class="modal-content" style="height: 269px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalMpago('crear-modalMpago')">&times;</span>
                 <h2 class="tittle">Crear Método de pago</h2>
-                <form id="form-crearMpago" onsubmit="validarFormularioMpago(event, 'crear')">
+                <form id="form-crearMpago" onsubmit="validarFormularioMpago(event, 'crear')" novalidate>
 
                     <div class="form-group">
                         <label for="crear-mpago">Nombre:</label>
@@ -106,9 +107,9 @@ $mpagos = obtenerRegistros($dbh, "metodosdepago", "id_metpago, nombre_metpago, d
             <div class="modal-content" style="height: 269px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalMpago('editar-modalMpago')">&times;</span>
                 <h2 class="tittle">Editar Mpago</h2>
-                <form id="form-editarMpago">
+                <form id="form-editarMpago" novalidate>
                     <input type="hidden" id="editar-idmpago" name="editar-idmpago" value="" />
-                    
+
                     <div class="form-group">
                         <label for="editar-mpago">Nombre de la Mpago:</label>
                         <input type="text" id="editar-mpago" name="mpago" autocomplete="off"

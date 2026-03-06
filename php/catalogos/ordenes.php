@@ -96,9 +96,9 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
                 <i class="fa-solid fa-qrcode"></i>
               </button>
 
-              <button title="Editar" class="editarOrden fa-solid fa-pen-to-square" data-id="<?php echo $ord['id_orden']; ?>"></button>
+              <button title="Editar" class="editarOrden fa-solid fa-pen-to-square" data-id="<?php echo $ord['id_orden']; ?>" style="background-color: #c1c13c; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;"></button>
 
-              <button title="Cancelar Orden" class="eliminarOrden" data-id="<?php echo $ord['id_orden']; ?>" style="background-color: #dc3545; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;">
+              <button title="Cancelar Orden" class="eliminarOrden" data-id="<?php echo $ord['id_orden']; ?>" style="background-color: #cb2c3c; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;">
                 <i class="fa-solid fa-trash pointer-events-none"></i>
               </button>
             </td>

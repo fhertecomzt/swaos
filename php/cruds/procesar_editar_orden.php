@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $saldo_servicio = floatval($costo_servicio) - $anticipo_total;
 
     // --- REGLA DE NEGOCIO DEL SALDO (Ajustar tu ID de entregado aquí) ---
-    $id_estado_entregado = 6;
+    $id_estado_entregado = 2;
     if ($id_estado_servicio == $id_estado_entregado && $saldo_servicio > 0) {
         echo json_encode(['success' => false, 'message' => 'Seguridad: No se puede entregar si hay un saldo pendiente de $' . number_format($saldo_servicio, 2)]);
         exit;

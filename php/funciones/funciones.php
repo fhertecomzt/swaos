@@ -1,24 +1,28 @@
 <?php
 
-//Obtener registros*******************************************
-function obtenerRegistros($dbh, $tabla, $campos = "*", $orden = "id DESC", $campoId = "id", $registrosPorPagina = 10, $pagina = 1, $soloActivos = false)
+//Obtener registros (Actualizado para DataTables) ****************************
+function obtenerRegistros($dbh, $tabla, $campos = "*", $orden = "id DESC", $campoId = "id", $registrosPorPagina = 0, $pagina = 1, $soloActivos = false)
 {
   $tablasPermitidas = ['talleres', 'roles', 'productos', 'categorias', 'marcas', 'equipos', 'tiposervicios', 'estadosservicios',  'metodosdepago', 'impuestos', 'clientes', 'proveedores', 'estados', 'unidades_med'];
   if (!in_array($tabla, $tablasPermitidas)) {
     return [];
   }
 
-  $offset = ($pagina - 1) * $registrosPorPagina;
-
   // Si se solicita solo activos, agregamos la cláusula WHERE
   $clausulaWhere = $soloActivos ? "WHERE estatus = 0" : "";
 
-  // Construcción de la SQL con el filtro de estatus
-  $sql = "SELECT $campos FROM $tabla $clausulaWhere ORDER BY $campoId $orden LIMIT :limit OFFSET :offset";
-
-  $stmt = $dbh->prepare($sql);
-  $stmt->bindParam(':limit', $registrosPorPagina, PDO::PARAM_INT);
-  $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+  // Si registrosPorPagina es 0 (nuevo por defecto), traemos TODOS los registros para DataTables
+  if ($registrosPorPagina == 0) {
+    $sql = "SELECT $campos FROM $tabla $clausulaWhere ORDER BY $campoId $orden";
+    $stmt = $dbh->prepare($sql);
+  } else {
+    // Si se envía un número, usamos el paginador clásico de PHP
+    $offset = ($pagina - 1) * $registrosPorPagina;
+    $sql = "SELECT $campos FROM $tabla $clausulaWhere ORDER BY $campoId $orden LIMIT :limit OFFSET :offset";
+    $stmt = $dbh->prepare($sql);
+    $stmt->bindParam(':limit', $registrosPorPagina, PDO::PARAM_INT);
+    $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+  }
 
   $stmt->execute();
   return $stmt->fetchAll(PDO::FETCH_ASSOC);

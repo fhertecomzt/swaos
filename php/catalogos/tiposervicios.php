@@ -16,21 +16,23 @@ $tiposervicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servi
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalTiposervicios('crear-modalTiposervicios')">Nuevo</button>
-    <label class="buscarlabel" for="buscarboxTiposervicios">Buscar:</label>
-    <input class="buscar--box" id="buscarboxTiposervicios" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 
     <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroTiposervicios">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroTiposervicios" onchange="cargarTiposerviciosFiltrados()" style="width: 100px;">
-        <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+        <option value="8">8</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="-1">Todos</option>
     </select>
+
+    <label class="buscarlabel" for="buscarboxTiposervicios">Buscar:</label>
+    <input class="buscar--box" id="buscarboxTiposervicios" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 </div>
 
 <div class="container_dashboard_tablas" id="tiposervicios">
     <h3>Lista de Tipos de servicios</h3>
-    <div id="scroll-containerTiposervicios" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerTiposervicios">
         <!-- Mostrar Tabla de registros -->
         <table class="tbl" id="tabla-tiposervicios">
             <thead>
@@ -38,7 +40,7 @@ $tiposervicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servi
                     <th>Tipo de servicio</th>
                     <th>Descripción</th>
                     <th>Estatus</th>
-                    <th colspan="2" style="text-align: center;">Acciones</th>
+                    <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
 
@@ -50,10 +52,9 @@ $tiposervicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servi
                         <td data-lable="Estatus:"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
-                        <td data-lable="Editar:">
+                        <td data-lable="Acciones:">
                             <button title=" Editar" class="editarTiposervicio fa-solid fa-pen-to-square" data-id="<?php echo $u['id_servicio']; ?>"></button>
-                        </td>
-                        <td data-lable="Eliminar:">
+                       
                             <button title=" Eliminar" class="eliminarTiposervicio fa-solid fa-trash" data-id="<?php echo $u['id_servicio']; ?>"></button>
                         </td>
                     </tr>
@@ -69,7 +70,7 @@ $tiposervicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servi
             <div class="modal-content" style="height: 269px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalTiposervicios('crear-modalTiposervicios')">&times;</span>
                 <h2 class="tittle">Crear Tipos de servicio</h2>
-                <form id="form-crearTiposervicios" onsubmit="validarFormulariotiposervicios(event, 'crear')">
+                <form id="form-crearTiposervicios" onsubmit="validarFormularioTiposervicios(event, 'crear')" novalidate>
 
                     <div class="form-group">
                         <label for="crear-tiposervicios">Nombre:</label>
@@ -105,7 +106,7 @@ $tiposervicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servi
             <div class="modal-content" style="height: 269px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalTiposervicios('editar-modalTiposervicio')">&times;</span>
                 <h2 class="tittle">Editar Tipo de servicio</h2>
-                <form id="form-editarTiposervicio">
+                <form id="form-editarTiposervicio" novalidate>
                     <input type="hidden" id="editar-idtiposervicio" name="editar-idtiposervicio" value="" />
                     <div class="form-group">
                         <label for="editar-tiposervicio">Nombre:</label>

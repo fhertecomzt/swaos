@@ -16,49 +16,52 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalProveedor('crear-modalProveedor')">Nuevo</button>
+
+    <!-- Filtro de estatus -->
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+        <option value="8">8</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="-1">Todos</option>
+    </select>
     <label class="buscarlabel" for="buscarboxproveedor">Buscar:</label>
     <input class="buscar--box" id="buscarboxproveedor" type="search" placeholder="Qué estas buscando?" autocomplete="off">
-
-        <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroProv">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroProv" onchange="cargarProvFiltrados()" style="width: 100px;">
-        <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
-    </select>
-
 </div>
 
 <div class="container_dashboard_tablas" id="proveedores">
     <h3>Lista de Proveedores</h3>
-    <div id="scroll-containerProv" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerProv">
 
         <table class="tbl" id="tabla-proveedores">
             <thead>
                 <tr>
-                    <th>Nombre</th>
+                    <th>Contacto</th>
+                    <th>Primer apellido</th>
+                    <th>Segundo apellido</th>
                     <th>Empresa</th>
                     <th>Teléfono</th>
                     <th>Email</th>
                     <th>Estatus</th>
-                    <th colspan="2" style="text-align: center;">Acciones</th>
+                    <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="proveedores-lista">
                 <?php foreach ($proveedores as $u): ?>
                     <tr>
-                        <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre_prov']); ?></td>
-                        <td data-lable="Contacto:"><?php echo htmlspecialchars($u['contacto_prov']); ?></td>
+                        <td data-lable="Contacto:"><?php echo htmlspecialchars($u['nombre_prov']); ?></td>
+                        <td data-lable="Primer apellido:"><?php echo htmlspecialchars($u['papellido_prov']); ?></td>
+                        <td data-lable="Segundo apellido:"><?php echo htmlspecialchars($u['sapellido_prov']); ?></td>
+                        <td data-lable="Nombre:"><?php echo htmlspecialchars($u['contacto_prov']); ?></td>
                         <td data-lable="Teléfono:"><?php echo htmlspecialchars($u['tel_prov']); ?></td>
                         <td data-lable="Email:"><?php echo htmlspecialchars($u['email_prov']); ?></td>
                         <td data-lable="Estatus:"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
 
-                        <td data-lable="Editar:">
+                        <td data-lable="Acciones:">
                             <button title="Editar" class="editarProveedor fa-solid fa-pen-to-square" data-id="<?php echo $u['id_prov']; ?>"></button>
-                        </td>
-                        <td data-lable="Eliminar:">
+
                             <button title="Eliminar" class="eliminarProveedor fa-solid fa-trash" data-id="<?php echo $u['id_prov']; ?>"></button>
                         </td>
                     </tr>
@@ -73,7 +76,7 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
             <div class="modal-content">
                 <span title="Cerrar" class="close" onclick="cerrarModalProveedor('crear-modalProveedor')">&times;</span>
                 <h2 class="tittle">Crear Proveedor</h2>
-                <form id="form-crearProveedor" onsubmit="validarFormularioProveedor(event, 'crear')">
+                <form id="form-crearProveedor" onsubmit="validarFormularioProveedor(event, 'crear')" novalidate>
 
                     <div class="form-group">
                         <label for="crear-proveedor">Nombre:</label>
@@ -149,8 +152,7 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
             <div class="modal-content">
                 <span title="Cerrar" class="close" onclick="cerrarModalProveedor('editar-modalProveedor')">&times;</span>
                 <h2 class="tittle">Editar Proveedor</h2>
-                <form id="form-editarProveedor">
-
+                <form id="form-editarProveedor" novalidate>
                     <input type="hidden" id="editar-idproveedor" name="editar-idproveedor" value="" />
 
                     <div class="form-group">

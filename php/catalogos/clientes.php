@@ -20,44 +20,48 @@ $colonias = obtenerColonias($dbh);
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalCliente('crear-modalCliente')">Nuevo</button>
-    <label class="buscarlabel" for="buscarboxcliente">Buscar:</label>
-    <input class="buscar--box" id="buscarboxcliente" type="search" placeholder="Qué estas buscando?" enterkeyhint="search" autocomplete="off">
 
     <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroCl">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroCl" onchange="cargarClientesFiltrados()" style="width: 100px;">
-        <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+        <option value="8">8</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="-1">Todos</option>
     </select>
+    <label class="buscarlabel" for="buscarboxcliente">Buscar:</label>
+    <input class="buscar--box" id="buscarboxcliente" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 </div>
 
 <div class="container_dashboard_tablas" id="clientes">
     <h3>Lista de Clientes</h3>
-    <div id="scroll-containerCli" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerCli">
         <table class="tbl" id="tabla-clientes">
             <thead>
                 <tr>
                     <th>Nombre</th>
+                    <th>Primer apellido</th>
+                    <th>Segundo apellido</th>
                     <th>Teléfono</th>
                     <th>Email</th>
                     <th>Estatus</th>
-                    <th colspan="2" style="text-align: center;">Acciones</th>
+                    <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="clientes-lista">
                 <?php foreach ($clientes as $u): ?>
                     <tr>
                         <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre_cliente']); ?></td>
+                        <td data-lable="Primer apellido:"><?php echo htmlspecialchars($u['papellido_cliente']); ?></td>
+                        <td data-lable="Segundo apellido:"><?php echo htmlspecialchars($u['sapellido_cliente']); ?></td>
                         <td data-lable="Teléfono:"><?php echo htmlspecialchars($u['tel_cliente']); ?></td>
                         <td data-lable="Email:"><?php echo htmlspecialchars($u['email_cliente']); ?></td>
                         <td data-lable="Estatus"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
-                        <td data-lable="Editar:">
+                        <td data-lable="Acciones:">
                             <button title="Editar" class="editarCliente fa-solid fa-pen-to-square" data-id="<?php echo $u['id_cliente']; ?>"></button>
-                        </td>
-                        <td data-lable="Eliminar:">
+
                             <button title="Eliminar" class="eliminarCliente fa-solid fa-trash" data-id="<?php echo $u['id_cliente']; ?>"></button>
                         </td>
                     </tr>
@@ -73,7 +77,7 @@ $colonias = obtenerColonias($dbh);
             <div class="modal-content">
                 <span title="Cerrar" class="close" onclick="cerrarModalCliente('crear-modalCliente')">&times;</span>
                 <legend>Crear cliente</legend>
-                <form id="form-crearCliente" onsubmit="validarFormularioCliente(event, 'crear')">
+                <form id="form-crearCliente" onsubmit="validarFormularioCliente(event, 'crear')" novalidate>
 
                     <div class="form-group">
                         <label for="crear-cliente">Nombre:</label>
@@ -196,7 +200,7 @@ $colonias = obtenerColonias($dbh);
             <div class="modal-content">
                 <span title="Cerrar" class="close" onclick="cerrarModalCliente('editar-modalCliente')">&times;</span>
                 <h2 class="tittle">Editar Cliente</h2>
-                <form id="form-editarCliente">
+                <form id="form-editarCliente" novalidate>
 
                     <input type="hidden" id="editar-idcliente" name="editar-idcliente" value="" />
 

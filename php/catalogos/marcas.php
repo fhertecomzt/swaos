@@ -16,28 +16,30 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca, desc_marca, est
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalMarca('crear-modalMarca')">Nuevo</button>
-    <label class="buscarlabel" for="buscarboxmarca">Buscar:</label>
-    <input class="buscar--box" id="buscarboxmarca" type="search" placeholder="Qué estas buscando?" autocomplete="off">
+
 
     <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroMarca">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroMarca" onchange="cargarMarcasFiltradas()" style="width: 100px;">
-        <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+        <option value="8">8</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="-1">Todos</option>
     </select>
+    <label class="buscarlabel" for="buscarboxmarca">Buscar:</label>
+    <input class="buscar--box" id="buscarboxmarca" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 </div>
 
 <div class="container_dashboard_tablas" id="marcas">
     <h3>Lista de marcas</h3>
-    <div id="scroll-containerMarca" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerMarca">
         <table class="tbl" id="tabla-marcas">
             <thead>
                 <tr>
                     <th>Marca</th>
                     <th>Descripción</th>
                     <th>Estatus</th>
-                    <th colspan="2" style="text-align: center;">Acciones</th>
+                    <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="marcas-lista">
@@ -48,10 +50,8 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca, desc_marca, est
                         <td data-lable="Estatus:"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
-                        <td data-lable="Editar:">
+                        <td data-lable="Acciones:">
                             <button title="Editar" class="editarMarca fa-solid fa-pen-to-square" data-id="<?php echo $u['id_marca']; ?>"></button>
-                        </td>
-                        <td data-lable="Eliminar:">
                             <button title="Eliminar" class="eliminarMarca fa-solid fa-trash" data-id="<?php echo $u['id_marca']; ?>"></button>
                         </td>
                     </tr>
@@ -67,7 +67,7 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca, desc_marca, est
                 <span title="Cerrar" class="close" onclick="cerrarModalMarca('crear-modalMarca')">&times;</span>
                 <h2 class="tittle">Crear Marca</h2>
 
-                <form id="form-crearMarca" onsubmit="validarFormularioMarca(event, 'crear')">
+                <form id="form-crearMarca" onsubmit="validarFormularioMarca(event, 'crear')" novalidate>
                     <div class="form-group">
                         <label for="crear-marca">Nombre:</label>
                         <input type="text" id="crear-marca" name="marca" autocomplete="off"
@@ -100,7 +100,7 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca, desc_marca, est
             <div class="modal-content" style="height: 269px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalMarca('editar-modalMarca')">&times;</span>
                 <h2 class="tittle">Editar Marca</h2>
-                <form id="form-editarMarca">
+                <form id="form-editarMarca" novalidate>
                     <input type="hidden" id="editar-idmarca" name="editar-idmarca" value="" />
                     <div class="form-group">
                         <label for="editar-marca">Nombre de la Marca:</label>

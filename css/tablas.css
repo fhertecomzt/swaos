@@ -261,9 +261,50 @@ td img {
   background-color: #374151;
 }
 
-/* =========================================================
-   ETIQUETAS DE ESTADO (BADGES) PARA ÓRDENES
-   ========================================================= */
+/* EFECTO ZEBRA (FILAS ALTERNADAS) PARA DATATABLES Fila Par (Gris) */
+table.dataTable tbody tr.even > td {
+    background-color: #c5c5c5 !important;
+}
+
+/* Fila Impar (Color base de tu tabla) */
+table.dataTable tbody tr.odd > td {
+    background-color: rgb(230, 230, 230) !important;
+}
+
+/* Efecto Hover (Para que siga brillando en morado/azul al pasar el mouse) */
+table.dataTable tbody tr:hover > td {
+    background-color: #6d73e4 !important;
+    color: rgb(255, 255, 255) !important;
+    transition: all 0.3s ease-in;
+}
+
+/* EFECTO ZEBRA PARA EL MODO OSCURO (DARKMODE)*/
+.darkmode table.dataTable tbody tr.even > td {
+    background-color: #374151 !important;
+}
+.darkmode table.dataTable tbody tr.odd > td {
+    background-color: #1f2937 !important;
+}
+.darkmode table.dataTable tbody tr:hover > td {
+    background-color: #6d73e4 !important; /* Mismo hover */
+}
+
+/*
+   ALERTA DE BAJO STOCK (ESTA REGLA LE GANA A LA ZEBRA) */
+table.dataTable tbody tr.bajo-stock > td {
+    /* Usamos el color rojo suave que ya tenías elegido */
+    background-color: #f2737f !important; 
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Efecto Hover especial para el stock bajo (para que no se ponga morado/azul) */
+table.dataTable tbody tr.bajo-stock:hover > td {
+    background-color: #e05e6b !important; /* Un rojo un poco más oscuro al pasar el mouse */
+    cursor: pointer;
+}
+
+/* ETIQUETAS DE ESTADO (BADGES) PARA ÓRDENES*/
 .badge-estado {
     padding: 5px 10px;
     border-radius: 20px; 

@@ -3695,7 +3695,7 @@ function enviarFormularioEdicionProducto(formulario) {
     });
 }
 
-// Eliminar Productos****************************************************
+// Eliminar producto ************************************************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarProducto")) {
     const id = event.target.dataset.id;
@@ -3711,47 +3711,28 @@ document.addEventListener("click", function (event) {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Realizar la solicitud para eliminar
         fetch(`cruds/eliminar_producto.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              //alert("Registro eliminado correctamente");
               Swal.fire({
                 title: "¡Eliminado!",
-                text: data.message,
+                text: data.message || "El registro se ha eliminado correctamente.",
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
-              });
-              // Remover la fila de la tabla
-              Swal.fire({
-                title: "¡Eliminado!",
-                text: data.message,
-                icon: "success",
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true,
-            }).then(() => {
+              }).then(() => {
                 if (document.getElementById("productos-link")) {
-                    document.getElementById("productos-link").click();
+                  document.getElementById("productos-link").click(); // Recarga limpia
                 }
-            });
+              });
             } else {
-              Swal.fire(
-                "Error",
-                data.message || "No se pudo eliminar el registro.",
-                "error",
-              );
+              Swal.fire("Error", data.message || "No se pudo eliminar el registro.", "error");
             }
           })
           .catch((error) => {
-            Swal.fire(
-              "Error",
-              "Hubo un problema al procesar tu solicitud.",
-              "error",
-            );
+            Swal.fire("Error", "Hubo un problema al procesar tu solicitud.", "error");
             console.error("Error al eliminar:", error);
           });
       }
@@ -3983,9 +3964,7 @@ function verificarDuplicadoEditarCat(cat, id = 0) {
     });
 }
 
-// =========================================================================
-// EDITAR CATEGORÍA (Validación Profesional y Procesamiento)
-// =========================================================================
+// Editar categoria
 async function validarFormularioEdicionCat(formulario) {
   const reglasValidacion = [
     { id: "editar-cat", tipo: "texto", min: 3, mensaje: "La categoría debe tener al menos 3 caracteres." },
@@ -4145,15 +4124,13 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        cargarMarcasFiltradas();
+            inicializarTablaGenerica('#tabla-marcas', '#buscarboxmarca', '#cantidad-registros');
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
-
-//Crear Marcas***************************
-function abrirModalMarca(id) {
+  function abrirModalMarca(id) {
   document.getElementById(id).style.display = "flex";
 }
 
@@ -4161,8 +4138,57 @@ function cerrarModalMarca(id) {
   document.getElementById(id).style.display = "none";
 }
 
+// Crear Marca ******************************************
+function validarFormularioMarca(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    { id: "crear-marca", tipo: "texto", min: 3, mensaje: "La marca debe tener al menos 3 caracteres." },
+    { id: "crear-desc_marca", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  const marca = document.getElementById("crear-marca").value.trim();
+  verificarDuplicadoMarca(marca).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioMarca(event, "crear");
+  });
+}
+
 function procesarFormularioMarca(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
+  event.preventDefault();
   const formData = new FormData(event.target);
 
   fetch(`cruds/procesar_${tipo}_marca.php`, {
@@ -4172,145 +4198,32 @@ function procesarFormularioMarca(event, tipo) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Cerrar el modal
         cerrarModalMarca(tipo + "-modalMarca");
-        // Limpiar los campos del formulario
         event.target.reset();
 
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable="Nombre:">${data.marca.nombre}</td>
-            <td data-lable="Descripción:">${data.marca.descripcion}</td>
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                data.marca.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.marca.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar:">
-              <button title="Editar" class="editarMarca fa-solid fa-pen-to-square" data-id="${
-                data.marca.id
-              }"></button>
-              </td>
-              <td data-lable="Eliminar:">
-              <button title="Eliminar" class="eliminarMarca fa-solid fa-trash" data-id="${
-                data.marca.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
         Swal.fire({
           title: "¡Éxito!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "La acción se realizó correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("marcas-link")) {
+            document.getElementById("marcas-link").click();
+          }
         });
       } else {
-        // Mostrar un mensaje de error específico del backend
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
+        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
       }
     })
     .catch((error) => {
-      // Manejar errores inesperados
       console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
+      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
     });
 }
-function validarFormularioMarca(event) {
-  event.preventDefault();
 
-  const marca = document.querySelector("[name='marca']").value.trim();
-  const desc_marca = document.querySelector("[name='desc_marca']").value.trim();
-
-  const errores = [];
-
-  if (marca.length < 2) {
-    errores.push("El nombre debe tener al menos 2 caracteres.");
-    const inputname = document.querySelector("#crear-marca");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-marca");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (desc_marca.length < 3) {
-    errores.push("La descripción debe tener al menos 3 caracteres.");
-    const inputdesc = document.querySelector("#crear-desc_marca");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-desc_marca");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 3) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados
-  verificarDuplicadoMarca(marca)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "Error",
-          text: "El nombre de la marca ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario
-        procesarFormularioMarca(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-      });
-    });
-}
 function verificarDuplicadoMarca(marca) {
   //console.log("Nombre verificar:", marca);
 
@@ -4423,88 +4336,60 @@ function verificarDuplicadoEditarMarca(marca, id = 0) {
 }
 // Validación del formulario de edición Marca
 async function validarFormularioEdicionMarca(formulario) {
-  const campos = [
-    {
-      nombre: "marca",
-      min: 2,
-      mensaje: "El nombre debe tener al menos 2 caracteres.",
-    },
-    {
-      nombre: "desc_marca",
-      min: 3,
-      mensaje: "La descripción debe tener al menos 3 caracteres.",
-    },
+  const reglasValidacion = [
+    { id: "editar-marca", tipo: "texto", min: 3, mensaje: "La marca debe tener al menos 3 caracteres." },
+    { id: "editar-desc_marca", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
   ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
     });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
+
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
+    if (primerCampoConError) primerCampoConError.focus();
     return;
   }
 
-  // Verificar duplicado antes de enviar el formulario
   const marcaInput = document.getElementById("editar-marca");
   const idInput = document.getElementById("editar-idmarca");
-  if (!marcaInput || !idInput) {
-    console.log("Error: No se encontró el campo de marca o ID.");
-    return;
-  }
-  const marca = marcaInput.value.trim();
-  const id = idInput.value;
+  if (!marcaInput || !idInput) return;
 
   try {
-    //console.log("Verificando duplicado. ID:", id, "Marca:", marca);
-    const esDuplicado = await verificarDuplicadoEditarMarca(marca, id);
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      //cerrarModalMarca("editar-modalMarca");
-      enviarFormularioEdicionMarca(formulario); // Proceder si no hay duplicados
-    }
+    const esDuplicado = await verificarDuplicadoEditarMarca(marcaInput.value.trim(), idInput.value);
+    if (!esDuplicado) enviarFormularioEdicionMarca(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
 }
+
 // Enviar formulario de edición Marca
 function enviarFormularioEdicionMarca(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
   const formData = new FormData(formulario);
 
   fetch("cruds/editar_marca.php", {
@@ -4513,22 +4398,26 @@ function enviarFormularioEdicionMarca(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
         Swal.fire({
           title: "¡Actualizado!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "Marca actualizada correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("marcas-link")) {
+            document.getElementById("marcas-link").click();
+          }
         });
-        actualizarFilaTablaMarca(formData);
-        cerrarModal("editar-modalMarca");
+        // Si tu función de cerrar modal se llama cerrarModalMarca, asegúrate de que diga eso:
+        cerrarModalMarca("editar-modalMarca"); 
       } else {
         Swal.fire({
           title: "Atención",
-          text: data.message, // Usar el mensaje del backend editar sin cambios marca
+          text: data.message || "No hubo cambios.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -4537,33 +4426,11 @@ function enviarFormularioEdicionMarca(formulario) {
       }
     })
     .catch((error) => {
-      console.error("Error al actualizar la marca:", error);
-      mostrarAlerta(
-        "error",
-        "Error",
-        "Ocurrió un problema al actualizar la marca.",
-      );
+      console.error("Error al actualizar:", error);
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
     });
 }
-// Actualizar fila de la tabla marcas
-function actualizarFilaTablaMarca(formData) {
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idmarca")}"]`)
-    .closest("tr");
-  //console.log(formData.get("editar-idmarca"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("marca");
-    fila.cells[1].textContent = formData.get("desc_marca");
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
 
-    // Insertar el botón en la celda
-    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    cargarMarcasFiltradas();
-  }
-}
 // Eliminar Marcas*******************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarMarca")) {
@@ -4584,23 +4451,20 @@ document.addEventListener("click", function (event) {
         fetch(`cruds/eliminar_marca.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
-            if (data.success) {
-              //alert("Registro eliminado correctamente");
-              Swal.fire(
-                "¡Eliminado!",
-                "El registro ha sido eliminado correctamente.",
-                "success",
-              );
-              Swal.fire({
-                title: "¡Eliminado!",
-                text: "El registro ha sido eliminado correctamente.",
+  if (data.success) {
+             Swal.fire({
+                title: "¡Eliminada!",
+                text: data.message, 
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
+              }).then(() => {
+                // Recargamos DataTables limpiamente
+                if (document.getElementById("marcas-link")) {
+                  document.getElementById("marcas-link").click();
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
             } else {
               Swal.fire(
                 "Error",
@@ -4622,291 +4486,6 @@ document.addEventListener("click", function (event) {
   }
 });
 
-//Buscar en la tabla y filtrar
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboxmarca");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscarMarca(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboxmarca");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboxmarca' ya existe en el DOM");
-    agregarEventoBuscarMarca(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarMarca(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-marcas tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboxmarca") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaMarca = document.getElementById(
-        "limpiar-busquedaMarca",
-      ); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-marcas tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaMarca") {
-      const buscarBox = document.getElementById("buscarboxmarca");
-      const limpiarBusquedaMarca = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaMarca) {
-          limpiarBusquedaMarca.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-marcas tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar marcas desde el servidor**************************************
-function cargarMarcasFiltradas() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroMarca")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarMarcas(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
-    return;
-  }
-  //console.log("Cargando marcas filtrados del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_marcas.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log("Filtrados: ",data);
-      actualizarTablaMarcas(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar marcas filtrados:", error),
-    );
-}
-
-//Función para actualizar la tabla con las marcas filtradas
-function actualizarTablaMarcas(marcas) {
-  let tbody = document.getElementById("marcas-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (marcas.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron marcas</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevos marcas
-  tbody.innerHTML = "";
-
-  marcas.forEach((marcas) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${marcas.nom_marca}</td>
-      <td data-lable="Descripción:">${marcas.desc_marca}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          marcas.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${marcas.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarMarca fa-solid fa-pen-to-square" data-id="${
-          marcas.id_marca
-        }"></button>
-        </td>
-        <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarMarca fa-solid fa-trash" data-id="${
-          marcas.id_marca
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 marcas por defecto
-function cargarMarcas() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_marcas.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaMarcas(data);
-    })
-    .catch((error) => console.error("Error al cargar marcas:", error));
-}
-
-/* ------------------------ SCROLL INFINITO MARCAS------------------------*/
-
-function cargarMarcasScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltroMarca = document
-    .getElementById("estatusFiltroMarca")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_marcas_scroll.php?page=${pagina}`;
-
-  if (estatusFiltroMarca !== "") {
-    url += `&estatus=${estatusFiltroMarca}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-marcas tbody");
-        data.forEach((rol) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td data-lable="Nombre:">${marcas.nombre}</td>
-            <td data-lable="Descripción:">${marcas.descripcion}</td>
-            
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                marcas.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${marcas.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar">
-              <button title="Editar" class="editarMarca fa-solid fa-pen-to-square" data-id="${
-                marcas.id_marca
-              }"></button>
-            </td>
-        <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminarMarca fa-solid fa-trash" data-id="${
-          rol.id_marca
-        }"></button>
-      </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más Marcas.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => console.error("Error al cargar marcas:", error));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("marcas.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más marcas
-    console.log("Reiniciando scroll y cargando marcas en marcas.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A marcas.php
-    iniciarScrollMarcas();
-  }
-});
-
-function iniciarScrollMarcas() {
-  const scrollContainer = document.getElementById("scroll-containerR");
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      //console.log(" Scroll detectado, cargando más Marcas...");
-      cargarMarcasScroll();
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en Marcas.php");
-}
-
-const observerMarcas = new MutationObserver(() => {
-  const marcasSeccion = document.getElementById("scroll-containerR");
-  if (marcasSeccion) {
-    observerMarcas.disconnect();
-    iniciarScrollMarcas();
-  }
-});
-
-const Marcas = document.getElementById("content-area");
-if (Marcas) {
-  observerMarcas.observe(Marcas, { childList: true, subtree: true });
-}
-
 // Llamar Tipo de servicios *******************************************************
 document
   .getElementById("tiposervicios-link")
@@ -4916,13 +4495,15 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+    //Funcion para filtrar y buscar
+    inicializarTablaGenerica('#tabla-tiposervicios', '#buscarboxTiposervicios', '#cantidad-registros');
+
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-// Crear Tipo de servicios ******************************************
 function abrirModalTiposervicios(id) {
   document.getElementById(id).style.display = "flex";
 }
@@ -4930,8 +4511,58 @@ function abrirModalTiposervicios(id) {
 function cerrarModalTiposervicios(id) {
   document.getElementById(id).style.display = "none";
 }
-function procesarFormulariotiposervicios(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
+
+// Crear tipo de servicios ******************************************
+function validarFormularioTiposervicios(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    { id: "crear-tiposervicios", tipo: "texto", min: 3, mensaje: "El tipo de servicios debe tener al menos 3 caracteres." },
+    { id: "crear-desc_tiposervicios", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  const tiposervicios = document.getElementById("crear-tiposervicios").value.trim();
+  verificarDuplicadoTiposervicios(tiposervicios).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioTiposervicios(event, "crear");
+  });
+}
+
+function procesarFormularioTiposervicios(event, tipo) {
+  event.preventDefault();
   const formData = new FormData(event.target);
 
   fetch(`cruds/procesar_${tipo}_tiposervicios.php`, {
@@ -4941,155 +4572,34 @@ function procesarFormulariotiposervicios(event, tipo) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Cerrar el modal
         cerrarModalTiposervicios(tipo + "-modalTiposervicios");
-        // Limpiar los campos del formulario
         event.target.reset();
 
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable="Nombre:">${data.tiposervicios.nombre}</td>
-            <td data-lable="Descripción:">${data.tiposervicios.descripcion}</td>
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                data.tiposervicios.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.tiposervicios.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            
-            <td data-lable="Editar:">
-              <button title="Editar:" class="editarTiposervicio fa-solid fa-pen-to-square" data-id="${
-                data.tiposervicios.id
-              }"></button>
-              </td>
-            <td data-lable="Eliminar:">
-              <button title="Eliminar:" class="eliminarTiposervicio fa-solid fa-trash" data-id="${
-                data.tiposervicios.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
         Swal.fire({
           title: "¡Éxito!",
-          text: "La acción se realizó correctamente.",
+          text: data.message || "La acción se realizó correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("tiposervicios-link")) {
+            document.getElementById("tiposervicios-link").click();
+          }
         });
       } else {
-        // Mostrar un mensaje de error
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
+        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
       }
     })
     .catch((error) => {
-      // Manejar errores inesperados
       console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
+      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
     });
 }
-function validarFormulariotiposervicios(event) {
-  event.preventDefault();
 
-  const tiposervicios = document
-    .querySelector("[name='tiposervicios']")
-    .value.trim();
-  const desc_tiposervicios = document
-    .querySelector("[name='desc_tiposervicios']")
-    .value.trim();
-
-  const errores = [];
-
-  if (tiposervicios.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-tiposervicios");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-tiposervicios");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (desc_tiposervicios.length < 3) {
-    errores.push("La descripción debe tener al menos 3 caracteres.");
-    const inputdesc = document.querySelector("#crear-desc_tiposervicios");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-desc_tiposervicios");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 3) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-  //Alerta de validaciones campos vacios categorias
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados al crear
-  verificarDuplicadotiposervicios(tiposervicios)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "!Error¡",
-          text: "El nombre de la Tipo de servicio ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario
-        procesarFormulariotiposervicios(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
-    });
-}
-function verificarDuplicadotiposervicios(tiposervicios) {
-  //console.log("Nombre verificar duplicado:", tiposervicios);
+function verificarDuplicadoTiposervicios(tiposervicios) {
+  //console.log("Nombre verificar duplicado:", nombre_tiposervicios);
 
   return fetch("cruds/verificar_nombre_tiposervicios.php", {
     method: "POST",
@@ -5100,10 +4610,10 @@ function verificarDuplicadotiposervicios(tiposervicios) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        //mostrarAlerta("error", "Error", "El nombre de la Tipo de servicio ya existe.");
+        //mostrarAlerta("error", "Error", "El nombre de la tiposervicios ya existe.");
         Swal.fire({
-          title: "!Error¡",
-          text: "El nombre del Tipo de servicio ya existe.",
+          title: "!Atención¡",
+          text: "El nombre del tipo de servicios ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -5118,70 +4628,51 @@ function verificarDuplicadotiposervicios(tiposervicios) {
     });
 }
 
-//Editar Tipo servicios***********************************************
+// Editar tipo de servicios ***********************************
 document.addEventListener("DOMContentLoaded", function () {
-  // Escuchar clic en el botón de editar
+  // 1. Escuchar clic en el botón de editar
   document.addEventListener("click", function (event) {
     if (event.target.classList.contains("editarTiposervicio")) {
       const id = event.target.dataset.id;
-      //console.log("Botón editar clickeado. ID:", id);
 
       fetch(`cruds/obtener_tiposervicios.php?id=${id}`)
         .then((response) => response.json())
         .then((data) => {
-          //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
-            const formularioTiposervicios = document.getElementById(
-              "form-editarTiposervicio",
-            );
+            const formularioTiposervicios = document.getElementById("form-editarTiposervicio");
             if (formularioTiposervicios) {
-              const campos = [
-                "idtiposervicio",
-                "tiposervicio",
-                "desc_servicio",
-                "estatus",
-              ];
+              const campos = ["idtiposervicio", "tiposervicio", "desc_servicio", "estatus"];
+              
               campos.forEach((campo) => {
-                //console.log(`Asignando ${campo}:`, data.tiposervicios[campo]);
-                formularioTiposervicios[`editar-${campo}`].value =
-                  data.tiposervicios[campo] || "";
+                const input = formularioTiposervicios[`editar-${campo}`];
+                if(input){
+                    input.value = data.tiposervicios[campo] || "";
+                }
               });
               abrirModalTiposervicios("editar-modalTiposervicio");
-            } else {
-              console.error("Formulario de edición no encontrado.");
             }
           } else {
-            mostrarAlerta(
-              "error",
-              "Error",
-              data.message || "No se pudo cargar el tipo de servicio.",
-            );
+            Swal.fire("Error", data.message || "No se pudo cargar el tipo de servicio.", "error");
           }
         })
         .catch((error) => {
           console.error("Error al obtener el Tipo de servicio:", error);
-          mostrarAlerta(
-            "error",
-            "Error",
-            "Ocurrió un problema al obtener los datos.",
-          );
+          Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
         });
     }
   });
 
-  // Validar y enviar el formulario de edición
+  // 2. Escuchar el submit del formulario de edición
   document.body.addEventListener("submit", function (event) {
     if (event.target && event.target.id === "form-editarTiposervicio") {
-      event.preventDefault(); // Esto evita el comportamiento predeterminado de recargar la página.
+      event.preventDefault(); 
       validarFormularioEdicionTiposervicio(event.target);
     }
   });
 });
 
-//Verificar dublicado al editar
+// 3. Verificar duplicado al editar
 function verificarDuplicadoEditarTiposervicio(tiposervicio, id = 0) {
-  //console.log("Validando duplicados. ID:", id, "Tiposervicios:", tiposervicios);
-
   return fetch("cruds/verificar_nombre_tiposervicios.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -5189,111 +4680,84 @@ function verificarDuplicadoEditarTiposervicio(tiposervicio, id = 0) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
         Swal.fire({
-          title: "!Error¡",
-          text: data.message || "El nombre de la tipo servicios ya existe.", // Mostrar el mensaje específico si existe
+          title: "¡Atención!",
+          text: data.message || "El nombre del tipo de servicio ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
         });
-        //mostrarAlerta("error", "Error", "El nombre del Rol ya existe.");
       }
       return data.existe;
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
+      return true; 
     });
 }
-// Validación del formulario de edición Categoria
-async function validarFormularioEdicionTiposervicio(formulario) {
-  const campos = [
-    {
-      nombre: "tiposervicio",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "desc_servicio",
-      min: 3,
-      mensaje: "La descripción debe tener al menos 3 caracteres.",
-    },
-  ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
+// 4. Validación del Motor de Reglas
+async function validarFormularioEdicionTiposervicio(formulario) {
+  // Los IDs aquí ya coinciden exactamente con tu HTML
+  const reglasValidacion = [
+    { id: "editar-tiposervicio", tipo: "texto", min: 3, mensaje: "El tipo de servicio debe tener al menos 3 caracteres." },
+    { id: "editar-desc_servicio", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
     });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
+
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
+    if (primerCampoConError) primerCampoConError.focus();
     return;
   }
 
-  // Verificar duplicado antes de enviar el formulario
-  const catInput = document.getElementById("editar-tiposervicio");
+  // IDs corregidos para buscar en el DOM
+  const tiposerviciosInput = document.getElementById("editar-tiposervicio");
   const idInput = document.getElementById("editar-idtiposervicio");
-  if (!catInput || !idInput) {
-    console.log("Error: No se encontró el campo de Tiposervicios o ID.");
-    return;
-  }
-  const tiposervicios = catInput.value.trim();
-  const id = idInput.value;
+  
+  if (!tiposerviciosInput || !idInput) return;
 
   try {
-    //console.log("Verificando duplicado. ID:", id, "Tiposervicios:", tiposervicios);
-    const esDuplicado = await verificarDuplicadoEditarTiposervicio(
-      tiposervicios,
-      id,
-    );
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      enviarFormularioEdicionTiposervicio(formulario); // Proceder si no hay duplicados
-    }
+    const esDuplicado = await verificarDuplicadoEditarTiposervicio(tiposerviciosInput.value.trim(), idInput.value);
+    // Cambiamos el nombre de la función aquí para que no llame a Categorías
+    if (!esDuplicado) enviarFormularioEdicionTiposervicio(formulario); 
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
 }
-// Enviar formulario de edición Tiposervicios
+
+// 5. Enviar a la Base de Datos
 function enviarFormularioEdicionTiposervicio(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
   const formData = new FormData(formulario);
 
   fetch("cruds/editar_tiposervicios.php", {
@@ -5302,23 +4766,27 @@ function enviarFormularioEdicionTiposervicio(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
         Swal.fire({
           title: "¡Actualizado!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "Tipo de servicio actualizado correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Cambiado a tiposervicios-link
+          if (document.getElementById("tiposervicios-link")) {
+            document.getElementById("tiposervicios-link").click();
+          }
         });
-        // Actualizar la fila de la tabla sin recargar
-        actualizarFilaTablaTiposervicio(formData);
-        cerrarModal("editar-modalTiposervicio");
+        
+        // Cerrar el modal con el ID y función correcta
+        cerrarModalTiposervicios("editar-modalTiposervicio");
       } else {
         Swal.fire({
           title: "Atención",
-          text: data.message, // Usar el mensaje del backend no hubo cambios
+          text: data.message || "No se realizaron cambios.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -5328,33 +4796,11 @@ function enviarFormularioEdicionTiposervicio(formulario) {
     })
     .catch((error) => {
       console.error("Error al actualizar Tipo de servicio:", error);
-      mostrarAlerta(
-        "error",
-        "Error",
-        "Ocurrió un problema al actualizar la Tipo de servicio.",
-      );
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
     });
 }
-// Actualizar fila de la tabla tiposervicios
-function actualizarFilaTablaTiposervicio(formData) {
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idtiposervicio")}"]`)
-    .closest("tr");
-  console.log(formData.get("editar-idtiposervicio"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("tiposervicio");
-    fila.cells[1].textContent = formData.get("desc_servicios");
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
 
-    // Insertar el botón en la celda
-    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    cargarTiposerviciosFiltrados();
-  }
-}
-// Eliminar Tipo de servicios*****************
+// Eliminar Tipo de servicios *********************************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarTiposervicio")) {
     const id = event.target.dataset.id;
@@ -5374,18 +4820,20 @@ document.addEventListener("click", function (event) {
         fetch(`cruds/eliminar_tiposervicio.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
-            if (data.success) {
-              //alert("Registro eliminado correctamente");
-              Swal.fire({
-                title: "¡Eliminado!",
-                text: data.message, // Usar el mensaje del backend
+             if (data.success) {
+             Swal.fire({
+                title: "¡Eliminada!",
+                text: data.message, 
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
+              }).then(() => {
+                // Recargamos DataTables limpiamente
+                if (document.getElementById("categorias-link")) {
+                  document.getElementById("categorias-link").click();
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
             } else {
               Swal.fire(
                 "Error",
@@ -5407,301 +4855,7 @@ document.addEventListener("click", function (event) {
   }
 });
 
-//Buscar en la tabla y filtrar ***************************************
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboxTiposervicios");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscarTiposervicios(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboxTiposervicios");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboxTiposervicios' ya existe en el DOM");
-    agregarEventoBuscarTiposervicios(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarTiposervicios(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-tiposervicios tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboxTiposervicios") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaTiposervicio = document.getElementById(
-        "limpiar-busquedaTiposervicio",
-      ); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-tiposervicios tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaTiposervicio") {
-      const buscarBox = document.getElementById("buscarboxTiposervicios");
-      const limpiarBusquedaTiposervicio = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaTiposervicio) {
-          limpiarBusquedaTiposervicio.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-tiposervicios tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar tipo servicios desde el servidor**************************************
-function cargarTiposerviciosFiltrados() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroTiposervicios")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarTiposervicios(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
-    return;
-  }
-  //console.log("Cargando tipo servicios filtrados del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_tiposervicios.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log("Filtrados: ",data);
-      actualizarTablaTiposervicios(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar tipo servicios filtrados:", error),
-    );
-}
-
-//Función para actualizar la tabla con las tiendas filtradas
-function actualizarTablaTiposervicios(tiposervicios) {
-  let tbody = document.getElementById("tiposervicios-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (tiposervicios.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron Tiposervicios</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevos tiposervicios
-  tbody.innerHTML = "";
-
-  tiposervicios.forEach((tiposervicio) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${tiposervicio.nom_servicio}</td>
-      <td data-lable="Descripción:">${tiposervicio.desc_servicio}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          tiposervicio.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${tiposervicio.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarTiposervicio fa-solid fa-pen-to-square" data-id="${
-          tiposervicio.id_servicio
-        }"></button>
-        </td>
-        <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarTiposervicio fa-solid fa-trash" data-id="${
-          tiposervicio.id_servicio
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 Tiposervicios por defecto
-function cargarTiposervicios() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_tiposervicios.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaTiposervicios(data);
-    })
-    .catch((error) => console.error("Error al cargar tipo servicios:", error));
-}
-
-/* ------------------------ SCROLL INFINITO Tiposervicios------------------------*/
-
-function cargarTiposerviciosScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltroTiposervicios = document
-    .getElementById("estatusFiltroR")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_tiposervicios_scroll.php?page=${pagina}`;
-
-  if (estatusFiltroTiposervicios !== "") {
-    url += `&estatus=${estatusFiltroR}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-tiposervicios tbody");
-        data.forEach((rol) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td data-lable="Nombre:">${tiposervicio.nombre}</td>
-            <td data-lable="Descripción:">${tiposervicio.descripcion}</td>
-            
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                tiposervicio.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${tiposervicio.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar">
-              <button title="Editar" class="editarRol fa-solid fa-pen-to-square" data-id="${
-                tiposervicio.id_servicio
-              }"></button>
-            </td>
-        <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminarRol fa-solid fa-trash" data-id="${
-          rol.id_servicio
-        }"></button>
-      </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más Tipo de servicios.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) =>
-      console.error("Error al cargar Tipo de servicios:", error),
-    );
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("tiposervicios.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más roles
-    console.log("Reiniciando scroll y cargando roles en tipo de servicios.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A tipo de servicios.php
-    iniciarScrollRoles();
-  }
-});
-
-function iniciarScrollTiposervicios() {
-  const scrollContainer = document.getElementById(
-    "scroll-containerTiposervicios",
-  );
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      //console.log(" Scroll detectado, cargando más Tiposervicios...");
-      cargarTiposerviciosScroll();
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en Tiposervicios.php");
-}
-
-const observerTiposervicios = new MutationObserver(() => {
-  const tiposerviciosSeccion = document.getElementById(
-    "scroll-containerTiposervicios",
-  );
-  if (tiposerviciosSeccion) {
-    observerTiposervicios.disconnect();
-    iniciarScrollTiposervicios();
-  }
-});
-
-const Tiposervicios = document.getElementById("content-area");
-if (Tiposervicios) {
-  observerTiposervicios.observe(Tiposervicios, {
-    childList: true,
-    subtree: true,
-  });
-}
-
-//Llamar estado de servicio
+//Llamar estado de servicio *******************************************
 document
   .getElementById("estatusservicios-link")
   .addEventListener("click", function (event) {
@@ -5710,22 +4864,73 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+        //Funcion para filtrar y buscar
+        inicializarTablaGenerica('#tabla-estadoservicio', '#buscarboxEstadoservicios', '#cantidad-registros');
+
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-// Crear Estado de servicios ******************************************
-function abrirModalEstadoservicio(id) {
-  document.getElementById(id).style.display = "flex";
+  function abrirModalEstadoservicio(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+  
+  function cerrarModalEstadoservicio(id) {
+    document.getElementById(id).style.display = "none";
+  }
+  // Crear Estado de servicios ******************************************
+  function validarFormularioEstadoservicio(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    { id: "crear-estadoservicio", tipo: "texto", min: 3, mensaje: "El estado de servicio debe tener al menos 3 caracteres." },
+    { id: "crear-desc_estadoservicio", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  const estadoservicio = document.getElementById("crear-estadoservicio").value.trim();
+  verificarDuplicadoEstadoservicio(estadoservicio).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioEstadoservicio(event, "crear");
+  });
 }
 
-function cerrarModalEstadoservicio(id) {
-  document.getElementById(id).style.display = "none";
-}
-function procesarFormularioEstadoservicios(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
+function procesarFormularioEstadoservicio(event, tipo) {
+  event.preventDefault();
   const formData = new FormData(event.target);
 
   fetch(`cruds/procesar_${tipo}_estadoservicios.php`, {
@@ -5735,157 +4940,34 @@ function procesarFormularioEstadoservicios(event, tipo) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Cerrar el modal
         cerrarModalEstadoservicio(tipo + "-modalEstadoservicio");
-        // Limpiar los campos del formulario
         event.target.reset();
 
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable="Nombre:">${data.estadoservicio.nombre}</td>
-            <td data-lable="Descripción:">${
-              data.estadoservicio.descripcion
-            }</td>
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                data.estadoservicio.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.estadoservicio.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            
-            <td data-lable="Editar:">
-              <button title="Editar:" class="editarEstadoservicio fa-solid fa-pen-to-square" data-id="${
-                data.estadoservicio.id
-              }"></button>
-              </td>
-            <td data-lable="Eliminar:">
-              <button title="Eliminar:" class="eliminarEstadoservicio fa-solid fa-trash" data-id="${
-                data.estadoservicio.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
         Swal.fire({
           title: "¡Éxito!",
-          text: "La acción se realizó correctamente.",
+          text: data.message || "La acción se realizó correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("estatusservicios-link")) {
+            document.getElementById("estatusservicios-link").click();
+          }
         });
       } else {
-        // Mostrar un mensaje de error
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
+        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
       }
     })
     .catch((error) => {
-      // Manejar errores inesperados
       console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
+      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
     });
 }
-function validarFormularioEstadoservicio(event) {
-  event.preventDefault();
 
-  const estadoservicio = document
-    .querySelector("[name='estadoservicio']")
-    .value.trim();
-  const desc_estadoservicio = document
-    .querySelector("[name='desc_estadoservicio']")
-    .value.trim();
-
-  const errores = [];
-
-  if (estadoservicio.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-estadoservicio");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-estadoservicio");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (desc_estadoservicio.length < 3) {
-    errores.push("La descripción debe tener al menos 3 caracteres.");
-    const inputdesc = document.querySelector("#crear-desc_estadoservicio");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-desc_estadoservicio");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 3) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-  //Alerta de validaciones campos vacios categorias
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados al crear
-  verificarDuplicadoEstadoservicios(estadoservicio)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "!Error¡",
-          text: "El nombre del Estado de servicio ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario
-        procesarFormularioEstadoservicios(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
-    });
-}
-function verificarDuplicadoEstadoservicios(estadoservicio) {
-  //console.log("Nombre verificar duplicado:", estadoservicio);
+function verificarDuplicadoEstadoservicio(estadoservicio) {
+  //console.log("Nombre verificar duplicado:", nombre_estadoservicio);
 
   return fetch("cruds/verificar_nombre_estadoservicios.php", {
     method: "POST",
@@ -5896,10 +4978,10 @@ function verificarDuplicadoEstadoservicios(estadoservicio) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        //mostrarAlerta("error", "Error", "El nombre de la Tipo de servicio ya existe.");
+        //mostrarAlerta("error", "Error", "El nombre del estado de servicio ya existe.");
         Swal.fire({
-          title: "!Error¡",
-          text: "El nombre del Estado de servicio ya existe.",
+          title: "!Atención¡",
+          text: "El nombre de la Categoría ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -5927,16 +5009,9 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((data) => {
           //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
-            const formularioEstadoservicios = document.getElementById(
-              "form-editarEstadoservicio",
-            );
+            const formularioEstadoservicios = document.getElementById("form-editarEstadoservicio",);
             if (formularioEstadoservicios) {
-              const campos = [
-                "idestadoservicio",
-                "estadoservicio",
-                "desc_servicio",
-                "estatus",
-              ];
+              const campos = ["idestadoservicio","estadoservicio","desc_servicio","estatus",];
               campos.forEach((campo) => {
                 //console.log(`Asignando ${campo}:`, data.estadoservicios[campo]);
                 formularioEstadoservicios[`editar-${campo}`].value =
@@ -5965,7 +5040,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Validar y enviar el formulario de edición
+  // Validar y enviar el formulario de edición estadoservicio
   document.body.addEventListener("submit", function (event) {
     if (event.target && event.target.id === "form-editarEstadoservicio") {
       event.preventDefault(); // Esto evita el comportamiento predeterminado de recargar la página.
@@ -5974,7 +5049,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-//Verificar dublicado al editar
+//Verificar dublicado al editar estadoservicio
 function verificarDuplicadoEditarEstadoservicio(estadoservicio, id = 0) {
   //console.log("Validando duplicados. ID:", id, "Estadoservicios:", Estadoservicios);
 
@@ -6006,90 +5081,59 @@ function verificarDuplicadoEditarEstadoservicio(estadoservicio, id = 0) {
 }
 // Validación del formulario de edición Estado de servicio
 async function validarFormularioEdicionEstadoservicio(formulario) {
-  const campos = [
-    {
-      nombre: "estadoservicio",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "desc_servicio",
-      min: 3,
-      mensaje: "La descripción debe tener al menos 3 caracteres.",
-    },
+  const reglasValidacion = [
+    { id: "editar-estadoservicio", tipo: "texto", min: 3, mensaje: "El estado de servicio debe tener al menos 3 caracteres." },
+    { id: "editar-desc_servicio", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
   ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
     });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
+
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
+    if (primerCampoConError) primerCampoConError.focus();
     return;
   }
 
-  // Verificar duplicado antes de enviar el formulario
-  const catInput = document.getElementById("editar-estadoservicio");
+  const estadoservicioInput = document.getElementById("editar-estadoservicio");
   const idInput = document.getElementById("editar-idestadoservicio");
-  if (!catInput || !idInput) {
-    console.log("Error: No se encontró el campo de Estadoservicios o ID.");
-    return;
-  }
-  const Estadoservicios = catInput.value.trim();
-  const id = idInput.value;
+  if (!estadoservicioInput || !idInput) return;
 
   try {
-    //console.log("Verificando duplicado. ID:", id, "Estadoservicios:", Estadoservicios);
-    const esDuplicado = await verificarDuplicadoEditarEstadoservicio(
-      Estadoservicios,
-      id,
-    );
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      enviarFormularioEdicionEstadoservicio(formulario); // Proceder si no hay duplicados
-    }
+    const esDuplicado = await verificarDuplicadoEditarEstadoservicio(estadoservicioInput.value.trim(), idInput.value);
+    if (!esDuplicado) enviarFormularioEdicionEstadoservicio(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
 }
-// Enviar formulario de edición Estadoservicios
+
 function enviarFormularioEdicionEstadoservicio(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
   const formData = new FormData(formulario);
 
   fetch("cruds/editar_estadosservicios.php", {
@@ -6098,23 +5142,26 @@ function enviarFormularioEdicionEstadoservicio(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
         Swal.fire({
           title: "¡Actualizado!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "Estado de servicio actualizado correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("estatusservicios-link")) {
+            document.getElementById("estatusservicios-link").click();
+          }
         });
-        // Actualizar la fila de la tabla sin recargar
-        actualizarFilaTablaEstadoservicio(formData);
-        cerrarModal("editar-modalEstadoservicio");
+        // Si tu función de cerrar modal se llama cerrarModalEstadoservicio, asegúrate de que diga eso:
+        cerrarModalEstadoservicio("editar-modalEstadoservicio"); 
       } else {
         Swal.fire({
           title: "Atención",
-          text: data.message, // Usar el mensaje del backend no hubo cambios
+          text: data.message || "No hubo cambios.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -6123,36 +5170,12 @@ function enviarFormularioEdicionEstadoservicio(formulario) {
       }
     })
     .catch((error) => {
-      console.error("Error al actualizar Estado de servicio:", error);
-      mostrarAlerta(
-        "error",
-        "Error",
-        "Ocurrió un problema al actualizar la Estado de servicio.",
-      );
+      console.error("Error al actualizar:", error);
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
     });
 }
-// Actualizar fila de la tabla Estadoservicios
-function actualizarFilaTablaEstadoservicio(formData) {
-  const fila = document
-    .querySelector(
-      `button[data-id="${formData.get("editar-idestadoservicio")}"]`,
-    )
-    .closest("tr");
-  console.log(formData.get("editar-idestadoservicio"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("estadoservicio");
-    fila.cells[1].textContent = formData.get("desc_servicio");
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
 
-    // Insertar el botón en la celda
-    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    cargarestadoserviciosFiltrados();
-  }
-}
-// Eliminar Estado de servicios*****************
+// Eliminar Estado de servicios *******************************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarEstadoservicio")) {
     const id = event.target.dataset.id;
@@ -6172,18 +5195,20 @@ document.addEventListener("click", function (event) {
         fetch(`cruds/eliminar_estadoservicio.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
-            if (data.success) {
-              //alert("Registro eliminado correctamente");
-              Swal.fire({
-                title: "¡Eliminado!",
-                text: data.message, // Usar el mensaje del backend
+           if (data.success) {
+             Swal.fire({
+                title: "¡Eliminada!",
+                text: data.message, 
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
+              }).then(() => {
+                // Recargamos DataTables limpiamente
+                if (document.getElementById("estatusservicios-link")) {
+                  document.getElementById("estatusservicios-link").click();
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
             } else {
               Swal.fire(
                 "Error",
@@ -6205,300 +5230,6 @@ document.addEventListener("click", function (event) {
   }
 });
 
-//Buscar en la tabla y filtrar ***************************************
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboxEstadoservicios");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscarEstadoservicios(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboxEstadoservicios");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboxEstadoservicios' ya existe en el DOM");
-    agregarEventoBuscarEstadoservicios(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarEstadoservicios(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-estadoservicio tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboxEstadoservicios") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaEstadoservicio = document.getElementById(
-        "limpiar-busquedaEstadoservicio",
-      ); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-estadoservicio tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaEstadoservicio") {
-      const buscarBox = document.getElementById("buscarboxEstadoservicios");
-      const limpiarBusquedaEstadoservicio = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaEstadoservicio) {
-          limpiarBusquedaEstadoservicio.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-estadoservicio tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar tipo servicios desde el servidor**************************************
-function cargarestadoserviciosFiltrados() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroEstadoservicios")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarestadoservicios(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
-    return;
-  }
-  //console.log("Cargando tipo servicios filtrados del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_estatusservicios.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log("Filtrados: ",data);
-      actualizarTablaEstadoservicios(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar tipo servicios filtrados:", error),
-    );
-}
-
-//Función para actualizar la tabla con las tiendas filtradas
-function actualizarTablaEstadoservicios(estadoservicios) {
-  let tbody = document.getElementById("estadoservicios-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (estadoservicios.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron Estado servicios</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevos estadoservicio
-  tbody.innerHTML = "";
-
-  estadoservicios.forEach((estadoservicios) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${estadoservicios.estado_servicio}</td>
-      <td data-lable="Descripción:">${estadoservicios.desc_estado_servicio}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          estadoservicios.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${estadoservicios.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarEstadoservicio fa-solid fa-pen-to-square" data-id="${
-          estadoservicios.id_estado_servicio
-        }"></button>
-        </td>
-        <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarEstadoservicio fa-solid fa-trash" data-id="${
-          estadoservicios.id_estado_servicio
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 Estadoservicios por defecto
-function cargarestadoservicios() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_estatusservicios.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaEstadoservicios(data);
-    })
-    .catch((error) => console.error("Error al cargar tipo servicios:", error));
-}
-
-/* ----------------- SCROLL INFINITO Estado de servicios------------------------*/
-
-function cargarestadoserviciosScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltroEstadoservicios = document
-    .getElementById("estatusFiltroEstadoservicios")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_estadosservicios_scroll.php?page=${pagina}`;
-
-  if (estatusFiltroEstadoservicios !== "") {
-    url += `&estatus=${estatusFiltroEstadoservicios}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-estadoservicio tbody");
-        data.forEach((rol) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td data-lable="Nombre:">${estadosservicios.estado_servicio}</td>
-            <td data-lable="Descripción:">${estadosservicios.descripcion}</td>
-            
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                estadosservicios.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${estadosservicios.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar">
-              <button title="Editar" class="editarEstadoservicio fa-solid fa-pen-to-square" data-id="${
-                estadosservicios.id_estado_servicio
-              }"></button>
-            </td>
-        <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminarEstadoservicio fa-solid fa-trash" data-id="${
-          estadosservicios.id_estado_servicio
-        }"></button>
-      </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más Estado de servicios.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) =>
-      console.error("Error al cargar Estado de servicios:", error),
-    );
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("estadoservicios.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más roles
-    console.log("Reiniciando scroll y cargando roles en tipo de servicios.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A tipo de servicios.php
-    iniciarScrollEstadoservicios();
-  }
-});
-
-function iniciarScrollEstadoservicios() {
-  const scrollContainer = document.getElementById(
-    "scroll-containerEstadoservicios",
-  );
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      //console.log(" Scroll detectado, cargando más Estadoservicios...");
-      cargarestadoserviciosScroll();
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en Estadoservicios.php");
-}
-
-const observerEstadoservicios = new MutationObserver(() => {
-  const EstadoserviciosSeccion = document.getElementById(
-    "scroll-containerEstadoservicios",
-  );
-  if (EstadoserviciosSeccion) {
-    observerEstadoservicios.disconnect();
-    iniciarScrollEstadoservicios();
-  }
-});
-
-const Estadoservicios = document.getElementById("content-area");
-if (Estadoservicios) {
-  observerEstadoservicios.observe(Estadoservicios, {
-    childList: true,
-    subtree: true,
-  });
-}
-
 // Llamar Metodos de pago *****************************************************
 document
   .getElementById("mpagos-link")
@@ -6508,15 +5239,16 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        cargarMpagosFiltrados();
+
+            inicializarTablaGenerica('#tabla-mpagos', '#buscarboxmpago', '#cantidad-registros');
+
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-//Crear Métodos de pagos ****************************
-function abrirModalMpago(id) {
+  function abrirModalMpago(id) {
   document.getElementById(id).style.display = "flex";
 }
 
@@ -6524,8 +5256,57 @@ function cerrarModalMpago(id) {
   document.getElementById(id).style.display = "none";
 }
 
+//Crear Métodos de pagos ****************************
+function validarFormularioMpago(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    { id: "crear-mpago", tipo: "texto", min: 3, mensaje: "El método de pago debe tener al menos 3 caracteres." },
+    { id: "crear-desc_mpago", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  const mpago = document.getElementById("crear-mpago").value.trim();
+  verificarDuplicadoMpago(mpago).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioMpago(event, "crear");
+  });
+}
+
 function procesarFormularioMpago(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
+  event.preventDefault();
   const formData = new FormData(event.target);
 
   fetch(`cruds/procesar_${tipo}_mpago.php`, {
@@ -6535,147 +5316,34 @@ function procesarFormularioMpago(event, tipo) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Cerrar el modal
         cerrarModalMpago(tipo + "-modalMpago");
-        // Limpiar los campos del formulario
         event.target.reset();
 
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable="Nombre:">${data.mpago.nombre}</td>
-            <td data-lable="Descripción:">${data.mpago.descripcion}</td>
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                data.mpago.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.mpago.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar:">
-              <button title="Editar" class="editarMpago fa-solid fa-pen-to-square" data-id="${
-                data.mpago.id
-              }"></button>
-              </td>
-              <td data-lable="Eliminar:">
-              <button title="Eliminar" class="eliminarMpago fa-solid fa-trash" data-id="${
-                data.mpago.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
         Swal.fire({
           title: "¡Éxito!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "La acción se realizó correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("mpagos-link")) {
+            document.getElementById("mpagos-link").click();
+          }
         });
       } else {
-        // Mostrar un mensaje de error específico del backend
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
+        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
       }
     })
     .catch((error) => {
-      // Manejar errores inesperados
       console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
+      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
     });
 }
-function validarFormularioMpago(event) {
-  event.preventDefault();
 
-  const mpago = document.querySelector("[name='mpago']").value.trim();
-  const desc_mpago = document.querySelector("[name='desc_mpago']").value.trim();
-
-  const errores = [];
-
-  if (mpago.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-mpago");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-mpago");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (desc_mpago.length < 3) {
-    errores.push("La descripción debe tener al menos 3 caracteres.");
-    const inputdesc = document.querySelector("#crear-desc_mpago");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-desc_mpago");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 3) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados
-  verificarDuplicadoMpago(mpago)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "Error",
-          text: "El nombre ya existe. Por favor, elige otro.",
-          icon: "error",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario
-        procesarFormularioMpago(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-      });
-    });
-}
 function verificarDuplicadoMpago(mpago) {
-  //console.log("Nombre verificar:", mpago);
+  //console.log("Nombre verificar duplicado:", nombre_mpago);
 
   return fetch("cruds/verificar_nombre_mpago.php", {
     method: "POST",
@@ -6686,9 +5354,10 @@ function verificarDuplicadoMpago(mpago) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
+        //mostrarAlerta("error", "Error", "El nombre del método de pago ya existe.");
         Swal.fire({
-          title: "Error",
-          text: data.message || "El nombre de ya existe.", // Mostrar el mensaje específico si existe
+          title: "!Atención¡",
+          text: "El nombre del método de pago ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -6702,7 +5371,8 @@ function verificarDuplicadoMpago(mpago) {
       return true; // Asume duplicado en caso de error
     });
 }
-//Editar Metodos de pago ******************************************************
+
+//Editar Métodos de pago ******************************************************
 document.addEventListener("DOMContentLoaded", function () {
   // Escuchar clic en el botón de editar
   document.addEventListener("click", function (event) {
@@ -6786,88 +5456,59 @@ function verificarDuplicadoEditarMpago(mpago, id = 0) {
 }
 // Validación del formulario de edición Mpago
 async function validarFormularioEdicionMpago(formulario) {
-  const campos = [
-    {
-      nombre: "mpago",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "desc_mpago",
-      min: 3,
-      mensaje: "La descripción debe tener al menos 3 caracteres.",
-    },
+  const reglasValidacion = [
+    { id: "editar-mpago", tipo: "texto", min: 3, mensaje: "El método de pago debe tener al menos 3 caracteres." },
+    { id: "editar-desc_mpago", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
   ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
     });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+
+    if (valor.length < regla.min) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
+
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
+    if (primerCampoConError) primerCampoConError.focus();
     return;
   }
 
-  // Verificar duplicado antes de enviar el formulario
   const mpagoInput = document.getElementById("editar-mpago");
   const idInput = document.getElementById("editar-idmpago");
-  if (!mpagoInput || !idInput) {
-    console.log("Error: No se encontró el campo o ID.");
-    return;
-  }
-  const mpago = mpagoInput.value.trim();
-  const id = idInput.value;
+  if (!mpagoInput || !idInput) return;
 
   try {
-    //console.log("Verificando duplicado. ID:", id, "Mpago:", mpago);
-    const esDuplicado = await verificarDuplicadoEditarMpago(mpago, id);
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      //cerrarModalMpago("editar-modalMpago");
-      enviarFormularioEdicionMpago(formulario); // Proceder si no hay duplicados
-    }
+    const esDuplicado = await verificarDuplicadoEditarMpago(mpagoInput.value.trim(), idInput.value);
+    if (!esDuplicado) enviarFormularioEdicionMpago(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
 }
-// Enviar formulario de edición Mpago
+
 function enviarFormularioEdicionMpago(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
   const formData = new FormData(formulario);
 
   fetch("cruds/editar_mpago.php", {
@@ -6876,22 +5517,26 @@ function enviarFormularioEdicionMpago(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
         Swal.fire({
-          title: "Actualizado",
-          text: data.message || "Sé realizaron cambios.", // Mostrar el mensaje específico si existe
+          title: "¡Actualizado!",
+          text: data.message || "Método de pago actualizado correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("mpagos-link")) {
+            document.getElementById("mpagos-link").click();
+          }
         });
-        actualizarFilaTablaMpago(formData);
-        cerrarModal("editar-modalMpago");
+        // Si tu función de cerrar modal se llama cerrarModalMpago, asegúrate de que diga eso:
+        cerrarModalMpago("editar-modalMpago"); 
       } else {
         Swal.fire({
           title: "Atención",
-          text: data.message || "No se realizaron cambios.", // Mostrar el mensaje específico si existe
+          text: data.message || "No hubo cambios.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -6901,29 +5546,10 @@ function enviarFormularioEdicionMpago(formulario) {
     })
     .catch((error) => {
       console.error("Error al actualizar:", error);
-      mostrarAlerta("error", "Error", "Ocurrió un problema al actualizar.");
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
     });
 }
-// Actualizar fila de la tabla
-function actualizarFilaTablaMpago(formData) {
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idmpago")}"]`)
-    .closest("tr");
-  //console.log(formData.get("editar-idmpago"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("mpago");
-    fila.cells[1].textContent = formData.get("desc_mpago");
 
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
-
-    // Insertar el botón en la celda
-    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    cargarMpagosFiltrados();
-  }
-}
 // Eliminar Método de pagos*****************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarMpago")) {
@@ -6945,18 +5571,19 @@ document.addEventListener("click", function (event) {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              //alert("Registro eliminado correctamente");
-              Swal.fire({
-                title: "Eliminado",
-                text:
-                  data.message || "El registro se ha eliminado correctamente.", // Mostrar el mensaje específico si existe
+             Swal.fire({
+                title: "¡Eliminado!",
+                text: data.message, 
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
+              }).then(() => {
+                // Recargamos DataTables limpiamente
+                if (document.getElementById("mpagos-link")) {
+                  document.getElementById("mpagos-link").click();
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
             } else {
               Swal.fire(
                 "Error",
@@ -6971,296 +5598,12 @@ document.addEventListener("click", function (event) {
               "Hubo un problema al procesar tu solicitud.",
               "error",
             );
-            console.error("Error al eliminar:", error);
+            console.error("Error al eliminar la tienda:", error);
           });
       }
     });
   }
 });
-
-//Buscar en la tabla y filtrar
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboxmpago");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscarMpago(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboxmpago");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboxmpago' ya existe en el DOM");
-    agregarEventoBuscarMpago(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarMpago(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-mpagos tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboxmpago") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaMpago = document.getElementById(
-        "limpiar-busquedaMpago",
-      ); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-mpagos tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaMpago") {
-      const buscarBox = document.getElementById("buscarboxmpago");
-      const limpiarBusquedaMpago = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaMpago) {
-          limpiarBusquedaMpago.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-mpagos tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-//Función para filtrar metodos de pago desde el servidor *******************************
-function cargarMpagosFiltrados() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroMpago")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarMpagos(); // Si el usuario selecciona "Todos", cargamos las primeras 10 normales
-    return;
-  }
-  //console.log("Cargando mpags filtrados del servidor:", estatusFiltroMpago);
-
-  fetch(`cruds/cargar_mpagos.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      //console.log("Filtrados: ",data);
-      actualizarTablaMpagos(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar métodos de pago filtrados:", error),
-    );
-}
-
-//Función para actualizar la tabla con las métodos filtradas
-function actualizarTablaMpagos(metodos) {
-  let tbody = document.getElementById("mpagos-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (mpagos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron métodos de pago</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevos métodos
-  tbody.innerHTML = "";
-
-  metodos.forEach((mpagos) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${mpagos.nombre_metpago}</td>
-      <td data-lable="Descripción:">${mpagos.desc_metpago}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          mpagos.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${mpagos.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarMpago fa-solid fa-pen-to-square" data-id="${
-          mpagos.id_metpago
-        }"></button>
-        </td>
-        <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarMpago fa-solid fa-trash" data-id="${
-          mpagos.id_metpago
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 marcas por defecto
-function cargarMpagos() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_mpagos.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaMpagos(data);
-    })
-    .catch((error) => console.error("Error al cargar métodos de pago:", error));
-}
-
-/* ------------------------ SCROLL INFINITO Mpagos------------------------*/
-
-function cargarMpagosScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltroMpago = document
-    .getElementById("estatusFiltroMpago")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_mpagos_scroll.php?page=${pagina}`;
-
-  if (estatusFiltroMpago !== "") {
-    url += `&estatus=${estatusFiltroMpago}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-mpagos tbody");
-        data.forEach((rol) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td data-lable="Nombre:">${mpagos.nombre}</td>
-            <td data-lable="Descripción:">${mpagos.descripcion}</td>
-            
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                mpagos.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${mpagos.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar">
-              <button title="Editar" class="editarMpago fa-solid fa-pen-to-square" data-id="${
-                mpagos.id_mpago
-              }"></button>
-            </td>
-        <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminarMpago fa-solid fa-trash" data-id="${
-          rol.id_mpago
-        }"></button>
-      </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más Métodos de pago.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => console.error("Error al cargar marcas:", error));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("mpagos.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más métodos de pago
-    console.log("Reiniciando scroll y cargando métodos de pago en marcas.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A métodos de pago mpagos.php
-    iniciarScrollRoles();
-  }
-});
-
-function iniciarScrollMpagos() {
-  const scrollContainer = document.getElementById("scroll-containerMpag");
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      //console.log(" Scroll detectado, cargando más Marcas...");
-      cargarMpagosScroll();
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en Marcas.php");
-}
-
-const observerMpagos = new MutationObserver(() => {
-  const containerMpag = document.getElementById("scroll-containerMpag");
-  if (containerMpag) {
-    observerMpagos.disconnect();
-    iniciarScrollMpagos();
-  }
-});
-
-const Mpagos = document.getElementById("content-area");
-if (Mpagos) {
-  observerMpagos.observe(Mpagos, { childList: true, subtree: true });
-}
 
 // Llamar Impuestos***************************************************
 document
@@ -7271,24 +5614,86 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        //cargarMarcasFiltradas();
+            inicializarTablaGenerica('#tabla-impuestos', '#buscarboximpuesto', '#cantidad-registros');
+
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-//Crear Impuestos ***************************************
-function abrirModalImpuesto(id) {
-  document.getElementById(id).style.display = "flex";
-}
+  function abrirModalImpuesto(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+  
+  function cerrarModalImpuesto(id) {
+    document.getElementById(id).style.display = "none";
+  }
 
-function cerrarModalImpuesto(id) {
-  document.getElementById(id).style.display = "none";
+//Crear Impuestos ***************************************
+function validarFormularioImpuesto(event) {
+  event.preventDefault();
+
+  // 1. Definimos las reglas (¡Adiós descripción, hola número!)
+  const reglasValidacion = [
+    { id: "crear-impuesto", tipo: "texto", min: 3, mensaje: "El nombre del impuesto debe tener al menos 3 caracteres." },
+    { id: "crear-tasa", tipo: "numero", minVal: 0, mensaje: "La tasa debe ser un número mayor o igual a 0." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  // 2. Recorremos las reglas
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true; // Asumimos que es válido hasta demostrar lo contrario
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
+    });
+
+    // 3. Evaluamos según el tipo de campo
+    if (regla.tipo === "texto") {
+        if (valor.length < regla.min) esValido = false;
+    } else if (regla.tipo === "numero") {
+        let num = parseFloat(valor);
+        // Es inválido si está vacío, si no es un número (isNaN) o si es menor a 0
+        if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
+    }
+
+    // 4. Aplicamos los estilos de error
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  const impuesto = document.getElementById("crear-impuesto").value.trim();
+  verificarDuplicadoImpuesto(impuesto).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioImpuesto(event, "crear");
+  });
 }
 
 function procesarFormularioImpuesto(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
+  event.preventDefault();
   const formData = new FormData(event.target);
 
   fetch(`cruds/procesar_${tipo}_impuesto.php`, {
@@ -7298,147 +5703,34 @@ function procesarFormularioImpuesto(event, tipo) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Cerrar el modal
         cerrarModalImpuesto(tipo + "-modalImpuesto");
-        // Limpiar los campos del formulario
         event.target.reset();
 
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable="Nombre:">${data.impuesto.nombre}</td>
-            <td data-lable="Tasa:">${data.impuesto.tasa}</td>
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                data.impuesto.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.impuesto.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar:">
-              <button title="Editar" class="editarImpuesto fa-solid fa-pen-to-square" data-id="${
-                data.impuesto.id
-              }"></button>
-              </td>
-              <td data-lable="Eliminar:">
-              <button title="Eliminar" class="eliminarImpuesto fa-solid fa-trash" data-id="${
-                data.impuesto.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
         Swal.fire({
           title: "¡Éxito!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "La acción se realizó correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("impuestos-link")) {
+            document.getElementById("impuestos-link").click();
+          }
         });
       } else {
-        // Mostrar un mensaje de error específico del backend
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
+        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
       }
     })
     .catch((error) => {
-      // Manejar errores inesperados
       console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
+      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
     });
 }
-function validarFormularioImpuesto(event) {
-  event.preventDefault();
 
-  const impuesto = document.querySelector("[name='impuesto']").value.trim();
-  const tasa = document.querySelector("[name='tasa']").value.trim();
-
-  const errores = [];
-
-  if (impuesto.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-impuesto");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-impuesto");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (tasa.length < 1) {
-    errores.push("La tasa debe tener al menos 1 carácter.");
-    const inputdesc = document.querySelector("#crear-tasa");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-tasa");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 1) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados
-  verificarDuplicadoImpuesto(impuesto)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "Atención",
-          text: "El nombre ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario
-        procesarFormularioImpuesto(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-      });
-    });
-}
 function verificarDuplicadoImpuesto(impuesto) {
-  //console.log("Nombre verificar:", impuesto);
+  //console.log("Nombre verificar duplicado:", nombre_impuesto);
 
   return fetch("cruds/verificar_nombre_impuesto.php", {
     method: "POST",
@@ -7449,9 +5741,10 @@ function verificarDuplicadoImpuesto(impuesto) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
+        //mostrarAlerta("error", "Error", "El nombre de la impuesto ya existe.");
         Swal.fire({
-          title: "Error",
-          text: data.message || "El nombre del impuesto ya existe.", // Mostrar el mensaje específico si existe
+          title: "!Atención¡",
+          text: "El nombre del impuesto ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -7465,65 +5758,51 @@ function verificarDuplicadoImpuesto(impuesto) {
       return true; // Asume duplicado en caso de error
     });
 }
-//Editar Impuestos************************************************************
-document.addEventListener("DOMContentLoaded", function () {
-  // Escuchar clic en el botón de editar
-  document.addEventListener("click", function (event) {
+
+//Editar Impuestos ***********************************************************
+
+// Escuchar clic en el botón de editar y cargar los datos
+document.addEventListener("click", function (event) {
     if (event.target.classList.contains("editarImpuesto")) {
       const id = event.target.dataset.id;
-      //console.log("Botón editar clickeado. ID:", id);
-
+      
       fetch(`cruds/obtener_impuesto.php?id=${id}`)
         .then((response) => response.json())
         .then((data) => {
-          //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
-            const formularioImpuesto = document.getElementById(
-              "form-editarImpuesto",
-            );
+            const formularioImpuesto = document.getElementById("form-editarImpuesto");
             if (formularioImpuesto) {
               const campos = ["idimpuesto", "impuesto", "tasa", "estatus"];
+              
               campos.forEach((campo) => {
-                //console.log(`Asignando ${campo}:`, data.impuesto[campo]);
-                formularioImpuesto[`editar-${campo}`].value =
-                  data.impuesto[campo] || "";
+                const input = formularioImpuesto[`editar-${campo}`];
+                if (input) {
+                    input.value = data.impuesto[campo] || "";
+                }
               });
               abrirModalImpuesto("editar-modalImpuesto");
-            } else {
-              console.error("Formulario de edición no encontrado.");
             }
           } else {
-            mostrarAlerta(
-              "error",
-              "Error",
-              data.message || "No se pudo cargar el campo.",
-            );
+            Swal.fire("Error", data.message || "No se pudo cargar el campo.", "error");
           }
         })
         .catch((error) => {
           console.error("Error al obtener el campo:", error);
-          mostrarAlerta(
-            "error",
-            "Error",
-            "Ocurrió un problema al obtener los datos.",
-          );
+          Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
         });
     }
-  });
-
-  // Validar y enviar el formulario de edición
-  document.body.addEventListener("submit", function (event) {
-    if (event.target && event.target.id === "form-editarImpuesto") {
-      event.preventDefault(); // Esto evita el comportamiento predeterminado de recargar la página.
-      validarFormularioEdicionImpuesto(event.target);
-    }
-  });
 });
 
-//Validar duplicados en edicion impuesto
-function verificarDuplicadoEditarImpuesto(impuesto, id = 0) {
-  //console.log("Validando duplicados. ID:", id, "Impuesto:", impuesto);
+// Escuchar el submit del formulario de edición (AQUÍ ESTÁ FUERA DEL DOMContentLoaded)
+document.addEventListener("submit", function (event) {
+    if (event.target && event.target.id === "form-editarImpuesto") {
+      event.preventDefault(); 
+      validarFormularioEdicionImpuesto(event.target);
+    }
+});
 
+// Verificar duplicados en la base de datos
+function verificarDuplicadoEditarImpuesto(impuesto, id = 0) {
   return fetch("cruds/verificar_nombre_impuesto.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -7531,11 +5810,10 @@ function verificarDuplicadoEditarImpuesto(impuesto, id = 0) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
         Swal.fire({
           title: "Atención",
-          text: data.message || "El nombre del ya existe.", // Mostrar el mensaje específico si existe
+          text: data.message || "El nombre del impuesto ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -7546,90 +5824,74 @@ function verificarDuplicadoEditarImpuesto(impuesto, id = 0) {
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
+      return true; 
     });
 }
-// Validación del formulario de edición Impuesto
-async function validarFormularioEdicionImpuesto(formulario) {
-  const campos = [
-    {
-      nombre: "impuesto",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "tasa",
-      min: 1,
-      mensaje: "La tasa debe tener al menos 1 carácter.",
-    },
-  ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
+// Validación Profesional del Formulario
+async function validarFormularioEdicionImpuesto(formulario) {
+  const reglasValidacion = [
+    { id: "editar-impuesto", tipo: "texto", min: 3, mensaje: "El impuesto debe tener al menos 3 caracteres." },
+    { id: "editar-tasa", tipo: "numero", minVal: 0, mensaje: "La tasa debe ser un número mayor o igual a 0." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
     });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+
+    if (regla.tipo === "texto") {
+        if (valor.length < regla.min) esValido = false;
+    } else if (regla.tipo === "numero") {
+        let num = parseFloat(valor);
+        if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
+    }
+
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
+
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "error",
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
+    if (primerCampoConError) primerCampoConError.focus();
     return;
   }
 
-  // Verificar duplicado antes de enviar el formulario
   const impuestoInput = document.getElementById("editar-impuesto");
   const idInput = document.getElementById("editar-idimpuesto");
-  if (!impuestoInput || !idInput) {
-    console.log("Error: No se encontró el campo o ID.");
-    return;
-  }
-  const impuesto = impuestoInput.value.trim();
-  const id = idInput.value;
+  if (!impuestoInput || !idInput) return;
 
   try {
-    //console.log("Verificando duplicado. ID:", id, "Impuesto:", impuesto);
-    const esDuplicado = await verificarDuplicadoEditarImpuesto(impuesto, id);
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      //cerrarModalImpuesto("editar-modalImpuesto");
-      enviarFormularioEdicionImpuesto(formulario); // Proceder si no hay duplicados
-    }
+    const esDuplicado = await verificarDuplicadoEditarImpuesto(impuestoInput.value.trim(), idInput.value);
+    if (!esDuplicado) enviarFormularioEdicionImpuesto(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
 }
-// Enviar formulario de edición Impuesto
+
+//Enviar Datos al Servidor
 function enviarFormularioEdicionImpuesto(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
   const formData = new FormData(formulario);
 
   fetch("cruds/editar_impuesto.php", {
@@ -7638,22 +5900,24 @@ function enviarFormularioEdicionImpuesto(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
         Swal.fire({
-          title: "Actualizado",
-          text: data.message || "Se actualizo correctamente.", // Mostrar el mensaje específico si existe
+          title: "¡Actualizado!",
+          text: data.message || "Impuesto actualizado correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          if (document.getElementById("impuestos-link")) {
+            document.getElementById("impuestos-link").click();
+          }
         });
-        actualizarFilaTablaImpuesto(formData);
-        cerrarModal("editar-modalImpuesto");
+        cerrarModalImpuesto("editar-modalImpuesto"); 
       } else {
         Swal.fire({
           title: "Atención",
-          text: data.message || "No se ha actualizdo.", // Mostrar el mensaje específico si existe
+          text: data.message || "No hubo cambios.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -7663,30 +5927,11 @@ function enviarFormularioEdicionImpuesto(formulario) {
     })
     .catch((error) => {
       console.error("Error al actualizar:", error);
-      mostrarAlerta("error", "Error", "Ocurrió un problema al actualizar.");
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
     });
 }
-// Actualizar fila de la tabla
-function actualizarFilaTablaImpuesto(formData) {
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idimpuesto")}"]`)
-    .closest("tr");
-  //console.log(formData.get("editar-idimpuesto"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("impuesto");
-    fila.cells[1].textContent = formData.get("tasa");
 
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
-
-    // Insertar el botón en la celda
-    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    cargarImpuestosFiltrados();
-  }
-}
-// Eliminar Impuestos*****************************
+// Eliminar Impuestos *****************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarImpuesto")) {
     const id = event.target.dataset.id;
@@ -7707,17 +5952,19 @@ document.addEventListener("click", function (event) {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              //alert("Registro eliminado correctamente");
-              Swal.fire({
-                title: "Eliminado",
-                text: data.message || "El registro se ha eliminado.",
+             Swal.fire({
+                title: "¡Eliminado!",
+                text: data.message, 
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
+              }).then(() => {
+                // Recargamos DataTables limpiamente
+                if (document.getElementById("impuestos-link")) {
+                  document.getElementById("impuestos-link").click();
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
             } else {
               Swal.fire(
                 "Error",
@@ -7732,297 +5979,12 @@ document.addEventListener("click", function (event) {
               "Hubo un problema al procesar tu solicitud.",
               "error",
             );
-            console.error("Error al eliminar:", error);
+            console.error("Error al eliminar la tienda:", error);
           });
       }
     });
   }
 });
-
-//Buscar en la tabla y filtrar
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboximpuesto");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscarImpuesto(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboximpuesto");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboximpuesto' ya existe en el DOM");
-    agregarEventoBuscarImpuesto(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarImpuesto(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-impuestos tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboximpuesto") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaImpuesto = document.getElementById(
-        "limpiar-busquedaImpuesto",
-      ); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-impuestos tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaImpuesto") {
-      const buscarBox = document.getElementById("buscarboximpuesto");
-      const limpiarBusquedaImpuesto = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaImpuesto) {
-          limpiarBusquedaImpuesto.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-impuestos tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar Impuestos desde el servidor *********************************
-function cargarImpuestosFiltrados() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroImpuesto")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarImpuestos(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
-    return;
-  }
-  //console.log("Cargando impuestos filtrados del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_impuestos.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log("Filtrados: ",data);
-      actualizarTablaImpuestos(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar impuestos filtrados:", error),
-    );
-}
-
-//Función para actualizar la tabla con las impuestos filtradas
-function actualizarTablaImpuestos(impuestos) {
-  let tbody = document.getElementById("impuestos-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (impuestos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron impuestos</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevos impuestos
-  tbody.innerHTML = "";
-
-  impuestos.forEach((impuestos) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${impuestos.nomimpuesto}</td>
-      <td data-lable="Descripción:">${impuestos.tasa}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          impuestos.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${impuestos.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarImpuesto fa-solid fa-pen-to-square" data-id="${
-          impuestos.idimpuesto
-        }"></button>
-        </td>
-        <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarImpuesto fa-solid fa-trash" data-id="${
-          impuestos.idimpuesto
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 impuestos defecto
-function cargarImpuestos() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_impuestos.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaImpuestos(data);
-    })
-    .catch((error) => console.error("Error al cargar Impuestos:", error));
-}
-
-/* ------------------------ SCROLL INFINITO impuestos -------------------*/
-
-function cargarImpuestosScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltroImpuesto = document
-    .getElementById("estatusFiltroImpuesto")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_impuestos_scroll.php?page=${pagina}`;
-
-  if (estatusFiltroImpuesto !== "") {
-    url += `&estatus=${estatusFiltroImpuesto}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-impuestos tbody");
-        data.forEach((impuesto) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td data-lable="Nombre:">${impuesto.nombre}</td>
-            <td data-lable="Descripción:">${impuesto.descripcion}</td>
-            
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                impuesto.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${impuesto.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar">
-              <button title="Editar" class="editarImpuesto fa-solid fa-pen-to-square" data-id="${
-                impuesto.idimpuesto
-              }"></button>
-            </td>
-        <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminarImpuesto fa-solid fa-trash" data-id="${
-          impuesto.idimpuesto
-        }"></button>
-      </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más Impuestos.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => console.error("Error al cargar impuestos:", error));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("impuestos.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más marcas
-    console.log("Reiniciando scroll y cargando impuestos en impuestos.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A Impuestos.php
-    iniciarScrollImpuestos();
-  }
-});
-
-function iniciarScrollImpuestos() {
-  const scrollContainer = document.getElementById("scroll-containerImp");
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      //console.log(" Scroll detectado, cargando más Impuestos...");
-      cargarImpuestosScroll();
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en Impuestos.php");
-}
-
-const observerImpuestos = new MutationObserver(() => {
-  const impuestosSeccion = document.getElementById("scroll-containerImp");
-  if (impuestosSeccion) {
-    observerImpuestos.disconnect();
-    iniciarScrollImpuestos();
-  }
-});
-
-const Impuestos = document.getElementById("content-area");
-if (Impuestos) {
-  observerImpuestos.observe(Impuestos, { childList: true, subtree: true });
-}
 
 // Llamar Proveedores *************************************************
 document
@@ -8033,23 +5995,95 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+
+    inicializarTablaGenerica('#tabla-proveedores', '#buscarboxproveedor', '#cantidad-registros');
+
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-//Crear Proveedores***********************************
-function abrirModalProveedor(id) {
-  document.getElementById(id).style.display = "flex";
-}
+  function abrirModalProveedor(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+  
+  function cerrarModalProveedor(id) {
+    document.getElementById(id).style.display = "none";
+  }
+  
+  //Crear Proveedores***********************************
 
-function cerrarModalProveedor(id) {
-  document.getElementById(id).style.display = "none";
+function validarFormularioProveedor(event) {
+  event.preventDefault();
+
+  //  Reglas expandido soporta emails y teléfonos
+  const reglasValidacion = [
+    { id: "crear-proveedor", tipo: "texto", min: 3, mensaje: "El nombre debe tener al menos 3 caracteres." },
+    { id: "crear-papellido", tipo: "texto", min: 3, mensaje: "El primer apellido debe tener al menos 3 caracteres." },
+    { id: "crear-sapellido", tipo: "texto", min: 3, mensaje: "El segundo apellido debe tener al menos 3 caracteres." },
+    { id: "crear-contacto", tipo: "texto", min: 3, mensaje: "La empresa debe tener al menos 3 caracteres." },
+    { id: "crear-rfc", tipo: "texto", min: 12, mensaje: "El RFC debe tener al menos 12 caracteres." },
+    { id: "crear-telefono", tipo: "texto", min: 10, mensaje: "El teléfono debe tener exactamente 10 dígitos." },
+    { id: "crear-email", tipo: "email", mensaje: "Debes ingresar un correo electrónico válido (ej. pedro@correo.com)." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  // Evaluamos cada regla
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
+    });
+
+    // Validamos Texto vs Email
+    if (regla.tipo === "texto") {
+        if (valor.length < regla.min) esValido = false;
+    } else if (regla.tipo === "email") {
+        // Fórmula (RegEx) para comprobar que tiene un "@" y un punto "."
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(valor)) esValido = false;
+    }
+
+    // Pintamos de rojo si falló
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  //  Mostrar errores
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  // Verificar duplicados antes de enviar
+  const proveedor = document.getElementById("crear-proveedor").value.trim();
+  verificarDuplicadoProveedor(proveedor).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioProveedor(event, "crear");
+  });
 }
 
 function procesarFormularioProveedor(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
+  event.preventDefault();
   const formData = new FormData(event.target);
 
   fetch(`cruds/procesar_${tipo}_proveedor.php`, {
@@ -8059,195 +6093,33 @@ function procesarFormularioProveedor(event, tipo) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Cerrar el modal
         cerrarModalProveedor(tipo + "-modalProveedor");
-        // Limpiar los campos del formulario
         event.target.reset();
 
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td>${data.proveedor.proveedor}</td>
-            <td>${data.proveedor.contacto}</td>
-            <td>${data.proveedor.telefono}</td>
-            <td>${data.proveedor.email}</td>
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                data.proveedor.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.proveedor.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-             <td>
-              <button title="Editar" class="editarProveedor fa-solid fa-pen-to-square" data-id="${
-                data.proveedor.id
-              }"></button>
-              </td>
-              <td>
-              <button title="Eliminar" class="eliminarProveedor fa-solid fa-trash" data-id="${
-                data.proveedor.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
         Swal.fire({
           title: "¡Éxito!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "Proveedor guardado correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables usando el menú
+          if (document.getElementById("proveedores-link")) {
+            document.getElementById("proveedores-link").click();
+          }
         });
       } else {
-        // Mostrar un mensaje de error específico del backend
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
+        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
       }
     })
     .catch((error) => {
-      // Manejar errores inesperados
       console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
+      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
     });
 }
-function validarFormularioProveedor(event) {
-  event.preventDefault();
 
-  const proveedor = document.querySelector("[name='proveedor']").value.trim();
-  const papellido = document.querySelector("[name='papellido']").value.trim();
-  const sapellido = document.querySelector("[name='sapellido']").value.trim();
-  const contacto = document.querySelector("[name='contacto']").value.trim();
-  const rfc = document.querySelector("[name='rfc']").value.trim();
-
-  const errores = [];
-
-  if (proveedor.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-proveedor");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-proveedor");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (papellido.length < 3) {
-    errores.push("El primer apellido debe tener al menos 3 caracteres.");
-    const inputpapellido = document.querySelector("#crear-papellido");
-    inputpapellido.focus();
-    inputpapellido.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputpapellido = document.querySelector("#crear-papellido");
-  inputpapellido.addEventListener("input", () => {
-    if (inputpapellido.value.length >= 3) {
-      inputpapellido.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (sapellido.length < 3) {
-    errores.push("El segundo apellido debe tener al menos 3 caracteres.");
-    const inputsapellido = document.querySelector("#crear-sapellido");
-    inputsapellido.focus();
-    inputsapellido.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputsapellido = document.querySelector("#crear-sapellido");
-  inputsapellido.addEventListener("input", () => {
-    if (inputsapellido.value.length >= 3) {
-      inputsapellido.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (contacto.length < 3) {
-    errores.push("La empresa debe tener al menos 3 caracteres.");
-    const inputcontacto = document.querySelector("#crear-contacto");
-    inputcontacto.focus();
-    inputcontacto.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputcontacto = document.querySelector("#crear-contacto");
-  inputcontacto.addEventListener("input", () => {
-    if (inputcontacto.value.length >= 3) {
-      inputcontacto.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (rfc.length < 12) {
-    errores.push("El RFC debe tener al menos 12 caracteres.");
-    const inputrfc = document.querySelector("#crear-rfc");
-    inputrfc.focus();
-    inputrfc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputrfc = document.querySelector("#crear-rfc");
-  inputrfc.addEventListener("input", () => {
-    if (inputrfc.value.length >= 12) {
-      inputrfc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados
-  verificarDuplicadoProveedor(proveedor)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "Atención",
-          text: "El nombre ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario
-        procesarFormularioProveedor(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-      });
-    });
-}
 function verificarDuplicadoProveedor(proveedor) {
-  //console.log("Nombre verificar:", proveedor);
-
   return fetch("cruds/verificar_nombre_proveedor.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -8255,93 +6127,71 @@ function verificarDuplicadoProveedor(proveedor) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre ya existe.");
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "El nombre del proveedor ya existe.",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
       return data.existe;
     })
     .catch((error) => {
-      //console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
+      console.error("Error al verificar duplicado:", error);
+      return true;
     });
 }
+
 //Editar Proveedores************************************************************
-document.addEventListener("DOMContentLoaded", function () {
-  // Escuchar clic en el botón de editar
-  document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("editarProveedor")) {
-      const id = event.target.dataset.id;
-      //console.log("Botón editar clickeado. ID:", id);
 
-      fetch(`cruds/obtener_proveedor.php?id=${id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          //console.log("Datos recibidos del servidor:", data);
-          if (data.success) {
-            const formularioProveedor = document.getElementById(
-              "form-editarProveedor",
-            );
-            if (formularioProveedor) {
-              const campos = [
-                "idproveedor",
-                "proveedor",
-                "papellido",
-                "sapellido",
-                "contacto",
-                "rfc",
-                "telefono",
-                "email",
-                "estatus",
-              ];
-              //console.log(`Asignando ${campos}:`, data.proveedor[campos]);
-              campos.forEach((campo) => {
-                const input = formularioProveedor[`editar-${campo}`];
-                if (input) {
-                  //console.log(`Asignando ${campo}:`, data.proveedor[campo]);
-                  input.value = data.proveedor[campo] || "";
-                } else {
-                  console.warn(
-                    `El campo editar-${campo} no existe en el formulario.`,
-                  );
-                }
-              });
-              abrirModalProveedor("editar-modalProveedor");
-            } else {
-              console.error("Formulario de edición no encontrado.");
-            }
-          } else {
-            mostrarAlerta(
-              "error",
-              "Error",
-              data.message || "No se pudo cargar el campo.",
-            );
+// Escuchar clic en el botón de editar y cargar datos
+document.addEventListener("click", function (event) {
+  if (event.target.classList.contains("editarProveedor")) {
+    const id = event.target.dataset.id;
+
+    fetch(`cruds/obtener_proveedor.php?id=${id}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          const formularioProveedor = document.getElementById("form-editarProveedor");
+          if (formularioProveedor) {
+            const campos = [
+              "idproveedor", "proveedor", "papellido", "sapellido", 
+              "contacto", "rfc", "telefono", "email", "estatus"
+            ];
+            
+            campos.forEach((campo) => {
+              const input = formularioProveedor[`editar-${campo}`];
+              if (input) {
+                input.value = data.proveedor[campo] || "";
+              }
+            });
+            abrirModalProveedor("editar-modalProveedor");
           }
-        })
-        .catch((error) => {
-          console.error("Error al obtener el campo:", error);
-          mostrarAlerta(
-            "error",
-            "Error",
-            "Ocurrió un problema al obtener los datos.",
-          );
-        });
-    }
-  });
-
-  // Validar y enviar el formulario de edición
-  document.body.addEventListener("submit", function (event) {
-    if (event.target && event.target.id === "form-editarProveedor") {
-      event.preventDefault(); // Esto evita el comportamiento predeterminado de recargar la página.
-      validarFormularioEdicionProveedor(event.target);
-    }
-  });
+        } else {
+          Swal.fire("Error", data.message || "No se pudo cargar el proveedor.", "error");
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener el campo:", error);
+        Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
+      });
+  }
 });
 
-//Validar duplicados en edicion proveedor
-function verificarDuplicadoEditarProveedor(proveedor, id = 0) {
-  //console.log("Validando duplicados. ID:", id, "Proveedor:", proveedor);
+// Escuchar el submit del formulario de edición (Fuera del DOMContentLoaded)
+document.addEventListener("submit", function (event) {
+  if (event.target && event.target.id === "form-editarProveedor") {
+    event.preventDefault(); 
+    validarFormularioEdicionProveedor(event.target);
+  }
+});
 
+// Verificar duplicados
+function verificarDuplicadoEditarProveedor(proveedor, id = 0) {
   return fetch("cruds/verificar_nombre_proveedor.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -8349,116 +6199,94 @@ function verificarDuplicadoEditarProveedor(proveedor, id = 0) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre ya existe.");
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "El nombre ya existe. Por favor, elige otro.",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
       }
       return data.existe;
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
+      return true; 
     });
 }
-// Validación del formulario de edición Proveedor
-async function validarFormularioEdicionProveedor(formulario) {
-  const campos = [
-    {
-      nombre: "proveedor",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "papellido",
-      min: 3,
-      mensaje: "El primer apellido debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "sapellido",
-      min: 3,
-      mensaje: "El segundo apellido debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "contacto",
-      min: 3,
-      mensaje: "La empresa debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "rfc",
-      min: 12,
-      mensaje: "El RFC debe tener al menos 12 caracteres.",
-    },
-  ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
+// Validación Profesional del Formulario
+async function validarFormularioEdicionProveedor(formulario) {
+  // Motor de reglas (Soporta Textos y Emails)
+  const reglasValidacion = [
+    { id: "editar-proveedor", tipo: "texto", min: 3, mensaje: "El nombre debe tener al menos 3 caracteres." },
+    { id: "editar-papellido", tipo: "texto", min: 3, mensaje: "El primer apellido debe tener al menos 3 caracteres." },
+    { id: "editar-sapellido", tipo: "texto", min: 3, mensaje: "El segundo apellido debe tener al menos 3 caracteres." },
+    { id: "editar-contacto", tipo: "texto", min: 3, mensaje: "La empresa debe tener al menos 3 caracteres." },
+    { id: "editar-rfc", tipo: "texto", min: 12, mensaje: "El RFC debe tener al menos 12 caracteres." },
+    { id: "editar-telefono", tipo: "texto", min: 10, mensaje: "El teléfono debe tener exactamente 10 dígitos." },
+    { id: "editar-email", tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
     });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+
+    if (regla.tipo === "texto") {
+        if (valor.length < regla.min) esValido = false;
+    } else if (regla.tipo === "email") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(valor)) esValido = false;
+    }
+
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
+
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "error",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
+    if (primerCampoConError) primerCampoConError.focus();
     return;
   }
 
-  // Verificar duplicado antes de enviar el formulario
   const proveedorInput = document.getElementById("editar-proveedor");
   const idInput = document.getElementById("editar-idproveedor");
-  if (!proveedorInput || !idInput) {
-    console.log("Error: No se encontró el campo o ID.");
-    return;
-  }
-  const proveedor = proveedorInput.value.trim();
-  const id = idInput.value;
+  if (!proveedorInput || !idInput) return;
 
   try {
-    //console.log("Verificando duplicado. ID:", id, "Proveedor:", proveedor);
-    const esDuplicado = await verificarDuplicadoEditarProveedor(proveedor, id);
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      //cerrarModalProveedor("editar-modalProveedor");
-      enviarFormularioEdicionProveedor(formulario); // Proceder si no hay duplicados
-    }
+    const esDuplicado = await verificarDuplicadoEditarProveedor(proveedorInput.value.trim(), idInput.value);
+    if (!esDuplicado) enviarFormularioEdicionProveedor(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
 }
-// Enviar formulario de edición Proveedor
+
+// Enviar formulario al servidor
 function enviarFormularioEdicionProveedor(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
   const formData = new FormData(formulario);
 
   fetch("cruds/editar_proveedor.php", {
@@ -8467,23 +6295,26 @@ function enviarFormularioEdicionProveedor(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
         Swal.fire({
-          title: "Exito",
-          text: data.message || "Registro actualizado correctamente.", // Mostrar el mensaje específico si existe
+          title: "¡Actualizado!",
+          text: data.message || "Registro actualizado correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables usando el menú
+          if (document.getElementById("proveedores-link")) {
+            document.getElementById("proveedores-link").click();
+          }
         });
-
-        actualizarFilaTablaProveedor(formData);
-        cerrarModal("editar-modalProveedor");
+        
+        cerrarModalProveedor("editar-modalProveedor"); 
       } else {
         Swal.fire({
           title: "Atención",
-          text: data.message || "No se realizaron cambios en el proveedor.", // Mostrar el mensaje específico si existe
+          text: data.message || "No se realizaron cambios en el proveedor.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -8493,29 +6324,10 @@ function enviarFormularioEdicionProveedor(formulario) {
     })
     .catch((error) => {
       console.error("Error al actualizar:", error);
-      mostrarAlerta("error", "Error", "Ocurrió un problema al actualizar.");
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
     });
 }
-// Actualizar fila de la tabla
-function actualizarFilaTablaProveedor(formData) {
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idproveedor")}"]`)
-    .closest("tr");
-  //console.log(formData.get("editar-idproveedor"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("proveedor");
-    fila.cells[1].textContent = formData.get("contacto");
-    fila.cells[2].textContent = formData.get("telefono");
-    fila.cells[3].textContent = formData.get("email");
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
 
-    // Insertar el botón en la celda
-    fila.cells[4].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-  }
-}
 // Eliminar Proveedores*****************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarProveedor")) {
@@ -8537,22 +6349,23 @@ document.addEventListener("click", function (event) {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              //alert("Registro eliminado correctamente");
               Swal.fire({
-                title: "Atención",
-                text: data.message || "El registro se ha eliminado.",
-                icon: "warning",
+                title: "¡Eliminado!",
+                text: data.message || "El registro se ha eliminado correctamente.",
+                icon: "success", 
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
+              }).then(() => {
+                if (document.getElementById("proveedores-link")) {
+                  document.getElementById("proveedores-link").click();
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
             } else {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error",
+                "error"
               );
             }
           })
@@ -8560,7 +6373,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error",
+              "error"
             );
             console.error("Error al eliminar:", error);
           });
@@ -8569,187 +6382,6 @@ document.addEventListener("click", function (event) {
   }
 });
 
-//Buscar en la tabla y filtrar
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboxproveedor");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscarProveedor(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboxproveedor");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboxproveedor' ya existe en el DOM");
-    agregarEventoBuscarProveedor(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarProveedor(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-proveedores tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboxproveedor") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaCliente = document.getElementById(
-        "limpiar-busquedaCliente",
-      ); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-proveedores tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaCliente") {
-      const buscarBox = document.getElementById("buscarboxproveedor");
-      const limpiarBusquedaCliente = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaCliente) {
-          limpiarBusquedaCliente.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-proveedores tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar Proveedores desde el servidor ******************************
-function cargarProvFiltrados() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroProv")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarProveedores(); // Si el usuario selecciona "Todos", cargamos las primeros 10 proveedores normales
-    return;
-  }
-  //console.log("Cargando Proveedores filtrados del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_proveedores.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log("Filtrados: ",data);
-      actualizarTablaProveedores(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar Proveedores filtrados:", error),
-    );
-}
-
-//Función para actualizar la tabla con los proveedores filtradas
-function actualizarTablaProveedores(proveedores) {
-  let tbody = document.getElementById("proveedores-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (proveedores.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron proveedores</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevas proveedores
-  tbody.innerHTML = "";
-
-  proveedores.forEach((proveedor) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${proveedor.nombre_prov}</td>
-      <td data-lable="Empresa:">${proveedor.contacto_prov}</td>
-      <td data-lable="Teléfono:">${proveedor.tel_prov}</td>
-      <td data-lable="Email:">${proveedor.email_prov}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          proveedor.estatus == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${proveedor.estatus == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarProveedor fa-solid fa-pen-to-square" data-id="${
-          proveedor.id_prov
-        }"></button>
-        </td>
-        <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarProveedor fa-solid fa-trash" data-id="${
-          proveedor.id_prov
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 provedores por defecto
-function cargarProveedores() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_proveedores.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaProveedores(data);
-    })
-    .catch((error) => console.error("Error al cargar proveedores:", error));
-}
-
 // Llamar Ordenes de servicio *************************************************
 document.getElementById("ordenes-link").addEventListener("click", function (event) {
     event.preventDefault();
@@ -8757,7 +6389,43 @@ document.getElementById("ordenes-link").addEventListener("click", function (even
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+
+        //filtros y busqueda
         inicializarTablaGenerica('#tabla-ordenes', '#buscarboxorden', '#cantidad-registros');
+
+        // Revisamos si el Dashboard nos dejó un mensaje secreto
+        let filtroGuardado = sessionStorage.getItem("filtroDashboard");
+        
+        if (filtroGuardado) {
+            // Le damos 200 milisegundos a DataTables para que termine de construirse
+            setTimeout(() => {
+                let cajaBusqueda = $("#buscarboxorden"); 
+                
+                if (cajaBusqueda.length > 0) {
+                    cajaBusqueda.val(filtroGuardado); // Escribimos la palabra
+                    cajaBusqueda.trigger("input").trigger("keyup"); // Filtramos
+                    
+                    // --- LA MAGIA UX: Botón dinámico de "Ver Todas" ---
+                    // Verificamos que el botón no exista ya, para no duplicarlo
+                    if ($("#btn-limpiar-dashboard").length === 0) {
+                        // Creamos un botón gris elegante
+                        let btnLimpiar = $("<button id='btn-limpiar-dashboard' class='boton' style='margin-left: 50px; background-color: #204eda;'>Ver Todas</button>");
+                        
+                        // Lo pegamos justo después de la caja de búsqueda
+                        cajaBusqueda.after(btnLimpiar);
+                        
+                        // Le damos la orden de qué hacer al hacerle clic
+                        btnLimpiar.on("click", function() {
+                            cajaBusqueda.val("").trigger("input").trigger("keyup"); // Limpia el buscador y refresca la tabla
+                            $(this).remove(); // El botón se autodestruye para no estorbar
+                        });
+                    }
+                }
+                
+                // Borramos el mensaje de la memoria
+                sessionStorage.removeItem("filtroDashboard"); 
+            }, 200); 
+        }
       })
       .catch((error) => console.error("Error al cargar contenido:", error));
 });
@@ -9200,7 +6868,7 @@ document.addEventListener('click', function(e) {
 
         Swal.fire({
             title: '¿Estás seguro?',
-            text: "La orden #" + idOrden + " será cancelada. No se borrará del historial financiero.",
+            text: "La orden #" + idOrden + " será cancelada. No se borrará del historial.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',

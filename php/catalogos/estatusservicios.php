@@ -16,28 +16,29 @@ $estadosservicios = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalEstadoservicio('crear-modalEstadoservicio')">Nuevo</button>
-    <label class="buscarlabel" for="buscarboxEstadoservicios">Buscar:</label>
-    <input class="buscar--box" id="buscarboxEstadoservicios" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 
     <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroEstadoservicios">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroEstadoservicios" onchange="cargarestadoserviciosFiltrados()" style="width: 100px;">
-        <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+        <option value="8">8</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="-1">Todos</option>
     </select>
+    <label class="buscarlabel" for="buscarboxEstadoservicios">Buscar:</label>
+    <input class="buscar--box" id="buscarboxEstadoservicios" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 </div>
 
 <div class="container_dashboard_tablas" id="estadoservicio">
     <h3>Lista de Estados de servicio</h3>
-    <div id="scroll-containerEstadoservicios" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerEstadoservicios">
         <table class="tbl" id="tabla-estadoservicio">
             <thead>
                 <tr>
                     <th>Estados de servicio</th>
                     <th>Descripción</th>
                     <th>Estatus</th>
-                    <th colspan="2" style="text-align: center;">Acciones</th>
+                    <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="estadoservicios-lista">
@@ -48,10 +49,9 @@ $estadosservicios = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
                         <td data-lable="Estatus:"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
-                        <td data-lable="Editar:">
+                        <td data-lable="Acciones:">
                             <button title="Editar" class="editarEstadoservicio fa-solid fa-pen-to-square" data-id="<?php echo $u['id_estado_servicio']; ?>"></button>
-                        </td>
-                        <td data-lable="Eliminar:">
+
                             <button title="Eliminar" class="eliminarEstadoservicio fa-solid fa-trash" data-id="<?php echo $u['id_estado_servicio']; ?>"></button>
                         </td>
                     </tr>
@@ -67,7 +67,7 @@ $estadosservicios = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
                 <span title="Cerrar" class="close" onclick="cerrarModalEstadoservicio('crear-modalEstadoservicio')">&times;</span>
                 <h2 class="tittle">Crear Estado de servicio</h2>
 
-                <form id="form-crearEstadoservicio" onsubmit="validarFormularioEstadoservicio(event, 'crear')">
+                <form id="form-crearEstadoservicio" onsubmit="validarFormularioEstadoservicio(event, 'crear')" novalidate>
                     <div class="form-group">
                         <label for="crear-estadoservicio">Nombre:</label>
                         <input type="text" id="crear-estadoservicio" name="estadoservicio" autocomplete="off"
@@ -100,7 +100,7 @@ $estadosservicios = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
             <div class="modal-content" style="height: 269px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalEstadoservicio('editar-modalEstadoservicio')">&times;</span>
                 <h2 class="tittle">Editar Estado de servicio</h2>
-                <form id="form-editarEstadoservicio">
+                <form id="form-editarEstadoservicio" novalidate>
                     <input type="hidden" id="editar-idestadoservicio" name="editar-idestadoservicio" value="" />
                     <div class="form-group">
                         <label for="editar-estadoservicio">Nombre del estado de servicio:</label>

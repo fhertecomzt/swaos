@@ -8,19 +8,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id']) && ctype_digit($
   $id = (int) $_GET['id']; // Convertir el ID a entero para mayor seguridad
 
   try {
-    // Preparar y ejecutar la consulta para eliminar
-    $stmt = $dbh->prepare("DELETE FROM proveedores WHERE id_prov = :id");
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    // EL BLINDAJE: Verificar si el proveedor tiene historial en 'productos'
+    $query_check = "SELECT COUNT(*) as total FROM productos WHERE id_prov = :id";
+    $stmt_check = $dbh->prepare($query_check);
+    $stmt_check->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt_check->execute();
 
-    if ($stmt->execute()) {
-      $response["success"] = true;
-      $response["message"] = "Registro eliminado correctamente.";
+    $resultado = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+    // Si el total es mayor a 0, significa que sí tiene historial y detenemos la eliminación
+    if ($resultado['total'] > 0) {
+      $response["success"] = false;
+      $response["message"] = "No se puede eliminar. Este proveedor tiene productos asociados. Por favor, cambie su estatus a Inactivo.";
     } else {
-      $response["message"] = "Error al eliminar el registro.";
+      // LA ELIMINACIÓN: Solo se llega aquí si no tiene productos (total = 0)
+      $stmt = $dbh->prepare("DELETE FROM proveedores WHERE id_prov = :id");
+      $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+      if ($stmt->execute()) {
+        $response["success"] = true;
+        $response["message"] = "Registro eliminado correctamente.";
+      } else {
+        $response["message"] = "Error al eliminar el registro.";
+      }
     }
   } catch (PDOException $e) {
-    // Mensaje genérico para evitar exposición de detalles de errores
-    $response["message"] = "Hubo un error al procesar la solicitud. Intente más tarde.";
+    // Si la base de datos detecta un error de integridad (Foreign Keys estrictas)
+    // Atrapamos el error aquí para que envíe la alerta roja en lugar de romper el sistema.
+    $response["success"] = false;
+    $response["message"] = "Error de integridad: El proveedor está vinculado a otros registros del sistema y no puede ser borrado.";
   }
 } else {
   $response["message"] = "Método no permitido o ID no válido.";

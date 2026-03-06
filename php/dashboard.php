@@ -20,27 +20,27 @@ include "verificar_sesion.php";
   <!--Cards-->
   <div class="cards" id="dashboard-cards">
 
-    <div class="card card-pendiente" data-id="pendientes" data-page="catalogos/1productos.php" style="background: linear-gradient(45deg, #f09819, #edde5d);">
+    <div class="card card-pendiente" data-menu-link="ordenes-link" data-filtro="Recibido" style=" background: linear-gradient(45deg, #f09819, #edde5d); cursor: pointer;">
       <div>
         <span class="card-numeros">0</span>
         <p><span class="card-nombre">Órdenes pendientes</span></p>
       </div>
       <div class="card-icono">
-        <i class="fa-solid fa-boxes-stacked"></i>
+        <i class="fa-solid fa-clock"></i>
       </div>
     </div>
 
-    <div class="card" data-id="listas" data-page="catalogos/2productos.php" style="background: linear-gradient(45deg, #11998e, #38ef7d);">
+    <div class="card" data-menu-link="ordenes-link" data-filtro="Terminado" style="background: linear-gradient(45deg, #11998e, #38ef7d); cursor: pointer;">
       <div>
         <span class=" card-numeros">0</span>
         <p> <span class="card-nombre">Órdenes listas</span></p>
       </div>
       <div class="card-icono">
-        <i class="fa-solid fa-boxes-stacked"></i>
+        <i class="fa-solid fa-check-double"></i>
       </div>
     </div>
 
-    <div class="card" data-id="productos" data-page="catalogos/productos.php" style="background: linear-gradient(45deg, #2980b9, #6dd5fa);">
+    <div class="card" data-menu-link="productos-link" style="background: linear-gradient(45deg, #2980b9, #6dd5fa); cursor: pointer;">
       <div>
         <span class=" card-numeros">0</span><br>
         <p><span class="card-nombre">Productos</span></p>
@@ -50,7 +50,7 @@ include "verificar_sesion.php";
       </div>
     </div>
 
-    <div class="card" data-id="clientes" data-page="catalogos/clientes.php" style="background: linear-gradient(45deg, #373b44, #4286f4);">
+    <div class="card" data-menu-link="clientes-link" style="background: linear-gradient(45deg, #373b44, #4286f4); cursor: pointer;">
       <div>
         <span class=" card-numeros">0</span>
         <p><span class="card-nombre">Clientes</span></p>
@@ -60,17 +60,17 @@ include "verificar_sesion.php";
       </div>
     </div>
 
-    <div class="card" data-id="proveedores" data-page="catalogos/proveedores.php" style="background-color: #546e7a;;">
+    <div class="card" data-menu-link="proveedores-link" style="background-color: #546e7a; cursor: pointer;">
       <div>
         <span class=" card-numeros">0</span>
         <p><span class="card-nombre">Proveedores</span></p>
       </div>
       <div class="card-icono">
-        <i class="fa-solid fa-people-group"></i>
+        <i class="fa-solid fa-truck-fast"></i>
       </div>
     </div>
 
-    <div class="card" data-id="ventas" data-page="catalogos/productos.php" style="background-color: #00897b;">
+    <div class="card" data-menu-link="ventas-link" style="background-color: #00897b; cursor: pointer;">
       <div>
         <span class="card-numeros">0</span>
         <p><span class="card-nombre">Ventas</span></p>
