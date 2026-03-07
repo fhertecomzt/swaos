@@ -181,28 +181,97 @@ function iniciarDashboardSortable() {
 }
 
 //Llamar Talleres *********************************************
-document
-  .getElementById("tiendas-link")
-  .addEventListener("click", function (event) {
-    event.preventDefault(); // Evita la acción por defecto del enlace
+if (document.getElementById("tiendas-link")) {
+  document.getElementById("tiendas-link").addEventListener("click", function (event) {
+    event.preventDefault();
     fetch("tiendas.php")
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        //cargarTiendasFiltradas();
+        // INICIALIZAMOS DATATABLES AQUÍ:
+        inicializarTablaGenerica('#tabla-tiendas', '#buscarbox', '#cantidad-registros');
       })
-      .catch((error) => {
-        console.error("Error al cargar el contenido:", error);
-      });
+      .catch((error) => console.error("Error al cargar el contenido:", error));
   });
+}
 
-// Crear Talleres *******************************
 function abrirModal(id) {
   document.getElementById(id).style.display = "flex";
 }
 
 function cerrarModal(id) {
   document.getElementById(id).style.display = "none";
+}
+  
+// CREAR TIENDA (Con Motor de Reglas Avanzado)
+function validarFormularioTienda(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    { id: "crear-nombre", tipo: "texto", min: 3, mensaje: "El nombre del taller debe tener al menos 3 caracteres." },
+    { id: "crear-razonsocial", tipo: "texto", min: 3, mensaje: "La razón social debe tener al menos 3 caracteres." },
+    { id: "crear-rfc", tipo: "texto", min: 12, mensaje: "El RFC debe tener al menos 12 caracteres." },
+    { id: "crear-calle", tipo: "texto", min: 3, mensaje: "La calle debe tener al menos 3 caracteres." },
+    { id: "crear-noexterior", tipo: "numero", minVal: 1, mensaje: "El número exterior debe ser mayor a 0." },
+    { id: "estado", tipo: "select", mensaje: "Debes seleccionar un estado." },
+    { id: "municipio", tipo: "select", mensaje: "Debes seleccionar un municipio." },
+    { id: "colonia", tipo: "select", mensaje: "Debes seleccionar una colonia." },
+    { id: "crear-email", tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." },
+    { id: "crear-telefono", tipo: "texto", min: 10, mensaje: "El teléfono debe tener al menos 10 dígitos." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+    
+    elemento.addEventListener(regla.tipo === "select" ? "change" : "input", function() {
+        this.classList.remove("input-error");
+    });
+
+    if (regla.tipo === "texto") {
+        if (valor.length < regla.min) esValido = false;
+    } else if (regla.tipo === "numero") {
+        let num = parseFloat(valor);
+        if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
+    } else if (regla.tipo === "select") {
+        if (valor === "") esValido = false;
+    } else if (regla.tipo === "email") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(valor)) esValido = false;
+    }
+
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  const nombre = document.getElementById("crear-nombre").value.trim();
+
+  verificarDuplicado(nombre).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormulario(event, "crear");
+  });
 }
 
 function procesarFormulario(event, tipo) {
@@ -216,256 +285,33 @@ function procesarFormulario(event, tipo) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Cerrar el modal
         cerrarModal(tipo + "-modal");
-        // Limpiar los campos del formulario
         event.target.reset();
 
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          console.log("creado", tbody);
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable="Nombre:">${data.tienda.nombre}</td>
-            <td data-lable="Nombre, denominación o razón social:">${
-              data.tienda.razonsocial
-            }</td>
-            <td data-lable="R.F.C.:">${data.tienda.rfc}</td>
-            <td data-lable="Email:">${data.tienda.email}</td>
-            <td data-lable="Teléfono">${data.tienda.telefono}</td>
-            <td>
-              <button class="btn ${
-                data.tienda.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.tienda.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-
-            <td data-lable="Editar:">
-              <button title="Editar" class="editar fa-solid fa-pen-to-square" data-id="${
-                data.tienda.id
-              }"></button>
-            </td>
-            <td data-lable="Eliminar">
-              <button title="Eliminar" class="eliminar fa-solid fa-trash" data-id="${
-                data.tienda.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
         Swal.fire({
           title: "¡Éxito!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "Taller guardado correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // RECARGA LIMPIA DE DATATABLES
+          if (document.getElementById("tiendas-link")) {
+            document.getElementById("tiendas-link").click(); 
+          }
         });
       } else {
-        // Mostrar un mensaje de error específico del backend
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
+        Swal.fire("Error", data.message || "Ocurrió un problema.", "error");
       }
     })
     .catch((error) => {
-      // Manejar errores inesperados
       console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
+      Swal.fire("Error", "Ocurrió un error inesperado.", "error");
     });
 }
 
-function validarFormularioTienda(event) {
-  event.preventDefault();
-
-  const nombre = document.querySelector("[name='nombre']").value.trim();
-  const razonsocial = document
-    .querySelector("[name='razonsocial']")
-    .value.trim();
-  const rfc = document.querySelector("[name='rfc']").value.trim();
-  const calle = document.querySelector("[name='calle']").value.trim();
-  const noexterior = document.querySelector("[name='noexterior']").value.trim();
-
-  //Validaciones select de crear taller
-  const selectEstado = document.querySelector("#estado");
-  const selectMunicipio = document.querySelector("#municipio");
-  const selectColonia = document.querySelector("#colonia");
-
-  const errores = [];
-
-  if (nombre.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-nombre");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-nombre");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (razonsocial.length < 3) {
-    errores.push(
-      "La denominación o razón social: debe tener al menos 3 caracteres.",
-    );
-    const inputrazonsocial = document.querySelector("#crear-razonsocial");
-    inputrazonsocial.focus();
-    inputrazonsocial.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputrazonsocial = document.querySelector("#crear-razonsocial");
-  inputrazonsocial.addEventListener("input", () => {
-    if (inputrazonsocial.value.length >= 3) {
-      inputrazonsocial.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (rfc.length < 12) {
-    errores.push("El RFC debe tener al menos 12 caracteres.");
-    const inputrfc = document.querySelector("#crear-rfc");
-    inputrfc.focus();
-    inputrfc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputrfc = document.querySelector("#crear-rfc");
-  inputrfc.addEventListener("input", () => {
-    if (inputrfc.value.length >= 12) {
-      inputrfc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (calle.length < 3) {
-    errores.push("La calle debe tener al menos 3 caracteres.");
-    const inputcalle = document.querySelector("#crear-calle");
-    inputcalle.focus();
-    inputcalle.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputcalle = document.querySelector("#crear-calle");
-  inputcalle.addEventListener("input", () => {
-    if (inputcalle.value.length >= 3) {
-      inputcalle.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (isNaN(parseInt(noexterior)) || parseInt(noexterior) < 1) {
-    errores.push("El número exterior debe ser mayor a 0");
-    const inputnoexterior = document.querySelector("#crear-noexterior");
-    inputnoexterior.focus();
-    inputnoexterior.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputnoexterior = document.querySelector("#crear-noexterior");
-  inputnoexterior.addEventListener("input", () => {
-    if (inputnoexterior.value.length >= 1) {
-      inputnoexterior.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (selectEstado.value === "") {
-    errores.push("Selecciona un estado.");
-    const selectestado = document.querySelector("#estado");
-    selectestado.focus();
-    selectestado.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const selectestado = document.querySelector("#estado");
-  selectestado.addEventListener("input", () => {
-    if (selectestado.value.length >= 0) {
-      selectestado.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (selectMunicipio.value === "") {
-    errores.push("Selecciona un municipio.");
-    const selectmunicipio = document.querySelector("#municipio");
-    selectmunicipio.focus();
-    selectmunicipio.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const selectmunicipio = document.querySelector("#municipio");
-  selectmunicipio.addEventListener("input", () => {
-    if (selectmunicipio.value.length >= 0) {
-      selectmunicipio.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (selectColonia.value === "") {
-    errores.push("Selecciona una colonia.");
-    const selectColonia = document.querySelector("#colonia");
-    selectColonia.focus();
-    selectColonia.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const selectcolonia = document.querySelector("#colonia");
-  selectcolonia.addEventListener("input", () => {
-    if (selectcolonia.value.length >= 0) {
-      selectcolonia.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados tiendas ****************
-  verificarDuplicado(nombre)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "Atención",
-          text: "El nombre del taller ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario de tiendas *********
-        procesarFormulario(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
-    });
-}
 function verificarDuplicado(nombre) {
-  //console.log("Nombre:", nombre);
-
   return fetch("cruds/verificar_nombre.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -473,105 +319,71 @@ function verificarDuplicado(nombre) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
         Swal.fire({
-          title: "Error",
-          text: data.message, // Mostrar el mensaje específico si existe
-          icon: "error",
+          title: "Atención",
+          text: "Ya existe un taller con este nombre.",
+          icon: "warning",
           showConfirmButton: false,
           timer: 1500,
-          timerProgressBar: true,
         });
       }
       return data.existe;
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
+      return true; 
     });
 }
 
-//Editar taller *************************************************************************
+// =========================================================================
+// EDITAR TIENDA/TALLER
+// =========================================================================
 document.addEventListener("DOMContentLoaded", function () {
   // Escuchar clic en el botón de editar
   document.body.addEventListener("click", function (event) {
     if (event.target.classList.contains("editar")) {
       const id = event.target.dataset.id;
-      //console.log("Botón editar clickeado. ID:", id);
 
       fetch(`cruds/obtener_tienda.php?id=${id}`)
         .then((response) => response.json())
         .then((data) => {
-          //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
             const formulario = document.getElementById("form-editar");
             if (formulario) {
-              // --- INICIO: NUEVA LÓGICA DE POBLADO ---
-              // 1. Llenar campos simples (inputs de texto, etc.)
               const camposSimples = [
-                "id",
-                "nombre",
-                "razonsocial",
-                "rfc",
-                "calle",
-                "noexterior",
-                "nointerior",
-                "telefono",
-                "email",
-                "estatus",
+                "id", "nombre", "razonsocial", "rfc", "calle",
+                "noexterior", "nointerior", "telefono", "email", "estatus",
               ];
 
               camposSimples.forEach((campo) => {
                 const input = formulario[`editar-${campo}`];
                 if (input) {
                   input.value = data.tienda[campo] || "";
-                } else {
-                  console.warn(`Campo 'editar-${campo}' no encontrado.`);
                 }
               });
 
-              // 2. Obtener los IDs y valores guardados de la base de datos
+              // Lógica de ubicaciones anidadas
               const idEstadoDB = data.tienda.estado;
               const idMunicipioDB = data.tienda.municipio;
               const idColoniaDB = data.tienda.colonia;
-              const cpDB = data.tienda.codigo_postal; // Obtenemos el CP
+              const cpDB = data.tienda.codigo_postal; 
 
-              // 3. Llamar a nuestra nueva función para cargar y seleccionar
-              //    los valores en los selects anidados.
-              cargarYSeleccionarUbicacionEditar(
-                idEstadoDB,
-                idMunicipioDB,
-                idColoniaDB,
-                cpDB,
-              );
-
-              // --- FIN: NUEVA LÓGICA DE POBLADO ---
+              cargarYSeleccionarUbicacionEditar(idEstadoDB, idMunicipioDB, idColoniaDB, cpDB);
 
               abrirModal("editar-modal");
-            } else {
-              console.error("Formulario de edición no encontrado.");
             }
           } else {
-            mostrarAlerta(
-              "error",
-              "Error",
-              data.message || "No se pudo cargar el taller.",
-            );
+            Swal.fire("Error", data.message || "No se pudo cargar el taller.", "error");
           }
         })
         .catch((error) => {
           console.error("Error al obtener taller:", error);
-          mostrarAlerta(
-            "error",
-            "Error",
-            "Ocurrió un problema al obtener los datos.",
-          );
+          Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
         });
     }
   });
 
-  // Validar y enviar el formulario de edición de tiendas ******
   document.body.addEventListener("submit", function (event) {
     if (event.target && event.target.id === "form-editar") {
       event.preventDefault();
@@ -580,11 +392,79 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-//Validar duplicados en edicion de talleres
-function verificarDuplicadoEditarTienda(nombre, id = 0) {
-  //console.log("Nombre:", nombre);
-  //console.log("ID (si aplica):", id);
+async function validarFormularioEdicion(formulario) {
+  const reglasValidacion = [
+    { id: "editar-nombre", tipo: "texto", min: 3, mensaje: "El nombre del taller debe tener al menos 3 caracteres." },
+    { id: "editar-razonsocial", tipo: "texto", min: 3, mensaje: "La razón social debe tener al menos 3 caracteres." },
+    { id: "editar-rfc", tipo: "texto", min: 12, mensaje: "El RFC debe tener al menos 12 caracteres." },
+    { id: "editar-calle", tipo: "texto", min: 3, mensaje: "La calle debe tener al menos 3 caracteres." },
+    { id: "editar-noexterior", tipo: "numero", minVal: 1, mensaje: "El número exterior debe ser mayor a 0." },
+    { id: "editar-estado", tipo: "select", mensaje: "Debes seleccionar un estado." },
+    { id: "editar-municipio", tipo: "select", mensaje: "Debes seleccionar un municipio." },
+    { id: "editar-colonia", tipo: "select", mensaje: "Debes seleccionar una colonia." },
+    { id: "editar-email", tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." },
+    { id: "editar-telefono", tipo: "texto", min: 10, mensaje: "El teléfono debe tener al menos 10 dígitos." }
+  ];
 
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+    
+    elemento.addEventListener(regla.tipo === "select" ? "change" : "input", function() {
+        this.classList.remove("input-error");
+    });
+
+    if (regla.tipo === "texto") {
+        if (valor.length < regla.min) esValido = false;
+    } else if (regla.tipo === "numero") {
+        let num = parseFloat(valor);
+        if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
+    } else if (regla.tipo === "select") {
+        if (valor === "") esValido = false;
+    } else if (regla.tipo === "email") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(valor)) esValido = false;
+    }
+
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
+    });
+    if (primerCampoConError) primerCampoConError.focus();
+    return;
+  }
+
+  const nombre = document.getElementById("editar-nombre").value.trim();
+  const id = document.getElementById("editar-id").value;
+
+  try {
+    const esDuplicado = await verificarDuplicadoEditarTienda(nombre, id);
+    if (!esDuplicado) enviarFormularioEdicion(formulario); 
+  } catch (error) {
+    console.error("Error al verificar duplicado:", error);
+  }
+}
+
+function verificarDuplicadoEditarTienda(nombre, id = 0) {
   return fetch("cruds/verificar_nombre.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -592,11 +472,10 @@ function verificarDuplicadoEditarTienda(nombre, id = 0) {
   })
     .then((response) => response.json())
     .then((data) => {
-      // console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
         Swal.fire({
           title: "Atención",
-          text: data.message || "El nombre del taller ya existe.", // Mostrar el mensaje específico si existe
+          text: data.message || "El nombre del taller ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
@@ -607,131 +486,12 @@ function verificarDuplicadoEditarTienda(nombre, id = 0) {
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
+      return true; 
     });
 }
 
-// Validación del formulario de edición de tiendas
-async function validarFormularioEdicion(formulario) {
-  const campos = [
-    {
-      nombrec: "nombre",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      nombrec: "razonsocial",
-      min: 3,
-      mensaje: "El razón social debe tener al menos 3 caracteres.",
-    },
-    {
-      nombrec: "rfc",
-      min: 12,
-      mensaje: "El RFC debe tener al menos 12 caracteres.",
-    },
-    {
-      nombrec: "calle",
-      min: 3,
-      mensaje: "La calle debe tener al menos 3 caracteres.",
-    },
-    {
-      nombrec: "noexterior",
-      min: 1,
-      mensaje: "El número exterior debe ser mayor a 0",
-      numerico: true,
-    },
-    {
-      nombrec: "nointerior",
-      min: 1,
-      mensaje: "El número interior debe ser mayor o igual a 0",
-    },
-  ];
-
-  let primerError = null;
-  const errores = [];
-
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombrec}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombrec} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
-    });
-
-    const valor = campoFormulario.value.trim();
-
-    // Verificar si es numérico
-    if (campo.numerico) {
-      if (isNaN(parseInt(valor)) || parseInt(valor) < campo.min) {
-        errores.push(campo.mensaje);
-        campoFormulario.classList.add("input-error");
-        campoFormulario.focus(); // Establece el foco en el campo inválido
-        if (!primerError) primerError = campoFormulario; // Guardar el primer error
-      } else {
-        campoFormulario.addEventListener("input", () => {
-          if (campoFormulario.value.length >= campo.min) {
-            campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-          }
-        });
-        campoFormulario.classList.remove("input-error");
-      }
-    } else {
-      // Validar por longitud mínima
-      if (valor.length < campo.min) {
-        errores.push(campo.mensaje);
-        campoFormulario.classList.add("input-error");
-        campoFormulario.focus(); // Establece el foco en el campo inválido
-        if (!primerError) primerError = campoFormulario; // Guardar el primer error
-      } else {
-        campoFormulario.classList.remove("input-error");
-      }
-    }
-  });
-
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
-    return;
-  }
-
-  // Verificar duplicado antes de enviar el formulario
-  const nombre = document.getElementById("editar-nombre").value.trim();
-  const id = document.getElementById("editar-id").value;
-  //console.log("Ver verificado duplicado id: ", id);
-  //console.log("Ver verificado duplicado nombre: ", id);
-
-  try {
-    const esDuplicado = await verificarDuplicadoEditarTienda(nombre, id);
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      enviarFormularioEdicion(formulario); // Proceder si no hay duplicados
-    }
-  } catch (error) {
-    console.error("Error al verificar duplicado:", error);
-  }
-}
-
-// Enviar formulario de edición
 function enviarFormularioEdicion(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
+  if (!formulario) return;
   const formData = new FormData(formulario);
 
   fetch("cruds/editar_tienda.php", {
@@ -740,78 +500,84 @@ function enviarFormularioEdicion(formulario) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //  console.log("Respuesta del servidor:", data);
       if (data.success) {
         Swal.fire({
           title: "¡Actualizada!",
-          text: data.message, // Usar el mensaje del backend
+          text: data.message || "El taller ha sido actualizado.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          // RECARGA LIMPIA DE DATATABLES
+          if (document.getElementById("tiendas-link")) {
+            document.getElementById("tiendas-link").click(); 
+          }
         });
-        actualizarFilaTabla(formData);
         cerrarModal("editar-modal");
       } else {
-        Swal.fire({
-          title: "Atención",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
+        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
       }
     })
     .catch((error) => {
       console.error("Error al actualizar taller:", error);
-      Swal.fire({
-        title: "Error",
-        text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
+      Swal.fire("Error", "Ocurrió un problema al procesar la solicitud.", "error");
     });
 }
 
-// Actualizar fila de la tabla
-function actualizarFilaTabla(formData) {
-  //console.log("Datos enviados al formulario:", Object.fromEntries(formData));
+// =========================================================================
+// ELIMINAR TIENDA/TALLER
+// =========================================================================
+document.addEventListener("click", function (event) {
+  if (event.target.classList.contains("eliminar")) {
+    const id = event.target.dataset.id;
 
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-id")}"]`)
-    .closest("tr");
-  if (fila) {
-    fila.cells[0].textContent = formData.get("nombre");
-    fila.cells[1].textContent = formData.get("razonsocial");
-    fila.cells[2].textContent = formData.get("rfc");
-    fila.cells[3].textContent = formData.get("email");
-    fila.cells[4].textContent = formData.get("telefono");
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
-
-    // Insertar el botón en la celda
-    fila.cells[5].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    //Para mantener el filtro seleccionado y actualizar la tabla cuando se edite
-    cargarTiendasFiltradas();
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "No podrás revertir esta acción",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`cruds/eliminar_tienda.php?id=${id}`, { method: "POST" })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire({
+                title: "¡Eliminado!",
+                text: data.message || "El taller se ha eliminado correctamente.",
+                icon: "success",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+              }).then(() => {
+                if (document.getElementById("tiendas-link")) {
+                  document.getElementById("tiendas-link").click(); 
+                }
+              });
+            } else {
+              Swal.fire("Error", data.message || "No se pudo eliminar el registro.", "error");
+            }
+          })
+          .catch((error) => {
+            Swal.fire("Error", "Hubo un problema al procesar tu solicitud.", "error");
+            console.error("Error al eliminar:", error);
+          });
+      }
+    });
   }
-}
+});
 
-// --- INICIO: LÓGICA PARA SELECTS ANIDADOS (ESTADO, MUNICIPIO, COLONIA) ---
-
-/**
- * Función auxiliar para llenar un <select> con opciones.
- * @param {HTMLSelectElement} selectElement - El elemento <select> a llenar.
- * @param {Array} items - Un array de objetos (ej. [{id: 1, nombre: 'Opción 1'}])
- * @param {String} [valorDefault] - El valor para la opción "Seleccionar".
- */
+// =========================================================================
+// LÓGICA PARA SELECTS ANIDADOS (ESTADO, MUNICIPIO, COLONIA)
+// =========================================================================
 function popularSelect(selectElement, items, valorDefault = "Seleccionar") {
   if (!selectElement) return;
-  selectElement.innerHTML = `<option value="">${valorDefault}</option>`; // Limpiar opciones
+  selectElement.innerHTML = `<option value="">${valorDefault}</option>`; 
   items.forEach((item) => {
     const option = document.createElement("option");
     option.value = item.id;
@@ -820,24 +586,11 @@ function popularSelect(selectElement, items, valorDefault = "Seleccionar") {
   });
 }
 
-/**
- * Carga los municipios usando POST.
- * @param {string} idEstado - El ID del estado seleccionado.
- * @param {string} idSelectMunicipio - El ID del <select> de municipios.
- * @param {string} idSelectColonia - El ID del <select> de colonias.
- * @param {string} idInputCP - El ID del <input> de código postal.
- */
-async function cargarMunicipios(
-  idEstado,
-  idSelectMunicipio,
-  idSelectColonia,
-  idInputCP,
-) {
+async function cargarMunicipios(idEstado, idSelectMunicipio, idSelectColonia, idInputCP) {
   const selectMunicipio = document.getElementById(idSelectMunicipio);
   const selectColonia = document.getElementById(idSelectColonia);
   const inputCP = document.getElementById(idInputCP);
 
-  // Limpiar selects dependientes
   popularSelect(selectMunicipio, [], "Cargando...");
   popularSelect(selectColonia, []);
   if (inputCP) inputCP.value = "";
@@ -858,16 +611,10 @@ async function cargarMunicipios(
       popularSelect(selectMunicipio, [], "Error al cargar");
     }
   } else {
-    popularSelect(selectMunicipio, []); // Limpiar si no hay estado
+    popularSelect(selectMunicipio, []); 
   }
 }
 
-/**
- * Carga las colonias usando POST.
- * @param {string} idMunicipio - El ID del municipio seleccionado.
- * @param {string} idSelectColonia - El ID del <select> de colonias.
- * @param {string} idInputCP - El ID del <input> de código postal.
- */
 async function cargarColonias(idMunicipio, idSelectColonia, idInputCP) {
   const selectColonia = document.getElementById(idSelectColonia);
   const inputCP = document.getElementById(idInputCP);
@@ -891,15 +638,10 @@ async function cargarColonias(idMunicipio, idSelectColonia, idInputCP) {
       popularSelect(selectColonia, [], "Error al cargar");
     }
   } else {
-    popularSelect(selectColonia, []); // Limpiar si no hay municipio
+    popularSelect(selectColonia, []); 
   }
 }
 
-/**
- * Carga el Código Postal usando POST.
- * @param {string} idColonia - El ID de la colonia seleccionada.
- * @param {string} idInputCP - El ID del <input> de código postal.
- */
 async function cargarCP(idColonia, idInputCP) {
   const inputCP = document.getElementById(idInputCP);
   if (!inputCP) return;
@@ -924,17 +666,9 @@ async function cargarCP(idColonia, idInputCP) {
   }
 }
 
-// --- Event Listeners para los selects (Usando delegación de eventos) ---
-
 document.addEventListener("change", function (event) {
-  // Para el modal CREAR (basado en tiendas.php)
   if (event.target.id === "estado") {
-    cargarMunicipios(
-      event.target.value,
-      "municipio",
-      "colonia",
-      "codigo_postal",
-    );
+    cargarMunicipios(event.target.value, "municipio", "colonia", "codigo_postal");
   }
   if (event.target.id === "municipio") {
     cargarColonias(event.target.value, "colonia", "codigo_postal");
@@ -943,346 +677,38 @@ document.addEventListener("change", function (event) {
     cargarCP(event.target.value, "codigo_postal");
   }
 
-  // Para el modal EDITAR (basado en tiendas.php)
   if (event.target.id === "editar-estado") {
-    cargarMunicipios(
-      event.target.value,
-      "editar-municipio",
-      "editar-colonia",
-      "editar-codigo_postal",
-    );
+    cargarMunicipios(event.target.value, "editar-municipio", "editar-colonia", "editar-codigo_postal");
   }
   if (event.target.id === "editar-municipio") {
-    cargarColonias(
-      event.target.value,
-      "editar-colonia",
-      "editar-codigo_postal",
-    );
+    cargarColonias(event.target.value, "editar-colonia", "editar-codigo_postal");
   }
   if (event.target.id === "editar-colonia") {
     cargarCP(event.target.value, "editar-codigo_postal");
   }
 });
 
-/**
- * Función especial para el modal EDITAR: Carga y selecciona los valores guardados.
- * @param {string} idEstadoDB - El ID del estado guardado en la BD.
- * @param {string} idMunicipioDB - El ID del municipio guardado en la BD.
- * @param {string} idColoniaDB - El ID de la colonia guardada en la BD.
- * @param {string} cpDB - El Código Postal guardado en la BD.
- */
-async function cargarYSeleccionarUbicacionEditar(
-  idEstadoDB,
-  idMunicipioDB,
-  idColoniaDB,
-  cpDB,
-) {
+async function cargarYSeleccionarUbicacionEditar(idEstadoDB, idMunicipioDB, idColoniaDB, cpDB) {
   const selectEstado = document.getElementById("editar-estado");
   const selectMunicipio = document.getElementById("editar-municipio");
   const selectColonia = document.getElementById("editar-colonia");
   const inputCP = document.getElementById("editar-codigo_postal");
 
-  // 1. Establecer Estado (ya debe estar cargado) y CP
+  //  Seleccionamos el Estado
   selectEstado.value = idEstadoDB;
-  inputCP.value = cpDB || ""; // Asignamos el CP que ya teníamos
 
-  // 2. Cargar Municipios y seleccionar el guardado
-  await cargarMunicipios(
-    idEstadoDB,
-    "editar-municipio",
-    "editar-colonia",
-    "editar-codigo_postal",
-  );
-  selectMunicipio.value = idMunicipioDB; // ¡Seleccionar!
+  //  Cargamos municipios (esperamos a que termine) y seleccionamos
+  await cargarMunicipios(idEstadoDB, "editar-municipio", "editar-colonia", "editar-codigo_postal");
+  selectMunicipio.value = idMunicipioDB; 
 
-  // 3. Cargar Colonias y seleccionar la guardada
+  //  Cargamos colonias (esperamos a que termine) y seleccionamos
   await cargarColonias(idMunicipioDB, "editar-colonia", "editar-codigo_postal");
-  selectColonia.value = idColoniaDB; // ¡Seleccionar!
+  selectColonia.value = idColoniaDB; 
 
-  // 4. (Opcional) Recargar el CP por si acaso, aunque ya lo teníamos.
-  // Si prefieres que el CP se base en la colonia guardada:
-  await cargarCP(idColoniaDB, "editar-codigo_postal");
-  // Si no, la línea del paso 1 (inputCP.value = cpDB) es suficiente.
-}
-
-// --- FIN: LÓGICA PARA SELECTS ANIDADOS ---
-
-// Eliminar Taller ************************************************
-document.addEventListener("click", function (event) {
-  if (event.target.classList.contains("eliminar")) {
-    const id = event.target.dataset.id;
-
-    Swal.fire({
-      title: "¿Estás seguro?",
-      text: "No podrás revertir esta acción",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Realizar la solicitud para eliminar
-        fetch(`cruds/eliminar_tienda.php?id=${id}`, { method: "POST" })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              //alert("Tienda eliminada correctamente");
-              Swal.fire({
-                title: "¡Eliminado!",
-                text: data.message, // Usar el mensaje del backend
-                icon: "warning",
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true,
-              });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
-            } else {
-              Swal.fire(
-                "Error",
-                data.message || "No se pudo eliminar el registro.",
-                "error",
-              );
-            }
-          })
-          .catch((error) => {
-            Swal.fire(
-              "Error",
-              "Hubo un problema al procesar tu solicitud.",
-              "error",
-            );
-            console.error("Error al eliminar la tienda:", error);
-          });
-      }
-    });
+  // terminó de cargar todo, ahora sí inyectamos el Código Postal
+  if (inputCP) {
+      inputCP.value = cpDB || ""; 
   }
-});
-
-//Buscar en la tabla y filtrar taller ******************************
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarbox");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscar(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarbox");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarbox' ya existe en el DOM");
-    agregarEventoBuscar(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscar(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-tiendas tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarbox") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusqueda = document.getElementById("limpiar-busqueda"); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-tiendas tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busqueda") {
-      const buscarBox = document.getElementById("buscarbox");
-      const limpiarBusqueda = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusqueda) {
-          limpiarBusqueda.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-tiendas tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar tiendas desde el servidor ***********************************
-function cargarTiendasFiltradas() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroT")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarTiendas(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
-    return;
-  }
-  //console.log("Cargando tiendas filtradas del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_tiendas.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log("Filtradas: ",data);
-      actualizarTablaTiendas(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar tiendas filtradas:", error),
-    );
-}
-
-//Función para actualizar la tabla con las tiendas filtradas
-function actualizarTablaTiendas(tiendas) {
-  let tbody = document.getElementById("tiendas-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (tiendas.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron talleres</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevos tiendas
-  tbody.innerHTML = "";
-
-  tiendas.forEach((tienda) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${tienda.nombre_t}</td>
-      <td data-lable="Nombre, denominación o razón social:">${
-        tienda.razonsocial_t
-      }</td>
-      <td data-lable="R.F.C.">${tienda.rfc_t}</td>
-      <td data-lable="Email">${tienda.email_t}</td>
-      <td data-lable="Teléfono">${tienda.tel_t}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          tienda.estatus_t == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${tienda.estatus_t == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar">
-        <button title="Editar" class="editar fa-solid fa-pen-to-square" data-id="${
-          tienda.id_taller
-        }"></button>
-        </td>
-        <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminar fa-solid fa-trash" data-id="${
-          tienda.id_taller
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 tiendas por defecto
-function cargarTiendas() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_tiendas.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaTiendas(data);
-    })
-    .catch((error) => console.error("Error al cargar tiendas:", error));
-}
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("tiendas.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más tiendas
-    console.log("Reiniciando scroll y cargando tiendas en tiendas.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A tiendas.php
-    iniciarScrollTiendas();
-  }
-});
-
-function iniciarScrollTiendas() {
-  const scrollContainer = document.getElementById("scroll-container");
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en tiendas.php");
-}
-
-const observerTiendas = new MutationObserver(() => {
-  const tiendasSeccion = document.getElementById("scroll-container");
-  if (tiendasSeccion) {
-    observerTiendas.disconnect();
-    iniciarScrollTiendas();
-  }
-});
-
-const Tiendas = document.getElementById("content-area");
-if (Tiendas) {
-  observerTiendas.observe(Tiendas, { childList: true, subtree: true });
 }
 
 // Llamar Roles *************************************************

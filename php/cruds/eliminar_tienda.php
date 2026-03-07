@@ -8,19 +8,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id']) && ctype_digit($
   $id = (int) $_GET['id']; // Convertir el ID a entero para mayor seguridad
 
   try {
-    // Preparar y ejecutar la consulta para eliminar la tienda
-    $stmt = $dbh->prepare("DELETE FROM talleres WHERE id_taller = :id");
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    // EL BLINDAJE: Verificar si el taller tiene usuarios o historial
+    // Revisamos si este taller ya tiene usuarios asignados.
+    // (Opcional: también se puede sumar el inventario_sucursal)
+    $query_check = "SELECT COUNT(*) as total FROM usuarios WHERE taller_id = :id";
+    $stmt_check = $dbh->prepare($query_check);
+    $stmt_check->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt_check->execute();
 
-    if ($stmt->execute()) {
-      $response["success"] = true;
-      $response["message"] = "Registro eliminado correctamente.";
+    $resultado = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+    if ($resultado['total'] > 0) {
+      // Bloqueamos la eliminación
+      $response["success"] = false;
+      $response["message"] = "No se puede eliminar. Este taller tiene usuarios o inventario asignados. Por favor, cambie su estatus a Inactivo.";
     } else {
-      $response["message"] = "Error al eliminar el taller.";
+      // LA ELIMINACIÓN: Solo llega aquí si es un taller nuevo/vacío
+      $stmt = $dbh->prepare("DELETE FROM talleres WHERE id_taller = :id");
+      $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+      if ($stmt->execute()) {
+        $response["success"] = true;
+        $response["message"] = "Taller eliminado correctamente.";
+      } else {
+        $response["message"] = "Error al eliminar el taller en la base de datos.";
+      }
     }
   } catch (PDOException $e) {
-    // Mensaje genérico para evitar exposición de detalles de errores
-    $response["message"] = "Hubo un error al procesar la solicitud. Intente más tarde.";
+    // Se atrapan errores de llaves foráneas por si está ligado a otras tablas
+    $response["success"] = false;
+    $response["message"] = "Error de integridad: El taller está vinculado a otros registros del sistema y no puede ser borrado.";
   }
 } else {
   $response["message"] = "Método no permitido o ID no válido.";
