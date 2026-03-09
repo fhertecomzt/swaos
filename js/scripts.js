@@ -1522,7 +1522,7 @@ function validarFormularioProducto(event) {
     // Números (Costos y Precios)
     { id: "crear-costo_compra", tipo: "numero", minVal: 0.01, mensaje: "El costo de compra debe ser mayor a $0." },
     { id: "crear-ganancia", tipo: "numero", minVal: 0, mensaje: "El porcentaje de ganancia no puede ser negativo." },
-    // { id: "crear-precio1", tipo: "numero", minVal: 0.01, mensaje: "El precio final debe ser mayor a $0 (calcula el costo y ganancia)." },
+    { id: "crear-precio1", tipo: "numero", minVal: 0.01, mensaje: "El precio final debe ser mayor a $0 (calcula el costo y ganancia)." },
     { id: "crear-stock_minimo", tipo: "numero", minVal: 0, mensaje: "El stock mínimo no puede ser negativo." }
   ];
 
@@ -5075,6 +5075,21 @@ document.addEventListener('submit', function(e) {
         validarCampo('[name="modelo"]');
         validarCampo('[name="falla"]');
 
+        // BLINDAJE EXTRA: Si hay anticipo, exigir método de pago
+        const anticipoIngresado = parseFloat(document.getElementById('crear-anticipo').value) || 0;
+        const selectMetodoPagoCrear = document.getElementById('crear-metodo-pago');
+        
+        if (anticipoIngresado > 0) {
+            // Reutilizamos tu función auxiliar para pintar de rojo
+            validarCampo('#crear-metodo-pago', true);
+        } else {
+            // Si el anticipo es 0, le quitamos el rojo por si se arrepintió
+            if(selectMetodoPagoCrear) {
+                selectMetodoPagoCrear.classList.remove("input-error");
+                selectMetodoPagoCrear.style.border = "";
+            }
+        }
+
         if (hayErrores) {
             Swal.fire({
                 title: "Faltan datos",
@@ -5161,6 +5176,29 @@ document.addEventListener('submit', function(e) {
         const costoOriginal = parseFloat(form.dataset.costoOrig) || 0;
         const anticipoOriginal = parseFloat(document.getElementById('edit-anticipo').value) || 0;
         const saldoRestanteReal = costoOriginal - anticipoOriginal;
+        const metodoPagoEdit = document.getElementById('edit-metodo-pago');
+        
+        // BLINDAJE EXTRA: Si ingresa un nuevo abono, el método de pago es obligatorio
+        if (nuevoAbono > 0 && (!metodoPagoEdit.value || metodoPagoEdit.value.trim() === "")) {
+            metodoPagoEdit.classList.add("input-error");
+            metodoPagoEdit.style.border = "1px solid #d33";
+            
+            Swal.fire({
+                title: "Falta Método de Pago",
+                text: "Si estás registrando un abono, debes seleccionar con qué método te pagó el cliente.",
+                icon: "warning",
+                returnFocus: false,
+                confirmButtonColor: '#3085d6'
+            });
+
+            // Quitamos el rojo cuando seleccione algo
+            metodoPagoEdit.addEventListener("change", function() {
+                this.classList.remove("input-error");
+                this.style.border = "1px solid green"; // Regresa al verde original
+            }, { once: true });
+
+            return; // Detenemos la actualización para que no pase
+        }
 
         if (nuevoAbono > saldoRestanteReal && saldoRestanteReal > 0) {
             Swal.fire({
@@ -5230,7 +5268,7 @@ document.addEventListener('submit', function(e) {
 // MANEJO DE CLICS EN TABLA (EDITAR Y CANCELAR ORDENES) ***************************************
 document.addEventListener('click', function(e) {
     
-    //  ABRIR MODAL EDITAR
+ // ABRIR MODAL EDITAR
     const btnEditar = e.target.closest('.editarOrden');
     if (btnEditar) {
         const idOrden = btnEditar.getAttribute('data-id');
@@ -5245,20 +5283,57 @@ document.addEventListener('click', function(e) {
                 document.getElementById('edit-id-orden').value = data.orden.id_orden;
                 document.getElementById('edit-folio-text').textContent = data.orden.id_orden;
                 document.getElementById('edit-estado').value = data.orden.id_estado_servicio;
-                document.getElementById('edit-falla').value = data.orden.falla;
-                
+                document.getElementById('edit-falla').value = data.orden.falla;             
                 document.getElementById('edit-diagnostico').value = data.orden.diagnostico || ""; 
                 
-                document.getElementById('edit-costo').value = data.orden.costo_servicio;
+                // Costos y anticipos
+                document.getElementById('edit-mano-obra').value = data.orden.costo_servicio || 0;
                 document.getElementById('edit-anticipo').value = data.orden.anticipo_servicio || 0;
+                
+                // Limpiamos los campos de nuevos pagos
                 document.getElementById('edit-nuevo-abono').value = '0';
+                const selectMetP = document.getElementById('edit-metodo-pago');
+                if(selectMetP) {
+                    selectMetP.value = "";
+                    selectMetP.classList.remove("input-error");
+                    selectMetP.style.border = "1px solid green";
+                }
 
+                // Disparamos el cálculo
                 calcularSaldoEdit(); 
+
+                
+                // LLENAR HISTORIAL DE PAGOS (AQUÍ ES EL LUGAR CORRECTO)              
+                const tbodyPagos = document.getElementById('tabla-historial-pagos');
+                if (tbodyPagos) {
+                    tbodyPagos.innerHTML = ''; // Limpiamos la tabla
+                    if (data.abonos && data.abonos.length > 0) {
+                        data.abonos.forEach(abono => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td style="padding: 5px; text-align: center;">${abono.fecha_abono}</td>
+                                <td style="padding: 5px; text-align: center; color: green; font-weight: bold;">$${parseFloat(abono.monto_abono).toFixed(2)}</td>
+                                <td style="padding: 5px; text-align: center;">${abono.metodo}</td>
+                            `;
+                            tbodyPagos.appendChild(tr);
+                        });
+                    } else {
+                        tbodyPagos.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #888;">No hay abonos registrados.</td></tr>';
+                    }
+                }
 
                 const formEditar = document.getElementById('form-editarOrden');
                 formEditar.dataset.estadoOrig = data.orden.id_estado_servicio;
                 formEditar.dataset.diagOrig = data.orden.diagnostico || ''; 
                 formEditar.dataset.costoOrig = parseFloat(data.orden.costo_servicio).toFixed(2);
+                
+                // Limpiar refacciones visualmente por ahora
+                document.getElementById('tabla-refacciones-orden').innerHTML = `
+                    <tr id="fila-vacia-refacciones">
+                        <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No se han agregado refacciones a esta orden.</td>
+                    </tr>`;
+                document.getElementById('total-refacciones-input').value = 0;
+                document.getElementById('total-refacciones-text').textContent = "0.00";
                 
                 abrirModalOrden('editar-modalOrden');
             } else {
@@ -5356,6 +5431,144 @@ function verQrOrden(token) {
         confirmButtonColor: '#34495e'
     });
 }
+
+// MINI PUNTO DE VENTA EN ORDENES (REFACCIONES)
+
+// 1. Reescribimos la función calcularSaldoEdit para que sume Refacciones + Mano de Obra
+function calcularSaldoEdit() {
+    const manoObra = parseFloat(document.getElementById('edit-mano-obra').value) || 0;
+    const totalRefacciones = parseFloat(document.getElementById('total-refacciones-input').value) || 0;
+    
+    // El costo total de la orden ahora se calcula solo
+    const costoTotal = manoObra + totalRefacciones;
+    document.getElementById('edit-costo').value = costoTotal.toFixed(2);
+
+    const anticipoAcumulado = parseFloat(document.getElementById('edit-anticipo').value) || 0;
+    const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
+    
+    let saldoFinal = costoTotal - (anticipoAcumulado + nuevoAbono);
+    if (saldoFinal < 0) saldoFinal = 0; 
+    
+    const inputSaldo = document.getElementById('edit-saldo');
+    if (inputSaldo) inputSaldo.value = saldoFinal.toFixed(2);
+}
+
+// 2. Lógica para sumar las filas de la tabla de refacciones
+function recalcularTablaRefacciones() {
+    let total = 0;
+    const filas = document.querySelectorAll('.fila-refaccion');
+    
+    filas.forEach(fila => {
+        const cantidad = parseFloat(fila.querySelector('.input-cant').value) || 1;
+        const precio = parseFloat(fila.querySelector('.input-precio').value) || 0;
+        const subtotal = cantidad * precio;
+        
+        fila.querySelector('.td-subtotal').textContent = '$' + subtotal.toFixed(2);
+        total += subtotal;
+    });
+
+    document.getElementById('total-refacciones-text').textContent = total.toFixed(2);
+    document.getElementById('total-refacciones-input').value = total.toFixed(2);
+    
+    // Mostramos u ocultamos el mensaje de "tabla vacía"
+    document.getElementById('fila-vacia-refacciones').style.display = filas.length === 0 ? 'table-row' : 'none';
+    
+    // Al recalcular las piezas, forzamos recalcular el saldo general de la orden
+    calcularSaldoEdit();
+}
+
+// 3. Eliminar una pieza del carrito
+function eliminarRefaccion(btn) {
+    btn.closest('tr').remove();
+    recalcularTablaRefacciones();
+}
+
+// 4. Agregar al carrito de mentiras (Frontend)
+function agregarRefaccion(idProducto, nombre, precio) {
+    // Verificamos si ya está en la tabla para sumarle 1 en lugar de duplicar fila
+    const filaExistente = document.querySelector(`.fila-refaccion[data-id="${idProducto}"]`);
+    if (filaExistente) {
+        const inputCant = filaExistente.querySelector('.input-cant');
+        inputCant.value = parseInt(inputCant.value) + 1;
+        recalcularTablaRefacciones();
+        return;
+    }
+
+    const tbody = document.getElementById('tabla-refacciones-orden');
+    const tr = document.createElement('tr');
+    tr.className = 'fila-refaccion';
+    tr.dataset.id = idProducto;
+
+    // Aquí inyectamos inputs invisibles (name="refacciones[]") para enviarlos a PHP
+    tr.innerHTML = `
+        <td style="padding: 5px;">
+            ${nombre}
+            <input type="hidden" name="refacciones_id[]" value="${idProducto}">
+        </td>
+        <td style="padding: 5px; text-align: center;">
+            <input type="number" name="refacciones_cant[]" class="input-cant" value="1" min="1" oninput="recalcularTablaRefacciones()" style="width: 60px; text-align: center; padding: 2px;">
+        </td>
+        <td style="padding: 5px; text-align: center;">
+            <input type="number" name="refacciones_precio[]" class="input-precio" value="${precio}" step="0.01" min="0" oninput="recalcularTablaRefacciones()" style="width: 80px; text-align: center; padding: 2px;">
+        </td>
+        <td style="padding: 5px; text-align: center; font-weight: bold;" class="td-subtotal">$${precio.toFixed(2)}</td>
+        <td style="padding: 5px; text-align: center;">
+            <button type="button" onclick="eliminarRefaccion(this)" style="background: red; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+        </td>
+    `;
+    
+    tbody.appendChild(tr);
+    recalcularTablaRefacciones();
+}
+
+// 5. El Buscador Autocomplete
+let timeoutBusquedaProd;
+document.addEventListener('input', function(e) {
+    if (e.target && e.target.id === 'busqueda-producto-orden') {
+        const termino = e.target.value.trim();
+        const listaResultados = document.getElementById('lista-resultados-productos');
+        
+        clearTimeout(timeoutBusquedaProd);
+        listaResultados.innerHTML = '';
+
+        if (termino.length < 2) {
+            listaResultados.style.display = 'none';
+            return;
+        }
+
+        timeoutBusquedaProd = setTimeout(() => {
+            // Este es el archivo PHP que crearemos enseguida para buscar el stock
+            fetch(`cruds/buscar_productos_orden.php?q=${encodeURIComponent(termino)}`)
+                .then(res => res.json())
+                .then(data => {
+                    listaResultados.innerHTML = ''; 
+                    if (data.length > 0) {
+                        listaResultados.style.display = 'block';
+                        data.forEach(prod => {
+                            const li = document.createElement('li');
+                            li.style.padding = "10px"; li.style.cursor = "pointer"; li.style.borderBottom = "1px solid #eee";
+                            
+                            // Si tiene stock 0, lo pintamos rojo pero igual dejamos agregarlo (por si llegó y no lo han metido al sistema)
+                            const stockTexto = prod.stock > 0 ? `<span style="color:green;">Stock: ${prod.stock}</span>` : `<span style="color:red;">Stock: ${prod.stock}</span>`;
+                            
+                            li.innerHTML = `<strong>${prod.codebar}</strong> - ${prod.nombre} | ${stockTexto} | $${prod.precio}`;
+                            
+                            // Evento de clic para agregarlo a la tabla
+                            li.onmousedown = function() {
+                                agregarRefaccion(prod.id, prod.nombre, parseFloat(prod.precio));
+                                e.target.value = '';
+                                listaResultados.style.display = 'none';
+                            };
+                            listaResultados.appendChild(li);
+                        });
+                    } else {
+                        listaResultados.style.display = 'block';
+                        listaResultados.innerHTML = '<li style="padding: 10px; color: red;">No se encontró el producto.</li>';
+                    }
+                }).catch(err => console.error(err));
+        }, 300);
+    }
+});
 
 // Llamar informes *****************************************************************
 document

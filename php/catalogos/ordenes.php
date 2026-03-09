@@ -23,6 +23,9 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca", "ASC", "nom_ma
 // Servicios
 $servicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servicio", "ASC", "nom_servicio", 100, 1, true);
 
+//Metodos de pago
+$metpagos = obtenerRegistros($dbh, "metodosdepago", "id_metpago, nombre_metpago", "ASC", "nombre_metpago", 100, 1, true);
+
 // ordenes de servicio
 $ordenes = obtenerOrdenesDashboard($dbh, 50);
 // Estados de servicio (Para el modal de edición)
@@ -219,17 +222,27 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
         <div>
           <h4>5. Costos y Evidencia</h4>
           <div class="form-containernum">
-            <div class="form-group laquinta">
-              <label>Costo Total:</label>
+            <div class="form-group ladoble">
+              <label>Costo Total ($):</label>
               <input type="number" id="crear-costo" name="costo" step="0.01" min="0" oninput="calcularSaldoOrden()">
             </div>
-            <div class="form-group laquinta">
-              <label>Anticipo:</label>
+            <div class="form-group ladoble">
+              <label>Anticipo ($):</label>
               <input type="number" id="crear-anticipo" name="anticipo" step="0.01" min="0" value="0" oninput="calcularSaldoOrden()">
             </div>
-            <div class="form-group laquinta">
-              <label>Saldo:</label>
-              <input type="text" id="crear-saldo" name="saldo" readonly style="background: #eee; font-weight: bold;">
+
+            <div class="form-group ladoble">
+              <label>Método de Pago (Del Anticipo):</label>
+              <select name="id_metodo_pago" id="crear-metodo-pago">
+                <option value="">Seleccionar...</option>
+                <?php foreach ($metpagos as $mp): ?>
+                  <option value="<?php echo $mp['id_metpago']; ?>"><?php echo $mp['nombre_metpago']; ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="form-group ladoble">
+              <label>Saldo Restante ($):</label>
+              <input type="text" id="crear-saldo" name="saldo" readonly style="background: #eee; font-weight: bold; color: red;">
             </div>
           </div>
 
@@ -302,8 +315,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 </div>
 <!-- Modal para editar Orden -->
 <div id="editar-modalOrden" class="modal" style="display: none; z-index: 1050;">
-  <div class="modal-contentOrdenes">
-    <span class="close" onclick="cerrarModalOrden('editar-modalOrden')">&times;</span>
+  <div class="modal-contentOrdenes" style="max-width: 950px;"> <span class="close" onclick="cerrarModalOrden('editar-modalOrden')">&times;</span>
     <h2 class="tittle">Actualizar Orden #<span id="edit-folio-text"></span></h2>
 
     <form id="form-editarOrden">
@@ -330,30 +342,119 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 
           <div class="form-group" style="width: 100%;">
             <label>Diagnóstico Técnico / Solución:</label>
-            <textarea id="edit-diagnostico" name="diagnostico" rows="3" placeholder="Describe el trabajo realizado..."></textarea>
+            <textarea id="edit-diagnostico" name="diagnostico" rows="2" placeholder="Describe el trabajo realizado..."></textarea>
           </div>
         </div>
 
         <div class="seccion-form">
           <h4>2. Costos y Abonos</h4>
           <div class="form-containernum">
-            <div class="form-group" style="width: 100%;">
-              <label>Costo Total ($):</label>
-              <input type="number" id="edit-costo" name="costo_servicio" step="0.01" min="0" oninput="calcularSaldoEdit()">
+
+            <div class="form-group ladoble">
+              <label style="color: var(--color_sky); font-weight: bold;">Mano de Obra ($):</label>
+              <input type="number" id="edit-mano-obra" name="mano_obra" step="0.01" min="0" value="0" oninput="calcularSaldoEdit()">
             </div>
-            <div class="form-group" style="width: 100%;">
+            <div class="form-group ladoble">
+              <label>Costo Total (Auto):</label>
+              <input type="number" id="edit-costo" name="costo_servicio" step="0.01" min="0" readonly style="background: #eef2f5; font-weight: bold;">
+            </div>
+
+            <div class="form-group ladoble">
               <label>Anticipo Acumulado ($):</label>
               <input type="text" id="edit-anticipo" name="anticipo_servicio" readonly style="background: #eee;">
             </div>
-            <div class="form-group" style="width: 100%;">
-              <label style="color: green; font-weight: bold;">Ingresar Nuevo Abono ($):</label>
-              <input type="number" id="edit-nuevo-abono" name="nuevo_abono" step="0.01" min="0" value="0" oninput="calcularSaldoEdit()" style="border-color: green;">
-            </div>
-            <div class="form-group" style="width: 100%;">
+            <div class="form-group ladoble">
               <label>Saldo Restante ($):</label>
               <input type="text" id="edit-saldo" name="saldo_servicio" readonly style="background: #eee; font-weight: bold; color: red;">
             </div>
+
+            <div class="form-group ladoble" style="margin-top: 10px;">
+              <label style="color: green; font-weight: bold;">Nuevo Abono ($):</label>
+              <input type="number" id="edit-nuevo-abono" name="nuevo_abono" step="0.01" min="0" value="0" oninput="calcularSaldoEdit()" style="border-color: green;">
+            </div>
+            <div class="form-group ladoble" style="margin-top: 10px;">
+              <label style="color: green; font-weight: bold;">Método de Pago:</label>
+              <select name="id_metodo_pago" id="edit-metodo-pago" style="border-color: green;">
+                <option value="">Seleccionar...</option>
+                <?php foreach ($metpagos as $mp): ?>
+                  <option value="<?php echo $mp['id_metpago']; ?>"><?php echo $mp['nombre_metpago']; ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
           </div>
+        </div>
+
+        <!-- si queremos que abran al iniciar ponemos open <details open style="...">). -->
+        <div style="width: 100%; margin-top: 15px; grid-column: 1 / -1;">
+          <details style="border: 1px solid #ddd; border-radius: 5px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <summary style="padding: 10px 15px; background: #f4f6f9; color: #34495e; font-weight: bold; cursor: pointer; user-select: none; border-radius: 5px; outline: none;">
+              <i class="fa-solid fa-clock-rotate-left"></i> Ver Historial de Pagos Recibidos <span style="font-size: 12px; font-weight: normal; color: #777; float: right;">(Clic para desplegar ▼)</span>
+            </summary>
+
+            <div style="padding: 10px; max-height: 130px; overflow-y: auto;">
+              <table class="tbl" style="width: 100%; margin: 0; font-size: 12px;">
+                <thead style="background: #e9ecef; color: #333;">
+                  <tr>
+                    <th style="padding: 5px;">Fecha</th>
+                    <th style="padding: 5px;">Monto</th>
+                    <th style="padding: 5px;">Método de Pago</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-historial-pagos">
+                  <tr>
+                    <td colspan="3" style="text-align: center; color: #888;">No hay abonos registrados.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+        <!-- si queremos que abran al iniciar ponemos open <details open style="...">). -->
+        <div style="width: 100%; margin-top: 15px; grid-column: 1 / -1;">
+          <details style="border: 1px solid #ddd; border-radius: 5px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <summary style="padding: 12px 15px; background: #f4f6f9; color: var(--color_sky); font-weight: bold; font-size: 15px; cursor: pointer; user-select: none; border-radius: 5px; outline: none;">
+              <i class="fa-solid fa-screwdriver-wrench"></i> 3. Refacciones y Piezas Utilizadas <span style="font-size: 12px; font-weight: normal; color: #777; float: right;">(Clic para desplegar ▼)</span>
+            </summary>
+
+            <div style="padding: 15px; border-top: 1px solid #ddd;">
+              <div class="form-group" style="position: relative; margin-bottom: 10px;">
+                <label>Buscar Producto (Escribe nombre, código o número de parte):</label>
+                <input type="search" id="busqueda-producto-orden" placeholder="Ej. Pantalla, Batería, Memoria RAM..." autocomplete="off">
+                <ul id="lista-resultados-productos" class="lista-autocomplete" style="display: none; max-height: 200px; overflow-y: auto;"></ul>
+              </div>
+
+              <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px;">
+                <table class="tbl" style="width: 100%; margin: 0; font-size: 13px;">
+                  <thead style="position: sticky; top: 0; background: #34495e; color: white;">
+                    <tr>
+                      <th style="padding: 8px;">Producto</th>
+                      <th style="padding: 8px; width: 80px; text-align: center;">Cant.</th>
+                      <th style="padding: 8px; width: 100px; text-align: center;">Precio</th>
+                      <th style="padding: 8px; width: 100px; text-align: center;">Subtotal</th>
+                      <th style="padding: 8px; width: 50px; text-align: center;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabla-refacciones-orden">
+                    <tr id="fila-vacia-refacciones">
+                      <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No se han agregado refacciones a esta orden.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div style="text-align: right; margin-top: 10px; font-size: 16px;">
+                <strong>Total Piezas: </strong>
+                <span style="color: var(--color_sky); font-weight: bold; font-size: 18px;">$<span id="total-refacciones-text">0.00</span></span>
+                <input type="hidden" id="total-refacciones-input" name="total_refacciones" value="0">
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div style="text-align: right; margin-top: 10px; font-size: 16px;">
+          <strong>Total Piezas: </strong>
+          <span style="color: var(--color_sky); font-weight: bold; font-size: 18px;">$<span id="total-refacciones-text">0.00</span></span>
+          <input type="hidden" id="total-refacciones-input" name="total_refacciones" value="0">
         </div>
       </div>
 

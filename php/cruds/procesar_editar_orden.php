@@ -34,22 +34,79 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $dbh->prepare($sql);
         $stmt->execute([$id_estado_servicio, $diagnostico, $costo_servicio, $anticipo_total, $saldo_servicio, $id_orden]);
 
-        // 2. Si hay dinero de por medio, registramos el abono para el corte de caja
-        if ($nuevo_abono > 0) {
-            // Asumimos que tienes el ID del usuario en la sesión
-            $id_usuario = $_SESSION['id_usuario'] ?? 1;
+        //ACTUALIZAR REFACCIONES Y STOCK
+        $id_taller = $_SESSION['id_taller'] ?? 1;
 
-            $sqlAbono = "INSERT INTO abonos_ordenes (id_orden, monto_abono, id_usuario) VALUES (?, ?, ?)";
-            $stmtAbono = $dbh->prepare($sqlAbono);
-            $stmtAbono->execute([$id_orden, $nuevo_abono, $id_usuario]);
+        // 1. Devolver al inventario las piezas que tenía antes esta orden (para evitar descuadres)
+        $stmtViejas = $dbh->prepare("SELECT id_prod, cantidad FROM orden_refacciones WHERE id_orden = :id_orden");
+        $stmtViejas->execute([':id_orden' => $id_orden]);
+        $piezasViejas = $stmtViejas->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($piezasViejas as $pieza) {
+            $stmtReturn = $dbh->prepare("UPDATE inventario_sucursal SET stock = stock + :cant WHERE id_prod = :id_prod AND idtaller = :idtaller");
+            $stmtReturn->execute([
+                ':cant' => $pieza['cantidad'],
+                ':id_prod' => $pieza['id_prod'],
+                ':idtaller' => $id_taller
+            ]);
         }
 
-        // Si todo salió bien, guardamos permanentemente en la base de datos
+        // 2. Limpiar la tabla intermedia de esta orden para reconstruirla
+        $dbh->prepare("DELETE FROM orden_refacciones WHERE id_orden = :id_orden")->execute([':id_orden' => $id_orden]);
+
+        // 3. Insertar las nuevas piezas y descontar el stock actualizado
+        if (isset($_POST['refacciones_id']) && is_array($_POST['refacciones_id'])) {
+            for ($i = 0; $i < count($_POST['refacciones_id']); $i++) {
+                $id_p = $_POST['refacciones_id'][$i];
+                $cant = $_POST['refacciones_cant'][$i];
+                $precio = $_POST['refacciones_precio'][$i];
+                $subtotal = $cant * $precio;
+
+                // Insertar en orden_refacciones
+                $stmtInsertRef = $dbh->prepare("INSERT INTO orden_refacciones (id_orden, id_prod, cantidad, precio_unitario, subtotal) VALUES (:id_orden, :id_prod, :cantidad, :precio, :subtotal)");
+                $stmtInsertRef->execute([
+                    ':id_orden' => $id_orden,
+                    ':id_prod' => $id_p,
+                    ':cantidad' => $cant,
+                    ':precio' => $precio,
+                    ':subtotal' => $subtotal
+                ]);
+
+                // Descontar del inventario real de la sucursal
+                $stmtDeduct = $dbh->prepare("UPDATE inventario_sucursal SET stock = stock - :cant WHERE id_prod = :id_prod AND idtaller = :idtaller");
+                $stmtDeduct->execute([
+                    ':cant' => $cant,
+                    ':id_prod' => $id_p,
+                    ':idtaller' => $id_taller
+                ]);
+            }
+        }
+
+        // REGISTRO DE PAGO (NUEVO ABONO)
+        if (isset($_POST['nuevo_abono']) && $_POST['nuevo_abono'] > 0) {
+            $nuevo_abono = floatval($_POST['nuevo_abono']);
+            $metodo_pago = $_POST['id_metodo_pago'] ?? 1; // Efectivo por defecto
+
+        $stmtPago = $dbh->prepare("INSERT INTO historial_pagos (id_orden, monto, id_metodo_pago, id_usuario, fecha) VALUES (?, ?, ?, ?, NOW())");
+        $stmtPago->execute([$id_orden, $nuevo_abono, $metodo_pago, $_SESSION['id_usuario']]);
+        */
+        }
+
+        // 2. Si hay dinero de por medio, registramos el abono para el corte de caja
+        // REGISTRO DE PAGO (NUEVO ABONO)
+        if ($nuevo_abono > 0) {
+            $id_usuario = $_SESSION['id_usuario'] ?? 1;
+            $metodo_pago = $_POST['id_metodo_pago'] ?? 1;
+
+            $sqlAbono = "INSERT INTO abonos_ordenes (id_orden, monto_abono, id_usuario, id_metpago, fecha_abono) VALUES (?, ?, ?, ?, NOW())";
+            $stmtAbono = $dbh->prepare($sqlAbono);
+            $stmtAbono->execute([$id_orden, $nuevo_abono, $id_usuario, $metodo_pago]);
+        }
+
         $dbh->commit();
 
         echo json_encode(['success' => true, 'message' => 'Orden actualizada y abonos guardados correctamente.']);
     } catch (Exception $e) {
-        // Si ALGO falló, deshacemos todo para evitar información incompleta
         $dbh->rollBack();
         echo json_encode(['success' => false, 'message' => 'Error al actualizar: ' . $e->getMessage()]);
     }
