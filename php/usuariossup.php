@@ -19,17 +19,20 @@ $usuarios = obtenerUsuariosSup($dbh);
 
 <div class="containerr">
   <button class="boton" onclick="abrirModalUser('crear-modalUserSup')">Nuevo</button>
-  <label class="buscarlabel" for="buscarboxusuarioSup">Buscar:</label>
-  <input class="buscar--box" id="buscarboxusuarioSup" type="search" placeholder="Qué estas buscando?">
 
   <!-- Filtro de estatus -->
-  <label class="buscarlabel" for="estatusFiltroUSup">Filtrar por Estatus:</label>
-  <select class="buscar--box" id="estatusFiltroUSup" onchange="cargarUsuariosFiltradosSup()" style="width: 100px;">
-    <option value="">Todos</option>
-    <option value="Activo">Activo</option>
-    <option value="Inactivo">Inactivo</option>
+  <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+
+  <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+    <option value="8">8</option>
+    <option value="25">25</option>
+    <option value="50">50</option>
+    <option value="-1">Todos</option>
   </select>
+  <label class="buscarlabel" for="buscarboxusuarioSup">Buscar:</label>
+  <input class="buscar--box" id="buscarboxusuarioSup" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 </div>
+
 
 <div class="container_dashboard_tablas" id="usuarios">
   <h3>Lista de Super usuarios</h3>
@@ -45,7 +48,7 @@ $usuarios = obtenerUsuariosSup($dbh);
           <th>Rol</th>
           <th>Taller</th>
           <th>Acciones</th>
-          <th colspan="2" style="text-align: center;">Acciones</th>
+          <th style="text-align: center;">Acciones</th>
         </tr>
       </thead>
       <tbody id="usuarios-lista">
@@ -67,10 +70,9 @@ $usuarios = obtenerUsuariosSup($dbh);
                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
               </button></td>
 
-            <td data-lable="Editar:">
+            <td data-lable="Acciones:">
               <button title="Editar" class="editarUserSup fa-solid fa-pen-to-square" data-id="<?php echo $u['id_usuario']; ?>"></button>
-            </td>
-            <td data-lable="Eliminar:">
+
               <button title=" Eliminar" class="eliminarUserSup fa-solid fa-trash" data-id="<?php echo $u['id_usuario']; ?>"></button>
             </td>
           </tr>
@@ -86,7 +88,7 @@ $usuarios = obtenerUsuariosSup($dbh);
       <div class="modal-contentUsuariosSup" style="height: 700px;">
         <span title="Cerrar" class="close" onclick="cerrarModalUser('crear-modalUserSup')">&times;</span>
         <h2 class="tittle">Crear SuperUsuario</h2>
-        <form id="form-crearUserSup" enctype="multipart/form-data">
+        <form id="form-crearUserSup" enctype="multipart/form-data" novalidate>
 
           <div class="form-group">
             <label for="crear-usuario">SuperUsuario:</label>
@@ -192,7 +194,7 @@ $usuarios = obtenerUsuariosSup($dbh);
         <span title="Cerrar" class="close" onclick="cerrarModalUser('editar-modalUserSup')">&times;</span>
         <h2 class="tittle">Editar SuperUsuario</h2>
 
-        <form id="form-editarUserSup">
+        <form id="form-editarUserSup" novalidate>
           <input type="hidden" id="editar-idusuario" name="editar-idusuario" value="" />
 
           <div class="form-group">

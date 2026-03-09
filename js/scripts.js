@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         contentArea.innerHTML = data; 
         
-        // -Llamar función de los cards movibles
+        // Llamar función de los cards movibles
         iniciarDashboardSortable(); 
       })
       .catch((error) => console.error("Error al cargar el dashboard:", error));
@@ -150,7 +150,7 @@ function iniciarDashboardSortable() {
 
     if (!el) return; 
 
-    // A. Recuperar orden guardado
+    //  Recuperar orden guardado
     var ordenGuardado = localStorage.getItem('ordenDashboard');
     if (ordenGuardado) {
         var ordenArray = ordenGuardado.split('|');
@@ -162,7 +162,7 @@ function iniciarDashboardSortable() {
         });
     }
 
-    // B. Activar Sortable (Evitamos duplicados con la validación)
+    //  Activar Sortable (Evitamos duplicados con la validación)
     if (el.getAttribute('data-sortable-initialized')) return;
     
     Sortable.create(el, {
@@ -255,15 +255,24 @@ function validarFormularioTienda(event) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -336,9 +345,7 @@ function verificarDuplicado(nombre) {
     });
 }
 
-// =========================================================================
 // EDITAR TIENDA/TALLER
-// =========================================================================
 document.addEventListener("DOMContentLoaded", function () {
   // Escuchar clic en el botón de editar
   document.body.addEventListener("click", function (event) {
@@ -441,15 +448,24 @@ async function validarFormularioEdicion(formulario) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -525,9 +541,7 @@ function enviarFormularioEdicion(formulario) {
     });
 }
 
-// =========================================================================
 // ELIMINAR TIENDA/TALLER
-// =========================================================================
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminar")) {
     const id = event.target.dataset.id;
@@ -572,9 +586,7 @@ document.addEventListener("click", function (event) {
   }
 });
 
-// =========================================================================
 // LÓGICA PARA SELECTS ANIDADOS (ESTADO, MUNICIPIO, COLONIA)
-// =========================================================================
 function popularSelect(selectElement, items, valorDefault = "Seleccionar") {
   if (!selectElement) return;
   selectElement.innerHTML = `<option value="">${valorDefault}</option>`; 
@@ -721,14 +733,37 @@ document
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
 
-        cargarRolesFiltrados();
+            inicializarTablaGenerica('#tabla-roles', '#buscarboxrol', '#cantidad-registros');
+
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
+  function abrirModalRol(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+  
+  function cerrarModalRol(id) {
+    document.getElementById(id).style.display = "none";
+  }
+  
 //Crear Rol **********************************************
+// INICIALIZAR Y CARGAR MÓDULO DE ROLES
+if (document.getElementById("roles-link")) {
+  document.getElementById("roles-link").addEventListener("click", function (event) {
+    event.preventDefault(); 
+    fetch("roles.php") 
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+        inicializarTablaGenerica('#tabla-roles', '#buscarboxrol', '#cantidad-registros');
+      })
+      .catch((error) => console.error("Error al cargar el contenido:", error));
+  });
+}
+
 function abrirModalRol(id) {
   document.getElementById(id).style.display = "flex";
 }
@@ -737,237 +772,8 @@ function cerrarModalRol(id) {
   document.getElementById(id).style.display = "none";
 }
 
-function procesarFormularioRol(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
-  const formData = new FormData(event.target);
-
-  fetch(`cruds/procesar_${tipo}_rol.php`, {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        // Cerrar el modal
-        cerrarModalRol(tipo + "-modalRol");
-        // Limpiar los campos del formulario
-        event.target.reset();
-
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-            <td data-lable="Nombre:">${data.rol.nombre}</td>
-            <td data-lable="Descripción:">${data.rol.descripcion}</td>
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                data.rol.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-              ${data.rol.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-
-            <td data-lable="Editar:">
-              <button title="Editar" class="editarRol fa-solid fa-pen-to-square" data-id="${
-                data.rol.id
-              }"></button>
-            </td>
-            <td data-lable="Eliminar">
-              <button title="Eliminar" class="eliminarRol fa-solid fa-trash" data-id="${
-                data.rol.id
-              }"></button>
-            </td>
-          `;
-
-          // Agregar la nueva fila a la tabla
-          tbody.appendChild(newRow);
-        }
-
-        // Mostrar un mensaje de éxito
-        Swal.fire({
-          title: "¡Éxito!",
-          text: data.message, // Usar el mensaje del backend
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Mostrar un mensaje de error específico del backend
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-        });
-      }
-    })
-    .catch((error) => {
-      // Manejar errores inesperados
-      console.error("Error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-      });
-    });
-}
-function validarFormularioRol(event) {
-  event.preventDefault();
-
-  const rol = document.querySelector("[name='rol']").value.trim();
-  const desc_rol = document.querySelector("[name='desc_rol']").value.trim();
-
-  const errores = [];
-
-  if (rol.length < 3) {
-    errores.push("El nombre debe tener al menos 3 caracteres.");
-    const inputname = document.querySelector("#crear-rol");
-    inputname.focus();
-    inputname.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputname = document.querySelector("#crear-rol");
-  inputname.addEventListener("input", () => {
-    if (inputname.value.length >= 3) {
-      inputname.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-
-  if (desc_rol.length < 3) {
-    errores.push("La descripción debe tener al menos 3 caracteres.");
-    const inputdesc = document.querySelector("#crear-desc_rol");
-    inputdesc.focus();
-    inputdesc.classList.add("input-error"); // Añade la clase de error
-  }
-  // Elimina la clase de error al corregir
-  const inputdesc = document.querySelector("#crear-desc_rol");
-  inputdesc.addEventListener("input", () => {
-    if (inputdesc.value.length >= 3) {
-      inputdesc.classList.remove("input-error"); // Quita la clase si el campo es válido
-    }
-  });
-  //Alerta de validaciones campos vacios Rol
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Verificar duplicados
-  verificarDuplicadoRol(rol)
-    .then((esDuplicado) => {
-      if (esDuplicado) {
-        Swal.fire({
-          title: "Error",
-          text: "El nombre del Rol ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Si no hay errores, enviar el formulario
-        procesarFormularioRol(event, "crear");
-      }
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el nombre.",
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
-    });
-}
-function verificarDuplicadoRol(rol) {
-  //console.log("Nombre verificar:", nombre_rol);
-
-  return fetch("cruds/verificar_nombre_rol.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ rol }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      //console.log("Respuesta de verificar_nombre.php:", data);
-      if (data.existe) {
-        mostrarAlerta("error", "Error", "El nombre del Rol ya existe.");
-      }
-      return data.existe;
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
-    });
-}
-//Editar Roles*******************************************************
-document.addEventListener("DOMContentLoaded", function () {
-  // Escuchar clic en el botón de editar
-  document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("editarRol")) {
-      const id = event.target.dataset.id;
-      //console.log("Botón editar clickeado. ID:", id);
-
-      fetch(`cruds/obtener_rol.php?id=${id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          //console.log("Datos recibidos del servidor:", data);
-          if (data.success) {
-            const formularioRol = document.getElementById("form-editarRol");
-            if (formularioRol) {
-              const campos = ["idrol", "rol", "desc_rol", "estatus"];
-              campos.forEach((campo) => {
-                //console.log(`Asignando ${campo}:`, data.rol[campo]);
-                formularioRol[`editar-${campo}`].value = data.rol[campo] || "";
-              });
-              abrirModalRol("editar-modalRol");
-            } else {
-              console.error("Formulario de edición no encontrado.");
-            }
-          } else {
-            mostrarAlerta(
-              "error",
-              "Error",
-              data.message || "No se pudo cargar el Rol.",
-            );
-          }
-        })
-        .catch((error) => {
-          console.error("Error al obtener Rol:", error);
-          mostrarAlerta(
-            "error",
-            "Error",
-            "Ocurrió un problema al obtener los datos.",
-          );
-        });
-    }
-  });
-
-  // Validar y enviar el formulario de edición
-  document.body.addEventListener("submit", function (event) {
-    if (event.target && event.target.id === "form-editarRol") {
-      event.preventDefault(); // Esto evita el comportamiento predeterminado de recargar la página.
-      validarFormularioEdicionRol(event.target);
-    }
-  });
-});
-
-//Validar duplicados en edicion rol
-function verificarDuplicadoEditarRol(rol, id = 0) {
-  //console.log("Validando duplicados. ID:", id, "Rol:", rol);
-
+// VERIFICAR DUPLICADOS DE ROLES 
+function verificarDuplicadoRol(rol, id = 0) {
   return fetch("cruds/verificar_nombre_rol.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -975,172 +781,256 @@ function verificarDuplicadoEditarRol(rol, id = 0) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
         Swal.fire({
-          title: "Error",
-          text: data.message || "El nombre del Rol ya existe.", // Mostrar el mensaje específico si existe
+          title: "Atención",
+          text: data.message || "El nombre del Rol ya existe.",
           icon: "warning",
           showConfirmButton: false,
           timer: 1500,
-          timerProgressBar: true,
         });
-        //mostrarAlerta("error", "Error", "El nombre del Rol ya existe.");
       }
       return data.existe;
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
+      return true; 
     });
 }
-// Validación del formulario de edición Rol
-async function validarFormularioEdicionRol(formulario) {
-  const campos = [
-    {
-      nombre: "rol",
-      min: 3,
-      mensaje: "El rol debe tener al menos 3 caracteres.",
-    },
-    {
-      nombre: "desc_rol",
-      min: 3,
-      mensaje: "La descripción debe tener al menos 3 caracteres.",
-    },
-  ];
-  let primerError = null;
-  const errores = [];
 
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombre}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombre} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
+// CREAR ROL (Motor de Reglas)
+function validarFormularioRol(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    { id: "crear-rol", tipo: "texto", min: 3, mensaje: "El nombre del rol debe tener al menos 3 caracteres." },
+    { id: "crear-desc_rol", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
     });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
+
+    if (regla.tipo === "texto" && valor.length < regla.min) esValido = false;
+
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-      campoFormulario.classList.remove("input-error");
+        elemento.classList.remove("input-error");
     }
   });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error, alerta automatica en edición
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
-    return;
-  }
 
-  // Verificar duplicado antes de enviar el formulario
-  const rolInput = document.getElementById("editar-rol");
-  const idInput = document.getElementById("editar-idrol");
-  if (!rolInput || !idInput) {
-    console.log("Error: No se encontró el campo de Rol o ID.");
-    return;
-  }
-  const rol = rolInput.value.trim();
-  const id = idInput.value;
-
-  try {
-    //console.log("Verificando duplicado. ID:", id, "Rol:", rol);
-    const esDuplicado = await verificarDuplicadoEditarRol(rol, id);
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      //cerrarModalRol("editar-modalRol");
-      enviarFormularioEdicionRol(formulario); // Proceder si no hay duplicados
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
     }
-  } catch (error) {
-    console.error("Error al verificar duplicado:", error);
-  }
-}
-// Enviar formulario de edición rol
-function enviarFormularioEdicionRol(formulario) {
-  if (!formulario) {
-    console.error("El formulario no se encontró.");
+
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
+    });
+    
     return;
   }
-  const formData = new FormData(formulario);
 
-  fetch("cruds/editar_rol.php", {
+  const rolInput = document.getElementById("crear-rol");
+
+  verificarDuplicadoRol(rolInput.value.trim(), 0).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioRol(event);
+  });
+}
+
+function procesarFormularioRol(event) {
+  const formData = new FormData(event.target);
+
+  fetch("cruds/procesar_crear_rol.php", { 
     method: "POST",
     body: formData,
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta del servidorEdit:", data);
       if (data.success) {
+        cerrarModalRol("crear-modalRol");
+        event.target.reset();
+
         Swal.fire({
-          title: "¡Actualizado!",
-          text: data.message, // Usar el mensaje del backend
+          title: "¡Éxito!",
+          text: data.message || "Rol creado correctamente.",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
           timerProgressBar: true,
+        }).then(() => {
+          if (document.getElementById("roles-link")) {
+            document.getElementById("roles-link").click(); 
+          }
         });
-        actualizarFilaTablaRol(formData);
-        cerrarModal("editar-modalRol");
       } else {
-        Swal.fire({
-          title: "Atención",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
+        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
       }
     })
     .catch((error) => {
-      console.error("Error al actualizar tienda:", error);
-      Swal.fire({
-        title: "Error",
-        text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
+      console.error("Error:", error);
+      Swal.fire("Error", "Ocurrió un error inesperado.", "error");
     });
 }
-// Actualizar fila de la tabla
-function actualizarFilaTablaRol(formData) {
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idrol")}"]`)
-    .closest("tr");
-  //console.log(formData.get("editar-idrol"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("rol");
-    fila.cells[1].textContent = formData.get("desc_rol");
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
 
-    // Insertar el botón en la celda
-    fila.cells[2].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    cargarRolesFiltrados();
+// OBTENER DATOS PARA EDITAR ROL
+document.addEventListener("DOMContentLoaded", function () {
+  document.body.addEventListener("click", function (event) {
+    if (event.target.classList.contains("editarRol")) {
+      const id = event.target.dataset.id;
+
+      fetch(`cruds/obtener_rol.php?id=${id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            const formulario = document.getElementById("form-editarRol");
+            if (formulario) {
+              const campos = ["idrol", "rol", "desc_rol", "estatus"];
+              campos.forEach((campo) => {
+                if(formulario[`editar-${campo}`]){
+                    formulario[`editar-${campo}`].value = data.rol[campo] || "";
+                }
+              });
+              abrirModalRol("editar-modalRol");
+            }
+          } else {
+            Swal.fire("Error", data.message || "No se pudo cargar el Rol.", "error");
+          }
+        })
+        .catch((error) => {
+          console.error("Error al obtener Rol:", error);
+          Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
+        });
+    }
+  });
+
+  // Evento submit para editar
+  document.body.addEventListener("submit", function (event) {
+    if (event.target && event.target.id === "form-editarRol") {
+      validarFormularioEdicionRol(event);
+    }
+  });
+});
+
+// EDITAR ROL (Motor de Reglas)
+function validarFormularioEdicionRol(event) {
+  event.preventDefault();
+  const formulario = event.target;
+
+  const reglasValidacion = [
+    { id: "editar-rol", tipo: "texto", min: 3, mensaje: "El nombre del rol debe tener al menos 3 caracteres." },
+    { id: "editar-desc_rol", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+    
+    elemento.addEventListener("input", function() {
+        this.classList.remove("input-error");
+    });
+
+    if (regla.tipo === "texto" && valor.length < regla.min) esValido = false;
+
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
+  
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
+    });
+    
+    return;
   }
+
+  const rolInput = document.getElementById("editar-rol");
+  const idInput = document.getElementById("editar-idrol");
+
+  verificarDuplicadoRol(rolInput.value.trim(), idInput.value).then((esDuplicado) => {
+    if (!esDuplicado) enviarFormularioEdicionRol(formulario);
+  });
 }
-// Eliminar Roles*****************
+
+function enviarFormularioEdicionRol(formulario) {
+  const formData = new FormData(formulario);
+
+  fetch("cruds/editar_rol.php", { 
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        cerrarModalRol("editar-modalRol");
+        Swal.fire({
+          title: "¡Actualizado!",
+          text: data.message || "Rol actualizado correctamente.",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        }).then(() => {
+          if (document.getElementById("roles-link")) {
+            document.getElementById("roles-link").click(); 
+          }
+        });
+      } else {
+        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      Swal.fire("Error", "Ocurrió un error inesperado.", "error");
+    });
+}
+
+// ELIMINAR ROL
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarRol")) {
     const id = event.target.dataset.id;
@@ -1156,790 +1046,127 @@ document.addEventListener("click", function (event) {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Realizar la solicitud para eliminar
         fetch(`cruds/eliminar_rol.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              //alert("Registro eliminado correctamente");
               Swal.fire({
                 title: "¡Eliminado!",
-                text: data.message, // Usar el mensaje del backend
+                text: data.message || "El rol se ha eliminado correctamente.",
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
+              }).then(() => {
+                if (document.getElementById("roles-link")) {
+                  document.getElementById("roles-link").click(); 
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
             } else {
-              Swal.fire(
-                "Error",
-                data.message || "No se pudo eliminar el registro.",
-                "error",
-              );
+              Swal.fire("Error", data.message || "No se pudo eliminar el registro.", "error");
             }
           })
           .catch((error) => {
-            Swal.fire(
-              "Error",
-              "Hubo un problema al procesar tu solicitud.",
-              "error",
-            );
-            console.error("Error al eliminar la tienda:", error);
+            Swal.fire("Error", "Hubo un problema al procesar tu solicitud.", "error");
+            console.error("Error al eliminar:", error);
           });
       }
     });
   }
 });
 
-//Buscar en la tabla y filtrar ***************************************
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboxrol");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscarRol(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboxrol");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboxrol' ya existe en el DOM");
-    agregarEventoBuscarRol(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarRol(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-roles tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboxrol") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaRol = document.getElementById("limpiar-busquedaRol"); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-roles tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaRol") {
-      const buscarBox = document.getElementById("buscarboxrol");
-      const limpiarBusquedaRol = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaRol) {
-          limpiarBusquedaRol.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-roles tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar roles desde el servidor**************************************
-function cargarRolesFiltrados() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroR")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarRoles(); // Si el usuario selecciona "Todos", cargamos las primeras 10 tiendas normales
-    return;
-  }
-  //console.log("Cargando roles filtrados del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_roles.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log("Filtrados: ",data);
-      actualizarTablaRoles(data);
-    })
-    .catch((error) => console.error("Error al cargar roles filtrados:", error));
-}
-
-//Función para actualizar la tabla con las tiendas filtradas
-function actualizarTablaRoles(roles) {
-  let tbody = document.getElementById("roles-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-
-  if (roles.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron roles</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevos roles
-  tbody.innerHTML = "";
-
-  roles.forEach((rol) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td data-lable="Nombre:">${rol.nom_rol}</td>
-      <td data-lable="Descripción:">${rol.desc_rol}</td>
-
-      <td data-lable="Estatus">
-        <button class="btn ${
-          rol.estatus_rol == 0 ? "btn-success" : "btn-danger"
-        }">
-          ${rol.estatus_rol == 0 ? "Activo" : "Inactivo"}
-        </button>
-      </td>
-      <td data-lable="Editar:">
-        <button title="Editar" class="editarRol fa-solid fa-pen-to-square" data-id="${
-          rol.id_rol
-        }"></button>
-        </td>
-        <td data-lable="Eliminar:">
-        <button title="Eliminar" class="eliminarRol fa-solid fa-trash" data-id="${
-          rol.id_rol
-        }"></button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 roles por defecto
-function cargarRoles() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_roles.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaRoles(data);
-    })
-    .catch((error) => console.error("Error al cargar roles:", error));
-}
-
-/* ------------------------ SCROLL INFINITO ROL------------------------*/
-
-function cargarRolesScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltroR = document
-    .getElementById("estatusFiltroR")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_roles_scroll.php?page=${pagina}`;
-
-  if (estatusFiltroR !== "") {
-    url += `&estatus=${estatusFiltroR}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-roles tbody");
-        data.forEach((rol) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td data-lable="Nombre:">${rol.nombre}</td>
-            <td data-lable="Descripción:">${rol.descripcion}</td>
-            
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                rol.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${rol.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar">
-              <button title="Editar" class="editarRol fa-solid fa-pen-to-square" data-id="${
-                rol.idrol
-              }"></button>
-            </td>
-        <td data-lable="Eliminar">
-        <button title="Eliminar" class="eliminarRol fa-solid fa-trash" data-id="${
-          rol.idrol
-        }"></button>
-      </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más Roles.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => console.error("Error al cargar roles:", error));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("roles.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más roles
-    console.log("Reiniciando scroll y cargando roles en roles.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A roles.php
-    iniciarScrollRoles();
-  }
-});
-
-function iniciarScrollRoles() {
-  const scrollContainer = document.getElementById("scroll-containerR");
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      //console.log(" Scroll detectado, cargando más Roles...");
-      cargarRolesScroll();
-    }
-  });
-
-  //console.log(" Scroll infinito reactivado en roles.php");
-}
-
-const observerRoles = new MutationObserver(() => {
-  const rolesSeccion = document.getElementById("scroll-containerR");
-  if (rolesSeccion) {
-    observerRoles.disconnect();
-    iniciarScrollRoles();
-  }
-});
-
-const Roles = document.getElementById("content-area");
-if (Roles) {
-  observerRoles.observe(Roles, { childList: true, subtree: true });
-}
-
 // Llamar Usuarios *********************************************
-document
-  .getElementById("usuarios-link")
-  .addEventListener("click", function (event) {
-    event.preventDefault(); // Evita la acción por defecto del enlace
-    fetch("usuarios.php")
+// INICIALIZAR Y CARGAR MÓDULO DE USUARIOS
+if (document.getElementById("usuarios-link")) {
+  document.getElementById("usuarios-link").addEventListener("click", function (event) {
+    event.preventDefault(); 
+    fetch("usuarios.php") 
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-
-        // *** bloque dentro del callback ***
-        const crearUsuarioForm = document.querySelector("#form-crearUser");
-        //console.log("Formulario de creación encontrado:", crearUsuarioForm);
-        if (crearUsuarioForm) {
-          crearUsuarioForm.addEventListener("submit", validarFormularioUser);
-          //console.log("Event listener adjuntado al formulario.");
-        } else {
-          console.log("Formulario de creación NO encontrado.");
-        }
+        // DATATABLES TOMA EL CONTROL DEL BUSCADOR Y EL PAGINADOR
+        inicializarTablaGenerica('#tabla-usuarios', '#buscarboxusuario', '#estatusFiltroU');
       })
-      .catch((error) => {
-        console.error("Error al cargar el contenido:", error);
-      });
+      .catch((error) => console.error("Error al cargar el contenido:", error));
   });
-
-//Crear usuario ***************************************************************
-function abrirModalUser(id) {
-  document.getElementById(id).style.display = "flex";
 }
 
-function cerrarModalUser(id) {
-  document.getElementById(id).style.display = "none";
-}
+function abrirModalUser(id) { document.getElementById(id).style.display = "flex"; }
+function cerrarModalUser(id) { document.getElementById(id).style.display = "none"; }
 
-function procesarFormularioUser(event, tipo) {
-  event.preventDefault(); //Para que no recergue la pagina
-  const formData = new FormData(event.target);
-  //console.log("Interceptando envío del formulario usuarios"); // Verifica si se ejecuta
-
-  fetch(`cruds/procesar_${tipo}_user.php`, {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      //console.log("Respuesta del servidor:", data);
-
-      if (!data.success) {
-        throw new Error(data.message || "Error desconocido.");
-      }
-
-      //console.log("Imagen subida con éxito:", data.rutaImagen);
-
-      // Restablecer la variable después de recibir la respuesta del servidor
-      enviando = false;
-
-      // Aquí verificamos si la propiedad imagen existe antes de usarla
-      if (!data.rutaImagen) {
-        //console.warn("No se recibió imagen en la respuesta del servidor.");
-      }
-
-      if (data.success) {
-        // Cerrar el modal
-        cerrarModalUser(tipo + "-modalUser");
-        // Limpiar los campos del formulario
-        event.target.reset();
-
-        // Actualizar la tabla dinámicamente si es 'crear'
-        if (tipo === "crear") {
-          const tbody = document.querySelector("table tbody");
-
-          // Crear una nueva fila
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-                            <td data-lable"Imagen">${
-                              data.usuario.imagen
-                                ? `<img src="${data.usuario.imagen}" alt="Perfil" width="50" height="50" style="border-radius: 50%;">`
-                                : "N/A"
-                            } 
-                            </td>
-                            <td data-lable="Usuario:">${
-                              data.usuario.usuario
-                            }</td>
-                            <td data-lable="Nombre:">${data.usuario.nombre}</td>
-                            <td data-lable="Primer apellido:">${
-                              data.usuario.appaterno
-                            }</td>
-                            <td data-lable="Segundo apellido:">${
-                              data.usuario.sapellido
-                            }</td>
-                            <td data-lable="Rol:">${data.usuario.nom_rol}</td>
-                            <td data-lable="Taller:">${
-                              data.usuario.nombre_t
-                            }</td>                            
-
-                            <td data-lable="Estatus:">
-                              <button class="btn ${
-                                data.usuario.estatus == 0
-                                  ? "btn-success"
-                                  : "btn-danger"
-                              }">
-                                ${
-                                  data.usuario.estatus == 0
-                                    ? "Activo"
-                                    : "Inactivo"
-                                }
-                              </button>
-                            </td>
-                            <td data-lable="Editar:">
-                              <button title="Editar" class="editarUser fa-solid fa-pen-to-square" data-id="${
-                                data.usuario.id
-                              }"></button>
-                              </td>
-                              <td data-lable="Eliminar">
-                              <button title="Eliminar" class="eliminarUser fa-solid fa-trash" data-id="${
-                                data.usuario.id
-                              }"></button>
-                            </td>
-                            `;
-
-          tbody.insertBefore(newRow, tbody.firstChild);
-        }
-
-        // Mostrar un mensaje de éxito
-        Swal.fire({
-          title: "¡Éxito!",
-          text: data.message || "Usuario registrado.",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      } else {
-        // Mostrar un mensaje de error específico del backend
-        Swal.fire({
-          title: "Error",
-          text: data.message || "Ocurrió un problema.", // Mostrar el mensaje específico si existe
-          icon: "error",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => {
-      // Manejar errores inesperados
-      console.error("Error en fetch:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error inesperado. Intente más tarde.",
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
-    });
-}
-
-function validarFormularioUser(event) {
+// MOTOR DE REGLAS (Crear y Editar Usuario)
+function validarFormularioUser(event, tipo = "crear") {
   event.preventDefault();
-  //console.log("validarFormularioUser ejecutado");
+  const prefijo = tipo === "crear" ? "crear" : "editar";
 
-  const usuario = document.querySelector("[name='usuario']").value.trim();
-  const nombre = document.querySelector("[name='nombre']").value.trim();
-  const papellido = document.querySelector("[name='papellido']").value.trim();
-  const sapellido = document.querySelector("[name='sapellido']").value.trim();
-  const rol = document.querySelector("[name='rol']").value.trim();
-  const password1 = document.querySelector("[name='password1']").value.trim();
-  const password2 = document.querySelector("[name='password2']").value.trim();
-  const tienda = document.querySelector("[name='tienda']").value.trim();
-  const estatus = document.querySelector("[name='estatus']").value.trim();
-
-  /*console.log("Valores de los campos:", {
-    usuario,
-    nombre,
-    papellido,
-    sapellido,
-    rol,
-    password1,
-    password2,
-    tienda,
-    estatus,
-  });*/
+  const reglasValidacion = [
+    { id: `${prefijo}-usuario`, tipo: "texto", min: 3, mensaje: "El usuario debe tener al menos 3 caracteres." },
+    { id: `${prefijo}-nombre`, tipo: "texto", min: 3, mensaje: "El nombre debe tener al menos 3 caracteres." },
+    { id: `${prefijo}-papellido`, tipo: "texto", min: 3, mensaje: "El primer apellido debe tener al menos 3 caracteres." },
+    { id: `${prefijo}-sapellido`, tipo: "texto", min: 3, mensaje: "El segundo apellido debe tener al menos 3 caracteres." },
+    { id: `${prefijo}-email`, tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." },
+    { id: `${prefijo}-rol`, tipo: "select", mensaje: "Debes seleccionar un rol." },
+    { id: `${prefijo}-tienda`, tipo: "select", mensaje: "Debes seleccionar un taller." },
+    { id: `${prefijo}-password1`, tipo: "password", mensaje: "La contraseña debe tener al menos 6 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial." },
+    { id: `${prefijo}-password2`, tipo: "confirmacion", mensaje: "Las contraseñas no coinciden." }
+  ];
 
   const errores = [];
+  let primerCampoConError = null;
 
-  // Función para manejar la visualización de errores en los inputs
-  function mostrarError(selector, mensaje) {
-    errores.push(mensaje);
-    const inputElement = document.querySelector(selector);
-    if (inputElement) {
-      inputElement.focus();
-      inputElement.classList.add("input-error");
+  reglasValidacion.forEach(regla => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+    let esValido = true;
+    
+    elemento.addEventListener("input", function() { this.classList.remove("input-error"); });
+
+    if (regla.tipo === "texto" && valor.length < regla.min) esValido = false;
+    else if (regla.tipo === "select" && valor === "") esValido = false;
+    else if (regla.tipo === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor)) esValido = false;
+    else if (regla.tipo === "password") {
+        const regexPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+        if (tipo === "crear" && valor === "") esValido = false; // Obligatorio al crear
+        if (valor !== "" && !regexPass.test(valor)) esValido = false; // Si escribe algo, debe cumplir
     }
-  }
-
-  // Validaciones simples
-  if (usuario.length < 3) {
-    mostrarError(
-      "#crear-usuario",
-      "El usuario debe tener al menos 3 caracteres.",
-    );
-  }
-  if (nombre.length < 3) {
-    mostrarError(
-      "#crear-nombre",
-      "El nombre debe tener al menos 3 caracteres.",
-    );
-  }
-  if (papellido.length < 3) {
-    mostrarError(
-      "#crear-papellido",
-      "El primer apellido debe tener al menos 3 caracteres.",
-    );
-  }
-  if (sapellido.length < 3) {
-    mostrarError(
-      "#crear-sapellido",
-      "El segundo apellido debe tener al menos 3 caracteres.",
-    );
-  }
-
-  // Validación de contraseñas
-  const passwordErrores = validarContrasenasInterno(password1, password2);
-  errores.push(...passwordErrores);
-  if (passwordErrores.length > 0) {
-    const inputpassword1 = document.querySelector("#crear-password1");
-    if (inputpassword1 && !inputpassword1.classList.contains("input-error")) {
-      inputpassword1.focus();
-      inputpassword1.classList.add("input-error");
+    else if (regla.tipo === "confirmacion") {
+        const pass1 = document.getElementById(`${prefijo}-password1`).value.trim();
+        if (tipo === "crear" && valor === "") esValido = false;
+        if (valor !== pass1) esValido = false; // Deben ser exactamente iguales
     }
-  }
 
-  //console.log("Errores de validación:", errores);
+    if (!esValido) {
+        errores.push(`<li>${regla.mensaje}</li>`);
+        elemento.classList.add("input-error");
+        if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+        elemento.classList.remove("input-error");
+    }
+  });
 
   if (errores.length > 0) {
     Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "error",
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      returnFocus: false, // <-- ¡EL FIN DEL ERROR ARIA-HIDDEN!
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Entendido'
     });
     return;
   }
 
-  // console.log("Iniciando verificación de duplicados...");
-  // Verificar duplicados antes de proceder
-  verificarDuplicadoUser(usuario)
-    .then((esDuplicado) => {
-      //console.log("Resultado de verificarDuplicadoUser:", esDuplicado);
-      if (esDuplicado) {
-        Swal.fire({
-          title: "Error",
-          text: "El usuario ya existe. Por favor, elige otro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-        return; // Detener la ejecución si hay duplicados
-      }
+  const usuarioInput = document.getElementById(`${prefijo}-usuario`).value.trim();
+  const idInput = tipo === "editar" ? document.getElementById("editar-idusuario").value : 0;
 
-      // console.log("No hay duplicados, procediendo a procesarFormularioUser...");
-      // Si no hay errores, enviar el formulario
-      procesarFormularioUser(event, "crear");
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicados:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Ocurrió un problema al validar el usuario.",
-        icon: "error",
-      });
-    });
-}
-
-//Validaciones contraseñas *****************************************************************
-function validarContrasenasInterno(password1, password2) {
-  const errores = [];
-
-  // Validación de longitud mínima
-  if (password1.length < 6) {
-    errores.push("La contraseña debe tener al menos 6 caracteres.");
-  }
-
-  // Validación de coincidencia de contraseñas
-  if (password1 !== password2) {
-    errores.push("Las contraseñas no coinciden.");
-  }
-
-  // Validación de requisitos de complejidad
-  const regex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-  if (!regex.test(password1)) {
-    errores.push(
-      "La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial.",
-    );
-  }
-
-  return errores;
-}
-
-// Event listeners para remover la clase de error al escribir (delegados)
-document.addEventListener("input", (event) => {
-  if (event.target) {
-    if (event.target.id === "crear-usuario" && event.target.value.length >= 3) {
-      event.target.classList.remove("input-error");
-    } else if (
-      event.target.id === "crear-nombre" &&
-      event.target.value.length >= 3
-    ) {
-      event.target.classList.remove("input-error");
-    } else if (
-      event.target.id === "crear-papellido" &&
-      event.target.value.length >= 3
-    ) {
-      event.target.classList.remove("input-error");
-    } else if (
-      event.target.id === "crear-sapellido" &&
-      event.target.value.length >= 3
-    ) {
-      event.target.classList.remove("input-error");
-    } else if (event.target.id === "crear-password1") {
-      if (
-        event.target.value.length >= 6 &&
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(
-          event.target.value,
-        )
-      ) {
-        event.target.classList.remove("input-error");
-      } else if (event.target.value.length >= 6) {
-        // Podrías agregar una lógica para mostrar un mensaje más específico si cumple la longitud pero no la complejidad
-      } else {
-        // Si la longitud es menor a 6, la clase de error se gestiona en la validación del formulario
-      }
-    } else if (event.target.id === "crear-password2") {
-      const password1Input = document.querySelector("#crear-password1");
-      if (password1Input && event.target.value === password1Input.value) {
-        event.target.classList.remove("input-error");
-      } else if (
-        password1Input &&
-        event.target.value !== password1Input.value
-      ) {
-        event.target.classList.add("input-error");
-      }
-    }
-  }
-}); //Fin validar contraseña
-
-function verificarDuplicadoUser(usuario, nombre) {
-  return fetch("cruds/verificar_nombre_usuario.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ usuario, nombre }), // Ahora se envían ambos datos
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.existe) {
-        Swal.fire({
-          title: "Error",
-          text: "El usuario o el nombre ya existen.",
-          icon: "error",
-        });
-        return true; // Indicar que hay un duplicado
-      }
-      return false; // No hay duplicado
-    })
-    .catch((error) => {
-      console.error("Error al verificar duplicado:", error);
-      return true; // Asumimos duplicado en caso de error
-    });
-}
-
-// Event listener para el envío del formulario de creación de usuario
-const crearUsuarioForm = document.querySelector("#form-crearUser"); // Reemplaza con el ID real de tu formulario
-if (crearUsuarioForm) {
-  crearUsuarioForm.addEventListener("submit", validarFormularioUser);
-}
-
-//Para Editar Usuarios ********************************************
-document.addEventListener("DOMContentLoaded", function () {
-  // Escuchar clic en el botón de editar
-  document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("editarUser")) {
-      const id = event.target.dataset.id;
-      // console.log("Botón editar clickeado. ID:", id);
-
-      fetch(`cruds/obtener_usuario.php?id=${id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          //console.log("Datos recibidos del servidor:", data); //Depuracion
-
-          if (data.success) {
-            const formularioUsuario =
-              document.getElementById("form-editarUser");
-
-            if (formularioUsuario) {
-              const campos = [
-                "idusuario",
-                "usuario",
-                "nombre",
-                "papellido",
-                "sapellido",
-                "email",
-                "rol",
-                "tienda",
-                "estatus",
-              ];
-              campos.forEach((campo) => {
-                // console.log(`Asignando ${campo}:`, data.users[campo]);
-                const input = formularioUsuario[`editar-${campo}`];
-                if (input) {
-                  //console.log(`Asignando ${campo}:`, data.users[campo]);
-                  if (
-                    campo === "rol" ||
-                    campo === "tienda" ||
-                    campo === "estatus"
-                  ) {
-                    // Para los selects, seleccionar la opción correcta
-                    input.value = data.users[campo] || "";
-                  } else {
-                    // Para los inputs de texto, asignar el valor directamente
-                    input.value = data.users[campo] || "";
-                  }
-                } else {
-                  console.warn(
-                    `El campo editar-${campo} no existe en el formulario.`,
-                  );
-                }
-              });
-              abrirModalUser("editar-modalUser");
-            } else {
-              console.error("Formulario de edición no encontrado.");
-            }
-          } else {
-            mostrarAlerta(
-              "error",
-              "Error",
-              data.message || "No se pudo cargar el campo.",
-            );
-          }
-        })
-        .catch((error) => {
-          console.error("Error al obtener el campo:", error);
-          mostrarAlerta(
-            "error",
-            "Error",
-            "Ocurrió un problema al obtener los datos.",
-          );
-        });
-    }
+  verificarDuplicadoUser(usuarioInput, idInput).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioUser(event.target, tipo);
   });
+}
 
-  // Validar y enviar el formulario de editar ****************************
-  document.body.addEventListener("submit", function (event) {
-    if (event.target && event.target.id === "form-editarUser") {
-      event.preventDefault(); // Esto evita el comportamiento de recargar la página.
-      validarFormularioEdicionUsuario(event.target);
-    }
-  });
-});
-
-//Validar duplicados en editar usuario
-function verificarDuplicadoEditarUsuario(usuario, id = 0) {
-  //console.log("Usuario:", usuario);
-  //console.log("ID (si aplica):", id);
-
+function verificarDuplicadoUser(usuario, id = 0) {
   return fetch("cruds/verificar_nombre_usuario.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1947,538 +1174,117 @@ function verificarDuplicadoEditarUsuario(usuario, id = 0) {
   })
     .then((response) => response.json())
     .then((data) => {
-      //console.log("Respuesta de verificar_nombre_usuario.php:", data);
       if (data.existe) {
         Swal.fire({
-          title: "Error",
-          text: data.message || "El usuario ya existe. Por favor, elige otro.", // Mostrar el mensaje específico si existe
-          icon: "error",
+          title: "Atención",
+          text: data.message || "El usuario ya existe. Por favor, elige otro.",
+          icon: "warning",
+          returnFocus: false,
           showConfirmButton: false,
           timer: 1500,
-          timerProgressBar: true,
         });
       }
       return data.existe;
     })
-    .catch((error) => {
-      console.error("Error al verificar duplicado:", error);
-      return true; // Asume duplicado en caso de error
-    });
+    .catch(() => true);
 }
 
-// Validación del formulario de edición
-async function validarFormularioEdicionUsuario(formularioUsuario) {
-  const campos = [
-    {
-      nombrec: "usuario",
-      min: 3,
-      mensaje: "El usuario debe tener al menos 3 caracteres.",
-    },
-    {
-      nombrec: "nombre",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      nombrec: "papellido",
-      min: 3,
-      mensaje: "El primer apellido debe tener al menos 3 caracteres.",
-    },
-    {
-      nombrec: "sapellido",
-      min: 3,
-      mensaje: "El segundo apellido debe tener al menos 3 caracteres.",
-    },
-  ];
+function procesarFormularioUser(formulario, tipo) {
+  const formData = new FormData(formulario);
+  const url = tipo === "crear" ? "cruds/procesar_crear_user.php" : "cruds/editar_user.php";
 
-  let primerError = null;
-  const errores = [];
-
-  // Validar cada campo
-  campos.forEach((campo) => {
-    const campoFormulario = document.getElementById(`editar-${campo.nombrec}`);
-    if (!campoFormulario) {
-      console.error(`El campo editar-${campo.nombrec} no se encontró.`);
-      return; // Continúa con el siguiente campo
-    }
-    campoFormulario.addEventListener("input", () => {
-      //Quita lo rojo del error al validar que es mayor o igual a su validación
-      if (campoFormulario.value.length >= campo.min) {
-        campoFormulario.classList.remove("input-error"); // Quita la clase si el campo es válido
-      }
-    });
-    const valor = campoFormulario.value.trim();
-    // Validar por longitud mínima
-    if (valor.length < campo.min) {
-      errores.push(campo.mensaje);
-      campoFormulario.classList.add("input-error");
-      campoFormulario.focus(); // Establece el foco en el campo inválido
-      if (!primerError) primerError = campoFormulario; // Guardar el primer error
-    } else {
-      campoFormulario.classList.remove("input-error");
-    }
-  });
-  // Si hay errores, mostrar la alerta y enfocar el primer campo con error
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Errores en el formulario",
-      html: errores.join("<br>"),
-      icon: "warning",
-      showConfirmButton: false,
-      timer: 1500,
-      timerProgressBar: true,
-    });
-    if (primerError) primerError.focus(); // Enfocar el primer campo con error
-    return;
-  }
-  // Verificar duplicado antes de enviar el formulario
-  const idInput = document.getElementById("editar-idusuario");
-  const usuarioInput = document.getElementById("editar-usuario");
-
-  if (!usuarioInput || !idInput) {
-    console.log("Error: No se encontró el campo o ID.");
-    return;
-  }
-  const usuario = usuarioInput.value.trim();
-  const id = idInput.value;
-
-  try {
-    //console.log("Verificando duplicado. ID:", id, "usuario:", usuario);
-    const esDuplicado = await verificarDuplicadoEditarUsuario(usuario, id);
-    if (esDuplicado) {
-      return; // No enviar el formulario si hay duplicados
-    } else {
-      //cerrarModalusuario("editar-modalusuario");
-      enviarFormularioEdicionUsuario(formularioUsuario); // Proceder si no hay duplicados
-    }
-  } catch (error) {
-    console.error("Error al verificar duplicado:", error);
-  }
-}
-// Enviar formulario de edición Usuario
-function enviarFormularioEdicionUsuario(formularioUsuario) {
-  if (!formularioUsuario) {
-    console.error("El formulario no se encontró.");
-    return;
-  }
-  const formData = new FormData(formularioUsuario);
-
-  fetch("cruds/editar_user.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(url, { method: "POST", body: formData })
     .then((response) => response.json())
     .then((data) => {
-      //Prueba console.log("Respuesta del servidor Edit:", data); // Para depuración
       if (data.success) {
+        cerrarModalUser(`${tipo}-modalUser`);
+        if (tipo === "crear") formulario.reset();
+
         Swal.fire({
           title: "¡Éxito!",
-          text: data.message || "La actualización se realizó correctamente.",
+          text: data.message || `Usuario ${tipo === "crear" ? "registrado" : "actualizado"}.`,
           icon: "success",
+          returnFocus: false,
           showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
+          timer: 1500
+        }).then(() => {
+          if (document.getElementById("usuarios-link")) {
+            document.getElementById("usuarios-link").click(); // Recarga limpia de DataTables
+          }
         });
-        actualizarFilaTablaUsuario(formData);
-        cerrarModalUser("editar-modalUser");
       } else {
-        Swal.fire({
-          title: "Atención",
-          text: data.message || "No hubo cambios en el registro.",
-          icon: "warning",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
+        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
       }
     })
-    .catch((error) => {
-      console.error("Error al actualizar:", error);
-      mostrarAlerta("error", "Error", "Ocurrió un problema al actualizar.");
-    });
-}
-// Actualizar fila de la tabla usuario ************************************
-function actualizarFilaTablaUsuario(formData) {
-  //  console.log("Datos enviados al formulario:", Object.fromEntries(formData));
-
-  const fila = document
-    .querySelector(`button[data-id="${formData.get("editar-idusuario")}"]`)
-    .closest("tr");
-  //console.log(formData.get("editar-idusuario"));
-  if (fila) {
-    fila.cells[0].textContent = formData.get("imagen");
-    fila.cells[1].textContent = formData.get("usuario");
-    fila.cells[2].textContent = formData.get("nombre");
-    fila.cells[3].textContent = formData.get("papellido");
-    fila.cells[4].textContent = formData.get("sapellido");
-    fila.cells[5].textContent = formData.get("rol");
-    fila.cells[6].textContent = formData.get("tienda");
-    // Determinar clases y texto del botón
-    const estatus = formData.get("estatus") === "0" ? "Activo" : "Inactivo";
-    const claseBtn =
-      formData.get("estatus") === "0" ? "btn btn-success" : "btn btn-danger";
-
-    // Insertar el botón en la celda
-    fila.cells[8].innerHTML = `<button class="${claseBtn}">${estatus}</button>`;
-    //Para mantener el filtro seleccionado y actualizar la tabla cuando se edite
-    cargarUsuariosFiltrados();
-  }
+    .catch(() => Swal.fire("Error", "Ocurrió un error inesperado.", "error"));
 }
 
-// Eliminar usuario *************************************************
-document.addEventListener("click", function (event) {
-  if (event.target.classList.contains("eliminarUser")) {
-    const id = event.target.dataset.id;
+// OBTENER DATOS PARA EDITAR USUARIO Y EVENTOS SUBMIT
+document.addEventListener("DOMContentLoaded", function () {
+  // Eventos submit delegados al document body (funcionan aunque DataTables re-dibuje el HTML)
+  document.body.addEventListener("submit", function (event) {
+    if (event.target && event.target.id === "form-crearUser") {
+      validarFormularioUser(event, "crear");
+    } else if (event.target && event.target.id === "form-editarUser") {
+      validarFormularioUser(event, "editar");
+    }
+  });
 
-    Swal.fire({
-      title: "¿Estás seguro?",
-      text: "No podrás revertir esta acción",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Realizar la solicitud para eliminar
-        fetch(`cruds/eliminar_user.php?id=${id}`, { method: "POST" })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              //alert("Registro eliminado correctamente");
-              Swal.fire({
-                title: "Eliminado",
-                text: data.message, // Mostrar el mensaje específico si existe
-                icon: "warning",
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true,
+  document.body.addEventListener("click", function (event) {
+    if (event.target.classList.contains("editarUser")) {
+      const id = event.target.dataset.id;
+      fetch(`cruds/obtener_usuario.php?id=${id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            const formulario = document.getElementById("form-editarUser");
+            if (formulario) {
+              const campos = ["idusuario", "usuario", "nombre", "papellido", "sapellido", "email", "rol", "tienda", "estatus"];
+              campos.forEach((campo) => {
+                if (formulario[`editar-${campo}`]) {
+                  formulario[`editar-${campo}`].value = data.users[campo] || "";
+                }
               });
-              // Remover la fila de la tabla
-              event.target.closest("tr").remove();
-            } else {
-              Swal.fire(
-                "Error",
-                data.message || "No se pudo eliminar el registro.",
-                "error",
-              );
+              // Limpiar contraseñas para que no queden marcadas
+              document.getElementById("editar-password1").value = "";
+              document.getElementById("editar-password2").value = "";
+              
+              abrirModalUser("editar-modalUser");
             }
-          })
-          .catch((error) => {
-            Swal.fire(
-              "Error",
-              "Hubo un problema al procesar tu solicitud.",
-              "error",
-            );
-            console.error("Error al eliminar la tienda:", error);
-          });
-      }
-    });
-  }
-});
-
-//Buscar en la tabla y filtrar usuarios
-document.addEventListener("DOMContentLoaded", function () {
-  const observarDOM = new MutationObserver(function (mutations) {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        const buscarBox = document.getElementById("buscarboxusuario");
-        if (buscarBox) {
-          //console.log("Elemento 'buscarbox' encontrado dinámicamente");
-          agregarEventoBuscarUsuario(buscarBox);
-          observarDOM.disconnect(); // Deja de observar después de encontrarlo
-        }
-      }
-    });
-  });
-
-  // Comienza a observar el body del DOM
-  observarDOM.observe(document.body, { childList: true, subtree: true });
-
-  // Si el elemento ya existe en el DOM
-  const buscarBoxInicial = document.getElementById("buscarboxusuario");
-  if (buscarBoxInicial) {
-    console.log("Elemento 'buscarboxusuario' ya existe en el DOM");
-    agregarEventoBuscarUsuario(buscarBoxInicial);
-    observarDOM.disconnect(); // No es necesario seguir observando
-  }
-
-  // Función para agregar el evento de búsqueda
-  function agregarEventoBuscarUsuario(buscarBox) {
-    buscarBox.addEventListener("input", function () {
-      const filtro = buscarBox.value.toLowerCase();
-      const filas = document.querySelectorAll("#tabla-usuarios tbody tr");
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    });
-  }
-});
-
-//Limpiar busqueda usuarios
-document.addEventListener("DOMContentLoaded", function () {
-  // Delegación del evento 'input' en el campo de búsqueda
-  document.addEventListener("input", function (event) {
-    if (event.target.id === "buscarboxusuario") {
-      const buscarBox = event.target; // El input dinámico
-      const filtro = buscarBox.value.toLowerCase();
-      const limpiarBusquedaUsuario = document.getElementById(
-        "limpiar-busquedaUsuario",
-      ); // Botón dinámico
-      const filas = document.querySelectorAll("#tabla-usuarios tbody tr");
-      const mensajeVacio = document.getElementById("mensaje-vacio");
-
-      let coincidencias = 0; // Contador de filas visibles
-
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        if (textoFila.includes(filtro)) {
-          fila.style.display = ""; // Mostrar fila
-          coincidencias++;
-        } else {
-          fila.style.display = "none"; // Ocultar fila
-        }
-      });
-
-      // Mostrar/ocultar mensaje de resultados vacíos
-      if (coincidencias === 0) {
-        mensajeVacio.style.display = "block";
-      } else {
-        mensajeVacio.style.display = "none";
-      }
-
-      // Filtrar las filas de la tabla
-      filas.forEach((fila) => {
-        const textoFila = fila.textContent.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
-    }
-  });
-
-  // Delegación del evento 'click' en el botón "Limpiar"
-  document.addEventListener("click", function (event) {
-    if (event.target.id === "limpiar-busquedaUsuarios") {
-      const buscarBox = document.getElementById("buscarboxusuario");
-      const limpiarBusquedaUsuarios = event.target;
-
-      if (buscarBox) {
-        buscarBox.value = ""; // Limpiar el input
-        if (limpiarBusquedaUsuarios) {
-          limpiarBusquedaUsuarios.style.display = "none"; // Ocultar el botón de limpiar
-          document.getElementById("mensaje-vacio").style.display = "none";
-        }
-      }
-
-      const filas = document.querySelectorAll("#tabla-usuarios tbody tr");
-      filas.forEach((fila) => {
-        fila.style.display = ""; // Mostrar todas las filas
-      });
-    }
-  });
-});
-
-//Función para filtrar usuarios desde el servidor ****************************
-function cargarUsuariosFiltrados() {
-  const estatusFiltro = document
-    .getElementById("estatusFiltroU")
-    .value.trim()
-    .toLowerCase();
-
-  if (!estatusFiltro) {
-    cargarUsuarios(); // Si el usuario selecciona "Todos", cargamos los primeros 10 usuarios normales
-    return;
-  }
-  //console.log("Cargando usuarios filtradas del servidor:", estatusFiltro);
-
-  fetch(`cruds/cargar_usuarios.php?estatus=${estatusFiltro}`)
-    .then((response) => response.json())
-    .then((data) => {
-      //console.log("Filtradas: ",data);
-      actualizarTablaUsuarios(data);
-    })
-    .catch((error) =>
-      console.error("Error al cargar usuarios filtradas:", error),
-    );
-}
-
-//Función para actualizar tabla usuarios filtrados
-function actualizarTablaUsuarios(data) {
-  let tbody = document.getElementById("usuarios-lista");
-  tbody.innerHTML = ""; // Limpiar la tabla
-  //console.log(data);
-
-  if (data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan='7' style='text-align: center; color: red;'>No se encontraron usuarios</td></tr>`;
-    return;
-  }
-  //LIMPIAR LA TABLA antes de agregar nuevos usuarios
-  tbody.innerHTML = "";
-
-  data.forEach((usuario) => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-          <td data-lable"Imagen:"><img src="${
-            usuario.imagen
-          }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
-          <td data-lable="Usuario:">${usuario.usuario}</td>
-          <td data-lable="Nombre:">${usuario.nombre}</td>
-          <td data-lable="Primer apellido:">${usuario.p_appellido}</td>
-          <td data-lable="Segundo apellido:">${
-            usuario.s_appellido
-          }</td>          
-          <td data-lable="Rol:">${usuario.nom_rol}</td>
-          <td data-lable="Taller:">${usuario.nombre_t}</td>
-
-          <td data-lable="Estatus">
-          <button class="btn ${
-            usuario.estatus == 0 ? "btn-success" : "btn-danger"
-          }">
-                             ${usuario.estatus == 0 ? "Activo" : "Inactivo"}
-          </button>
-          </td>
-          <td data-lable="Editar">
-            <button title="Editar" class="editarUser fa-solid fa-pen-to-square" data-id="${
-              usuario.id_usuario
-            }"></button>
-            </td>
-            <td data-lable="Eliminar">
-            <button title="Eliminar" class="eliminarUser fa-solid fa-trash" data-id="${
-              usuario.id_usuario
-            }"></button>
-          </td>
-      `;
-    tbody.appendChild(fila);
-  });
-}
-
-//Función para cargar los primeros 10 Usuarios por defecto
-function cargarUsuarios() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_usuarios.php?limit=10&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaUsuarios(data);
-    })
-    .catch((error) => console.error("Error al cargar usuarios:", error));
-}
-
-/* ------------------------ SCROLL USUARIOS INFINITO ------------------------*/
-
-function cargarUsuariosScroll() {
-  if (cargando) return;
-  cargando = true;
-
-  // Obtener el filtro actual para que el scroll también lo respete
-  const estatusFiltro = document
-    .getElementById("estatusFiltroU")
-    .value.trim()
-    .toLowerCase();
-  let url = `cruds/cargar_usuarios_scroll.php?page=${pagina}`;
-
-  if (estatusFiltro !== "") {
-    url += `&estatus=${estatusFiltro}`; // Enviar el filtro al servidor
-  }
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        const tbody = document.querySelector("#tabla-usuarios tbody");
-        data.forEach((usuario) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td data-lable"Imagen:"><img src="${
-              usuario.imagen
-            }" width="50" height="50" onerror="this.src='../imgs/default.png'"></td>
-            <td data-lable="Usuario:">${usuario.usuario}</td>
-            <td data-lable="Nombre:">${usuario.nombre}</td>
-            <td data-lable="Primer apellido:">${usuario.p_appellido}</td>
-            <td data-lable="Segundo apellido:">${usuario.s_appellido}</td>
-            <td data-lable="Rol:">${usuario.nom_rol}</td>
-            <td data-lable="Tienda:">${usuario.nombre_t}</td>
-
-            <td data-lable="Estatus:">
-              <button class="btn ${
-                usuario.estatus == 0 ? "btn-success" : "btn-danger"
-              }">
-                ${usuario.estatus == 0 ? "Activo" : "Inactivo"}
-              </button>
-            </td>
-            <td data-lable="Editar:">
-              <button title="Editar" class="editarUser fa-solid fa-pen-to-square" data-id="${
-                usuario.id_usuario
-              }"></button>
-              </td>
-              <td data-lable="Eliminar:">
-              <button title="Eliminar" class="eliminarUser fa-solid fa-trash" data-id="${
-                usuario.id_usuario
-              }"></button>
-            </td>
-          `;
-          tbody.appendChild(row);
+          } else {
+            Swal.fire("Error", data.message || "No se pudo cargar el usuario.", "error");
+          }
         });
+    }
 
-        pagina++; // Aumentamos la página
-        cargando = false;
-      } else {
-        Swal.fire({
-          title: "No hay más usuarios.",
-          icon: "info",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-      }
-    })
-    .catch((error) => console.error("Error al cargar usuarios:", error));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.location.pathname.includes("usuarios.php")) {
-    pagina = 2; //  Reiniciar paginación
-    cargando = false; // Permitir cargar más usuarios
-    console.log("Reiniciando scroll y cargando usuarios en usuarios.php");
-
-    //REACTIVAR EL SCROLL INFINITO CUANDO REGRESES A usuarios.php
-    iniciarScrollUsuarios();
-  }
-});
-
-function iniciarScrollUsuarios() {
-  const scrollContainer = document.getElementById("scroll-containerU");
-  if (!scrollContainer) return;
-
-  scrollContainer.addEventListener("scroll", () => {
-    if (
-      scrollContainer.scrollTop + scrollContainer.clientHeight >=
-        scrollContainer.scrollHeight - 10 &&
-      !cargando
-    ) {
-      console.log(" Scroll detectado, cargando más usuarios...");
-      cargarUsuariosScroll();
+    // ELIMINAR USUARIO ***********************************************
+    if (event.target.classList.contains("eliminarUser")) {
+      const id = event.target.dataset.id;
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "No podrás revertir esta acción",
+        icon: "warning",
+        returnFocus: false,
+        showCancelButton: true,
+        confirmButtonText: "Sí, eliminar"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`cruds/eliminar_user.php?id=${id}`, { method: "POST" })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                Swal.fire("Eliminado", data.message, "success").then(() => {
+                  if (document.getElementById("usuarios-link")) document.getElementById("usuarios-link").click();
+                });
+              } else {
+                Swal.fire("Error", data.message, "error");
+              }
+            });
+        }
+      });
     }
   });
-
-  //console.log(" Scroll infinito reactivado en usuarios.php");
-}
-
-const observerUsuarios = new MutationObserver(() => {
-  const usuariosSeccion = document.getElementById("scroll-containerU");
-  if (usuariosSeccion) {
-    observerUsuarios.disconnect();
-    iniciarScrollUsuarios();
-  }
 });
-
-const Usuarios = document.getElementById("content-area");
-if (Usuarios) {
-  observerUsuarios.observe(Usuarios, { childList: true, subtree: true });
-}
 
 // Llamar Productos *******************************************************
 document
@@ -2699,7 +1505,7 @@ function procesarFormularioProducto(event, tipo) {
 function validarFormularioProducto(event) {
   event.preventDefault();
 
-  // 1. reglas para TODOS los campos en un solo lugar
+  // reglas para TODOS los campos en un solo lugar
   const reglasValidacion = [
     // Textos
     { id: "crear-codebar", tipo: "texto", min: 3, mensaje: "El código de barras debe tener al menos 3 caracteres." },
@@ -2723,7 +1529,6 @@ function validarFormularioProducto(event) {
   const errores = [];
   let primerCampoConError = null;
 
-  // 2. El "Motor" que revisa cada regla automáticamente
   reglasValidacion.forEach(regla => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return; // Si el campo no existe en el HTML, lo ignora
@@ -2731,7 +1536,7 @@ function validarFormularioProducto(event) {
     let valor = elemento.value.trim();
     let esValido = true;
 
-    // A) borde rojo desaparezca cuando el usuario corrija el error
+    //  borde rojo desaparezca cuando el usuario corrija el error
     if (regla.tipo === "select") {
         // Los selects usan 'change' cuando eliges una opción
         elemento.addEventListener("change", function() {
@@ -2744,7 +1549,7 @@ function validarFormularioProducto(event) {
         });
     }
 
-    // B) Evaluar si el campo pasa la prueba
+    // Evaluar si el campo pasa la prueba
     if (regla.tipo === "texto") {
         if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "select") {
@@ -2754,7 +1559,7 @@ function validarFormularioProducto(event) {
         if (isNaN(num) || num < regla.minVal) esValido = false;
     }
 
-    // C) Aplicar el estilo rojo y guardar el mensaje si falló
+    // Aplica el estilo rojo y guardar el mensaje si falló
     if (!esValido) {
         errores.push(`<li>${regla.mensaje}</li>`); // Lo guardamos como elemento de lista HTML
         elemento.classList.add("input-error");
@@ -2766,23 +1571,29 @@ function validarFormularioProducto(event) {
     }
   });
 
-  // 3. Si se encontraron errores, mostrar la alerta estructurada
-  if (errores.length > 0) {
+  //  Si se encontraron errores, mostrar la alerta estructurada
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
-      // Unimos todos los errores en una lista <ul> para que se vea ordenado
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido' // Usamos un botón para que el usuario pueda leer la lista con calma
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
     
-    // Movemos la pantalla y el cursor al primer campo que le faltó llenar
-    if (primerCampoConError) primerCampoConError.focus();
-    return; // Detenemos el envío
+    return;
   }
 
-  // 4. Si pasa las validaciones visuales, verificamos duplicados en la BD
+  // Si pasa las validaciones visuales, verificamos duplicados en la BD
   const codebar = document.getElementById("crear-codebar").value.trim();
   const producto = document.getElementById("crear-producto").value.trim();
 
@@ -2963,12 +1774,10 @@ function verificarDuplicadoEditarProducto(producto, id = 0) {
       return true; // Asume duplicado en caso de error
     });
 }
-// =========================================================================
-// 1. VALIDACIÓN PROFESIONAL DEL FORMULARIO DE EDICIÓN PRODUCTO
-// =========================================================================
+// VALIDACIÓN DEL FORMULARIO DE EDICIÓN PRODUCTO
 async function validarFormularioEdicionProducto(formulario) {
   
-  // 1. Definimos las reglas exactas para los campos de EDICIÓN (id empieza con "editar-")
+  //  las reglas exactas para los campos de EDICIÓN (id empieza con "editar-")
   const reglasValidacion = [
     // Textos
     { id: "editar-codebar", tipo: "texto", min: 3, mensaje: "El código de barras debe tener al menos 3 caracteres." },
@@ -2991,7 +1800,7 @@ async function validarFormularioEdicionProducto(formulario) {
   const errores = [];
   let primerCampoConError = null;
 
-  // 2. El "Motor" que revisa cada regla automáticamente
+  // El "Motor" que revisa cada regla automáticamente
   reglasValidacion.forEach(regla => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return; // Si no lo encuentra, lo salta para no romper el código
@@ -2999,7 +1808,7 @@ async function validarFormularioEdicionProducto(formulario) {
     let valor = elemento.value.trim();
     let esValido = true;
 
-    // A) Programar que el borde rojo desaparezca al corregir
+    //  Programar que el borde rojo desaparezca al corregir
     if (regla.tipo === "select") {
         elemento.addEventListener("change", function() {
             if (this.value.trim() !== "") this.classList.remove("input-error");
@@ -3010,7 +1819,7 @@ async function validarFormularioEdicionProducto(formulario) {
         });
     }
 
-    // B) Evaluar si el campo pasa la prueba
+    // Evaluar si el campo pasa la prueba
     if (regla.tipo === "texto") {
         if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "select") {
@@ -3020,7 +1829,7 @@ async function validarFormularioEdicionProducto(formulario) {
         if (isNaN(num) || num < regla.minVal) esValido = false;
     }
 
-    // C) Aplicar el estilo rojo y guardar el mensaje si falló
+    //  Aplicar el estilo rojo y guardar el mensaje si falló
     if (!esValido) {
         errores.push(`<li>${regla.mensaje}</li>`);
         elemento.classList.add("input-error");
@@ -3030,21 +1839,29 @@ async function validarFormularioEdicionProducto(formulario) {
     }
   });
 
-  // 3. Si hay errores visuales, mostramos la alerta y detenemos todo
-  if (errores.length > 0) {
+  // Si hay errores visuales, mostramos la alerta y detenemos todo
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
     
-    if (primerCampoConError) primerCampoConError.focus();
-    return; 
+    return;
   }
 
-  // 4. Validar duplicados en la Base de Datos (Backend)
+  // Validar duplicados en la Base de Datos (Backend)
   const productoInput = document.getElementById("editar-producto");
   const codebarInput = document.getElementById("editar-codebar");
   const idInput = document.getElementById("editar-idproducto");
@@ -3069,11 +1886,11 @@ async function validarFormularioEdicionProducto(formulario) {
     return;
   }
 
-  // 5. ¡Paso todas las validaciones! Enviamos al servidor
+  // Pasa todas las validaciones! Enviamos al servidor
   enviarFormularioEdicionProducto(formulario);
 }
 
-// 2. Enviar formulario de edición Producto (AQUÍ SÍ EXISTE 'data')
+// Enviar formulario de edición Producto (AQUÍ SÍ EXISTE 'data')
 function enviarFormularioEdicionProducto(formulario) {
   if (!formulario) return;
   
@@ -3192,7 +2009,7 @@ function cerrarModalCat(id) {
   document.getElementById(id).style.display = "none";
 }
 
-// CREAR CATEGORÍA (Validación Profesional y Procesamiento) ******************************************
+// CREAR CATEGORÍA (Validación y Procesamiento) ******************************************
 function validarFormularioCat(event) {
   event.preventDefault();
 
@@ -3223,15 +2040,24 @@ function validarFormularioCat(event) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -3419,15 +2245,24 @@ async function validarFormularioEdicionCat(formulario) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -3467,7 +2302,7 @@ function enviarFormularioEdicionCat(formulario) {
             document.getElementById("categorias-link").click();
           }
         });
-        // Si tu función de cerrar modal se llama cerrarModalCat, asegúrate de que diga eso:
+        // Si la función de cerrar modal se llama cerrarModalCat, asegúrate de que diga eso:
         cerrarModalCat("editar-modalCat"); 
       } else {
         Swal.fire({
@@ -3486,7 +2321,7 @@ function enviarFormularioEdicionCat(formulario) {
     });
 }
 
-// Eliminar Categorias*********************************
+// Eliminar Categorias *********************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarCat")) {
     const id = event.target.dataset.id;
@@ -3595,15 +2430,24 @@ function validarFormularioMarca(event) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -3789,15 +2633,24 @@ async function validarFormularioEdicionMarca(formulario) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -3969,15 +2822,24 @@ function validarFormularioTiposervicios(event) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -4056,7 +2918,7 @@ function verificarDuplicadoTiposervicios(tiposervicios) {
 
 // Editar tipo de servicios ***********************************
 document.addEventListener("DOMContentLoaded", function () {
-  // 1. Escuchar clic en el botón de editar
+  // Escuchar clic en el botón de editar
   document.addEventListener("click", function (event) {
     if (event.target.classList.contains("editarTiposervicio")) {
       const id = event.target.dataset.id;
@@ -4088,7 +2950,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // 2. Escuchar el submit del formulario de edición
+  // Escuchar el submit del formulario de edición
   document.body.addEventListener("submit", function (event) {
     if (event.target && event.target.id === "form-editarTiposervicio") {
       event.preventDefault(); 
@@ -4097,7 +2959,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// 3. Verificar duplicado al editar
+// Verificar duplicado al editar
 function verificarDuplicadoEditarTiposervicio(tiposervicio, id = 0) {
   return fetch("cruds/verificar_nombre_tiposervicios.php", {
     method: "POST",
@@ -4124,7 +2986,7 @@ function verificarDuplicadoEditarTiposervicio(tiposervicio, id = 0) {
     });
 }
 
-// 4. Validación del Motor de Reglas
+// Validación del Motor de Reglas
 async function validarFormularioEdicionTiposervicio(formulario) {
   // Los IDs aquí ya coinciden exactamente con tu HTML
   const reglasValidacion = [
@@ -4154,15 +3016,24 @@ async function validarFormularioEdicionTiposervicio(formulario) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -4181,7 +3052,7 @@ async function validarFormularioEdicionTiposervicio(formulario) {
   }
 }
 
-// 5. Enviar a la Base de Datos
+// Enviar a la Base de Datos
 function enviarFormularioEdicionTiposervicio(formulario) {
   if (!formulario) return;
   const formData = new FormData(formulario);
@@ -4337,15 +3208,24 @@ document
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -4404,7 +3284,6 @@ function verificarDuplicadoEstadoservicio(estadoservicio) {
     .then((data) => {
       //console.log("Respuesta de verificar_nombre.php:", data);
       if (data.existe) {
-        //mostrarAlerta("error", "Error", "El nombre del estado de servicio ya existe.");
         Swal.fire({
           title: "!Atención¡",
           text: "El nombre de la Categoría ya existe.",
@@ -4534,15 +3413,24 @@ async function validarFormularioEdicionEstadoservicio(formulario) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -4713,15 +3601,24 @@ function validarFormularioMpago(event) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -4909,15 +3806,24 @@ async function validarFormularioEdicionMpago(formulario) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -5100,15 +4006,24 @@ function validarFormularioImpuesto(event) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -5254,7 +4169,7 @@ function verificarDuplicadoEditarImpuesto(impuesto, id = 0) {
     });
 }
 
-// Validación Profesional del Formulario
+// Validación  del Formulario
 async function validarFormularioEdicionImpuesto(formulario) {
   const reglasValidacion = [
     { id: "editar-impuesto", tipo: "texto", min: 3, mensaje: "El impuesto debe tener al menos 3 caracteres." },
@@ -5291,15 +4206,24 @@ async function validarFormularioEdicionImpuesto(formulario) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -5439,7 +4363,6 @@ document
   }
   
   //Crear Proveedores***********************************
-
 function validarFormularioProveedor(event) {
   event.preventDefault();
 
@@ -5489,15 +4412,24 @@ function validarFormularioProveedor(event) {
   });
 
   //  Mostrar errores
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -5572,7 +4504,6 @@ function verificarDuplicadoProveedor(proveedor) {
 }
 
 //Editar Proveedores************************************************************
-
 // Escuchar clic en el botón de editar y cargar datos
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("editarProveedor")) {
@@ -5643,7 +4574,7 @@ function verificarDuplicadoEditarProveedor(proveedor, id = 0) {
     });
 }
 
-// Validación Profesional del Formulario
+// Validación  del Formulario
 async function validarFormularioEdicionProveedor(formulario) {
   // Motor de reglas (Soporta Textos y Emails)
   const reglasValidacion = [
@@ -5686,15 +4617,24 @@ async function validarFormularioEdicionProveedor(formulario) {
     }
   });
 
-  if (errores.length > 0) {
+if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonText: 'Entendido',
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      }
     });
-    if (primerCampoConError) primerCampoConError.focus();
+    
     return;
   }
 
@@ -5754,7 +4694,7 @@ function enviarFormularioEdicionProveedor(formulario) {
     });
 }
 
-// Eliminar Proveedores*****************************
+// Eliminar Proveedores *****************************
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("eliminarProveedor")) {
     const id = event.target.dataset.id;
@@ -6035,9 +4975,29 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// FUNCIÓN MATEMÁTICA PARA EL MODAL DE EDITAR (LIBERADA GLOBALMENTE)
+function calcularSaldoEdit() {
+    const costo = parseFloat(document.getElementById('edit-costo').value) || 0;
+    const anticipoAcumulado = parseFloat(document.getElementById('edit-anticipo').value) || 0;
+    const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
+    
+    // El saldo es el costo menos lo que ya había dado, menos lo que está dando ahorita
+    let saldoFinal = costo - (anticipoAcumulado + nuevoAbono);
+    
+    // Evitamos que el saldo sea negativo visualmente
+    if (saldoFinal < 0) saldoFinal = 0; 
+    
+    const inputSaldo = document.getElementById('edit-saldo');
+    if (inputSaldo) {
+        inputSaldo.value = saldoFinal.toFixed(2);
+    }
+}
+
+
+// MANEJO DE TODOS LOS FORMULARIOS (SUBMITS)
 document.addEventListener('submit', function(e) {
     
-    // A) GUARDAR CLIENTE EXPRESS
+    // GUARDAR CLIENTE EXPRESS
     if (e.target && e.target.id === 'form-cliente-express') {
         e.preventDefault();
         e.stopPropagation();
@@ -6061,9 +5021,9 @@ document.addEventListener('submit', function(e) {
                     if (btnLimpiar) btnLimpiar.style.display = 'inline';
                     if (listaResultados) listaResultados.style.display = 'none';
                 }
-                Swal.fire({ icon: 'success', title: 'Cliente creado', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                Swal.fire({ icon: 'success', title: 'Cliente creado', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, returnFocus: false });
             } else {
-                Swal.fire('Error', data.message, 'error');
+                Swal.fire({ title: 'Error', text: data.message, icon: 'error', returnFocus: false });
             }
         });
     }
@@ -6071,18 +5031,70 @@ document.addEventListener('submit', function(e) {
     // CREAR ORDEN (INCLUYE FOTOS WEBCAM)
     if (e.target && e.target.id === 'form-crearOrden') {
         e.preventDefault();
-        
         const form = e.target;
+        let hayErrores = false;
+
+        function validarCampo(selector, esSelect = false) {
+            const campo = form.querySelector(selector);
+            if (!campo) return true;
+            
+            const valor = campo.value.trim();
+            if (valor === "") {
+                campo.classList.add("input-error");
+                campo.style.border = "1px solid #d33"; 
+                hayErrores = true;
+                campo.addEventListener(esSelect ? "change" : "input", function() {
+                    this.classList.remove("input-error");
+                    this.style.border = ""; 
+                }, { once: true });
+                return false;
+            } else {
+                campo.classList.remove("input-error");
+                campo.style.border = ""; 
+                return true;
+            }
+        }
+
+        const idCliente = document.getElementById('id_cliente_seleccionado').value;
+        const cajaBusquedaCliente = document.getElementById('busqueda-cliente');
+        if (!idCliente || idCliente.trim() === "") {
+            if(cajaBusquedaCliente) {
+                cajaBusquedaCliente.classList.add("input-error");
+                hayErrores = true;
+                cajaBusquedaCliente.addEventListener("input", function() {
+                    this.classList.remove("input-error");
+                }, { once: true });
+            }
+        } else {
+            if(cajaBusquedaCliente) cajaBusquedaCliente.classList.remove("input-error");
+        }
+
+        validarCampo('[name="tipo_equipo"]', true);
+        validarCampo('[name="marca"]', true);
+        validarCampo('[name="tipo_servicio"]', true);
+        validarCampo('[name="modelo"]');
+        validarCampo('[name="falla"]');
+
+        if (hayErrores) {
+            Swal.fire({
+                title: "Faltan datos",
+                text: "Por favor, revisa y completa los campos marcados en rojo.",
+                icon: "warning",
+                returnFocus: false,
+                confirmButtonColor: '#3085d6'
+            });
+            return; 
+        }
+
         const formData = new FormData(form);
         
-        // Agregar fotos de webcam si existen
         if (typeof fotosCapturadas !== 'undefined' && fotosCapturadas.length > 0) {
             fotosCapturadas.forEach((foto, index) => {
                 formData.append('evidencias[]', foto, `webcam_foto_${index}.jpg`);
             });
         }
 
-        Swal.fire({ title: 'Procesando...', text: 'Generando orden...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        Swal.fire({ title: 'Procesando...', text: 'Generando orden...', allowOutsideClick: false, returnFocus: false, didOpen: () => Swal.showLoading() });
 
         fetch('cruds/procesar_crear_orden.php', { method: 'POST', body: formData })
         .then(res => res.json())
@@ -6092,19 +5104,15 @@ document.addEventListener('submit', function(e) {
                 form.reset();
                 document.getElementById('preview-container').innerHTML = '';
                 
-                // Reset Cámara
                 fotosCapturadas = []; 
                 if(streamCamara) streamCamara.getTracks().forEach(track => track.stop());
                 document.getElementById('camera-preview').style.display = 'none';
                 document.getElementById('btn-activar-camara').style.display = 'inline-block';
                 document.getElementById('btn-tomar-foto').style.display = 'none';
 
-                // Reset Buscador Cliente
-                const inputBusqueda = document.getElementById('busqueda-cliente');
-                if(inputBusqueda) { inputBusqueda.value = ''; inputBusqueda.disabled = false; }
+                if(cajaBusquedaCliente) { cajaBusquedaCliente.value = ''; cajaBusquedaCliente.disabled = false; }
                 if(document.getElementById('limpiar-cliente')) document.getElementById('limpiar-cliente').style.display = 'none';
                 
-                // ALERTA DE ÉXITO CON QR
                 Swal.fire({
                     title: '¡Orden Creada!',
                     html: `<p>${data.message}</p>
@@ -6113,6 +5121,7 @@ document.addEventListener('submit', function(e) {
                            </div>
                            <p style="font-size: 12px; color: #666;">Escanea para ver el rastreo</p>`,
                     icon: 'success',
+                    returnFocus: false,
                     confirmButtonText: '<i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp',
                     showCancelButton: true,
                     cancelButtonText: 'Cerrar',
@@ -6130,115 +5139,49 @@ document.addEventListener('submit', function(e) {
                     if(document.getElementById("ordenes-link")) document.getElementById("ordenes-link").click(); 
                 });
             } else {
-                Swal.fire('Error', data.message, 'error');
+                Swal.fire({ title: 'Error', text: data.message, icon: 'error', returnFocus: false });
             }
         })
         .catch(err => {
             console.error(err);
-            Swal.fire('Error', 'Fallo en el servidor', 'error');
+            Swal.fire({ title: 'Error', text: 'Fallo en el servidor', icon: 'error', returnFocus: false });
         });
     }
-});
 
-//Función para cargar los primeras 10 ordenes por defecto
-function cargarOrdenes() {
-  pagina = 2; //Reiniciar la paginación cuando seleccionas "Todos"
-  cargando = false; //Asegurar que el scroll pueda volver a activarse
-
-  fetch("cruds/cargar_ordenes.php?limit=8&offset=0")
-    .then((response) => response.json())
-    .then((data) => {
-      actualizarTablaOrdenes(data);
-    })
-    .catch((error) => console.error("Error al cargar ordenes:", error));
-}
-
-//Llamar editar ordenes 
-// Función para calcular el saldo en el modal de editar
-function calcularSaldoEdit() {
-    const costo = parseFloat(document.getElementById('edit-costo').value) || 0;
-    const anticipoAcumulado = parseFloat(document.getElementById('edit-anticipo').value) || 0;
-    const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
-    
-    // El saldo es el costo menos lo que ya había dado, menos lo que está dando ahorita
-    let saldoFinal = costo - (anticipoAcumulado + nuevoAbono);
-    
-    // Evitamos que el saldo sea negativo visualmente
-    if (saldoFinal < 0) saldoFinal = 0; 
-    
-    document.getElementById('edit-saldo').value = saldoFinal.toFixed(2);
-}
-
-//  ABRIR EL MODAL Y TRAER DATOS
-document.addEventListener('click', function(e) {
-    if (e.target && e.target.classList.contains('editarOrden')) {
-        const idOrden = e.target.getAttribute('data-id');
-
-        // Mostramos cargando con SweetAlert
-        Swal.fire({ title: 'Cargando datos...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-        fetch(`cruds/obtener_orden.php?id=${idOrden}`)
-        .then(res => res.json())
-        .then(data => {
-            Swal.close();
-            if(data.success) {
-                // Llenamos el formulario con los datos de la base de datos
-                document.getElementById('edit-id-orden').value = data.orden.id_orden;
-                document.getElementById('edit-folio-text').textContent = data.orden.id_orden;
-                document.getElementById('edit-estado').value = data.orden.id_estado_servicio;
-                document.getElementById('edit-falla').value = data.orden.falla;
-                document.getElementById('edit-diagnostico').value = data.orden.diagnostico;
-                document.getElementById('edit-costo').value = data.orden.costo_servicio;
-                document.getElementById('edit-anticipo').value = data.orden.anticipo_servicio || 0;
-                document.getElementById('edit-nuevo-abono').value = '0';
-
-                calcularSaldoEdit(); // Calculamos para que se vea rojo el saldo
-
-                const formEditar = document.getElementById('form-editarOrden');
-                    formEditar.dataset.estadoOrig = data.orden.id_estado_servicio;
-                    // Usamos || '' por si el diagnóstico viene vacío (null) de la BD
-                    formEditar.dataset.diagOrig = data.orden.diagnostico || ''; 
-                    formEditar.dataset.costoOrig = parseFloat(data.orden.costo_servicio).toFixed(2);
-                
-                // Abrimos el modal
-                abrirModalOrden('editar-modalOrden');
-            } else {
-                Swal.fire('Error', data.message, 'error');
-            }
-        })
-        .catch(err => {
-            Swal.close();
-            console.error(err);
-            Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
-        });
-    }
-});
-
-// ENVIAR LOS DATOS ACTUALIZADOS AL SERVIDOR
-document.addEventListener("submit", function (e) {
-  if (e.target && e.target.id === "form-editarOrden") {
- e.preventDefault();
+    // EDITAR ORDEN 
+    if (e.target && e.target.id === "form-editarOrden") {
+        e.preventDefault();
         
-        const form = e.target; // Nuestro formulario
-        // NUEVA VALIDACIÓN: ¿HUBO CAMBIOS ?
-        // 1. Extraemos los valores actuales de las cajas
+        const form = e.target; 
         const estadoActual = document.getElementById('edit-estado').value;
         const diagActual = document.getElementById('edit-diagnostico').value.trim();
         const costoActual = parseFloat(document.getElementById('edit-costo').value || 0).toFixed(2);
         const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
+        
+        const costoOriginal = parseFloat(form.dataset.costoOrig) || 0;
+        const anticipoOriginal = parseFloat(document.getElementById('edit-anticipo').value) || 0;
+        const saldoRestanteReal = costoOriginal - anticipoOriginal;
 
-        // 2. Comparamos los actuales contra la "fotografía" que guardamos
+        if (nuevoAbono > saldoRestanteReal && saldoRestanteReal > 0) {
+            Swal.fire({
+                title: "Abono excedido",
+                text: `El cliente solo debe $${saldoRestanteReal.toFixed(2)}. No puedes abonar $${nuevoAbono.toFixed(2)}.`,
+                icon: "error",
+                returnFocus: false
+            });
+            return;
+        }
+
         if (estadoActual === form.dataset.estadoOrig && 
             diagActual === form.dataset.diagOrig && 
             costoActual === form.dataset.costoOrig && 
-            nuevoAbono === 0) { // Si el abono es 0, tampoco hubo pago
+            nuevoAbono === 0) { 
             
-            // Lanzamos alerta informativa y detenemos todo el proceso
             Swal.fire({
                 icon: 'info',
                 title: 'Sin cambios',
                 text: 'No has modificado ningún dato ni ingresado un nuevo abono.',
-                icon: "warning",
+                returnFocus: false,
                 showConfirmButton: false,
                 timer: 2000,
                 timerProgressBar: true,
@@ -6246,49 +5189,91 @@ document.addEventListener("submit", function (e) {
             return; 
         }
 
-    const formData = new FormData(e.target);
+        const formData = new FormData(form);
 
-    Swal.fire({
-      title: "Guardando cambios...",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-    });
-
-    // Vamos al PHP del Paso 3
-    fetch("cruds/procesar_editar_orden.php", { method: "POST", body: formData })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          cerrarModalOrden("editar-modalOrden");
-
-  Swal.fire({
-            icon: "success", // Cambiamos a success porque todo salió bien
-            title: "¡Actualizado!",
-            text: data.message,
-            showConfirmButton: false,
-            timer: 2000,           
-            timerProgressBar: true    
-        }).then(() => {
-            // Esto se va a ejecutar automáticamente cuando los 2 segundos terminen
-            if (document.getElementById("ordenes-link")) {
-                document.getElementById("ordenes-link").click();
-            }
+        Swal.fire({
+            title: "Guardando cambios...",
+            allowOutsideClick: false,
+            returnFocus: false,
+            didOpen: () => Swal.showLoading(),
         });
-        } else {
-          Swal.fire("Error", data.message, "error");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        Swal.fire("Error", "Ocurrió un problema en la red.", "error");
-      });
-  }
-});
-// LÓGICA PARA ELIMINAR (CANCELAR) ÓRDENES
+
+        fetch("cruds/procesar_editar_orden.php", { method: "POST", body: formData })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.success) {
+                cerrarModalOrden("editar-modalOrden");
+                Swal.fire({
+                    icon: "success", 
+                    title: "¡Actualizado!",
+                    text: data.message,
+                    returnFocus: false,
+                    showConfirmButton: false,
+                    timer: 2000,           
+                    timerProgressBar: true    
+                }).then(() => {
+                    if (document.getElementById("ordenes-link")) {
+                        document.getElementById("ordenes-link").click();
+                    }
+                });
+            } else {
+                Swal.fire({ title: "Error", text: data.message, icon: "error", returnFocus: false });
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            Swal.fire({ title: "Error", text: "Ocurrió un problema en la red.", icon: "error", returnFocus: false });
+        });
+    }
+}); // <<< FIN DE TODOS LOS SUBMITS
+
+// MANEJO DE CLICS EN TABLA (EDITAR Y CANCELAR ORDENES) ***************************************
 document.addEventListener('click', function(e) {
-    // Detectamos si el clic fue en el botón rojo
-    const btnEliminar = e.target.closest('.eliminarOrden');
     
+    //  ABRIR MODAL EDITAR
+    const btnEditar = e.target.closest('.editarOrden');
+    if (btnEditar) {
+        const idOrden = btnEditar.getAttribute('data-id');
+
+        Swal.fire({ title: 'Cargando datos...', allowOutsideClick: false, returnFocus: false, didOpen: () => Swal.showLoading() });
+
+        fetch(`cruds/obtener_orden.php?id=${idOrden}`)
+        .then(res => res.json())
+        .then(data => {
+            Swal.close();
+            if(data.success) {
+                document.getElementById('edit-id-orden').value = data.orden.id_orden;
+                document.getElementById('edit-folio-text').textContent = data.orden.id_orden;
+                document.getElementById('edit-estado').value = data.orden.id_estado_servicio;
+                document.getElementById('edit-falla').value = data.orden.falla;
+                
+                document.getElementById('edit-diagnostico').value = data.orden.diagnostico || ""; 
+                
+                document.getElementById('edit-costo').value = data.orden.costo_servicio;
+                document.getElementById('edit-anticipo').value = data.orden.anticipo_servicio || 0;
+                document.getElementById('edit-nuevo-abono').value = '0';
+
+                calcularSaldoEdit(); 
+
+                const formEditar = document.getElementById('form-editarOrden');
+                formEditar.dataset.estadoOrig = data.orden.id_estado_servicio;
+                formEditar.dataset.diagOrig = data.orden.diagnostico || ''; 
+                formEditar.dataset.costoOrig = parseFloat(data.orden.costo_servicio).toFixed(2);
+                
+                abrirModalOrden('editar-modalOrden');
+            } else {
+                Swal.fire({ title: 'Error', text: data.message, icon: 'error', returnFocus: false });
+            }
+        })
+        .catch(err => {
+            Swal.close();
+            console.error(err);
+            Swal.fire({ title: 'Error', text: 'No se pudo conectar con el servidor.', icon: 'error', returnFocus: false });
+        });
+    }
+
+    // CANCELAR ORDEN
+    const btnEliminar = e.target.closest('.eliminarOrden');
     if (btnEliminar) {
         const idOrden = btnEliminar.getAttribute('data-id');
 
@@ -6296,6 +5281,7 @@ document.addEventListener('click', function(e) {
             title: '¿Estás seguro?',
             text: "La orden #" + idOrden + " será cancelada. No se borrará del historial.",
             icon: 'warning',
+            returnFocus: false,
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#6c757d',
@@ -6303,10 +5289,8 @@ document.addEventListener('click', function(e) {
             cancelButtonText: 'No, regresar'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Pantalla de carga
-                Swal.fire({ title: 'Procesando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                Swal.fire({ title: 'Procesando...', allowOutsideClick: false, returnFocus: false, didOpen: () => Swal.showLoading() });
 
-                // Petición Fetch hacia tu nuevo PHP
                 fetch('cruds/procesar_eliminar_orden.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -6315,39 +5299,32 @@ document.addEventListener('click', function(e) {
                 .then(res => res.json())
                 .then(data => {
                     if(data.success) {
-                        // Mensaje de éxito
-                        Swal.fire('¡Cancelada!', data.message, 'success', ).then(() => {
-                            // Recargamos la tabla automáticamente simulando un clic en el menú
+                        Swal.fire({ title: '¡Cancelada!', text: data.message, icon: 'success', returnFocus: false }).then(() => {
                             if(document.getElementById("ordenes-link")) {
                                 document.getElementById("ordenes-link").click(); 
                             }
                         });
                     } else {
-                        Swal.fire('Error', data.message, 'error');
+                        Swal.fire({ title: 'Error', text: data.message, icon: 'error', returnFocus: false });
                     }
                 })
                 .catch(err => {
                     console.error(err);
-                    Swal.fire('Error', 'Fallo de conexión con el servidor.', 'error');
+                    Swal.fire({ title: 'Error', text: 'Fallo de conexión.', icon: 'error', returnFocus: false });
                 });
             }
         });
     }
 });
 
-// LÓGICA PARA ENVIAR WHATSAPP DESDE LA TABLA
+// UTILIDADES FINALES (WHATSAPP, IMPRESIÓN, QR)
 function enviarWhatsOrden(telefono, folio, cliente, saldo, estado, taller) {
-    // 1. Limpiamos el teléfono
     let tel = telefono.replace(/\D/g, '');
-    if (tel.length === 10) {
-        tel = '52' + tel;
-    }
+    if (tel.length === 10) tel = '52' + tel;
 
-    // 2. Construimos el mensaje de texto limpio
     let mensaje = `¡Hola ${cliente}! Te contactamos de *${taller}*.\n\n`;
     mensaje += `Te informamos que tu orden de servicio con *Folio #${folio}* se encuentra actualmente en estado: *${estado.toUpperCase()}*.\n\n`;
 
-    // 3. Condicionamos el texto del saldo
     let saldoNum = parseFloat(saldo);
     if (saldoNum > 0) {
         mensaje += `*Saldo pendiente:* $${saldoNum.toFixed(2)}\n\n`;
@@ -6356,34 +5333,25 @@ function enviarWhatsOrden(telefono, folio, cliente, saldo, estado, taller) {
     }
 
     mensaje += `Si tienes alguna duda, responde a este mensaje. ¡Gracias por tu preferencia!`;
-
-    // 4. Codificamos el texto para la URL
-    let textoCodificado = encodeURIComponent(mensaje);
-
-    // 5. Abrimos WhatsApp
-    window.open(`https://wa.me/${tel}?text=${textoCodificado}`, '_blank');
+    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
-// LÓGICA PARA IMPRIMIR DESDE LA TABLA
+
 function imprimirTicket(idOrden) {
-    // Abre una ventana pequeña de 400x600 pixeles
     window.open(`cruds/imprimir_ticket.php?id=${idOrden}`, 'Ticket', 'width=400,height=600');
 }
-// LÓGICA PARA VER EL QR RÁPIDO EN PANTALLA
+
 function verQrOrden(token) {
-    // 1. Construimos la URL completa que el cliente va a visitar
     const urlRastreo = `http://localhost/swaos/track.php?t=${token}`;
-    
-    // 2. Generamos la imagen del QR usando la API gratuita (tamaño grande para pantallas)
     const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(urlRastreo)}`;
 
-    // 3. Lanzamos el SweetAlert con la imagen incrustada
     Swal.fire({
         title: 'Código de Rastreo',
-        text: 'Pide al cliente que escanee este código con su cámara.',
+        text: 'Pide al cliente que escanee este código.',
         imageUrl: urlImagenQR,
         imageWidth: 250,
         imageHeight: 250,
-        imageAlt: 'Código QR de Rastreo',
+        imageAlt: 'QR',
+        returnFocus: false,
         confirmButtonText: 'Cerrar',
         confirmButtonColor: '#34495e'
     });

@@ -130,17 +130,26 @@ function validarFormularioCliente(event) {
     }
   });
 
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Faltan datos",
-      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
-      icon: "warning",
-      confirmButtonColor: "#3085d6",
-      confirmButtonText: "Entendido",
-    });
-    if (primerCampoConError) primerCampoConError.focus();
-    return;
+if (errores.length > 0) {
+  // Quitar el cursor por seguridad
+  if (document.activeElement) {
+    document.activeElement.blur();
   }
+
+  Swal.fire({
+    title: "Faltan datos",
+    html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+    icon: "warning",
+    confirmButtonColor: "#3085d6",
+    confirmButtonText: "Entendido",
+    // Esperamos a que la alerta desaparezca al 100%
+    didClose: () => {
+      if (primerCampoConError) primerCampoConError.focus();
+    },
+  });
+
+  return;
+}
 
   const cliente = document.getElementById("crear-cliente").value.trim();
   const papellido = document.getElementById("crear-papellido").value.trim();
@@ -426,17 +435,26 @@ async function validarFormularioEdicionCliente(formulario) {
     }
   });
 
-  if (errores.length > 0) {
-    Swal.fire({
-      title: "Faltan datos",
-      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
-      icon: "warning",
-      confirmButtonColor: "#3085d6",
-      confirmButtonText: "Entendido",
-    });
-    if (primerCampoConError) primerCampoConError.focus();
-    return;
+if (errores.length > 0) {
+  // Quitar el cursor por seguridad
+  if (document.activeElement) {
+    document.activeElement.blur();
   }
+
+  Swal.fire({
+    title: "Faltan datos",
+    html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+    icon: "warning",
+    confirmButtonColor: "#3085d6",
+    confirmButtonText: "Entendido",
+    // Esperamos a que la alerta desaparezca al 100%
+    didClose: () => {
+      if (primerCampoConError) primerCampoConError.focus();
+    },
+  });
+
+  return;
+}
 
   const idInput = document.getElementById("editar-idcliente");
   const clienteInput = document.getElementById("editar-cliente");

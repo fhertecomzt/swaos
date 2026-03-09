@@ -1,41 +1,54 @@
 <?php
-include "../conexion.php"; // Asegúrate de que la conexión a la base de datos esté incluida
+include "../conexion.php"; 
 
-// Inicializamos la respuesta
 $response = ["success" => false, "message" => ""];
 
-// Verificamos que el método sea POST y que se haya enviado un ID
+// Verificar que el método sea POST y que se haya enviado un ID
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id'])) {
-  // Sanitizar el ID recibido por GET
   $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
 
   // Validar que el ID sea un número válido
   if (!$id || !filter_var($id, FILTER_VALIDATE_INT)) {
-    $response["message"] = "El ID proporcionado no es válido.";
-    echo json_encode($response);
+    echo json_encode(["success" => false, "message" => "El ID proporcionado no es válido."]);
     exit;
   }
 
   try {
-    // Preparar la consulta para eliminar el registro
-    $stmt = $dbh->prepare("DELETE FROM usuarios WHERE id_usuario = :id");
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    // Verificar si el usuario tiene órdenes o historial
+    // OJO AQUÍ: Estoy asumiendo que tu tabla de órdenes tiene una columna llamada 'id_usuario'. 
+    // Si en tu base de datos se llama 'id_tecnico' o de otra forma, cámbialo en la consulta de abajo.
 
-    // Ejecutar la consulta
-    if ($stmt->execute()) {
-      // Verificar si se eliminó un registro
-      if ($stmt->rowCount() > 0) {
-        $response["success"] = true;
-        $response["message"] = "Registro eliminado correctamente.";
-      } else {
-        $response["message"] = "No se encontró un registro con ese ID.";
-      }
+    $query_check = "SELECT COUNT(*) as total FROM ordenesservicio WHERE id_usuario = :id";
+    $stmt_check = $dbh->prepare($query_check);
+    $stmt_check->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt_check->execute();
+
+    $resultado = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+    // Si el usuario tiene órdenes asignadas, bloqueamos la eliminación
+    if ($resultado['total'] > 0) {
+      $response["success"] = false;
+      $response["message"] = "No se puede eliminar. Este usuario tiene órdenes de servicio o historial asociado. Por favor, cambie su estatus a Inactivo.";
     } else {
-      $response["message"] = "Error al intentar eliminar el registro.";
+      // LA ELIMINACIÓN: Solo llega aquí si es un usuario nuevo o sin historial
+      $stmt = $dbh->prepare("DELETE FROM usuarios WHERE id_usuario = :id");
+      $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+      if ($stmt->execute()) {
+        if ($stmt->rowCount() > 0) {
+          $response["success"] = true;
+          $response["message"] = "Usuario eliminado correctamente.";
+        } else {
+          $response["message"] = "No se encontró un usuario con ese ID.";
+        }
+      } else {
+        $response["message"] = "Error al intentar eliminar el registro.";
+      }
     }
   } catch (PDOException $e) {
-    // Evitar mostrar errores técnicos directamente al usuario
-    $response["message"] = "Error en la base de datos. Intente nuevamente más tarde.";
+    // Atrapamos errores de llaves foráneas por si está ligado a otras tablas (ej. ventas)
+    $response["success"] = false;
+    $response["message"] = "Error de integridad: El usuario está vinculado a otros registros del sistema y no puede ser borrado.";
   }
 } else {
   $response["message"] = "Método no permitido o falta de un ID válido.";

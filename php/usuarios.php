@@ -19,21 +19,23 @@ $usuarios = obtenerUsuarios($dbh);
 
 <div class="containerr">
     <button class="boton" onclick="abrirModalUser('crear-modalUser')">Nuevo</button>
-    <label class="buscarlabel" for="buscarboxusuario">Buscar:</label>
-    <input class="buscar--box" id="buscarboxusuario" type="search" placeholder="¿Qué estas buscando?" autocomplete="off">
 
     <!-- Filtro de estatus -->
-    <label class="buscarlabel" for="estatusFiltroU">Filtrar por Estatus:</label>
-    <select class="buscar--box" id="estatusFiltroU" onchange="cargarUsuariosFiltrados()" style="width: 100px;">
-        <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+        <option value="8">8</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="-1">Todos</option>
     </select>
+    <label class="buscarlabel" for="buscarboxusuario">Buscar:</label>
+    <input class="buscar--box" id="buscarboxusuario" type="search" placeholder="Qué estas buscando?" autocomplete="off">
 </div>
 
 <div class="container_dashboard_tablas" id="usuarios">
     <h3>Lista de Usuarios</h3>
-    <div id="scroll-containerU" style="height: 65vh; overflow-y: auto; position: relative;">
+    <div id="scroll-containerU">
 
         <table class="tbl" id="tabla-usuarios">
             <thead>
@@ -46,7 +48,7 @@ $usuarios = obtenerUsuarios($dbh);
                     <th>Rol</th>
                     <th>Taller</th>
                     <th>Estatus</th>
-                    <th colspan="2" style="text-align: center;">Acciones</th>
+                    <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
 
@@ -69,10 +71,9 @@ $usuarios = obtenerUsuarios($dbh);
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
 
-                        <td data-lable="Editar:">
+                        <td data-lable="Acciones:">
                             <button title="Editar" class="editarUser fa-solid fa-pen-to-square" data-id="<?php echo $u['id_usuario']; ?>"></button>
-                        </td>
-                        <td data-lable="Eliminar:">
+
                             <button title=" Eliminar" class="eliminarUser fa-solid fa-trash" data-id="<?php echo $u['id_usuario']; ?>"></button>
                         </td>
                     </tr>
@@ -89,7 +90,7 @@ $usuarios = obtenerUsuarios($dbh);
             <div class="modal-contentUsuarios" style="height: 700px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalUser('crear-modalUser')">&times;</span>
                 <h2 class="tittle">Crear Usuario</h2>
-                <form id="form-crearUser" enctype="multipart/form-data">
+                <form id="form-crearUser" enctype="multipart/form-data" novalidate>
 
                     <div class="form-group">
                         <label for="crear-usuario">Usuario:</label>
@@ -195,7 +196,7 @@ $usuarios = obtenerUsuarios($dbh);
                 <span title="Cerrar" class="close" onclick="cerrarModalUser('editar-modalUser')">&times;</span>
                 <h2 class="tittle">Editar Usuario</h2>
 
-                <form id="form-editarUser" enctype="multipart/form-data" method="post">
+                <form id="form-editarUser" enctype="multipart/form-data" method="post" novalidate>
                     <input type="hidden" id="editar-idusuario" name="editar-idusuario" value="" />
 
                     <div class="form-group">

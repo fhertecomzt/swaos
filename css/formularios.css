@@ -785,6 +785,116 @@ select {
   color: #a667bc;
 }
 
+/* MODAL DE ÓRDENES Y SISTEMA DE GRIDS (COLUMNAS)*/
+
+/* Hacemos el modal de órdenes más ancho para que quepan las columnas */
+.modal-contentOrdenes {
+  background-color: #fff;
+  margin: 3% auto; /* Un poco más arriba para que no estorbe */
+  padding: 25px;
+  border: 1px solid #888;
+  width: 75%; /* Más ancho que los catálogos normales */
+  max-width: 1100px; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  max-height: 90vh; /* Máximo el 90% de la pantalla */
+  overflow-y: auto; /* Scroll interno solo si la pantalla es enana */
+}
+
+/* Rejilla de 3 columnas para la parte superior (Cliente, Equipo, Recepción) */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+/* Rejilla de 2 columnas para la parte inferior (Diagnóstico, Costos) */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr; /* La primera columna un poco más ancha */
+  gap: 20px;
+}
+
+/* Tarjetas o "Cajones" para separar visualmente cada sección */
+.seccion-form {
+  background-color: #f8f9fa; /* Gris super clarito */
+  padding: 15px 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+/* Títulos de cada cajón (Ej: "1. Cliente") */
+.seccion-form h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: var(--color_sky);
+  border-bottom: 2px solid var(--color_sky);
+  padding-bottom: 5px;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+/* Corrección de altura para textareas en las órdenes */
+.seccion-form textarea {
+  width: 94%;
+  background: #f6f6f6;
+  border: 1px solid #ccc;
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 12px;
+  resize: vertical; /* Permite estirar hacia abajo */
+  outline: none;
+}
+.seccion-form textarea:focus {
+  border-color: var(--color_sky);
+}
+
+/* --- ADAPTACIÓN AL MODO OSCURO --- */
+.darkmode .modal-contentOrdenes {
+  background-color: #444446;
+  color: white;
+  border-color: #555;
+}
+.darkmode .seccion-form {
+  background-color: #3b3b3d;
+  border-color: #4a4a4c;
+}
+.darkmode .seccion-form h4 {
+  color: #deb2ed; /* Morado del dark mode */
+  border-bottom-color: #deb2ed;
+}
+.darkmode .seccion-form textarea {
+  background-color: #555;
+  color: white;
+  border-color: #777;
+}
+
+/* Modal grande para formularios de 2 columnas (Talleres, Usuarios, Productos) */
+.modal-content-lg {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 25px;
+  border: 1px solid #888;
+  width: 65%; /* Más ancho que el normal, menos que el de órdenes */
+  max-width: 900px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.darkmode .modal-content-lg {
+  background-color: #444446;
+  color: white;
+  border-color: #555;
+}
+
+@media screen and (max-width: 900px) {
+  .modal-content-lg {
+    width: 95%;
+  }
+}
+
 /* Opcional: Ajustar para pantallas más pequeñas */
 @media screen and (max-width: 850px) {
   .container_ventas {
@@ -817,5 +927,16 @@ select {
 @media (max-width: 600px) {
   .modal-content {
     width: 90%; /* Ajustar el ancho para pantallas pequeñas */
+  }
+}
+
+@media screen and (max-width: 900px) {
+  /* En tablets o celulares rompemos las columnas a 1 sola */
+  .form-grid-3, 
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .modal-contentOrdenes {
+    width: 95%; /* Que ocupe casi toda la pantalla en móvil */
   }
 }

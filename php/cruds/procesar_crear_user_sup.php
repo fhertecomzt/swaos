@@ -21,10 +21,10 @@ try {
   $nombre = trim($_POST['nombre'] ?? '');
   $papellido = trim($_POST['papellido'] ?? '');
   $sapellido = trim($_POST['sapellido'] ?? '');
+  $email = trim($_POST['email'] ?? '');
   $rol = $_POST['rol'] ?? '';
   $password1 = trim($_POST['password1'] ?? '');
   $tienda = $_POST['tienda'] ?? '';
-  $comision = trim($_POST['comision'] ?? 0);
   $estatus = trim($_POST['estatus'] ?? '');
 
   // Validación de campos obligatorios
@@ -40,11 +40,11 @@ try {
     return $stmt->fetchColumn() > 0;
   }
 
-  if (!verificarExistencia($dbh, 'roles', 'idrol', $rol)) {
+  if (!verificarExistencia($dbh, 'roles', 'id_rol', $rol)) {
     throw new Exception("El Rol seleccionado no es válido.");
   }
 
-  if (!verificarExistencia($dbh, 'tiendas', 'idtienda', $tienda)) {
+  if (!verificarExistencia($dbh, 'talleres', 'id_taller', $tienda)) {
     throw new Exception("La tienda seleccionada no es válida.");
   }
 
@@ -72,7 +72,7 @@ try {
   // Insertar en la base de datos
   $stmt = $dbh->prepare("
         INSERT INTO usuarios (
-            usuario, nombre, appaterno, apmaterno, idrol, password1, sucursales_id, imagen, comision, estatus
+            usuario, nombre, p_appellido, s_appellido, email, id_rol, password, taller_id, imagen, estatus
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
@@ -81,27 +81,27 @@ try {
     $nombre,
     $papellido,
     $sapellido,
+    $email,
     $rol,
     $passwordHash, // Contraseña cifrada
     $tienda,
     $rutaImagen,
-    $comision,
     $estatus
   ]);
 
   $lastId = $dbh->lastInsertId();
 
   // **NUEVA CONSULTA PARA OBTENER EL NOMBRE DEL ROL**
-  $stmtRol = $dbh->prepare("SELECT nomrol FROM roles WHERE idrol = ?");
+  $stmtRol = $dbh->prepare("SELECT nom_rol FROM roles WHERE id_rol = ?");
   $stmtRol->execute([$rol]);
   $rolData = $stmtRol->fetch(PDO::FETCH_ASSOC);
-  $nombreRol = $rolData ? $rolData['nomrol'] : '';
+  $nombreRol = $rolData ? $rolData['nom_rol'] : '';
 
   // **NUEVA CONSULTA PARA OBTENER EL NOMBRE DE LA TIENDA**
-  $stmtTienda = $dbh->prepare("SELECT nombre FROM tiendas WHERE idtienda = ?");
+  $stmtTienda = $dbh->prepare("SELECT nombre_t FROM talleres WHERE id_taller = ?");
   $stmtTienda->execute([$tienda]);
   $tiendaData = $stmtTienda->fetch(PDO::FETCH_ASSOC);
-  $nombreTienda = $tiendaData ? $tiendaData['nombre'] : '';
+  $nombreTienda = $tiendaData ? $tiendaData['nombre_t'] : '';
 
 
   $response["success"] = true;
@@ -112,9 +112,9 @@ try {
     "nombre" => $nombre,
     "appaterno" => $papellido,
     "sapellido" => $sapellido,
+    "email" => $email,
     "nomrol" => $nombreRol,
     "nomtienda" => $nombreTienda,
-    "comision" => $comision,
     "imagen" => $rutaImagen,
     "estatus" => $estatus
   ];

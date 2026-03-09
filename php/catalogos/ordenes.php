@@ -111,11 +111,11 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 
 <!-- Modal para crear Orden -->
 <div id="crear-modalOrden" class="modal" style="display: none;">
-  <div class="modal-contentProductos" style="width: 40%; max-width: 900px;">
+  <div class="modal-contentOrdenes">
     <span class="close" onclick="cerrarModalOrden('crear-modalOrden')">&times;</span>
     <h2 class="tittle">Nueva Orden de Servicio</h2>
 
-    <form id="form-crearOrden" enctype="multipart/form-data">
+    <form id="form-crearOrden" enctype="multipart/form-data" novalidate>
       <input type="hidden" name="id_usuario_sesion" value="<?php echo $_SESSION['id_usuario'] ?? 0; ?>">
 
       <div class="form-grid-3">
@@ -204,15 +204,15 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Falla Reportada (Cliente):</label>
-            <textarea name="falla" rows="2" placeholder="¿Qué dice el cliente que falla?" required></textarea>
+            <textarea name="falla" rows="3" style="width: 80%;" placeholder="¿Qué dice el cliente que falla?" required></textarea>
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Diagnóstico Técnico (Opcional):</label>
-            <textarea name="diagnostico" rows="2" placeholder="Observaciones técnicas iniciales"></textarea>
+            <textarea name="diagnostico" rows="3" style="width: 80%;" placeholder="Observaciones técnicas iniciales"></textarea>
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Observaciones Generales:</label>
-            <textarea name="observaciones" rows="2" placeholder="Detalles estéticos, condiciones, etc."></textarea>
+            <textarea name="observaciones" rows="3" style="width: 80%;" placeholder="Detalles estéticos, condiciones, etc."></textarea>
           </div>
         </div>
 
@@ -272,7 +272,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
     <span class="close" onclick="cerrarModalClienteExpress()">&times;</span>
     <h3 class="tittle">Nuevo Cliente Rápido</h3>
 
-    <form id="form-cliente-express">
+    <form id="form-cliente-express" novalidate>
       <div class="form-group">
         <label>Nombre:</label>
         <input type="text" name="nombre" required autocomplete="off">
@@ -302,7 +302,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 </div>
 <!-- Modal para editar Orden -->
 <div id="editar-modalOrden" class="modal" style="display: none; z-index: 1050;">
-  <div class="modal-contentProductos" style="width: 40%; max-width: 800px;">
+  <div class="modal-contentOrdenes">
     <span class="close" onclick="cerrarModalOrden('editar-modalOrden')">&times;</span>
     <h2 class="tittle">Actualizar Orden #<span id="edit-folio-text"></span></h2>
 
