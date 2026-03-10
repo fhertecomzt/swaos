@@ -1,86 +1,103 @@
 <?php
-
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
-
 $roles_permitidos = ["superusuario", "gerencia"];
-
-//Includes
 include "verificar_sesion.php";
-
 ?>
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-</head>
 
 <div class="container_dashboard" id="dashboard">
-  <!--Cards-->
-  <div class="cards" id="dashboard-cards">
 
-    <div class="card card-pendiente" data-menu-link="ordenes-link" data-filtro="Recibido" style=" background: linear-gradient(45deg, #f09819, #edde5d); cursor: pointer;">
+  <div class="cards" id="dashboard-cards">
+    <div class="card card-minimal" data-menu-link="ordenes-link" data-filtro="Recibido">
       <div>
         <span class="card-numeros" id="dash-pendientes">0</span>
         <p><span class="card-nombre">Órdenes pendientes</span></p>
       </div>
-      <div class="card-icono">
-        <i class="fa-solid fa-clock"></i>
-      </div>
+      <div class="card-icono text-warning"><i class="fa-solid fa-clock"></i></div>
     </div>
-
-    <div class="card" data-menu-link="ordenes-link" data-filtro="Terminado" style="background: linear-gradient(45deg, #11998e, #38ef7d); cursor: pointer;">
+    <div class="card card-minimal" data-menu-link="ordenes-link" data-filtro="Terminado">
       <div>
         <span class="card-numeros" id="dash-listas">0</span>
-        <p> <span class="card-nombre">Órdenes listas</span></p>
+        <p><span class="card-nombre">Órdenes listas</span></p>
       </div>
-      <div class="card-icono">
-        <i class="fa-solid fa-check-double"></i>
-      </div>
+      <div class="card-icono text-success"><i class="fa-solid fa-check-double"></i></div>
     </div>
-
-    <div class="card" data-menu-link="productos-link" style="background: linear-gradient(45deg, #2980b9, #6dd5fa); cursor: pointer;">
+    <div class="card card-minimal" data-menu-link="productos-link">
       <div>
-        <span class="card-numeros" id="dash-productos">0</span><br>
+        <span class="card-numeros" id="dash-productos">0</span>
         <p><span class="card-nombre">Productos</span></p>
       </div>
-      <div class="card-icono">
-        <i class="fa-solid fa-boxes-stacked"></i>
-      </div>
+      <div class="card-icono text-info"><i class="fa-solid fa-boxes-stacked"></i></div>
     </div>
-
-    <div class="card" data-menu-link="clientes-link" style="background: linear-gradient(45deg, #373b44, #4286f4); cursor: pointer;">
+    <div class="card card-minimal" data-menu-link="clientes-link">
       <div>
         <span class="card-numeros" id="dash-clientes">0</span>
         <p><span class="card-nombre">Clientes</span></p>
       </div>
-      <div class="card-icono">
-        <i class="fa-solid fa-people-group"></i>
-      </div>
+      <div class="card-icono text-primary"><i class="fa-solid fa-people-group"></i></div>
     </div>
-
-    <div class="card" data-menu-link="proveedores-link" style="background-color: #546e7a; cursor: pointer;">
+    <div class="card card-minimal" data-menu-link="proveedores-link">
       <div>
         <span class="card-numeros" id="dash-proveedores">0</span>
         <p><span class="card-nombre">Proveedores</span></p>
       </div>
-      <div class="card-icono">
-        <i class="fa-solid fa-truck-fast"></i>
-      </div>
+      <div class="card-icono text-secondary"><i class="fa-solid fa-truck-fast"></i></div>
     </div>
-
-    <div class="card" data-menu-link="ventas-link" style="background-color: #00897b; cursor: pointer;">
+    <div class="card card-minimal" data-menu-link="ventas-link">
       <div>
         <span class="card-numeros" id="dash-ventas">0</span>
         <p><span class="card-nombre">Ventas</span></p>
       </div>
-      <div class="card-icono">
-        <i class="fa-solid fa-money-check-dollar"></i>
+      <div class="card-icono text-teal"><i class="fa-solid fa-money-check-dollar"></i></div>
+    </div>
+  </div>
+
+  <div class="command-center">
+
+    <div class="panel-grafica">
+      <h3 class="panel-title">Estado de los Equipos</h3>
+      <div class="canvas-container">
+        <canvas id="miGraficaEquipos"></canvas>
       </div>
     </div>
 
-  </div><!--End Cards-->
-</div><!--End Conteiner-->
+    <div class="panel-acciones">
+      <h3 class="panel-title">Acciones Rápidas</h3>
+      <div class="botones-accion">
+        <button class="btn-accion btn-nueva-orden" data-menu-link="ordenes-link">
+          <i class="fa-solid fa-plus"></i> Nueva Orden
+        </button>
 
-</html>
+        <button class="btn-accion btn-nuevo-cliente" data-menu-link="clientes-link">
+          <i class="fa-solid fa-user-plus"></i> Nuevo Cliente
+        </button>
+
+        <button class="btn-accion btn-cobrar" data-menu-link="ventas-link">
+          <i class="fa-solid fa-cash-register"></i> Cobrar / Vender
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-tabla">
+      <h3 class="panel-title">Órdenes Recientes</h3>
+      <div class="tabla-responsive">
+        <table class="tabla-moderna">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Cliente</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-ultimas-ordenes">
+            <tr>
+              <td colspan="3" style="text-align:center;">Cargando...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

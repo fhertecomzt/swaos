@@ -19,7 +19,7 @@ $colonias = obtenerColonias($dbh);
 ?>
 
 <div class="containerr">
-    <button class="boton" onclick="abrirModalCliente('crear-modalCliente')">Nuevo</button>
+    <button id="btn-crear-cliente" class="boton" onclick="abrirModalCliente('crear-modalCliente')">Nuevo</button>
 
     <!-- Filtro de estatus -->
     <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>

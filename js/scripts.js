@@ -4758,6 +4758,20 @@ document.getElementById("ordenes-link").addEventListener("click", function (even
 
         //filtros y busqueda
         inicializarTablaGenerica('#tabla-ordenes', '#buscarboxorden', '#cantidad-registros');
+        //  ID correcto de tu tabla de órdenes
+        let miTablaDeOrdenes = $('#tabla-ordenes').DataTable(); 
+
+        // Leemos la nota secreta del Dashboard
+        let filtroPendiente = sessionStorage.getItem("filtroDashboard");
+
+        if (filtroPendiente) {
+            // Le decimos al buscador de DataTables que escriba el folio y filtre
+            miTablaDeOrdenes.search(filtroPendiente).draw();
+            
+            // Borramos la nota para que no se quede pegado el filtro si recargas la página
+            sessionStorage.removeItem("filtroDashboard"); 
+        }
+        
 
         // Revisamos si el Dashboard nos dejó un mensaje secreto
         let filtroGuardado = sessionStorage.getItem("filtroDashboard");

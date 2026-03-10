@@ -12,7 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $roles_permitidos = ["superusuario"];
 include "verificar_sesion.php";
 
-
+/*
 //Verificar si hay una sesión activa y si el rol está permitido
 if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos)) {
     header("Location: ../index.php?error=acceso_denegado");
@@ -37,7 +37,7 @@ if (isset($_SESSION['last_token'])) {
 
 // Actualizar el último token utilizado
 $_SESSION['last_token'] = $current_token;
-
+*/
 ?>
 
 <!DOCTYPE html>
@@ -322,6 +322,9 @@ $_SESSION['last_token'] = $current_token;
     </div>
 
     <!--Scripts JS-->
+
+    <!--Libreria para las graficas JS-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!--Sortable libreria para mover los cards del dashboard-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>

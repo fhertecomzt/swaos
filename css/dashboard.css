@@ -3,7 +3,7 @@
 }
 /*Dashboard*/
 .container_dashboard {
-  background: #e1e1e1;
+  background: #d1d9e4;
   border-radius: 10px;
   box-shadow: 0 7px 7px rgba(0, 0, 0, 0.5);
   left: 16px;
@@ -36,95 +36,160 @@
   overflow: hidden; 
 }
 
-.cards .card:hover {
-    background: #ffffff !important; 
-    transform: translateY(-5px);    
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); 
+
+/* DISEÑO DE TARJETAS VIBRANTES (MODERNAS)   */
+.card-minimal {
+  border: none !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+.card-minimal:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
 }
 
-.cards .card .card-numeros,
-.cards .card .card-nombre,
-.cards .card .card-icono {
-  color: #0f161c ;  
+/* Degradados Premium para cada tarjeta */
+.card-minimal:nth-child(1) { background: linear-gradient(135deg, #ff9d2f, #ff6126) !important; } /* Naranja/Rojo */
+.card-minimal:nth-child(2) { background: linear-gradient(135deg, #2ecc71, #1abc9c) !important; } /* Verde/Teal */
+.card-minimal:nth-child(3) { background: linear-gradient(135deg, #3498db, #2980b9) !important; } /* Azul */
+.card-minimal:nth-child(4) { background: linear-gradient(135deg, #9b59b6, #8e44ad) !important; } /* Morado */
+.card-minimal:nth-child(5) { background: linear-gradient(135deg, #546e7a, #37474f) !important; } /* Gris Oscuro */
+.card-minimal:nth-child(6) { background: linear-gradient(135deg, #00c6ff, #0072ff) !important; } /* Cyan/Azul vibrante */
+
+/* Textos en color blanco para que resalten sobre el color */
+.card-numeros { font-size: 2.5rem; font-weight: 800; color: #ffffff !important; }
+.card-nombre { font-size: 1rem; color: rgba(255, 255, 255, 0.9) !important; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.card-icono { font-size: 3.5rem; color: #ffffff !important; opacity: 0.3; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
+
+/* Ajuste al Darkmode para estas tarjetas */
+.darkmode .card-minimal { opacity: 0.9; }
+.darkmode .card-minimal:hover { opacity: 1; }
+.darkmode .panel-title { color: #fff; border-bottom-color: #444; }
+
+
+/* GRID DEL CENTRO DE COMANDO (3 COLUMNAS)   */
+.command-center {
+  display: grid;
+  /* Creamos 3 columnas: Gráfica (1.2), Botones (0.8), Tabla (1.5) */
+  grid-template-columns: 1.2fr 0.8fr 1.5fr; 
+  gap: 20px;
+  padding: 0 20px 20px 20px;
 }
 
-.cards .card .card-numeros {
-  font-size: 3rem;
-  font-weight: 800;
+.panel-grafica {
+  grid-column: 1 / 2;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 15px; /* Menos padding para hacerlo compacto */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  align-self: start; 
+}
+.darkmode .panel-grafica { background: #2a2d34; }
+
+/* Contenedor estricto y más pequeño para la gráfica */
+.canvas-container {
+  position: relative;
+  height: 220px; /* <--- Redujimos de 300px a 220px */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.cards .card .card-nombre {
-  font-size: 1.1rem;
-  opacity: 0.9; 
+.panel-acciones {
+  grid-column: 2 / 3;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  align-self: start; 
+}
+.darkmode .panel-acciones { background: #2a2d34; }
+
+.panel-tabla {
+  grid-column: 3 / 4;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  align-self: start; 
+}
+.darkmode .panel-tabla { background: #2a2d34; }
+
+.panel-title {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.1rem; /* Título un poco más discreto */
+  color: #444;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 8px;
+}
+.darkmode .panel-title { color: #fff; border-bottom-color: #444; }
+
+/* Botones de acción rápida más compactos */
+.botones-accion { display: flex; flex-direction: column; gap: 8px; }
+.btn-accion {
+  padding: 8px 12px; /* <--- Redujimos el alto del botón */
+  border: none; 
+  border-radius: 6px; 
+  font-size: 0.9rem; /* <--- Letra más fina */
+  font-weight: bold; 
+  cursor: pointer; 
+  color: #fff; 
+  transition: 0.3s;
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px;
 }
 
-.cards .card .card-icono {
-  font-size: 4rem;
-  opacity: 0.4; 
+/* TABLA INTERACTIVA (ÓRDENES RECIENTES)     */
+.fila-orden-reciente {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-/* Cursor de manita para indicar que se puede mover */
-.cards .card {
-    cursor: grab; /* Manita abierta */
+/* Efecto Hover: Un azul súper clarito y elegante */
+.fila-orden-reciente:hover {
+  background-color: #f0f4f8; 
 }
 
-.cards .card:active {
-    cursor: grabbing; /* Manita cerrada al agarrar */
+/* Efecto Hover en Modo Oscuro */
+.darkmode .fila-orden-reciente:hover {
+  background-color: #3a3f48;
 }
 
-/* Estilo del "fantasma" (el espacio donde va a caer la tarjeta) */
-.tarjeta-fantasma {
-    opacity: 0.4;
-    background-color: #e0e0e0;
-    border: 2px dashed #999;
-}
+.btn-nueva-orden { background: #007bff; } .btn-nueva-orden:hover { background: #0056b3; }
+.btn-nuevo-cliente { background: #28a745; } .btn-nuevo-cliente:hover { background: #1e7e34; }
+.btn-cobrar { background: #6f42c1; } .btn-cobrar:hover { background: #5a32a3; }
 
-/* Estilos cuando el modo oscuro está activado */
+/* Tabla moderna minimalista compacta */
+.tabla-moderna { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.tabla-moderna th { text-align: left; padding: 8px; color: #888; border-bottom: 1px solid #ddd; }
+.tabla-moderna td { padding: 8px; color: #444; border-bottom: 1px solid #eee; }
+.darkmode .tabla-moderna th { color: #bbb; border-bottom-color: #555; }
+.darkmode .tabla-moderna td { color: #ddd; border-bottom-color: #444; }
 
-.darkmode .container_dashboard {
-  background: #2f2f31 !important;
-}
-.darkmode .cards .card-nombre,.darkmode .card-numeros,.darkmode  .card-icono {
-  color: white !important;
-}
 
-.darkmode .card {  
-  background: #444446 !important;
-}
-.darkmode .cards .card:hover {
-  background: rgb(41, 102, 128) !important;
-  box-shadow: 0 7px 7px rgba(255, 255, 255, 0.5);
+/* RESPONSIVIDAD INTELIGENTE                 */
 
-}
-.darkmode .cards .card:hover .card-numeros,
-.darkmode .cards .card:hover .card-nombre,
-.darkmode .cards .card:hover .card-icono {
-  color: white !important;
-}
-
-@media (max-width: 1450px) {
-  .cards {
-    grid-template-columns: repeat(
-      3,
-      1fr
-    ); /* Ajustar el ancho para pantallas pequeñas */
+/* Pantallas medianas (Laptops pequeñas o tablets horizontales) */
+@media (max-width: 1350px) {
+  .command-center { 
+    grid-template-columns: 1fr 1fr; /* Pasamos a 2 columnas */
   }
+  .panel-grafica { grid-column: 1 / 3; } /* La gráfica ocupa toda la parte superior */
+  .panel-acciones { grid-column: 1 / 2; }
+  .panel-tabla { grid-column: 2 / 3; }
 }
-@media (max-width: 1234px) {
-  .cards {
-    grid-template-columns: repeat(
-      2,
-      1fr
-    ); /* Ajustar el ancho para pantallas pequeñas */
-  }
-}
+
+/* Pantallas pequeñas (Tablets verticales y celulares) */
 @media (max-width: 935px) {
-  .cards {
-    grid-template-columns: repeat(
-      1,
-      1fr
-    ); /* Ajustar el ancho para pantallas pequeñas */
+  .command-center { 
+    grid-template-columns: 1fr; /* Pasamos a 1 sola columna */
   }
+  .panel-grafica { grid-column: 1 / 2; }
+  .panel-acciones { grid-column: 1 / 2; }
+  .panel-tabla { grid-column: 1 / 2; }
 }
 
 /*Moviles Tablets, celulares*/
