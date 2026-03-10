@@ -82,24 +82,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        // REGISTRO DE PAGO (NUEVO ABONO)
-        if (isset($_POST['nuevo_abono']) && $_POST['nuevo_abono'] > 0) {
-            $nuevo_abono = floatval($_POST['nuevo_abono']);
-            $metodo_pago = $_POST['id_metodo_pago'] ?? 1; // Efectivo por defecto
-
-        $stmtPago = $dbh->prepare("INSERT INTO historial_pagos (id_orden, monto, id_metodo_pago, id_usuario, fecha) VALUES (?, ?, ?, ?, NOW())");
-        $stmtPago->execute([$id_orden, $nuevo_abono, $metodo_pago, $_SESSION['id_usuario']]);
-        }
-
         // 2. Si hay dinero de por medio, registramos el abono para el corte de caja
         // REGISTRO DE PAGO (NUEVO ABONO)
         if ($nuevo_abono > 0) {
-            $id_usuario = $_SESSION['id_usuario'] ?? 1;
+            $id_usuario = $_SESSION['idusuario'] ?? 1;
             $metodo_pago = $_POST['id_metodo_pago'] ?? 1;
 
             $sqlAbono = "INSERT INTO abonos_ordenes (id_orden, monto_abono, id_usuario, id_metpago, fecha_abono) VALUES (?, ?, ?, ?, NOW())";
             $stmtAbono = $dbh->prepare($sqlAbono);
             $stmtAbono->execute([$id_orden, $nuevo_abono, $id_usuario, $metodo_pago]);
+
+            // --- NUEVO: REGISTRO EN LA CAJA GENERAL (ventas) ---
+            // Decidimos el tipo de movimiento: Si el saldo quedó en $0 o menos, es liquidación.
+            $tipo_movimiento = ($saldo_servicio <= 0) ? 'Liquidacion Orden' : 'Abono Orden';
+
+            // Mapeo básico de método de pago
+            $metodo_texto = ($metodo_pago == 1) ? 'Efectivo' : (($metodo_pago == 2) ? 'Tarjeta' : 'Transferencia');
+
+            //  Buscamos de quién es esta orden para que el ticket salga a su nombre
+            $stmtBuscaCliente = $dbh->prepare("SELECT id_cliente FROM ordenesservicio WHERE id_orden = ?");
+            $stmtBuscaCliente->execute([$id_orden]);
+            $infoOrden = $stmtBuscaCliente->fetch(PDO::FETCH_ASSOC);
+            $id_cliente_real = $infoOrden ? $infoOrden['id_cliente'] : null;
+
+            //  Creamos el ticket en ventas id_cliente_real
+            $stmtVenta = $dbh->prepare("INSERT INTO ventas (id_cliente, id_usuario, id_orden, total, metodo_pago, tipo_movimiento) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmtVenta->execute([$id_cliente_real, $id_usuario, $id_orden, $nuevo_abono, $metodo_texto, $tipo_movimiento]);
+            $id_venta = $dbh->lastInsertId();
+
+            //  Especificamos el concepto en detalle_ventas
+            $concepto = $tipo_movimiento . " #" . $id_orden;
+            $stmtDetalle = $dbh->prepare("INSERT INTO detalle_ventas (id_venta, concepto, cantidad, precio_unitario, subtotal) VALUES (?, ?, 1, ?, ?)");
+            $stmtDetalle->execute([$id_venta, $concepto, $nuevo_abono, $nuevo_abono]);
         }
 
         $dbh->commit();

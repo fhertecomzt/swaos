@@ -454,13 +454,6 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </details>
         </div>
 
-        <div style="text-align: right; margin-top: 10px; font-size: 16px;">
-          <strong>Total Piezas: </strong>
-          <span style="color: var(--color_sky); font-weight: bold; font-size: 18px;">$<span id="total-refacciones-text">0.00</span></span>
-          <input type="hidden" id="total-refacciones-input" name="total_refacciones" value="0">
-        </div>
-      </div>
-
       <div style="margin-top: 20px; text-align: right;">
         <button type="submit" class="boton-guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
         <span class="cancelarModal" onclick="cerrarModalOrden('editar-modalOrden')">Cancelar</span>

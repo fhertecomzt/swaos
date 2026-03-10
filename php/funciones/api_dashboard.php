@@ -7,7 +7,11 @@ try {
   $productos = $dbh->query("SELECT COUNT(*) as total FROM productos WHERE estatus = 0")->fetch(PDO::FETCH_ASSOC)['total'];
   $clientes = $dbh->query("SELECT COUNT(*) as total FROM clientes WHERE estatus = 0")->fetch(PDO::FETCH_ASSOC)['total'];
   $proveedores = $dbh->query("SELECT COUNT(*) as total FROM proveedores WHERE estatus = 0")->fetch(PDO::FETCH_ASSOC)['total'];
-  $ventas = 0; // Pendiente para cuando exista el módulo de ventas
+// VENTAS DEL DÍA: Sumamos todo el dinero real que entró hoy a la caja (Anticipos, Liquidaciones y Mostrador)
+  $stmtVentas = $dbh->query("SELECT SUM(total) as ingresos_hoy FROM ventas WHERE DATE(fecha_venta) = CURDATE()");
+  $resultadoVentas = $stmtVentas->fetch(PDO::FETCH_ASSOC);
+  $ventas = $resultadoVentas['ingresos_hoy'] ? $resultadoVentas['ingresos_hoy'] : 0;
+  // (Si no hay ventas hoy, regresamos 0 en lugar de nulo)
 
   $opendientes = $dbh->query("SELECT COUNT(*) as total FROM ordenesservicio WHERE id_estado_servicio IN (1,3,4)")->fetch(PDO::FETCH_ASSOC)['total'];
   $olistas = $dbh->query("SELECT COUNT(*) as total FROM ordenesservicio WHERE id_estado_servicio = 6")->fetch(PDO::FETCH_ASSOC)['total'];

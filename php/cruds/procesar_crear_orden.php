@@ -26,7 +26,7 @@ try {
 
   $dbh->beginTransaction();
 
-  // 1. VALIDAR USUARIO (TÉCNICO)
+  // VALIDAR USUARIO (TÉCNICO)
 
   $id_usuario = 1; // Valor por defecto de seguridad (Admin)
 
@@ -34,7 +34,7 @@ try {
     $id_usuario = $_POST['id_usuario_sesion'];
   }
 
-  // 2. VALIDAR CLIENTE
+  //  VALIDAR CLIENTE
   $id_cliente = $_POST['id_cliente'] ?? null;
   if (empty($id_cliente)) {
     throw new Exception("Debes seleccionar un cliente.");
@@ -59,7 +59,7 @@ try {
     $es_cuenta_nueva = true;
   }
 
-  // 3. INSERTAR ORDEN
+  // INSERTAR ORDEN
   $token_hash = generarToken();
   $fecha_entrega = !empty($_POST['fecha_entrega_estimada']) ? $_POST['fecha_entrega_estimada'] : date('Y-m-d H:i:s', strtotime('+3 days'));
 
@@ -101,7 +101,24 @@ try {
 
   $id_orden = $dbh->lastInsertId();
 
-  // 4. SUBIR FOTOS
+  //  CAJA GENERAL: REGISTRAR EL ANTICIPO (NUEVO)
+  if ($anticipo > 0) {
+    // Creamos el ticket en ventas
+    $stmtVenta = $dbh->prepare("INSERT INTO ventas (id_cliente, id_usuario, id_orden, total, metodo_pago, tipo_movimiento) VALUES (?, ?, ?, ?, 'Efectivo', 'Anticipo Orden')");
+    $stmtVenta->execute([$id_cliente, $id_usuario, $id_orden, $anticipo]);
+    $id_venta = $dbh->lastInsertId();
+
+    //  Especificamos el concepto en detalle_ventas
+    $concepto = "Anticipo de Reparación Orden #" . $id_orden;
+    $stmtDetalle = $dbh->prepare("INSERT INTO detalle_ventas (id_venta, concepto, cantidad, precio_unitario, subtotal) VALUES (?, ?, 1, ?, ?)");
+    $stmtDetalle->execute([$id_venta, $concepto, $anticipo, $anticipo]);
+
+    //  NUEVO: Lo guardamos en abonos_ordenes para que el modal lo pueda mostrar
+    $stmtAbonoInicial = $dbh->prepare("INSERT INTO abonos_ordenes (id_orden, monto_abono, id_usuario, id_metpago) VALUES (?, ?, ?, 1)");
+    $stmtAbonoInicial->execute([$id_orden, $anticipo, $id_usuario]);
+  }
+
+    // SUBIR FOTOS
   if (!empty($_FILES['evidencias']['name'][0])) {
     $dir = "../../imgs/ordenes/";
     if (!is_dir($dir)) mkdir($dir, 0777, true);
@@ -122,7 +139,7 @@ try {
 
   $dbh->commit();
 
-  // 5. RESPUESTA
+  // RESPUESTA
   $link = "https://localhost/swaos/track.php?t=" . $token_hash;
   $msg = "Hola *" . $datosCliente['nombre_cliente'] . "*,\nRecibimos tu equipo (Orden #$id_orden).\nVer estado: $link";
   if ($es_cuenta_nueva) $msg .= "\n\nTu clave de acceso: $pass_generada_texto";
