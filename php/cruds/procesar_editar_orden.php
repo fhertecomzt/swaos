@@ -89,7 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $stmtPago = $dbh->prepare("INSERT INTO historial_pagos (id_orden, monto, id_metodo_pago, id_usuario, fecha) VALUES (?, ?, ?, ?, NOW())");
         $stmtPago->execute([$id_orden, $nuevo_abono, $metodo_pago, $_SESSION['id_usuario']]);
-        */
         }
 
         // 2. Si hay dinero de por medio, registramos el abono para el corte de caja
