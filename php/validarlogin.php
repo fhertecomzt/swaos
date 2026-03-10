@@ -11,13 +11,14 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Includes
 include "conexion.php";
+require_once "config_keys.php";
 
 // Inicializar array de errores
 $errores = [];
 
 // Validar usuario y contraseña
-$username = filter_input(INPUT_POST, 'txtusuario', FILTER_SANITIZE_STRING);
-$password1 = filter_input(INPUT_POST, 'txtpassword1', FILTER_SANITIZE_STRING);
+$username = htmlspecialchars(trim($_POST['txtusuario'] ?? ''), ENT_QUOTES, 'UTF-8');
+$password1 = $_POST['txtpassword1'] ?? ''; // La contraseña no se sanitiza, se deja intacta para password_verify
 
 if (empty($_POST['txtusuario'])) {
     $errores[] = "El campo de usuario es obligatorio.";
@@ -58,7 +59,8 @@ if (empty($errores)) {
             }
 
             // Si el usuario está activo, procedemos con la verificación de la contraseña y la sesión
-            $stmt = $dbh->prepare("SELECT usuarios.id_usuario, usuarios.usuario, usuarios.nombre, usuarios.email, usuarios.p_appellido, usuarios.s_appellido, usuarios.password, usuarios.imagen, roles.nom_rol, talleres.id_taller, talleres.nombre_t, usuarios.intentos_fallidos, usuarios.bloqueado_hasta, usuarios.session_token, usuarios.ultimo_acceso_token
+            $stmt = $dbh->prepare("SELECT usuarios.id_usuario, usuarios.usuario, usuarios.nombre, usuarios.email, usuarios.p_appellido, usuarios.s_appellido, usuarios.password, usuarios.imagen, roles.nom_rol, talleres.id_taller, talleres.nombre_t, usuarios.intentos_fallidos, usuarios.bloqueado_hasta, usuarios.session_token, usuarios.ultimo_acceso_token,
+            TIMESTAMPDIFF(SECOND, usuarios.ultimo_acceso_token, NOW()) as inactividad_segundos
             FROM usuarios
             JOIN roles ON usuarios.id_rol = roles.id_rol
             JOIN talleres ON usuarios.taller_id = talleres.id_taller
@@ -67,15 +69,24 @@ if (empty($errores)) {
             $stmt->execute();
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // **LÓGICA PARA EXPIRACIÓN DEL TOKEN POR INACTIVIDAD (PRUEBA: 1200 SEGUNDOS 20 Min)**
-            $tiempo_maximo_token = 3600;
-            if ($user['session_token'] !== null && isset($user['ultimo_acceso_token']) && (time() - strtotime($user['ultimo_acceso_token'])) > $tiempo_maximo_token) {
-                // El token ha expirado por inactividad, lo invalidamos
+            // Sincronizamos con los 10 minutos del sistema (600 segundos)
+            $tiempo_maximo_token = 600;
+
+            // Limpiamos las "Sesiones Zombie" usando el tiempo de MySQL
+            if ($user['session_token'] !== null && $user['inactividad_segundos'] > $tiempo_maximo_token) {
                 $updateStmt = $dbh->prepare("UPDATE usuarios SET session_token = NULL WHERE id_usuario = :id");
-                $updateStmt->bindParam(':id', $user['idusuario']);
+                $updateStmt->bindParam(':id', $user['id_usuario']);
                 $updateStmt->execute();
-                $user['session_token'] = null; // Actualizamos la variable $user
+                $user['session_token'] = null;
             }
+
+            // // Bloqueamos si la sesión está viva en otro lado
+            // if ($user['session_token'] !== null) {
+            //     $_SESSION['errores'] = ["⚠️ Esta cuenta ya está en uso. Cierra la sesión activa o espera 10 minutos de inactividad."];
+            //     header("Location: ../index.php");
+            //     exit;
+            // }
+
             if ($user) { // Comprobar si el usuario existe (de nuevo, pero ahora con todos los datos)
                 if ($user['bloqueado_hasta'] && strtotime($user['bloqueado_hasta']) > time()) {
                     $tiempoRestante = strtotime($user['bloqueado_hasta']) - time();
@@ -83,14 +94,6 @@ if (empty($errores)) {
                     header("Location: ../index.php");
                     exit;
                 }
-
-                //Evita multiples sesiones
-                if ($user['session_token'] !== null) {
-                    $_SESSION['errores'] = ["Esta cuenta ya está en uso en otra sesión."];
-                    header("Location: ../index.php");
-                    exit;
-                }
-
 
                 // Validar reCAPTCHA si es necesario
                 if (isset($_SESSION['mostrar_recaptcha']) && $_SESSION['mostrar_recaptcha']) {
@@ -100,7 +103,8 @@ if (empty($errores)) {
                         exit;
                     }
 
-                    $recaptchaSecret = "6LfvWZYqAAAAAMGcQob-npo9ZLY1rN3JZPVTVdJ9"; // Reemplaza con tu clave secreta
+                    // Usamos la constante mágica en lugar del texto fijo
+                    $recaptchaSecret = RECAPTCHA_SECRET_KEY;
                     $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$recaptchaSecret&response=" . $_POST['g-recaptcha-response']);
                     $recaptchaResult = json_decode($response, true);
 
@@ -115,14 +119,6 @@ if (empty($errores)) {
 
                     // Regenerar el ID de sesión para evitar la fijación de la sesión
                     session_regenerate_id(true);
-
-                    // Verificar sesión existente
-                    if ($user['session_token'] !== null) {
-                        // Opcional: invalidar la sesión anterior (es posible que desees notificar al usuario)
-                        $updateStmt = $dbh->prepare("UPDATE usuarios SET session_token = NULL WHERE id_usuario = :id");
-                        $updateStmt->bindParam(':id', $user['id_usuario']);
-                        $updateStmt->execute();
-                    }
 
                     // Generar un nuevo token de sesión
                     $sessionToken = bin2hex(random_bytes(32));

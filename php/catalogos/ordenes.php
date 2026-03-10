@@ -169,7 +169,10 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </div>
           <div class="form-group">
             <label>No. Serie / IMEI:</label>
-            <input type="text" name="numero_serie" placeholder="Obligatorio para garantía">
+            <input type="text" name="numero_serie" placeholder="Obligatorio para garantía" 
+              pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+              title="Solo se permiten letras, números y espacios."
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
           </div>
         </div>
 

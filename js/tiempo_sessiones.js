@@ -1,5 +1,5 @@
 // Configuración de tiempos (en milisegundos)
-const TIEMPO_INACTIVIDAD = 30 * 60 * 1000; // 30 minutos totales
+const TIEMPO_INACTIVIDAD = 2 * 60 * 1000; // 30 minutos totales
 const TIEMPO_ADVERTENCIA = 60 * 1000; // Mostrar alerta 60 segundos antes de cerrar
 // const TIEMPO_INACTIVIDAD = 60 * 1000; // 60 segundos total
 // const TIEMPO_ADVERTENCIA = 15 * 1000; // Alerta a los 15 segundos
@@ -7,6 +7,9 @@ const TIEMPO_ESPERA_ALERTA = TIEMPO_INACTIVIDAD - TIEMPO_ADVERTENCIA;
 
 let timerInactividad;
 let alertaVisible = false; // Bandera para saber si el SweetAlert está abierto
+let tituloOriginal = document.title;
+let intervaloParpadeoTitulo;
+let tituloParpadeando = false;
 
 document.addEventListener("DOMContentLoaded", () => {
   iniciarTemporizador();
@@ -44,6 +47,14 @@ function mostrarAlertaCierre() {
 
   let tiempoRestante = TIEMPO_ADVERTENCIA / 1000; // Convertir a segundos para mostrar
 
+  // Hacer parpadear la pestaña del navegador
+  intervaloParpadeoTitulo = setInterval(() => {
+    document.title = tituloParpadeando
+      ? "⚠️ ¡ATENCIÓN! ⚠️"
+      : "⏳ Sesión por expirar...";
+    tituloParpadeando = !tituloParpadeando;
+  }, 1000);
+
   Swal.fire({
     title: "Tu sesión está por caducar",
     html: `Cerrando sesión en <b>${tiempoRestante}</b> segundos por inactividad.`,
@@ -68,7 +79,11 @@ function mostrarAlertaCierre() {
       }, 1000);
     },
     willClose: () => {
-      clearInterval(timerInterval); // Limpiar el intervalo visual al cerrar
+      clearInterval(timerInterval); // Limpiar el intervalo visual del SweetAlert
+
+      // Detener el parpadeo de la pestaña y restaurar el nombre original
+      clearInterval(intervaloParpadeoTitulo);
+      document.title = tituloOriginal;
     },
   }).then((result) => {
     /*

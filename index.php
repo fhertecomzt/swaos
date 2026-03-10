@@ -1,6 +1,9 @@
 <?php
 
 session_start();
+
+require_once 'php/config_keys.php';
+
 // Manejar mensajes de error y añadirlos a la sesión
 if (isset($_GET['session_expired'])) {
     $_SESSION['errores'][] = "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.";
@@ -9,6 +12,12 @@ if (isset($_GET['session_expired'])) {
 if (isset($_GET['error']) && $_GET['error'] === 'acceso_denegado') {
     $_SESSION['errores'][] = "No tienes permisos para acceder a esa página.";
 }
+
+// MENSAJE: SESIÓN DUPLICADA
+if (isset($_GET['error']) && $_GET['error'] === 'sesion_duplicada') {
+    $_SESSION['errores'][] = "⚠️ Tu sesión se cerró porque ingresaste desde otro dispositivo o navegador.";
+}
+
 //Captcha suma basico
 $num1 = rand(1, 9);
 $num2 = rand(1, 9);
@@ -54,23 +63,25 @@ $_SESSION['captcha_result'] = $num1 + $num2;
 
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-user"></i>
-                                <input type="text" placeholder="Usuario" id="user" name="txtusuario" required>
+                                <input type="text" placeholder=" " id="user" name="txtusuario" required>
+                                <label for="user" class="label-flotante">Usuario</label>
                             </div>
 
                             <div class="input-wrapper">
                                 <i class="bx fa-solid fa-eye"></i>
-                                <input type="password" placeholder="Contraseña" id="pass" name="txtpassword1" autocomplete="off" required>
+                                <input type="password" placeholder=" " id="pass" name="txtpassword1" autocomplete="off" required>
+                                <label for="pass" class="label-flotante">Contraseña</label>
                             </div>
 
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-calculator"></i>
-                                <input type="number" placeholder="<?php echo $num1; ?> + <?php echo $num2; ?>=   " name="captcha" required>
+                                <input type="number" placeholder=" " name="captcha" id="captcha" required>
+                                <label for="captcha" class="label-flotante">Suma: <?php echo $num1; ?> + <?php echo $num2; ?> =</label>
                             </div>
 
                             <div class="recaptchamx">
-                                <!-- Mostrar reCAPTCHA solo si se necesitan -->
                                 <?php if (isset($_SESSION['mostrar_recaptcha']) && $_SESSION['mostrar_recaptcha']): ?>
-                                    <div class="g-recaptcha" data-sitekey="6LfvWZYqAAAAABAAzNP9IPyPePJ5iwxONAh1DfVi"></div>
+                                    <div class="g-recaptcha" data-sitekey="<?php echo RECAPTCHA_SITE_KEY; ?>"></div>
                                 <?php endif; ?>
                             </div>
 
