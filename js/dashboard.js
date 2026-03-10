@@ -16,17 +16,22 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
         }
 
-        let cardElements = document.querySelectorAll(
-          "#dashboard-cards .card-numeros",
-        );
-        if (cardElements.length >= 6) {
-          cardElements[0].textContent = data.opendientes || 0;
-          cardElements[1].textContent = data.olistas || 0;
-          cardElements[2].textContent = data.productos || 0;
-          cardElements[3].textContent = data.clientes || 0;
-          cardElements[4].textContent = data.proveedores || 0;
-          cardElements[5].textContent = data.ventas || 0;
-        }
+        // Ahora inyectamos directamente por el ID de cada elemento.
+        // Así no importa si la tarjeta está en la posición 1 o en la 6.
+        let elPendientes = document.getElementById('dash-pendientes');
+        let elListas = document.getElementById('dash-listas');
+        let elProductos = document.getElementById('dash-productos');
+        let elClientes = document.getElementById('dash-clientes');
+        let elProveedores = document.getElementById('dash-proveedores');
+        let elVentas = document.getElementById('dash-ventas');
+
+        if (elPendientes) elPendientes.textContent = data.opendientes || 0;
+        if (elListas) elListas.textContent = data.olistas || 0;
+        if (elProductos) elProductos.textContent = data.productos || 0;
+        if (elClientes) elClientes.textContent = data.clientes || 0;
+        if (elProveedores) elProveedores.textContent = data.proveedores || 0;
+        if (elVentas) elVentas.textContent = data.ventas || 0;
+      
       })
       .catch((error) =>
         console.error("Error al obtener datos del dashboard:", error),
