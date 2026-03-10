@@ -81,25 +81,25 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
                     <div class="form-group">
                         <label for="crear-proveedor">Nombre:</label>
                         <input type="text" id="crear-proveedor" name="proveedor" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                     </div>
 
                     <div class="form-group">
                         <label for="crear-papellido">Primer apellido:</label>
                         <input type="text" id="crear-papellido" name="papellido" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                     </div>
 
                     <div class="form-group">
                         <label for="crear-sapellido">Segundo apellido:</label>
                         <input type="text" id="crear-sapellido" name="sapellido" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                     </div>
 
                     <div class="form-group">
@@ -120,7 +120,7 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
 
                     <div class="form-group">
                         <label for="crear-telefono">Teléfono:</label>
-                        <input type="text" id="crear-telefono" name="telefono" autocomplete="off" maxlength="10 "
+                        <input type="text" id="crear-telefono" name="telefono" autocomplete="off" maxlength="10"
                             pattern="\d{10}"
                             title="Por favor, ingrese un número de telefono de 10 dígitos."
                             oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
@@ -158,25 +158,25 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
                     <div class="form-group">
                         <label for="editar-proveedor">Nombre:</label>
                         <input type="text" id="editar-proveedor" name="proveedor" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                     </div>
 
                     <div class="form-group">
                         <label for="editar-papellido">Primer apellido:</label>
                         <input type="text" id="editar-papellido" name="papellido" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                     </div>
 
                     <div class="form-group">
                         <label for="editar-sapellido">Segundo apellido:</label>
                         <input type="text" id="editar-sapellido" name="sapellido" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')" required>
                     </div>
 
                     <div class="form-group">
@@ -197,7 +197,7 @@ $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, pape
 
                     <div class="form-group">
                         <label for="editar-telefono">Teléfono:</label>
-                        <input type="text" id="editar-telefono" name="telefono" autocomplete="off" maxlength="10 "
+                        <input type="text" id="editar-telefono" name="telefono" autocomplete="off" maxlength="10"
                             pattern="\d{10}"
                             title="Por favor, ingrese un número de telefono de 10 dígitos."
                             oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
