@@ -44,10 +44,10 @@ include "verificar_sesion.php";
         </div>
         <div class="card-icono text-secondary"><i class="fa-solid fa-truck-fast"></i></div>
       </div>
-      <div class="card card-minimal" data-menu-link="ventas-link">
+      <div class="card card-minimal" data-menu-link="corte-link">
         <div>
           <span class="card-numeros" id="dash-ventas">0</span>
-          <p><span class="card-nombre">Ventas</span></p>
+          <p><span class="card-nombre">Venta del día</span></p>
         </div>
         <div class="card-icono text-teal"><i class="fa-solid fa-money-check-dollar"></i></div>
       </div>

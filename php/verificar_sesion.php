@@ -8,21 +8,21 @@ if (session_status() === PHP_SESSION_NONE) {
 if (!isset($roles_permitidos)) {
   $roles_permitidos = ["superusuario", "gerencia", "ventas"];
 }
-$tiempo_inactividad = 600; // 10 minutos
+$tiempo_inactividad = 3600; // 10 minutos
 
 // LA FUNCIÓN MAESTRA DE EXPULSIÓN
 function expulsar_usuario($motivo = "")
 {
-  // 1. Borramos la cookie de sesión por seguridad
+  //  Borramos la cookie de sesión por seguridad
   if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 125, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
   }
-  // 2. Destruimos la sesión en el servidor
+  //  Destruimos la sesión en el servidor
   session_unset();
   session_destroy();
 
-  // 3. EL TRUCO DEL ESCAPE DE AJAX:
+  // EL ESCAPE DE AJAX:
   // Script normal por si recargan la página directamente (F5)
   echo '<script>window.top.location.href="../index.php?' . $motivo . '";</script>';
 
@@ -32,17 +32,17 @@ function expulsar_usuario($motivo = "")
 }
 
 
-// 1. Verificar si hay sesión activa
+// Verificar si hay sesión activa
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || !isset($_SESSION['idusuario']) || !isset($_SESSION['session_token'])) {
   expulsar_usuario("error=acceso_denegado");
 }
 
-// 2. Verificar inactividad
+// Verificar inactividad
 if (isset($_SESSION['ultimo_acceso']) && (time() - $_SESSION['ultimo_acceso']) > $tiempo_inactividad) {
   expulsar_usuario("session_expired=1");
 }
 
-// 3. Verificar el token de sesión (Para evitar sesiones dobles/robadas)
+// Verificar el token de sesión (Para evitar sesiones dobles/robadas)
 try {
   include_once "conexion.php";
   $stmt = $dbh->prepare("SELECT session_token FROM usuarios WHERE id_usuario = :id");

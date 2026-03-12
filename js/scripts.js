@@ -1,11 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.getElementById("menu-toggle");
   const navbar = document.querySelector(".navbar"); // <--- Seleccionamos toda la barra
-  const submenuLinks = document.querySelectorAll(".has-submenu > a"); 
-  const allMenuLinks = document.querySelectorAll(".menu a.nav-link"); 
+  const submenuLinks = document.querySelectorAll(".has-submenu > a");
+  const allMenuLinks = document.querySelectorAll(".menu a.nav-link");
   const body = document.body;
 
-  // 1. ABRIR / CERRAR MENÚ (Botón Hamburguesa)
+  // ABRIR / CERRAR MENÚ (Botón Hamburguesa)
   if (menuToggle && navbar) {
     menuToggle.addEventListener("click", (e) => {
       e.preventDefault();
@@ -16,10 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
     allMenuLinks.forEach((link) => {
       link.addEventListener("click", () => {
         const parentLi = link.closest("li");
-        
+
         // Si tocamos un título que tiene submenú, NO cerramos la barra
         if (parentLi && parentLi.classList.contains("has-submenu")) {
-          return; 
+          return;
         }
 
         // Si tocamos un enlace normal (ej. Inicio, Ventas) en CELULAR, cerramos la barra
@@ -30,15 +30,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ACORDEÓN DE SUBMENÚS 
+  // ACORDEÓN DE SUBMENÚS
   submenuLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      const submenu = link.nextElementSibling; 
+      const submenu = link.nextElementSibling;
       if (submenu && submenu.tagName === "UL") {
         submenuLinks.forEach((otherLink) => {
           const otherSubmenu = otherLink.nextElementSibling;
-          if (otherSubmenu && otherSubmenu.classList.contains("show") && otherSubmenu !== submenu) {
+          if (
+            otherSubmenu &&
+            otherSubmenu.classList.contains("show") &&
+            otherSubmenu !== submenu
+          ) {
             otherSubmenu.classList.remove("show");
           }
         });
@@ -75,50 +79,53 @@ function mostrarAlerta(tipo, titulo, mensaje) {
 // DATATABLES: FUNCIÓN MAESTRA UNIVERSAL PARA TODO EL SISTEMA
 // INICIALIZACIÓN DE DATATABLES (PAGINADOR Y BUSCADOR)
 function inicializarTablaGenerica(idTabla, idBuscador, idSelectorCantidad) {
-    // Verificamos si la tabla existe en la pantalla actual
-    if ($(idTabla).length) {
-        
-        // Si ya era DataTables, la limpiamos
-        if ($.fn.DataTable.isDataTable(idTabla)) {
-            $(idTabla).DataTable().destroy();
-        }
-
-        // Inicializamos la tabla
-        let tabla = $(idTabla).DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-            },
-            "pageLength": 8,
-            "order": [[ 0, "desc" ]], // Ordena por la primera columna de mayor a menor
-            "dom": 'rtip',            // Oculta los controles feos por defecto
-            "scrollY": "60vh",        // Encabezados fijos nativos
-            "scrollCollapse": true
-        });
-
-        // Conectamos TU caja de búsqueda personalizada
-        $(idBuscador).off('keyup').on('keyup', function() {
-            tabla.search(this.value).draw();
-        });
-
-        // Conectamos TU selector de cantidades personalizado
-        $(idSelectorCantidad).off('change').on('change', function() {
-            tabla.page.len(this.value).draw();
-        });
+  // Verificamos si la tabla existe en la pantalla actual
+  if ($(idTabla).length) {
+    // Si ya era DataTables, la limpiamos
+    if ($.fn.DataTable.isDataTable(idTabla)) {
+      $(idTabla).DataTable().destroy();
     }
+
+    // Inicializamos la tabla
+    let tabla = $(idTabla).DataTable({
+      language: {
+        url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      },
+      pageLength: 8,
+      order: [[0, "desc"]], // Ordena por la primera columna de mayor a menor
+      dom: "rtip", // Oculta los controles feos por defecto
+      scrollY: "60vh", // Encabezados fijos nativos
+      scrollCollapse: true,
+    });
+
+    // Conectamos TU caja de búsqueda personalizada
+    $(idBuscador)
+      .off("keyup")
+      .on("keyup", function () {
+        tabla.search(this.value).draw();
+      });
+
+    // Conectamos TU selector de cantidades personalizado
+    $(idSelectorCantidad)
+      .off("change")
+      .on("change", function () {
+        tabla.page.len(this.value).draw();
+      });
+  }
 }
 
 // Carga Dashboard y los cards movibles
 document.addEventListener("DOMContentLoaded", function () {
   let contentArea = document.getElementById("content-area");
-  
+
   if (contentArea) {
-    fetch("../php/dashboard.php") 
+    fetch("../php/dashboard.php")
       .then((response) => response.text())
       .then((data) => {
-        contentArea.innerHTML = data; 
-        
+        contentArea.innerHTML = data;
+
         // Llamar función de los cards movibles
-        iniciarDashboardSortable(); 
+        iniciarDashboardSortable();
       })
       .catch((error) => console.error("Error al cargar el dashboard:", error));
   }
@@ -127,72 +134,80 @@ document.addEventListener("DOMContentLoaded", function () {
 // Cargar por clic en el menu
 const dashboardLink = document.getElementById("dashboard-link");
 if (dashboardLink) {
-    dashboardLink.addEventListener("click", function (event) {
-        event.preventDefault(); 
-        fetch("dashboard.php")
-        .then((response) => response.text())
-        .then((html) => {
-            document.getElementById("content-area").innerHTML = html;
+  dashboardLink.addEventListener("click", function (event) {
+    event.preventDefault();
+    fetch("dashboard.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
 
-            // Aquí sí la tenías puesta
-            iniciarDashboardSortable();
-        })
-        .catch((error) => {
-            console.error("Error al cargar el contenido:", error);
-        });
-    });
+        // Aquí sí la tenías puesta
+        iniciarDashboardSortable();
+      })
+      .catch((error) => {
+        console.error("Error al cargar el contenido:", error);
+      });
+  });
 }
 
 // Función de movimientos
 function iniciarDashboardSortable() {
-    // HTML el contenedor tenga id="dashboard-cards"
-    var el = document.getElementById('dashboard-cards');
+  // HTML el contenedor tenga id="dashboard-cards"
+  var el = document.getElementById("dashboard-cards");
 
-    if (!el) return; 
+  if (!el) return;
 
-    //  Recuperar orden guardado
-    var ordenGuardado = localStorage.getItem('ordenDashboard');
-    if (ordenGuardado) {
-        var ordenArray = ordenGuardado.split('|');
-        ordenArray.forEach(function(id) {
-            var card = el.querySelector(`.card[data-id="${id}"]`);
-            if (card) {
-                el.appendChild(card); 
-            }
-        });
-    }
-
-    //  Activar Sortable (Evitamos duplicados con la validación)
-    if (el.getAttribute('data-sortable-initialized')) return;
-    
-    Sortable.create(el, {
-        animation: 150,
-        ghostClass: 'tarjeta-fantasma',
-        onEnd: function (evt) {
-            var orden = [];
-            el.querySelectorAll('.card').forEach(function(card) {
-                orden.push(card.getAttribute('data-id'));
-            });
-            localStorage.setItem('ordenDashboard', orden.join('|'));
-        }
+  //  Recuperar orden guardado
+  var ordenGuardado = localStorage.getItem("ordenDashboard");
+  if (ordenGuardado) {
+    var ordenArray = ordenGuardado.split("|");
+    ordenArray.forEach(function (id) {
+      var card = el.querySelector(`.card[data-id="${id}"]`);
+      if (card) {
+        el.appendChild(card);
+      }
     });
-    
-    el.setAttribute('data-sortable-initialized', 'true');
+  }
+
+  //  Activar Sortable (Evitamos duplicados con la validación)
+  if (el.getAttribute("data-sortable-initialized")) return;
+
+  Sortable.create(el, {
+    animation: 150,
+    ghostClass: "tarjeta-fantasma",
+    onEnd: function (evt) {
+      var orden = [];
+      el.querySelectorAll(".card").forEach(function (card) {
+        orden.push(card.getAttribute("data-id"));
+      });
+      localStorage.setItem("ordenDashboard", orden.join("|"));
+    },
+  });
+
+  el.setAttribute("data-sortable-initialized", "true");
 }
 
 //Llamar Talleres *********************************************
 if (document.getElementById("tiendas-link")) {
-  document.getElementById("tiendas-link").addEventListener("click", function (event) {
-    event.preventDefault();
-    fetch("tiendas.php")
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        // INICIALIZAMOS DATATABLES AQUÍ:
-        inicializarTablaGenerica('#tabla-tiendas', '#buscarbox', '#cantidad-registros');
-      })
-      .catch((error) => console.error("Error al cargar el contenido:", error));
-  });
+  document
+    .getElementById("tiendas-link")
+    .addEventListener("click", function (event) {
+      event.preventDefault();
+      fetch("tiendas.php")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("content-area").innerHTML = html;
+          // INICIALIZAMOS DATATABLES AQUÍ:
+          inicializarTablaGenerica(
+            "#tabla-tiendas",
+            "#buscarbox",
+            "#cantidad-registros",
+          );
+        })
+        .catch((error) =>
+          console.error("Error al cargar el contenido:", error),
+        );
+    });
 }
 
 function abrirModal(id) {
@@ -202,77 +217,122 @@ function abrirModal(id) {
 function cerrarModal(id) {
   document.getElementById(id).style.display = "none";
 }
-  
+
 // CREAR TIENDA (Con Motor de Reglas Avanzado)
 function validarFormularioTienda(event) {
   event.preventDefault();
 
   const reglasValidacion = [
-    { id: "crear-nombre", tipo: "texto", min: 3, mensaje: "El nombre del taller debe tener al menos 3 caracteres." },
-    { id: "crear-razonsocial", tipo: "texto", min: 3, mensaje: "La razón social debe tener al menos 3 caracteres." },
-    { id: "crear-rfc", tipo: "texto", min: 12, mensaje: "El RFC debe tener al menos 12 caracteres." },
-    { id: "crear-calle", tipo: "texto", min: 3, mensaje: "La calle debe tener al menos 3 caracteres." },
-    { id: "crear-noexterior", tipo: "numero", minVal: 1, mensaje: "El número exterior debe ser mayor a 0." },
+    {
+      id: "crear-nombre",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre del taller debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-razonsocial",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La razón social debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-rfc",
+      tipo: "texto",
+      min: 12,
+      mensaje: "El RFC debe tener al menos 12 caracteres.",
+    },
+    {
+      id: "crear-calle",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La calle debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-noexterior",
+      tipo: "numero",
+      minVal: 1,
+      mensaje: "El número exterior debe ser mayor a 0.",
+    },
     { id: "estado", tipo: "select", mensaje: "Debes seleccionar un estado." },
-    { id: "municipio", tipo: "select", mensaje: "Debes seleccionar un municipio." },
-    { id: "colonia", tipo: "select", mensaje: "Debes seleccionar una colonia." },
-    { id: "crear-email", tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." },
-    { id: "crear-telefono", tipo: "texto", min: 10, mensaje: "El teléfono debe tener al menos 10 dígitos." }
+    {
+      id: "municipio",
+      tipo: "select",
+      mensaje: "Debes seleccionar un municipio.",
+    },
+    {
+      id: "colonia",
+      tipo: "select",
+      mensaje: "Debes seleccionar una colonia.",
+    },
+    {
+      id: "crear-email",
+      tipo: "email",
+      mensaje: "Debes ingresar un correo electrónico válido.",
+    },
+    {
+      id: "crear-telefono",
+      tipo: "texto",
+      min: 10,
+      mensaje: "El teléfono debe tener al menos 10 dígitos.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true;
-    
-    elemento.addEventListener(regla.tipo === "select" ? "change" : "input", function() {
+
+    elemento.addEventListener(
+      regla.tipo === "select" ? "change" : "input",
+      function () {
         this.classList.remove("input-error");
-    });
+      },
+    );
 
     if (regla.tipo === "texto") {
-        if (valor.length < regla.min) esValido = false;
+      if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "numero") {
-        let num = parseFloat(valor);
-        if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
+      let num = parseFloat(valor);
+      if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
     } else if (regla.tipo === "select") {
-        if (valor === "") esValido = false;
+      if (valor === "") esValido = false;
     } else if (regla.tipo === "email") {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(valor)) esValido = false;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(valor)) esValido = false;
     }
 
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -307,7 +367,7 @@ function procesarFormulario(event, tipo) {
         }).then(() => {
           // RECARGA LIMPIA DE DATATABLES
           if (document.getElementById("tiendas-link")) {
-            document.getElementById("tiendas-link").click(); 
+            document.getElementById("tiendas-link").click();
           }
         });
       } else {
@@ -341,7 +401,7 @@ function verificarDuplicado(nombre) {
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; 
+      return true;
     });
 }
 
@@ -359,8 +419,16 @@ document.addEventListener("DOMContentLoaded", function () {
             const formulario = document.getElementById("form-editar");
             if (formulario) {
               const camposSimples = [
-                "id", "nombre", "razonsocial", "rfc", "calle",
-                "noexterior", "nointerior", "telefono", "email", "estatus",
+                "id",
+                "nombre",
+                "razonsocial",
+                "rfc",
+                "calle",
+                "noexterior",
+                "nointerior",
+                "telefono",
+                "email",
+                "estatus",
               ];
 
               camposSimples.forEach((campo) => {
@@ -374,19 +442,32 @@ document.addEventListener("DOMContentLoaded", function () {
               const idEstadoDB = data.tienda.estado;
               const idMunicipioDB = data.tienda.municipio;
               const idColoniaDB = data.tienda.colonia;
-              const cpDB = data.tienda.codigo_postal; 
+              const cpDB = data.tienda.codigo_postal;
 
-              cargarYSeleccionarUbicacionEditar(idEstadoDB, idMunicipioDB, idColoniaDB, cpDB);
+              cargarYSeleccionarUbicacionEditar(
+                idEstadoDB,
+                idMunicipioDB,
+                idColoniaDB,
+                cpDB,
+              );
 
               abrirModal("editar-modal");
             }
           } else {
-            Swal.fire("Error", data.message || "No se pudo cargar el taller.", "error");
+            Swal.fire(
+              "Error",
+              data.message || "No se pudo cargar el taller.",
+              "error",
+            );
           }
         })
         .catch((error) => {
           console.error("Error al obtener taller:", error);
-          Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
+          Swal.fire(
+            "Error",
+            "Ocurrió un problema al obtener los datos.",
+            "error",
+          );
         });
     }
   });
@@ -401,71 +482,120 @@ document.addEventListener("DOMContentLoaded", function () {
 
 async function validarFormularioEdicion(formulario) {
   const reglasValidacion = [
-    { id: "editar-nombre", tipo: "texto", min: 3, mensaje: "El nombre del taller debe tener al menos 3 caracteres." },
-    { id: "editar-razonsocial", tipo: "texto", min: 3, mensaje: "La razón social debe tener al menos 3 caracteres." },
-    { id: "editar-rfc", tipo: "texto", min: 12, mensaje: "El RFC debe tener al menos 12 caracteres." },
-    { id: "editar-calle", tipo: "texto", min: 3, mensaje: "La calle debe tener al menos 3 caracteres." },
-    { id: "editar-noexterior", tipo: "numero", minVal: 1, mensaje: "El número exterior debe ser mayor a 0." },
-    { id: "editar-estado", tipo: "select", mensaje: "Debes seleccionar un estado." },
-    { id: "editar-municipio", tipo: "select", mensaje: "Debes seleccionar un municipio." },
-    { id: "editar-colonia", tipo: "select", mensaje: "Debes seleccionar una colonia." },
-    { id: "editar-email", tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." },
-    { id: "editar-telefono", tipo: "texto", min: 10, mensaje: "El teléfono debe tener al menos 10 dígitos." }
+    {
+      id: "editar-nombre",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre del taller debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-razonsocial",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La razón social debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-rfc",
+      tipo: "texto",
+      min: 12,
+      mensaje: "El RFC debe tener al menos 12 caracteres.",
+    },
+    {
+      id: "editar-calle",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La calle debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-noexterior",
+      tipo: "numero",
+      minVal: 1,
+      mensaje: "El número exterior debe ser mayor a 0.",
+    },
+    {
+      id: "editar-estado",
+      tipo: "select",
+      mensaje: "Debes seleccionar un estado.",
+    },
+    {
+      id: "editar-municipio",
+      tipo: "select",
+      mensaje: "Debes seleccionar un municipio.",
+    },
+    {
+      id: "editar-colonia",
+      tipo: "select",
+      mensaje: "Debes seleccionar una colonia.",
+    },
+    {
+      id: "editar-email",
+      tipo: "email",
+      mensaje: "Debes ingresar un correo electrónico válido.",
+    },
+    {
+      id: "editar-telefono",
+      tipo: "texto",
+      min: 10,
+      mensaje: "El teléfono debe tener al menos 10 dígitos.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true;
-    
-    elemento.addEventListener(regla.tipo === "select" ? "change" : "input", function() {
+
+    elemento.addEventListener(
+      regla.tipo === "select" ? "change" : "input",
+      function () {
         this.classList.remove("input-error");
-    });
+      },
+    );
 
     if (regla.tipo === "texto") {
-        if (valor.length < regla.min) esValido = false;
+      if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "numero") {
-        let num = parseFloat(valor);
-        if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
+      let num = parseFloat(valor);
+      if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
     } else if (regla.tipo === "select") {
-        if (valor === "") esValido = false;
+      if (valor === "") esValido = false;
     } else if (regla.tipo === "email") {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(valor)) esValido = false;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(valor)) esValido = false;
     }
 
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -474,7 +604,7 @@ if (errores.length > 0) {
 
   try {
     const esDuplicado = await verificarDuplicadoEditarTienda(nombre, id);
-    if (!esDuplicado) enviarFormularioEdicion(formulario); 
+    if (!esDuplicado) enviarFormularioEdicion(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
@@ -502,7 +632,7 @@ function verificarDuplicadoEditarTienda(nombre, id = 0) {
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; 
+      return true;
     });
 }
 
@@ -527,17 +657,25 @@ function enviarFormularioEdicion(formulario) {
         }).then(() => {
           // RECARGA LIMPIA DE DATATABLES
           if (document.getElementById("tiendas-link")) {
-            document.getElementById("tiendas-link").click(); 
+            document.getElementById("tiendas-link").click();
           }
         });
         cerrarModal("editar-modal");
       } else {
-        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
+        Swal.fire(
+          "Atención",
+          data.message || "Ocurrió un problema.",
+          "warning",
+        );
       }
     })
     .catch((error) => {
       console.error("Error al actualizar taller:", error);
-      Swal.fire("Error", "Ocurrió un problema al procesar la solicitud.", "error");
+      Swal.fire(
+        "Error",
+        "Ocurrió un problema al procesar la solicitud.",
+        "error",
+      );
     });
 }
 
@@ -563,22 +701,31 @@ document.addEventListener("click", function (event) {
             if (data.success) {
               Swal.fire({
                 title: "¡Eliminado!",
-                text: data.message || "El taller se ha eliminado correctamente.",
+                text:
+                  data.message || "El taller se ha eliminado correctamente.",
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
               }).then(() => {
                 if (document.getElementById("tiendas-link")) {
-                  document.getElementById("tiendas-link").click(); 
+                  document.getElementById("tiendas-link").click();
                 }
               });
             } else {
-              Swal.fire("Error", data.message || "No se pudo eliminar el registro.", "error");
+              Swal.fire(
+                "Error",
+                data.message || "No se pudo eliminar el registro.",
+                "error",
+              );
             }
           })
           .catch((error) => {
-            Swal.fire("Error", "Hubo un problema al procesar tu solicitud.", "error");
+            Swal.fire(
+              "Error",
+              "Hubo un problema al procesar tu solicitud.",
+              "error",
+            );
             console.error("Error al eliminar:", error);
           });
       }
@@ -589,7 +736,7 @@ document.addEventListener("click", function (event) {
 // LÓGICA PARA SELECTS ANIDADOS (ESTADO, MUNICIPIO, COLONIA)
 function popularSelect(selectElement, items, valorDefault = "Seleccionar") {
   if (!selectElement) return;
-  selectElement.innerHTML = `<option value="">${valorDefault}</option>`; 
+  selectElement.innerHTML = `<option value="">${valorDefault}</option>`;
   items.forEach((item) => {
     const option = document.createElement("option");
     option.value = item.id;
@@ -598,7 +745,12 @@ function popularSelect(selectElement, items, valorDefault = "Seleccionar") {
   });
 }
 
-async function cargarMunicipios(idEstado, idSelectMunicipio, idSelectColonia, idInputCP) {
+async function cargarMunicipios(
+  idEstado,
+  idSelectMunicipio,
+  idSelectColonia,
+  idInputCP,
+) {
   const selectMunicipio = document.getElementById(idSelectMunicipio);
   const selectColonia = document.getElementById(idSelectColonia);
   const inputCP = document.getElementById(idInputCP);
@@ -623,7 +775,7 @@ async function cargarMunicipios(idEstado, idSelectMunicipio, idSelectColonia, id
       popularSelect(selectMunicipio, [], "Error al cargar");
     }
   } else {
-    popularSelect(selectMunicipio, []); 
+    popularSelect(selectMunicipio, []);
   }
 }
 
@@ -650,7 +802,7 @@ async function cargarColonias(idMunicipio, idSelectColonia, idInputCP) {
       popularSelect(selectColonia, [], "Error al cargar");
     }
   } else {
-    popularSelect(selectColonia, []); 
+    popularSelect(selectColonia, []);
   }
 }
 
@@ -680,7 +832,12 @@ async function cargarCP(idColonia, idInputCP) {
 
 document.addEventListener("change", function (event) {
   if (event.target.id === "estado") {
-    cargarMunicipios(event.target.value, "municipio", "colonia", "codigo_postal");
+    cargarMunicipios(
+      event.target.value,
+      "municipio",
+      "colonia",
+      "codigo_postal",
+    );
   }
   if (event.target.id === "municipio") {
     cargarColonias(event.target.value, "colonia", "codigo_postal");
@@ -690,17 +847,31 @@ document.addEventListener("change", function (event) {
   }
 
   if (event.target.id === "editar-estado") {
-    cargarMunicipios(event.target.value, "editar-municipio", "editar-colonia", "editar-codigo_postal");
+    cargarMunicipios(
+      event.target.value,
+      "editar-municipio",
+      "editar-colonia",
+      "editar-codigo_postal",
+    );
   }
   if (event.target.id === "editar-municipio") {
-    cargarColonias(event.target.value, "editar-colonia", "editar-codigo_postal");
+    cargarColonias(
+      event.target.value,
+      "editar-colonia",
+      "editar-codigo_postal",
+    );
   }
   if (event.target.id === "editar-colonia") {
     cargarCP(event.target.value, "editar-codigo_postal");
   }
 });
 
-async function cargarYSeleccionarUbicacionEditar(idEstadoDB, idMunicipioDB, idColoniaDB, cpDB) {
+async function cargarYSeleccionarUbicacionEditar(
+  idEstadoDB,
+  idMunicipioDB,
+  idColoniaDB,
+  cpDB,
+) {
   const selectEstado = document.getElementById("editar-estado");
   const selectMunicipio = document.getElementById("editar-municipio");
   const selectColonia = document.getElementById("editar-colonia");
@@ -710,16 +881,21 @@ async function cargarYSeleccionarUbicacionEditar(idEstadoDB, idMunicipioDB, idCo
   selectEstado.value = idEstadoDB;
 
   //  Cargamos municipios (esperamos a que termine) y seleccionamos
-  await cargarMunicipios(idEstadoDB, "editar-municipio", "editar-colonia", "editar-codigo_postal");
-  selectMunicipio.value = idMunicipioDB; 
+  await cargarMunicipios(
+    idEstadoDB,
+    "editar-municipio",
+    "editar-colonia",
+    "editar-codigo_postal",
+  );
+  selectMunicipio.value = idMunicipioDB;
 
   //  Cargamos colonias (esperamos a que termine) y seleccionamos
   await cargarColonias(idMunicipioDB, "editar-colonia", "editar-codigo_postal");
-  selectColonia.value = idColoniaDB; 
+  selectColonia.value = idColoniaDB;
 
   // terminó de cargar todo, ahora sí inyectamos el Código Postal
   if (inputCP) {
-      inputCP.value = cpDB || ""; 
+    inputCP.value = cpDB || "";
   }
 }
 
@@ -733,35 +909,46 @@ document
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
 
-            inicializarTablaGenerica('#tabla-roles', '#buscarboxrol', '#cantidad-registros');
-
+        inicializarTablaGenerica(
+          "#tabla-roles",
+          "#buscarboxrol",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-  function abrirModalRol(id) {
-    document.getElementById(id).style.display = "flex";
-  }
-  
-  function cerrarModalRol(id) {
-    document.getElementById(id).style.display = "none";
-  }
-  
+function abrirModalRol(id) {
+  document.getElementById(id).style.display = "flex";
+}
+
+function cerrarModalRol(id) {
+  document.getElementById(id).style.display = "none";
+}
+
 //Crear Rol **********************************************
 // INICIALIZAR Y CARGAR MÓDULO DE ROLES
 if (document.getElementById("roles-link")) {
-  document.getElementById("roles-link").addEventListener("click", function (event) {
-    event.preventDefault(); 
-    fetch("roles.php") 
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        inicializarTablaGenerica('#tabla-roles', '#buscarboxrol', '#cantidad-registros');
-      })
-      .catch((error) => console.error("Error al cargar el contenido:", error));
-  });
+  document
+    .getElementById("roles-link")
+    .addEventListener("click", function (event) {
+      event.preventDefault();
+      fetch("roles.php")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("content-area").innerHTML = html;
+          inicializarTablaGenerica(
+            "#tabla-roles",
+            "#buscarboxrol",
+            "#cantidad-registros",
+          );
+        })
+        .catch((error) =>
+          console.error("Error al cargar el contenido:", error),
+        );
+    });
 }
 
 function abrirModalRol(id) {
@@ -772,7 +959,7 @@ function cerrarModalRol(id) {
   document.getElementById(id).style.display = "none";
 }
 
-// VERIFICAR DUPLICADOS DE ROLES 
+// VERIFICAR DUPLICADOS DE ROLES
 function verificarDuplicadoRol(rol, id = 0) {
   return fetch("cruds/verificar_nombre_rol.php", {
     method: "POST",
@@ -794,7 +981,7 @@ function verificarDuplicadoRol(rol, id = 0) {
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; 
+      return true;
     });
 }
 
@@ -803,53 +990,63 @@ function validarFormularioRol(event) {
   event.preventDefault();
 
   const reglasValidacion = [
-    { id: "crear-rol", tipo: "texto", min: 3, mensaje: "El nombre del rol debe tener al menos 3 caracteres." },
-    { id: "crear-desc_rol", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "crear-rol",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre del rol debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-desc_rol",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true;
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (regla.tipo === "texto" && valor.length < regla.min) esValido = false;
 
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -863,7 +1060,7 @@ if (errores.length > 0) {
 function procesarFormularioRol(event) {
   const formData = new FormData(event.target);
 
-  fetch("cruds/procesar_crear_rol.php", { 
+  fetch("cruds/procesar_crear_rol.php", {
     method: "POST",
     body: formData,
   })
@@ -882,11 +1079,15 @@ function procesarFormularioRol(event) {
           timerProgressBar: true,
         }).then(() => {
           if (document.getElementById("roles-link")) {
-            document.getElementById("roles-link").click(); 
+            document.getElementById("roles-link").click();
           }
         });
       } else {
-        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
+        Swal.fire(
+          "Atención",
+          data.message || "Ocurrió un problema.",
+          "warning",
+        );
       }
     })
     .catch((error) => {
@@ -909,19 +1110,27 @@ document.addEventListener("DOMContentLoaded", function () {
             if (formulario) {
               const campos = ["idrol", "rol", "desc_rol", "estatus"];
               campos.forEach((campo) => {
-                if(formulario[`editar-${campo}`]){
-                    formulario[`editar-${campo}`].value = data.rol[campo] || "";
+                if (formulario[`editar-${campo}`]) {
+                  formulario[`editar-${campo}`].value = data.rol[campo] || "";
                 }
               });
               abrirModalRol("editar-modalRol");
             }
           } else {
-            Swal.fire("Error", data.message || "No se pudo cargar el Rol.", "error");
+            Swal.fire(
+              "Error",
+              data.message || "No se pudo cargar el Rol.",
+              "error",
+            );
           }
         })
         .catch((error) => {
           console.error("Error al obtener Rol:", error);
-          Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
+          Swal.fire(
+            "Error",
+            "Ocurrió un problema al obtener los datos.",
+            "error",
+          );
         });
     }
   });
@@ -940,67 +1149,79 @@ function validarFormularioEdicionRol(event) {
   const formulario = event.target;
 
   const reglasValidacion = [
-    { id: "editar-rol", tipo: "texto", min: 3, mensaje: "El nombre del rol debe tener al menos 3 caracteres." },
-    { id: "editar-desc_rol", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "editar-rol",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre del rol debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-desc_rol",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true;
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (regla.tipo === "texto" && valor.length < regla.min) esValido = false;
 
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
-  
-if (errores.length > 0) {
+
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
   const rolInput = document.getElementById("editar-rol");
   const idInput = document.getElementById("editar-idrol");
 
-  verificarDuplicadoRol(rolInput.value.trim(), idInput.value).then((esDuplicado) => {
-    if (!esDuplicado) enviarFormularioEdicionRol(formulario);
-  });
+  verificarDuplicadoRol(rolInput.value.trim(), idInput.value).then(
+    (esDuplicado) => {
+      if (!esDuplicado) enviarFormularioEdicionRol(formulario);
+    },
+  );
 }
 
 function enviarFormularioEdicionRol(formulario) {
   const formData = new FormData(formulario);
 
-  fetch("cruds/editar_rol.php", { 
+  fetch("cruds/editar_rol.php", {
     method: "POST",
     body: formData,
   })
@@ -1017,11 +1238,15 @@ function enviarFormularioEdicionRol(formulario) {
           timerProgressBar: true,
         }).then(() => {
           if (document.getElementById("roles-link")) {
-            document.getElementById("roles-link").click(); 
+            document.getElementById("roles-link").click();
           }
         });
       } else {
-        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
+        Swal.fire(
+          "Atención",
+          data.message || "Ocurrió un problema.",
+          "warning",
+        );
       }
     })
     .catch((error) => {
@@ -1059,15 +1284,23 @@ document.addEventListener("click", function (event) {
                 timerProgressBar: true,
               }).then(() => {
                 if (document.getElementById("roles-link")) {
-                  document.getElementById("roles-link").click(); 
+                  document.getElementById("roles-link").click();
                 }
               });
             } else {
-              Swal.fire("Error", data.message || "No se pudo eliminar el registro.", "error");
+              Swal.fire(
+                "Error",
+                data.message || "No se pudo eliminar el registro.",
+                "error",
+              );
             }
           })
           .catch((error) => {
-            Swal.fire("Error", "Hubo un problema al procesar tu solicitud.", "error");
+            Swal.fire(
+              "Error",
+              "Hubo un problema al procesar tu solicitud.",
+              "error",
+            );
             console.error("Error al eliminar:", error);
           });
       }
@@ -1078,21 +1311,33 @@ document.addEventListener("click", function (event) {
 // Llamar Usuarios *********************************************
 // INICIALIZAR Y CARGAR MÓDULO DE USUARIOS
 if (document.getElementById("usuarios-link")) {
-  document.getElementById("usuarios-link").addEventListener("click", function (event) {
-    event.preventDefault(); 
-    fetch("usuarios.php") 
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        // DATATABLES TOMA EL CONTROL DEL BUSCADOR Y EL PAGINADOR
-        inicializarTablaGenerica('#tabla-usuarios', '#buscarboxusuario', '#estatusFiltroU');
-      })
-      .catch((error) => console.error("Error al cargar el contenido:", error));
-  });
+  document
+    .getElementById("usuarios-link")
+    .addEventListener("click", function (event) {
+      event.preventDefault();
+      fetch("usuarios.php")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("content-area").innerHTML = html;
+          // DATATABLES TOMA EL CONTROL DEL BUSCADOR Y EL PAGINADOR
+          inicializarTablaGenerica(
+            "#tabla-usuarios",
+            "#buscarboxusuario",
+            "#estatusFiltroU",
+          );
+        })
+        .catch((error) =>
+          console.error("Error al cargar el contenido:", error),
+        );
+    });
 }
 
-function abrirModalUser(id) { document.getElementById(id).style.display = "flex"; }
-function cerrarModalUser(id) { document.getElementById(id).style.display = "none"; }
+function abrirModalUser(id) {
+  document.getElementById(id).style.display = "flex";
+}
+function cerrarModalUser(id) {
+  document.getElementById(id).style.display = "none";
+}
 
 // MOTOR DE REGLAS (Crear y Editar Usuario)
 function validarFormularioUser(event, tipo = "crear") {
@@ -1100,49 +1345,98 @@ function validarFormularioUser(event, tipo = "crear") {
   const prefijo = tipo === "crear" ? "crear" : "editar";
 
   const reglasValidacion = [
-    { id: `${prefijo}-usuario`, tipo: "texto", min: 3, mensaje: "El usuario debe tener al menos 3 caracteres." },
-    { id: `${prefijo}-nombre`, tipo: "texto", min: 3, mensaje: "El nombre debe tener al menos 3 caracteres." },
-    { id: `${prefijo}-papellido`, tipo: "texto", min: 3, mensaje: "El primer apellido debe tener al menos 3 caracteres." },
-    { id: `${prefijo}-sapellido`, tipo: "texto", min: 3, mensaje: "El segundo apellido debe tener al menos 3 caracteres." },
-    { id: `${prefijo}-email`, tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." },
-    { id: `${prefijo}-rol`, tipo: "select", mensaje: "Debes seleccionar un rol." },
-    { id: `${prefijo}-tienda`, tipo: "select", mensaje: "Debes seleccionar un taller." },
-    { id: `${prefijo}-password1`, tipo: "password", mensaje: "La contraseña debe tener al menos 6 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial." },
-    { id: `${prefijo}-password2`, tipo: "confirmacion", mensaje: "Las contraseñas no coinciden." }
+    {
+      id: `${prefijo}-usuario`,
+      tipo: "texto",
+      min: 3,
+      mensaje: "El usuario debe tener al menos 3 caracteres.",
+    },
+    {
+      id: `${prefijo}-nombre`,
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre debe tener al menos 3 caracteres.",
+    },
+    {
+      id: `${prefijo}-papellido`,
+      tipo: "texto",
+      min: 3,
+      mensaje: "El primer apellido debe tener al menos 3 caracteres.",
+    },
+    {
+      id: `${prefijo}-sapellido`,
+      tipo: "texto",
+      min: 3,
+      mensaje: "El segundo apellido debe tener al menos 3 caracteres.",
+    },
+    {
+      id: `${prefijo}-email`,
+      tipo: "email",
+      mensaje: "Debes ingresar un correo electrónico válido.",
+    },
+    {
+      id: `${prefijo}-rol`,
+      tipo: "select",
+      mensaje: "Debes seleccionar un rol.",
+    },
+    {
+      id: `${prefijo}-tienda`,
+      tipo: "select",
+      mensaje: "Debes seleccionar un taller.",
+    },
+    {
+      id: `${prefijo}-password1`,
+      tipo: "password",
+      mensaje:
+        "La contraseña debe tener al menos 6 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.",
+    },
+    {
+      id: `${prefijo}-password2`,
+      tipo: "confirmacion",
+      mensaje: "Las contraseñas no coinciden.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true;
-    
-    elemento.addEventListener("input", function() { this.classList.remove("input-error"); });
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
+    });
 
     if (regla.tipo === "texto" && valor.length < regla.min) esValido = false;
     else if (regla.tipo === "select" && valor === "") esValido = false;
-    else if (regla.tipo === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor)) esValido = false;
+    else if (
+      regla.tipo === "email" &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor)
+    )
+      esValido = false;
     else if (regla.tipo === "password") {
-        const regexPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-        if (tipo === "crear" && valor === "") esValido = false; // Obligatorio al crear
-        if (valor !== "" && !regexPass.test(valor)) esValido = false; // Si escribe algo, debe cumplir
-    }
-    else if (regla.tipo === "confirmacion") {
-        const pass1 = document.getElementById(`${prefijo}-password1`).value.trim();
-        if (tipo === "crear" && valor === "") esValido = false;
-        if (valor !== pass1) esValido = false; // Deben ser exactamente iguales
+      const regexPass =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+      if (tipo === "crear" && valor === "") esValido = false; // Obligatorio al crear
+      if (valor !== "" && !regexPass.test(valor)) esValido = false; // Si escribe algo, debe cumplir
+    } else if (regla.tipo === "confirmacion") {
+      const pass1 = document
+        .getElementById(`${prefijo}-password1`)
+        .value.trim();
+      if (tipo === "crear" && valor === "") esValido = false;
+      if (valor !== pass1) esValido = false; // Deben ser exactamente iguales
     }
 
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
@@ -1152,14 +1446,17 @@ function validarFormularioUser(event, tipo = "crear") {
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
       returnFocus: false, // <-- ¡EL FIN DEL ERROR ARIA-HIDDEN!
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido'
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
     });
     return;
   }
 
-  const usuarioInput = document.getElementById(`${prefijo}-usuario`).value.trim();
-  const idInput = tipo === "editar" ? document.getElementById("editar-idusuario").value : 0;
+  const usuarioInput = document
+    .getElementById(`${prefijo}-usuario`)
+    .value.trim();
+  const idInput =
+    tipo === "editar" ? document.getElementById("editar-idusuario").value : 0;
 
   verificarDuplicadoUser(usuarioInput, idInput).then((esDuplicado) => {
     if (!esDuplicado) procesarFormularioUser(event.target, tipo);
@@ -1191,7 +1488,10 @@ function verificarDuplicadoUser(usuario, id = 0) {
 
 function procesarFormularioUser(formulario, tipo) {
   const formData = new FormData(formulario);
-  const url = tipo === "crear" ? "cruds/procesar_crear_user.php" : "cruds/editar_user.php";
+  const url =
+    tipo === "crear"
+      ? "cruds/procesar_crear_user.php"
+      : "cruds/editar_user.php";
 
   fetch(url, { method: "POST", body: formData })
     .then((response) => response.json())
@@ -1202,18 +1502,24 @@ function procesarFormularioUser(formulario, tipo) {
 
         Swal.fire({
           title: "¡Éxito!",
-          text: data.message || `Usuario ${tipo === "crear" ? "registrado" : "actualizado"}.`,
+          text:
+            data.message ||
+            `Usuario ${tipo === "crear" ? "registrado" : "actualizado"}.`,
           icon: "success",
           returnFocus: false,
           showConfirmButton: false,
-          timer: 1500
+          timer: 1500,
         }).then(() => {
           if (document.getElementById("usuarios-link")) {
             document.getElementById("usuarios-link").click(); // Recarga limpia de DataTables
           }
         });
       } else {
-        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
+        Swal.fire(
+          "Atención",
+          data.message || "Ocurrió un problema.",
+          "warning",
+        );
       }
     })
     .catch(() => Swal.fire("Error", "Ocurrió un error inesperado.", "error"));
@@ -1239,7 +1545,17 @@ document.addEventListener("DOMContentLoaded", function () {
           if (data.success) {
             const formulario = document.getElementById("form-editarUser");
             if (formulario) {
-              const campos = ["idusuario", "usuario", "nombre", "papellido", "sapellido", "email", "rol", "tienda", "estatus"];
+              const campos = [
+                "idusuario",
+                "usuario",
+                "nombre",
+                "papellido",
+                "sapellido",
+                "email",
+                "rol",
+                "tienda",
+                "estatus",
+              ];
               campos.forEach((campo) => {
                 if (formulario[`editar-${campo}`]) {
                   formulario[`editar-${campo}`].value = data.users[campo] || "";
@@ -1248,11 +1564,15 @@ document.addEventListener("DOMContentLoaded", function () {
               // Limpiar contraseñas para que no queden marcadas
               document.getElementById("editar-password1").value = "";
               document.getElementById("editar-password2").value = "";
-              
+
               abrirModalUser("editar-modalUser");
             }
           } else {
-            Swal.fire("Error", data.message || "No se pudo cargar el usuario.", "error");
+            Swal.fire(
+              "Error",
+              data.message || "No se pudo cargar el usuario.",
+              "error",
+            );
           }
         });
     }
@@ -1266,7 +1586,7 @@ document.addEventListener("DOMContentLoaded", function () {
         icon: "warning",
         returnFocus: false,
         showCancelButton: true,
-        confirmButtonText: "Sí, eliminar"
+        confirmButtonText: "Sí, eliminar",
       }).then((result) => {
         if (result.isConfirmed) {
           fetch(`cruds/eliminar_user.php?id=${id}`, { method: "POST" })
@@ -1274,7 +1594,8 @@ document.addEventListener("DOMContentLoaded", function () {
             .then((data) => {
               if (data.success) {
                 Swal.fire("Eliminado", data.message, "success").then(() => {
-                  if (document.getElementById("usuarios-link")) document.getElementById("usuarios-link").click();
+                  if (document.getElementById("usuarios-link"))
+                    document.getElementById("usuarios-link").click();
                 });
               } else {
                 Swal.fire("Error", data.message, "error");
@@ -1295,11 +1616,11 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-            inicializarTablaGenerica(
-              "#tabla-productos",
-              "#buscarboxproducto",
-              "#cantidad-registros",
-            );
+        inicializarTablaGenerica(
+          "#tabla-productos",
+          "#buscarboxproducto",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -1465,10 +1786,10 @@ function procesarFormularioProducto(event, tipo) {
         event.target.reset();
 
         // Actualizar la tabla dinámicamente si es 'crear'
-       if (tipo === "crear") {
-            if (document.getElementById("productos-link")) {
-                document.getElementById("productos-link").click(); // Recarga la tabla limpia
-            }
+        if (tipo === "crear") {
+          if (document.getElementById("productos-link")) {
+            document.getElementById("productos-link").click(); // Recarga la tabla limpia
+          }
         }
 
         // Mostrar un mensaje de éxito
@@ -1508,28 +1829,84 @@ function validarFormularioProducto(event) {
   // reglas para TODOS los campos en un solo lugar
   const reglasValidacion = [
     // Textos
-    { id: "crear-codebar", tipo: "texto", min: 3, mensaje: "El código de barras debe tener al menos 3 caracteres." },
-    { id: "crear-producto", tipo: "texto", min: 3, mensaje: "El nombre del producto debe tener al menos 3 caracteres." },
-    { id: "crear-descprod", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." },
-    
+    {
+      id: "crear-codebar",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El código de barras debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-producto",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre del producto debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-descprod",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
+
     // Selects (Listas desplegables)
-    { id: "crear-categoria", tipo: "select", mensaje: "Debes seleccionar una Categoría." },
-    { id: "crear-marca", tipo: "select", mensaje: "Debes seleccionar una Marca." },
-    { id: "crear-proveedor", tipo: "select", mensaje: "Debes seleccionar un Proveedor." },
-    { id: "crear-umedida", tipo: "select", mensaje: "Debes seleccionar una Unidad de Medida." },
-    { id: "crear-impuesto", tipo: "select", mensaje: "Debes seleccionar un Impuesto." },
-    
+    {
+      id: "crear-categoria",
+      tipo: "select",
+      mensaje: "Debes seleccionar una Categoría.",
+    },
+    {
+      id: "crear-marca",
+      tipo: "select",
+      mensaje: "Debes seleccionar una Marca.",
+    },
+    {
+      id: "crear-proveedor",
+      tipo: "select",
+      mensaje: "Debes seleccionar un Proveedor.",
+    },
+    {
+      id: "crear-umedida",
+      tipo: "select",
+      mensaje: "Debes seleccionar una Unidad de Medida.",
+    },
+    {
+      id: "crear-impuesto",
+      tipo: "select",
+      mensaje: "Debes seleccionar un Impuesto.",
+    },
+
     // Números (Costos y Precios)
-    { id: "crear-costo_compra", tipo: "numero", minVal: 0.01, mensaje: "El costo de compra debe ser mayor a $0." },
-    { id: "crear-ganancia", tipo: "numero", minVal: 0, mensaje: "El porcentaje de ganancia no puede ser negativo." },
-    { id: "crear-precio1", tipo: "numero", minVal: 0.01, mensaje: "El precio final debe ser mayor a $0 (calcula el costo y ganancia)." },
-    { id: "crear-stock_minimo", tipo: "numero", minVal: 0, mensaje: "El stock mínimo no puede ser negativo." }
+    {
+      id: "crear-costo_compra",
+      tipo: "numero",
+      minVal: 0.01,
+      mensaje: "El costo de compra debe ser mayor a $0.",
+    },
+    {
+      id: "crear-ganancia",
+      tipo: "numero",
+      minVal: 0,
+      mensaje: "El porcentaje de ganancia no puede ser negativo.",
+    },
+    {
+      id: "crear-precio1",
+      tipo: "numero",
+      minVal: 0.01,
+      mensaje:
+        "El precio final debe ser mayor a $0 (calcula el costo y ganancia).",
+    },
+    {
+      id: "crear-stock_minimo",
+      tipo: "numero",
+      minVal: 0,
+      mensaje: "El stock mínimo no puede ser negativo.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return; // Si el campo no existe en el HTML, lo ignora
 
@@ -1538,58 +1915,58 @@ function validarFormularioProducto(event) {
 
     //  borde rojo desaparezca cuando el usuario corrija el error
     if (regla.tipo === "select") {
-        // Los selects usan 'change' cuando eliges una opción
-        elemento.addEventListener("change", function() {
-            if (this.value.trim() !== "") this.classList.remove("input-error");
-        });
+      // Los selects usan 'change' cuando eliges una opción
+      elemento.addEventListener("change", function () {
+        if (this.value.trim() !== "") this.classList.remove("input-error");
+      });
     } else {
-        // Los inputs de texto/número usan 'input' cuando escribes
-        elemento.addEventListener("input", function() {
-            this.classList.remove("input-error");
-        });
+      // Los inputs de texto/número usan 'input' cuando escribes
+      elemento.addEventListener("input", function () {
+        this.classList.remove("input-error");
+      });
     }
 
     // Evaluar si el campo pasa la prueba
     if (regla.tipo === "texto") {
-        if (valor.length < regla.min) esValido = false;
+      if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "select") {
-        if (valor === "") esValido = false;
+      if (valor === "") esValido = false;
     } else if (regla.tipo === "numero") {
-        let num = parseFloat(valor);
-        if (isNaN(num) || num < regla.minVal) esValido = false;
+      let num = parseFloat(valor);
+      if (isNaN(num) || num < regla.minVal) esValido = false;
     }
 
     // Aplica el estilo rojo y guardar el mensaje si falló
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`); // Lo guardamos como elemento de lista HTML
-        elemento.classList.add("input-error");
-        
-        // Guardamos el primer elemento que falló para hacerle "focus" al final
-        if (!primerCampoConError) primerCampoConError = elemento; 
+      errores.push(`<li>${regla.mensaje}</li>`); // Lo guardamos como elemento de lista HTML
+      elemento.classList.add("input-error");
+
+      // Guardamos el primer elemento que falló para hacerle "focus" al final
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error"); // Por si estaba rojo de un error anterior
+      elemento.classList.remove("input-error"); // Por si estaba rojo de un error anterior
     }
   });
 
   //  Si se encontraron errores, mostrar la alerta estructurada
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -1602,12 +1979,16 @@ if (errores.length > 0) {
       if (esDuplicado) {
         return; // Detener la ejecución si hay duplicados (tu función ya lanza su propia alerta)
       }
-      // 5. ¡Todo perfecto! Enviamos el formulario al servidor
+      // ¡Todo perfecto! Enviamos el formulario al servidor
       procesarFormularioProducto(event, "crear");
     })
     .catch((error) => {
       console.error("Error al verificar duplicados:", error);
-      Swal.fire("Error", "Ocurrió un problema al validar el producto en la base de datos.", "error");
+      Swal.fire(
+        "Error",
+        "Ocurrió un problema al validar el producto en la base de datos.",
+        "error",
+      );
     });
 }
 
@@ -1776,32 +2157,81 @@ function verificarDuplicadoEditarProducto(producto, id = 0) {
 }
 // VALIDACIÓN DEL FORMULARIO DE EDICIÓN PRODUCTO
 async function validarFormularioEdicionProducto(formulario) {
-  
   //  las reglas exactas para los campos de EDICIÓN (id empieza con "editar-")
   const reglasValidacion = [
     // Textos
-    { id: "editar-codebar", tipo: "texto", min: 3, mensaje: "El código de barras debe tener al menos 3 caracteres." },
-    { id: "editar-producto", tipo: "texto", min: 3, mensaje: "El nombre del producto debe tener al menos 3 caracteres." },
-    { id: "editar-descprod", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." },
-    
+    {
+      id: "editar-codebar",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El código de barras debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-producto",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre del producto debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-descprod",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
+
     // Selects (Listas desplegables)
-    { id: "editar-categoria", tipo: "select", mensaje: "Debes seleccionar una Categoría." },
-    { id: "editar-marca", tipo: "select", mensaje: "Debes seleccionar una Marca." },
-    { id: "editar-proveedor", tipo: "select", mensaje: "Debes seleccionar un Proveedor." },
-    { id: "editar-umedida", tipo: "select", mensaje: "Debes seleccionar una Unidad de Medida." },
-    { id: "editar-impuesto", tipo: "select", mensaje: "Debes seleccionar un Impuesto." },
-    
+    {
+      id: "editar-categoria",
+      tipo: "select",
+      mensaje: "Debes seleccionar una Categoría.",
+    },
+    {
+      id: "editar-marca",
+      tipo: "select",
+      mensaje: "Debes seleccionar una Marca.",
+    },
+    {
+      id: "editar-proveedor",
+      tipo: "select",
+      mensaje: "Debes seleccionar un Proveedor.",
+    },
+    {
+      id: "editar-umedida",
+      tipo: "select",
+      mensaje: "Debes seleccionar una Unidad de Medida.",
+    },
+    {
+      id: "editar-impuesto",
+      tipo: "select",
+      mensaje: "Debes seleccionar un Impuesto.",
+    },
+
     // Números (Costos y Precios)
-    { id: "editar-costo_compra", tipo: "numero", minVal: 0.01, mensaje: "El costo de compra debe ser mayor a $0." },
-    { id: "editar-ganancia", tipo: "numero", minVal: 0, mensaje: "El porcentaje de ganancia no puede ser negativo." },
-    { id: "editar-stock_minimo", tipo: "numero", minVal: 0, mensaje: "El stock mínimo no puede ser negativo." }
+    {
+      id: "editar-costo_compra",
+      tipo: "numero",
+      minVal: 0.01,
+      mensaje: "El costo de compra debe ser mayor a $0.",
+    },
+    {
+      id: "editar-ganancia",
+      tipo: "numero",
+      minVal: 0,
+      mensaje: "El porcentaje de ganancia no puede ser negativo.",
+    },
+    {
+      id: "editar-stock_minimo",
+      tipo: "numero",
+      minVal: 0,
+      mensaje: "El stock mínimo no puede ser negativo.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
   // El "Motor" que revisa cada regla automáticamente
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return; // Si no lo encuentra, lo salta para no romper el código
 
@@ -1810,54 +2240,54 @@ async function validarFormularioEdicionProducto(formulario) {
 
     //  Programar que el borde rojo desaparezca al corregir
     if (regla.tipo === "select") {
-        elemento.addEventListener("change", function() {
-            if (this.value.trim() !== "") this.classList.remove("input-error");
-        });
+      elemento.addEventListener("change", function () {
+        if (this.value.trim() !== "") this.classList.remove("input-error");
+      });
     } else {
-        elemento.addEventListener("input", function() {
-            this.classList.remove("input-error");
-        });
+      elemento.addEventListener("input", function () {
+        this.classList.remove("input-error");
+      });
     }
 
     // Evaluar si el campo pasa la prueba
     if (regla.tipo === "texto") {
-        if (valor.length < regla.min) esValido = false;
+      if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "select") {
-        if (valor === "") esValido = false;
+      if (valor === "") esValido = false;
     } else if (regla.tipo === "numero") {
-        let num = parseFloat(valor);
-        if (isNaN(num) || num < regla.minVal) esValido = false;
+      let num = parseFloat(valor);
+      if (isNaN(num) || num < regla.minVal) esValido = false;
     }
 
     //  Aplicar el estilo rojo y guardar el mensaje si falló
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento; 
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
   // Si hay errores visuales, mostramos la alerta y detenemos todo
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -1874,13 +2304,18 @@ if (errores.length > 0) {
 
   try {
     // Primero revisamos si el nombre ya lo tiene otro producto
-    const esNombreDuplicado = await verificarDuplicadoEditarProducto(producto, id);
+    const esNombreDuplicado = await verificarDuplicadoEditarProducto(
+      producto,
+      id,
+    );
     if (esNombreDuplicado) return; // Se detiene porque ya saltó la alerta de duplicado
 
     // Luego revisamos si el código de barras ya lo tiene otro
-    const esCodebarDuplicado = await verificarDuplicadoEditarCodebar(codebar, id);
+    const esCodebarDuplicado = await verificarDuplicadoEditarCodebar(
+      codebar,
+      id,
+    );
     if (esCodebarDuplicado) return; // Se detiene
-
   } catch (error) {
     console.error("Error validando duplicados:", error);
     return;
@@ -1893,7 +2328,7 @@ if (errores.length > 0) {
 // Enviar formulario de edición Producto (AQUÍ SÍ EXISTE 'data')
 function enviarFormularioEdicionProducto(formulario) {
   if (!formulario) return;
-  
+
   const formData = new FormData(formulario);
 
   // Hacemos la petición a PHP
@@ -1918,9 +2353,8 @@ function enviarFormularioEdicionProducto(formulario) {
             document.getElementById("productos-link").click();
           }
         });
-        
+
         cerrarModalProducto("editar-modalProducto");
-        
       } else {
         Swal.fire({
           title: "Atención",
@@ -1960,7 +2394,8 @@ document.addEventListener("click", function (event) {
             if (data.success) {
               Swal.fire({
                 title: "¡Eliminado!",
-                text: data.message || "El registro se ha eliminado correctamente.",
+                text:
+                  data.message || "El registro se ha eliminado correctamente.",
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
@@ -1971,11 +2406,19 @@ document.addEventListener("click", function (event) {
                 }
               });
             } else {
-              Swal.fire("Error", data.message || "No se pudo eliminar el registro.", "error");
+              Swal.fire(
+                "Error",
+                data.message || "No se pudo eliminar el registro.",
+                "error",
+              );
             }
           })
           .catch((error) => {
-            Swal.fire("Error", "Hubo un problema al procesar tu solicitud.", "error");
+            Swal.fire(
+              "Error",
+              "Hubo un problema al procesar tu solicitud.",
+              "error",
+            );
             console.error("Error al eliminar:", error);
           });
       }
@@ -1992,9 +2435,12 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-    //Funcion para filtrar y buscar
-    inicializarTablaGenerica('#tabla-categorias', '#buscarboxcat', '#cantidad-registros');
-
+        //Funcion para filtrar y buscar
+        inicializarTablaGenerica(
+          "#tabla-categorias",
+          "#buscarboxcat",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -2014,50 +2460,60 @@ function validarFormularioCat(event) {
   event.preventDefault();
 
   const reglasValidacion = [
-    { id: "crear-cat", tipo: "texto", min: 3, mensaje: "La categoría debe tener al menos 3 caracteres." },
-    { id: "crear-desc_cat", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "crear-cat",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La categoría debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-desc_cat",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -2095,12 +2551,20 @@ function procesarFormularioCat(event, tipo) {
           }
         });
       } else {
-        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
     });
 }
 
@@ -2219,50 +2683,60 @@ function verificarDuplicadoEditarCat(cat, id = 0) {
 // Editar categoria
 async function validarFormularioEdicionCat(formulario) {
   const reglasValidacion = [
-    { id: "editar-cat", tipo: "texto", min: 3, mensaje: "La categoría debe tener al menos 3 caracteres." },
-    { id: "editar-desc_cat", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "editar-cat",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La categoría debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-desc_cat",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -2271,7 +2745,10 @@ if (errores.length > 0) {
   if (!catInput || !idInput) return;
 
   try {
-    const esDuplicado = await verificarDuplicadoEditarCat(catInput.value.trim(), idInput.value);
+    const esDuplicado = await verificarDuplicadoEditarCat(
+      catInput.value.trim(),
+      idInput.value,
+    );
     if (!esDuplicado) enviarFormularioEdicionCat(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
@@ -2303,7 +2780,7 @@ function enviarFormularioEdicionCat(formulario) {
           }
         });
         // Si la función de cerrar modal se llama cerrarModalCat, asegúrate de que diga eso:
-        cerrarModalCat("editar-modalCat"); 
+        cerrarModalCat("editar-modalCat");
       } else {
         Swal.fire({
           title: "Atención",
@@ -2342,9 +2819,9 @@ document.addEventListener("click", function (event) {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-             Swal.fire({
+              Swal.fire({
                 title: "¡Eliminada!",
-                text: data.message, 
+                text: data.message,
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
@@ -2385,13 +2862,17 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-            inicializarTablaGenerica('#tabla-marcas', '#buscarboxmarca', '#cantidad-registros');
+        inicializarTablaGenerica(
+          "#tabla-marcas",
+          "#buscarboxmarca",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
-  function abrirModalMarca(id) {
+function abrirModalMarca(id) {
   document.getElementById(id).style.display = "flex";
 }
 
@@ -2404,50 +2885,60 @@ function validarFormularioMarca(event) {
   event.preventDefault();
 
   const reglasValidacion = [
-    { id: "crear-marca", tipo: "texto", min: 3, mensaje: "La marca debe tener al menos 3 caracteres." },
-    { id: "crear-desc_marca", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "crear-marca",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La marca debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-desc_marca",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -2485,12 +2976,20 @@ function procesarFormularioMarca(event, tipo) {
           }
         });
       } else {
-        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
     });
 }
 
@@ -2607,50 +3106,60 @@ function verificarDuplicadoEditarMarca(marca, id = 0) {
 // Validación del formulario de edición Marca
 async function validarFormularioEdicionMarca(formulario) {
   const reglasValidacion = [
-    { id: "editar-marca", tipo: "texto", min: 3, mensaje: "La marca debe tener al menos 3 caracteres." },
-    { id: "editar-desc_marca", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "editar-marca",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La marca debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-desc_marca",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -2659,7 +3168,10 @@ if (errores.length > 0) {
   if (!marcaInput || !idInput) return;
 
   try {
-    const esDuplicado = await verificarDuplicadoEditarMarca(marcaInput.value.trim(), idInput.value);
+    const esDuplicado = await verificarDuplicadoEditarMarca(
+      marcaInput.value.trim(),
+      idInput.value,
+    );
     if (!esDuplicado) enviarFormularioEdicionMarca(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
@@ -2692,7 +3204,7 @@ function enviarFormularioEdicionMarca(formulario) {
           }
         });
         // Si tu función de cerrar modal se llama cerrarModalMarca, asegúrate de que diga eso:
-        cerrarModalMarca("editar-modalMarca"); 
+        cerrarModalMarca("editar-modalMarca");
       } else {
         Swal.fire({
           title: "Atención",
@@ -2730,10 +3242,10 @@ document.addEventListener("click", function (event) {
         fetch(`cruds/eliminar_marca.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
-  if (data.success) {
-             Swal.fire({
+            if (data.success) {
+              Swal.fire({
                 title: "¡Eliminada!",
-                text: data.message, 
+                text: data.message,
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
@@ -2774,9 +3286,12 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-    //Funcion para filtrar y buscar
-    inicializarTablaGenerica('#tabla-tiposervicios', '#buscarboxTiposervicios', '#cantidad-registros');
-
+        //Funcion para filtrar y buscar
+        inicializarTablaGenerica(
+          "#tabla-tiposervicios",
+          "#buscarboxTiposervicios",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -2796,54 +3311,66 @@ function validarFormularioTiposervicios(event) {
   event.preventDefault();
 
   const reglasValidacion = [
-    { id: "crear-tiposervicios", tipo: "texto", min: 3, mensaje: "El tipo de servicios debe tener al menos 3 caracteres." },
-    { id: "crear-desc_tiposervicios", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "crear-tiposervicios",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El tipo de servicios debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-desc_tiposervicios",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
-  const tiposervicios = document.getElementById("crear-tiposervicios").value.trim();
+  const tiposervicios = document
+    .getElementById("crear-tiposervicios")
+    .value.trim();
   verificarDuplicadoTiposervicios(tiposervicios).then((esDuplicado) => {
     if (!esDuplicado) procesarFormularioTiposervicios(event, "crear");
   });
@@ -2877,12 +3404,20 @@ function procesarFormularioTiposervicios(event, tipo) {
           }
         });
       } else {
-        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
     });
 }
 
@@ -2927,25 +3462,40 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            const formularioTiposervicios = document.getElementById("form-editarTiposervicio");
+            const formularioTiposervicios = document.getElementById(
+              "form-editarTiposervicio",
+            );
             if (formularioTiposervicios) {
-              const campos = ["idtiposervicio", "tiposervicio", "desc_servicio", "estatus"];
-              
+              const campos = [
+                "idtiposervicio",
+                "tiposervicio",
+                "desc_servicio",
+                "estatus",
+              ];
+
               campos.forEach((campo) => {
                 const input = formularioTiposervicios[`editar-${campo}`];
-                if(input){
-                    input.value = data.tiposervicios[campo] || "";
+                if (input) {
+                  input.value = data.tiposervicios[campo] || "";
                 }
               });
               abrirModalTiposervicios("editar-modalTiposervicio");
             }
           } else {
-            Swal.fire("Error", data.message || "No se pudo cargar el tipo de servicio.", "error");
+            Swal.fire(
+              "Error",
+              data.message || "No se pudo cargar el tipo de servicio.",
+              "error",
+            );
           }
         })
         .catch((error) => {
           console.error("Error al obtener el Tipo de servicio:", error);
-          Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
+          Swal.fire(
+            "Error",
+            "Ocurrió un problema al obtener los datos.",
+            "error",
+          );
         });
     }
   });
@@ -2953,7 +3503,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Escuchar el submit del formulario de edición
   document.body.addEventListener("submit", function (event) {
     if (event.target && event.target.id === "form-editarTiposervicio") {
-      event.preventDefault(); 
+      event.preventDefault();
       validarFormularioEdicionTiposervicio(event.target);
     }
   });
@@ -2982,7 +3532,7 @@ function verificarDuplicadoEditarTiposervicio(tiposervicio, id = 0) {
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; 
+      return true;
     });
 }
 
@@ -2990,63 +3540,76 @@ function verificarDuplicadoEditarTiposervicio(tiposervicio, id = 0) {
 async function validarFormularioEdicionTiposervicio(formulario) {
   // Los IDs aquí ya coinciden exactamente con tu HTML
   const reglasValidacion = [
-    { id: "editar-tiposervicio", tipo: "texto", min: 3, mensaje: "El tipo de servicio debe tener al menos 3 caracteres." },
-    { id: "editar-desc_servicio", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "editar-tiposervicio",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El tipo de servicio debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-desc_servicio",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
   // IDs corregidos para buscar en el DOM
   const tiposerviciosInput = document.getElementById("editar-tiposervicio");
   const idInput = document.getElementById("editar-idtiposervicio");
-  
+
   if (!tiposerviciosInput || !idInput) return;
 
   try {
-    const esDuplicado = await verificarDuplicadoEditarTiposervicio(tiposerviciosInput.value.trim(), idInput.value);
+    const esDuplicado = await verificarDuplicadoEditarTiposervicio(
+      tiposerviciosInput.value.trim(),
+      idInput.value,
+    );
     // Cambiamos el nombre de la función aquí para que no llame a Categorías
-    if (!esDuplicado) enviarFormularioEdicionTiposervicio(formulario); 
+    if (!esDuplicado) enviarFormularioEdicionTiposervicio(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
   }
@@ -3077,7 +3640,7 @@ function enviarFormularioEdicionTiposervicio(formulario) {
             document.getElementById("tiposervicios-link").click();
           }
         });
-        
+
         // Cerrar el modal con el ID y función correcta
         cerrarModalTiposervicios("editar-modalTiposervicio");
       } else {
@@ -3117,10 +3680,10 @@ document.addEventListener("click", function (event) {
         fetch(`cruds/eliminar_tiposervicio.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
-             if (data.success) {
-             Swal.fire({
+            if (data.success) {
+              Swal.fire({
                 title: "¡Eliminada!",
-                text: data.message, 
+                text: data.message,
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
@@ -3162,74 +3725,89 @@ document
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
         //Funcion para filtrar y buscar
-        inicializarTablaGenerica('#tabla-estadoservicio', '#buscarboxEstadoservicios', '#cantidad-registros');
-
+        inicializarTablaGenerica(
+          "#tabla-estadoservicio",
+          "#buscarboxEstadoservicios",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-  function abrirModalEstadoservicio(id) {
-    document.getElementById(id).style.display = "flex";
-  }
-  
-  function cerrarModalEstadoservicio(id) {
-    document.getElementById(id).style.display = "none";
-  }
-  // Crear Estado de servicios ******************************************
-  function validarFormularioEstadoservicio(event) {
+function abrirModalEstadoservicio(id) {
+  document.getElementById(id).style.display = "flex";
+}
+
+function cerrarModalEstadoservicio(id) {
+  document.getElementById(id).style.display = "none";
+}
+// Crear Estado de servicios ******************************************
+function validarFormularioEstadoservicio(event) {
   event.preventDefault();
 
   const reglasValidacion = [
-    { id: "crear-estadoservicio", tipo: "texto", min: 3, mensaje: "El estado de servicio debe tener al menos 3 caracteres." },
-    { id: "crear-desc_estadoservicio", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "crear-estadoservicio",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El estado de servicio debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-desc_estadoservicio",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
-  const estadoservicio = document.getElementById("crear-estadoservicio").value.trim();
+  const estadoservicio = document
+    .getElementById("crear-estadoservicio")
+    .value.trim();
   verificarDuplicadoEstadoservicio(estadoservicio).then((esDuplicado) => {
     if (!esDuplicado) procesarFormularioEstadoservicio(event, "crear");
   });
@@ -3263,12 +3841,20 @@ function procesarFormularioEstadoservicio(event, tipo) {
           }
         });
       } else {
-        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
     });
 }
 
@@ -3314,9 +3900,16 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((data) => {
           //console.log("Datos recibidos del servidor:", data);
           if (data.success) {
-            const formularioEstadoservicios = document.getElementById("form-editarEstadoservicio",);
+            const formularioEstadoservicios = document.getElementById(
+              "form-editarEstadoservicio",
+            );
             if (formularioEstadoservicios) {
-              const campos = ["idestadoservicio","estadoservicio","desc_servicio","estatus",];
+              const campos = [
+                "idestadoservicio",
+                "estadoservicio",
+                "desc_servicio",
+                "estatus",
+              ];
               campos.forEach((campo) => {
                 //console.log(`Asignando ${campo}:`, data.estadoservicios[campo]);
                 formularioEstadoservicios[`editar-${campo}`].value =
@@ -3387,50 +3980,60 @@ function verificarDuplicadoEditarEstadoservicio(estadoservicio, id = 0) {
 // Validación del formulario de edición Estado de servicio
 async function validarFormularioEdicionEstadoservicio(formulario) {
   const reglasValidacion = [
-    { id: "editar-estadoservicio", tipo: "texto", min: 3, mensaje: "El estado de servicio debe tener al menos 3 caracteres." },
-    { id: "editar-desc_servicio", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "editar-estadoservicio",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El estado de servicio debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-desc_servicio",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -3439,7 +4042,10 @@ if (errores.length > 0) {
   if (!estadoservicioInput || !idInput) return;
 
   try {
-    const esDuplicado = await verificarDuplicadoEditarEstadoservicio(estadoservicioInput.value.trim(), idInput.value);
+    const esDuplicado = await verificarDuplicadoEditarEstadoservicio(
+      estadoservicioInput.value.trim(),
+      idInput.value,
+    );
     if (!esDuplicado) enviarFormularioEdicionEstadoservicio(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
@@ -3471,7 +4077,7 @@ function enviarFormularioEdicionEstadoservicio(formulario) {
           }
         });
         // Si tu función de cerrar modal se llama cerrarModalEstadoservicio, asegúrate de que diga eso:
-        cerrarModalEstadoservicio("editar-modalEstadoservicio"); 
+        cerrarModalEstadoservicio("editar-modalEstadoservicio");
       } else {
         Swal.fire({
           title: "Atención",
@@ -3509,10 +4115,10 @@ document.addEventListener("click", function (event) {
         fetch(`cruds/eliminar_estadoservicio.php?id=${id}`, { method: "POST" })
           .then((response) => response.json())
           .then((data) => {
-           if (data.success) {
-             Swal.fire({
+            if (data.success) {
+              Swal.fire({
                 title: "¡Eliminada!",
-                text: data.message, 
+                text: data.message,
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
@@ -3554,15 +4160,18 @@ document
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
 
-            inicializarTablaGenerica('#tabla-mpagos', '#buscarboxmpago', '#cantidad-registros');
-
+        inicializarTablaGenerica(
+          "#tabla-mpagos",
+          "#buscarboxmpago",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-  function abrirModalMpago(id) {
+function abrirModalMpago(id) {
   document.getElementById(id).style.display = "flex";
 }
 
@@ -3575,50 +4184,60 @@ function validarFormularioMpago(event) {
   event.preventDefault();
 
   const reglasValidacion = [
-    { id: "crear-mpago", tipo: "texto", min: 3, mensaje: "El método de pago debe tener al menos 3 caracteres." },
-    { id: "crear-desc_mpago", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "crear-mpago",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El método de pago debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-desc_mpago",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -3656,12 +4275,20 @@ function procesarFormularioMpago(event, tipo) {
           }
         });
       } else {
-        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
     });
 }
 
@@ -3780,50 +4407,60 @@ function verificarDuplicadoEditarMpago(mpago, id = 0) {
 // Validación del formulario de edición Mpago
 async function validarFormularioEdicionMpago(formulario) {
   const reglasValidacion = [
-    { id: "editar-mpago", tipo: "texto", min: 3, mensaje: "El método de pago debe tener al menos 3 caracteres." },
-    { id: "editar-desc_mpago", tipo: "texto", min: 3, mensaje: "La descripción debe tener al menos 3 caracteres." }
+    {
+      id: "editar-mpago",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El método de pago debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-desc_mpago",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (valor.length < regla.min) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -3832,7 +4469,10 @@ if (errores.length > 0) {
   if (!mpagoInput || !idInput) return;
 
   try {
-    const esDuplicado = await verificarDuplicadoEditarMpago(mpagoInput.value.trim(), idInput.value);
+    const esDuplicado = await verificarDuplicadoEditarMpago(
+      mpagoInput.value.trim(),
+      idInput.value,
+    );
     if (!esDuplicado) enviarFormularioEdicionMpago(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
@@ -3864,7 +4504,7 @@ function enviarFormularioEdicionMpago(formulario) {
           }
         });
         // Si tu función de cerrar modal se llama cerrarModalMpago, asegúrate de que diga eso:
-        cerrarModalMpago("editar-modalMpago"); 
+        cerrarModalMpago("editar-modalMpago");
       } else {
         Swal.fire({
           title: "Atención",
@@ -3903,9 +4543,9 @@ document.addEventListener("click", function (event) {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-             Swal.fire({
+              Swal.fire({
                 title: "¡Eliminado!",
-                text: data.message, 
+                text: data.message,
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
@@ -3946,84 +4586,97 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-            inicializarTablaGenerica('#tabla-impuestos', '#buscarboximpuesto', '#cantidad-registros');
-
+        inicializarTablaGenerica(
+          "#tabla-impuestos",
+          "#buscarboximpuesto",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-  function abrirModalImpuesto(id) {
-    document.getElementById(id).style.display = "flex";
-  }
-  
-  function cerrarModalImpuesto(id) {
-    document.getElementById(id).style.display = "none";
-  }
+function abrirModalImpuesto(id) {
+  document.getElementById(id).style.display = "flex";
+}
+
+function cerrarModalImpuesto(id) {
+  document.getElementById(id).style.display = "none";
+}
 
 //Crear Impuestos ***************************************
 function validarFormularioImpuesto(event) {
   event.preventDefault();
 
-  // 1. Definimos las reglas (¡Adiós descripción, hola número!)
+  // Definimos las reglas (¡Adiós descripción, hola número!)
   const reglasValidacion = [
-    { id: "crear-impuesto", tipo: "texto", min: 3, mensaje: "El nombre del impuesto debe tener al menos 3 caracteres." },
-    { id: "crear-tasa", tipo: "numero", minVal: 0, mensaje: "La tasa debe ser un número mayor o igual a 0." }
+    {
+      id: "crear-impuesto",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre del impuesto debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-tasa",
+      tipo: "numero",
+      minVal: 0,
+      mensaje: "La tasa debe ser un número mayor o igual a 0.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  // 2. Recorremos las reglas
-  reglasValidacion.forEach(regla => {
+  //Recorremos las reglas
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true; // Asumimos que es válido hasta demostrar lo contrario
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
-    // 3. Evaluamos según el tipo de campo
+    // Evaluamos según el tipo de campo
     if (regla.tipo === "texto") {
-        if (valor.length < regla.min) esValido = false;
+      if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "numero") {
-        let num = parseFloat(valor);
-        // Es inválido si está vacío, si no es un número (isNaN) o si es menor a 0
-        if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
+      let num = parseFloat(valor);
+      // Es inválido si está vacío, si no es un número (isNaN) o si es menor a 0
+      if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
     }
 
-    // 4. Aplicamos los estilos de error
+    // Aplicamos los estilos de error
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -4061,12 +4714,20 @@ function procesarFormularioImpuesto(event, tipo) {
           }
         });
       } else {
-        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
     });
 }
 
@@ -4101,45 +4762,54 @@ function verificarDuplicadoImpuesto(impuesto) {
 }
 
 //Editar Impuestos ***********************************************************
-
 // Escuchar clic en el botón de editar y cargar los datos
 document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("editarImpuesto")) {
-      const id = event.target.dataset.id;
-      
-      fetch(`cruds/obtener_impuesto.php?id=${id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            const formularioImpuesto = document.getElementById("form-editarImpuesto");
-            if (formularioImpuesto) {
-              const campos = ["idimpuesto", "impuesto", "tasa", "estatus"];
-              
-              campos.forEach((campo) => {
-                const input = formularioImpuesto[`editar-${campo}`];
-                if (input) {
-                    input.value = data.impuesto[campo] || "";
-                }
-              });
-              abrirModalImpuesto("editar-modalImpuesto");
-            }
-          } else {
-            Swal.fire("Error", data.message || "No se pudo cargar el campo.", "error");
+  if (event.target.classList.contains("editarImpuesto")) {
+    const id = event.target.dataset.id;
+
+    fetch(`cruds/obtener_impuesto.php?id=${id}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          const formularioImpuesto = document.getElementById(
+            "form-editarImpuesto",
+          );
+          if (formularioImpuesto) {
+            const campos = ["idimpuesto", "impuesto", "tasa", "estatus"];
+
+            campos.forEach((campo) => {
+              const input = formularioImpuesto[`editar-${campo}`];
+              if (input) {
+                input.value = data.impuesto[campo] || "";
+              }
+            });
+            abrirModalImpuesto("editar-modalImpuesto");
           }
-        })
-        .catch((error) => {
-          console.error("Error al obtener el campo:", error);
-          Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
-        });
-    }
+        } else {
+          Swal.fire(
+            "Error",
+            data.message || "No se pudo cargar el campo.",
+            "error",
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener el campo:", error);
+        Swal.fire(
+          "Error",
+          "Ocurrió un problema al obtener los datos.",
+          "error",
+        );
+      });
+  }
 });
 
 // Escuchar el submit del formulario de edición (AQUÍ ESTÁ FUERA DEL DOMContentLoaded)
 document.addEventListener("submit", function (event) {
-    if (event.target && event.target.id === "form-editarImpuesto") {
-      event.preventDefault(); 
-      validarFormularioEdicionImpuesto(event.target);
-    }
+  if (event.target && event.target.id === "form-editarImpuesto") {
+    event.preventDefault();
+    validarFormularioEdicionImpuesto(event.target);
+  }
 });
 
 // Verificar duplicados en la base de datos
@@ -4165,65 +4835,75 @@ function verificarDuplicadoEditarImpuesto(impuesto, id = 0) {
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; 
+      return true;
     });
 }
 
 // Validación  del Formulario
 async function validarFormularioEdicionImpuesto(formulario) {
   const reglasValidacion = [
-    { id: "editar-impuesto", tipo: "texto", min: 3, mensaje: "El impuesto debe tener al menos 3 caracteres." },
-    { id: "editar-tasa", tipo: "numero", minVal: 0, mensaje: "La tasa debe ser un número mayor o igual a 0." }
+    {
+      id: "editar-impuesto",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El impuesto debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-tasa",
+      tipo: "numero",
+      minVal: 0,
+      mensaje: "La tasa debe ser un número mayor o igual a 0.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true;
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (regla.tipo === "texto") {
-        if (valor.length < regla.min) esValido = false;
+      if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "numero") {
-        let num = parseFloat(valor);
-        if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
+      let num = parseFloat(valor);
+      if (valor === "" || isNaN(num) || num < regla.minVal) esValido = false;
     }
 
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -4232,7 +4912,10 @@ if (errores.length > 0) {
   if (!impuestoInput || !idInput) return;
 
   try {
-    const esDuplicado = await verificarDuplicadoEditarImpuesto(impuestoInput.value.trim(), idInput.value);
+    const esDuplicado = await verificarDuplicadoEditarImpuesto(
+      impuestoInput.value.trim(),
+      idInput.value,
+    );
     if (!esDuplicado) enviarFormularioEdicionImpuesto(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
@@ -4263,7 +4946,7 @@ function enviarFormularioEdicionImpuesto(formulario) {
             document.getElementById("impuestos-link").click();
           }
         });
-        cerrarModalImpuesto("editar-modalImpuesto"); 
+        cerrarModalImpuesto("editar-modalImpuesto");
       } else {
         Swal.fire({
           title: "Atención",
@@ -4302,9 +4985,9 @@ document.addEventListener("click", function (event) {
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-             Swal.fire({
+              Swal.fire({
                 title: "¡Eliminado!",
-                text: data.message, 
+                text: data.message,
                 icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
@@ -4346,90 +5029,128 @@ document
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
 
-    inicializarTablaGenerica('#tabla-proveedores', '#buscarboxproveedor', '#cantidad-registros');
-
+        inicializarTablaGenerica(
+          "#tabla-proveedores",
+          "#buscarboxproveedor",
+          "#cantidad-registros",
+        );
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
 
-  function abrirModalProveedor(id) {
-    document.getElementById(id).style.display = "flex";
-  }
-  
-  function cerrarModalProveedor(id) {
-    document.getElementById(id).style.display = "none";
-  }
-  
-  //Crear Proveedores***********************************
+function abrirModalProveedor(id) {
+  document.getElementById(id).style.display = "flex";
+}
+
+function cerrarModalProveedor(id) {
+  document.getElementById(id).style.display = "none";
+}
+
+//Crear Proveedores***********************************
 function validarFormularioProveedor(event) {
   event.preventDefault();
 
   //  Reglas expandido soporta emails y teléfonos
   const reglasValidacion = [
-    { id: "crear-proveedor", tipo: "texto", min: 3, mensaje: "El nombre debe tener al menos 3 caracteres." },
-    { id: "crear-papellido", tipo: "texto", min: 3, mensaje: "El primer apellido debe tener al menos 3 caracteres." },
-    { id: "crear-sapellido", tipo: "texto", min: 3, mensaje: "El segundo apellido debe tener al menos 3 caracteres." },
-    { id: "crear-contacto", tipo: "texto", min: 3, mensaje: "La empresa debe tener al menos 3 caracteres." },
-    { id: "crear-rfc", tipo: "texto", min: 12, mensaje: "El RFC debe tener al menos 12 caracteres." },
-    { id: "crear-telefono", tipo: "texto", min: 10, mensaje: "El teléfono debe tener exactamente 10 dígitos." },
-    { id: "crear-email", tipo: "email", mensaje: "Debes ingresar un correo electrónico válido (ej. pedro@correo.com)." }
+    {
+      id: "crear-proveedor",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-papellido",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El primer apellido debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-sapellido",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El segundo apellido debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-contacto",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La empresa debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-rfc",
+      tipo: "texto",
+      min: 12,
+      mensaje: "El RFC debe tener al menos 12 caracteres.",
+    },
+    {
+      id: "crear-telefono",
+      tipo: "texto",
+      min: 10,
+      mensaje: "El teléfono debe tener exactamente 10 dígitos.",
+    },
+    {
+      id: "crear-email",
+      tipo: "email",
+      mensaje:
+        "Debes ingresar un correo electrónico válido (ej. pedro@correo.com).",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
   // Evaluamos cada regla
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true;
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     // Validamos Texto vs Email
     if (regla.tipo === "texto") {
-        if (valor.length < regla.min) esValido = false;
+      if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "email") {
-        // Fórmula (RegEx) para comprobar que tiene un "@" y un punto "."
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(valor)) esValido = false;
+      // Fórmula (RegEx) para comprobar que tiene un "@" y un punto "."
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(valor)) esValido = false;
     }
 
     // Pintamos de rojo si falló
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
   //  Mostrar errores
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -4468,12 +5189,20 @@ function procesarFormularioProveedor(event, tipo) {
           }
         });
       } else {
-        Swal.fire({ title: "Error", text: data.message || "Ocurrió un problema.", icon: "error" });
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      Swal.fire({ title: "Error", text: "Ocurrió un error inesperado.", icon: "error" });
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
     });
 }
 
@@ -4513,13 +5242,22 @@ document.addEventListener("click", function (event) {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          const formularioProveedor = document.getElementById("form-editarProveedor");
+          const formularioProveedor = document.getElementById(
+            "form-editarProveedor",
+          );
           if (formularioProveedor) {
             const campos = [
-              "idproveedor", "proveedor", "papellido", "sapellido", 
-              "contacto", "rfc", "telefono", "email", "estatus"
+              "idproveedor",
+              "proveedor",
+              "papellido",
+              "sapellido",
+              "contacto",
+              "rfc",
+              "telefono",
+              "email",
+              "estatus",
             ];
-            
+
             campos.forEach((campo) => {
               const input = formularioProveedor[`editar-${campo}`];
               if (input) {
@@ -4529,12 +5267,20 @@ document.addEventListener("click", function (event) {
             abrirModalProveedor("editar-modalProveedor");
           }
         } else {
-          Swal.fire("Error", data.message || "No se pudo cargar el proveedor.", "error");
+          Swal.fire(
+            "Error",
+            data.message || "No se pudo cargar el proveedor.",
+            "error",
+          );
         }
       })
       .catch((error) => {
         console.error("Error al obtener el campo:", error);
-        Swal.fire("Error", "Ocurrió un problema al obtener los datos.", "error");
+        Swal.fire(
+          "Error",
+          "Ocurrió un problema al obtener los datos.",
+          "error",
+        );
       });
   }
 });
@@ -4542,7 +5288,7 @@ document.addEventListener("click", function (event) {
 // Escuchar el submit del formulario de edición (Fuera del DOMContentLoaded)
 document.addEventListener("submit", function (event) {
   if (event.target && event.target.id === "form-editarProveedor") {
-    event.preventDefault(); 
+    event.preventDefault();
     validarFormularioEdicionProveedor(event.target);
   }
 });
@@ -4570,7 +5316,7 @@ function verificarDuplicadoEditarProveedor(proveedor, id = 0) {
     })
     .catch((error) => {
       console.error("Error al verificar duplicado:", error);
-      return true; 
+      return true;
     });
 }
 
@@ -4578,63 +5324,97 @@ function verificarDuplicadoEditarProveedor(proveedor, id = 0) {
 async function validarFormularioEdicionProveedor(formulario) {
   // Motor de reglas (Soporta Textos y Emails)
   const reglasValidacion = [
-    { id: "editar-proveedor", tipo: "texto", min: 3, mensaje: "El nombre debe tener al menos 3 caracteres." },
-    { id: "editar-papellido", tipo: "texto", min: 3, mensaje: "El primer apellido debe tener al menos 3 caracteres." },
-    { id: "editar-sapellido", tipo: "texto", min: 3, mensaje: "El segundo apellido debe tener al menos 3 caracteres." },
-    { id: "editar-contacto", tipo: "texto", min: 3, mensaje: "La empresa debe tener al menos 3 caracteres." },
-    { id: "editar-rfc", tipo: "texto", min: 12, mensaje: "El RFC debe tener al menos 12 caracteres." },
-    { id: "editar-telefono", tipo: "texto", min: 10, mensaje: "El teléfono debe tener exactamente 10 dígitos." },
-    { id: "editar-email", tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." }
+    {
+      id: "editar-proveedor",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El nombre debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-papellido",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El primer apellido debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-sapellido",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El segundo apellido debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-contacto",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La empresa debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-rfc",
+      tipo: "texto",
+      min: 12,
+      mensaje: "El RFC debe tener al menos 12 caracteres.",
+    },
+    {
+      id: "editar-telefono",
+      tipo: "texto",
+      min: 10,
+      mensaje: "El teléfono debe tener exactamente 10 dígitos.",
+    },
+    {
+      id: "editar-email",
+      tipo: "email",
+      mensaje: "Debes ingresar un correo electrónico válido.",
+    },
   ];
 
   const errores = [];
   let primerCampoConError = null;
 
-  reglasValidacion.forEach(regla => {
+  reglasValidacion.forEach((regla) => {
     const elemento = document.getElementById(regla.id);
     if (!elemento) return;
 
     let valor = elemento.value.trim();
     let esValido = true;
-    
-    elemento.addEventListener("input", function() {
-        this.classList.remove("input-error");
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
     });
 
     if (regla.tipo === "texto") {
-        if (valor.length < regla.min) esValido = false;
+      if (valor.length < regla.min) esValido = false;
     } else if (regla.tipo === "email") {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(valor)) esValido = false;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(valor)) esValido = false;
     }
 
     if (!esValido) {
-        errores.push(`<li>${regla.mensaje}</li>`);
-        elemento.classList.add("input-error");
-        if (!primerCampoConError) primerCampoConError = elemento;
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
     } else {
-        elemento.classList.remove("input-error");
+      elemento.classList.remove("input-error");
     }
   });
 
-if (errores.length > 0) {
+  if (errores.length > 0) {
     // Quitar el cursor por seguridad
     if (document.activeElement) {
-        document.activeElement.blur();
+      document.activeElement.blur();
     }
 
     Swal.fire({
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Entendido',
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
       // Esperamos a que la alerta desaparezca al 100%
       didClose: () => {
         if (primerCampoConError) primerCampoConError.focus();
-      }
+      },
     });
-    
+
     return;
   }
 
@@ -4643,7 +5423,10 @@ if (errores.length > 0) {
   if (!proveedorInput || !idInput) return;
 
   try {
-    const esDuplicado = await verificarDuplicadoEditarProveedor(proveedorInput.value.trim(), idInput.value);
+    const esDuplicado = await verificarDuplicadoEditarProveedor(
+      proveedorInput.value.trim(),
+      idInput.value,
+    );
     if (!esDuplicado) enviarFormularioEdicionProveedor(formulario);
   } catch (error) {
     console.error("Error al verificar duplicado:", error);
@@ -4675,8 +5458,8 @@ function enviarFormularioEdicionProveedor(formulario) {
             document.getElementById("proveedores-link").click();
           }
         });
-        
-        cerrarModalProveedor("editar-modalProveedor"); 
+
+        cerrarModalProveedor("editar-modalProveedor");
       } else {
         Swal.fire({
           title: "Atención",
@@ -4717,8 +5500,9 @@ document.addEventListener("click", function (event) {
             if (data.success) {
               Swal.fire({
                 title: "¡Eliminado!",
-                text: data.message || "El registro se ha eliminado correctamente.",
-                icon: "success", 
+                text:
+                  data.message || "El registro se ha eliminado correctamente.",
+                icon: "success",
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
@@ -4731,7 +5515,7 @@ document.addEventListener("click", function (event) {
               Swal.fire(
                 "Error",
                 data.message || "No se pudo eliminar el registro.",
-                "error"
+                "error",
               );
             }
           })
@@ -4739,7 +5523,7 @@ document.addEventListener("click", function (event) {
             Swal.fire(
               "Error",
               "Hubo un problema al procesar tu solicitud.",
-              "error"
+              "error",
             );
             console.error("Error al eliminar:", error);
           });
@@ -4749,7 +5533,9 @@ document.addEventListener("click", function (event) {
 });
 
 // Llamar Ordenes de servicio *************************************************
-document.getElementById("ordenes-link").addEventListener("click", function (event) {
+document
+  .getElementById("ordenes-link")
+  .addEventListener("click", function (event) {
     event.preventDefault();
     fetch("catalogos/ordenes.php")
       .then((response) => response.text())
@@ -4757,758 +5543,935 @@ document.getElementById("ordenes-link").addEventListener("click", function (even
         document.getElementById("content-area").innerHTML = html;
 
         // filtros y busqueda
-        inicializarTablaGenerica('#tabla-ordenes', '#buscarboxorden', '#cantidad-registros');
-        
+        inicializarTablaGenerica(
+          "#tabla-ordenes",
+          "#buscarboxorden",
+          "#cantidad-registros",
+        );
+
         // Revisamos si el Dashboard nos dejó un mensaje secreto
         let filtroGuardado = sessionStorage.getItem("filtroDashboard");
-        
+
         if (filtroGuardado) {
-            // Le damos 200 milisegundos a DataTables para que termine de construirse
-            setTimeout(() => {
-                let miTablaDeOrdenes = $('#tabla-ordenes').DataTable(); 
-                let cajaBusqueda = $("#buscarboxorden"); 
-                
-                // 1. APLICAR EL FILTRO INTELIGENTE
-                if (filtroGuardado === "Pendientes") {
-                    // Usamos Regex (true, false) para buscar múltiples estados al mismo tiempo
-                    miTablaDeOrdenes.search('Recibido|Revisión|Diagnósticado', true, false).draw();
-                    if (cajaBusqueda.length > 0) cajaBusqueda.val("Filtrando Pendientes..."); // Solo visual
-                } else {
-                    // Filtro normal para un Folio exacto o para "Terminado"
-                    miTablaDeOrdenes.search(filtroGuardado).draw();
-                    if (cajaBusqueda.length > 0) cajaBusqueda.val(filtroGuardado); // Visual
-                }
-                
-                // 2. LA MAGIA UX: Botón dinámico de "Ver Todas"
-                if (cajaBusqueda.length > 0 && $("#btn-limpiar-dashboard").length === 0) {
-                    // Creamos el botón elegante
-                    let btnLimpiar = $("<button id='btn-limpiar-dashboard' class='boton' style='margin-left: 15px; background-color: #204eda; color: white;'>Ver Todas</button>");
-                    
-                    // Lo pegamos justo después de la caja de búsqueda
-                    cajaBusqueda.after(btnLimpiar);
-                    
-                    // Le damos la orden de limpiar la tabla al hacer clic
-                    btnLimpiar.on("click", function() {
-                        cajaBusqueda.val(""); // Limpia la caja de texto visual
-                        miTablaDeOrdenes.search('').draw(); // Le quita el filtro real a DataTables
-                        $(this).remove(); // El botón se autodestruye
-                    });
-                }
-                
-                // 3. Borramos el mensaje de la memoria para que no se recicle
-                sessionStorage.removeItem("filtroDashboard"); 
-                
-            }, 200); 
+          // damos 200 milisegundos a DataTables para que termine de construirse
+          setTimeout(() => {
+            let miTablaDeOrdenes = $("#tabla-ordenes").DataTable();
+            let cajaBusqueda = $("#buscarboxorden");
+
+            // APLICAR EL FILTRO INTELIGENTE
+            if (filtroGuardado === "Pendientes") {
+              // Usamos Regex (true, false) para buscar múltiples estados al mismo tiempo
+              miTablaDeOrdenes
+                .search("Recibido|Revisión|Diagnósticado", true, false)
+                .draw();
+              if (cajaBusqueda.length > 0)
+                cajaBusqueda.val("Filtrando Pendientes..."); // Solo visual
+            } else {
+              // Filtro normal para un Folio exacto o para "Terminado"
+              miTablaDeOrdenes.search(filtroGuardado).draw();
+              if (cajaBusqueda.length > 0) cajaBusqueda.val(filtroGuardado); // Visual
+            }
+
+            //  Botón dinámico de "Ver Todas"
+            if (
+              cajaBusqueda.length > 0 &&
+              $("#btn-limpiar-dashboard").length === 0
+            ) {
+              // Creamos el botón elegante
+              let btnLimpiar = $(
+                "<button id='btn-limpiar-dashboard' class='boton' style='margin-left: 15px; background-color: #204eda; color: white;'>Ver Todas</button>",
+              );
+
+              // Lo pegamos justo después de la caja de búsqueda
+              cajaBusqueda.after(btnLimpiar);
+
+              // Le damos la orden de limpiar la tabla al hacer clic
+              btnLimpiar.on("click", function () {
+                cajaBusqueda.val(""); // Limpia la caja de texto visual
+                miTablaDeOrdenes.search("").draw(); // Le quita el filtro real a DataTables
+                $(this).remove(); // El botón se autodestruye
+              });
+            }
+
+            // Borramos el mensaje de la memoria para que no se recicle
+            sessionStorage.removeItem("filtroDashboard");
+          }, 200);
         }
       })
       .catch((error) => console.error("Error al cargar contenido:", error));
-});
-
+  });
 
 // BUSCADOR DE CLIENTES (AUTOCOMPLETE)
 let timeoutBusquedaCliente;
 
-document.addEventListener('input', function(e) {
-    if (e.target && e.target.id === 'busqueda-cliente') {
-        const inputBusqueda = e.target;
-        const termino = inputBusqueda.value.trim();
-        const contenedor = inputBusqueda.closest('.autocomplete-container');
-        const listaResultados = contenedor.querySelector('.lista-autocomplete');
-        
-        clearTimeout(timeoutBusquedaCliente);
-        listaResultados.innerHTML = '';
+document.addEventListener("input", function (e) {
+  if (e.target && e.target.id === "busqueda-cliente") {
+    const inputBusqueda = e.target;
+    const termino = inputBusqueda.value.trim();
+    const contenedor = inputBusqueda.closest(".autocomplete-container");
+    const listaResultados = contenedor.querySelector(".lista-autocomplete");
 
-        if (termino.length < 2) {
-            listaResultados.style.display = 'none';
-            return;
-        }
+    clearTimeout(timeoutBusquedaCliente);
+    listaResultados.innerHTML = "";
 
-        timeoutBusquedaCliente = setTimeout(() => {
-            fetch(`cruds/buscar_clientes_select.php?q=${encodeURIComponent(termino)}`)
-                .then(res => res.json())
-                .then(data => {
-                    listaResultados.innerHTML = ''; 
-                    
-                    if (data.length > 0) {
-                        listaResultados.style.display = 'block';
-                        data.forEach(cliente => {
-                            const li = document.createElement('li');
-                            li.style.padding = "10px"; 
-                            li.style.cursor = "pointer";
-                            li.style.borderBottom = "1px solid #eee";
-                            li.textContent = `${cliente.nombre_cliente} ${cliente.papellido_cliente} (${cliente.tel_cliente})`;
-                            
-                            li.dataset.id = cliente.id_cliente;
-                            li.dataset.nombre = `${cliente.nombre_cliente} ${cliente.papellido_cliente}`;
-                            
-                            listaResultados.appendChild(li);
-                        });
-                    } else {
-                        // Mensaje de Cliente No Encontrado
-                        listaResultados.style.display = 'block';
-                        const liError = document.createElement('li');
-                        liError.style.color = 'red';
-                        liError.style.padding = '10px';
-                        liError.style.textAlign = 'center';
-                        liError.innerHTML = `
+    if (termino.length < 2) {
+      listaResultados.style.display = "none";
+      return;
+    }
+
+    timeoutBusquedaCliente = setTimeout(() => {
+      fetch(`cruds/buscar_clientes_select.php?q=${encodeURIComponent(termino)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          listaResultados.innerHTML = "";
+
+          if (data.length > 0) {
+            listaResultados.style.display = "block";
+            data.forEach((cliente) => {
+              const li = document.createElement("li");
+              li.style.padding = "10px";
+              li.style.cursor = "pointer";
+              li.style.borderBottom = "1px solid #eee";
+              li.textContent = `${cliente.nombre_cliente} ${cliente.papellido_cliente} (${cliente.tel_cliente})`;
+
+              li.dataset.id = cliente.id_cliente;
+              li.dataset.nombre = `${cliente.nombre_cliente} ${cliente.papellido_cliente}`;
+
+              listaResultados.appendChild(li);
+            });
+          } else {
+            // Mensaje de Cliente No Encontrado
+            listaResultados.style.display = "block";
+            const liError = document.createElement("li");
+            liError.style.color = "red";
+            liError.style.padding = "10px";
+            liError.style.textAlign = "center";
+            liError.innerHTML = `
                             <i class="fa-solid fa-circle-exclamation"></i> Cliente no encontrado.<br>
                             <strong style="color: blue; cursor: pointer; text-decoration: underline;" 
                                     onclick="abrirModalClienteExpress()">
                                 + ¡Regístralo aquí!
                             </strong>
                         `;
-                        listaResultados.appendChild(liError);
-                    }
-                })
-                .catch(err => console.error("Error búsqueda:", err));
-        }, 300);
-    }
+            listaResultados.appendChild(liError);
+          }
+        })
+        .catch((err) => console.error("Error búsqueda:", err));
+    }, 300);
+  }
 });
 
-// Selección de Cliente 
-document.addEventListener('click', function(e) {
-    // Seleccionar item de la lista
-    if (e.target && e.target.tagName === 'LI' && e.target.closest('.lista-autocomplete') && !e.target.closest('strong')) {
-        const li = e.target;
-        const contenedor = li.closest('.autocomplete-container');
-        const inputBusqueda = contenedor.querySelector('#busqueda-cliente');
-        const inputHidden = contenedor.querySelector('#id_cliente_seleccionado');
-        const listaResultados = contenedor.querySelector('.lista-autocomplete');
-        const btnLimpiar = contenedor.querySelector('#limpiar-cliente');
+// Selección de Cliente
+document.addEventListener("click", function (e) {
+  // Seleccionar item de la lista
+  if (
+    e.target &&
+    e.target.tagName === "LI" &&
+    e.target.closest(".lista-autocomplete") &&
+    !e.target.closest("strong")
+  ) {
+    const li = e.target;
+    const contenedor = li.closest(".autocomplete-container");
+    const inputBusqueda = contenedor.querySelector("#busqueda-cliente");
+    const inputHidden = contenedor.querySelector("#id_cliente_seleccionado");
+    const listaResultados = contenedor.querySelector(".lista-autocomplete");
+    const btnLimpiar = contenedor.querySelector("#limpiar-cliente");
 
-        inputBusqueda.value = li.dataset.nombre;
-        inputBusqueda.disabled = true; 
-        inputHidden.value = li.dataset.id;
-        listaResultados.style.display = 'none';
-        btnLimpiar.style.display = 'inline';
-    }
+    inputBusqueda.value = li.dataset.nombre;
+    inputBusqueda.disabled = true;
+    inputHidden.value = li.dataset.id;
+    listaResultados.style.display = "none";
+    btnLimpiar.style.display = "inline";
+  }
 
-    // Limpiar selección
-    if (e.target && e.target.id === 'limpiar-cliente') {
-        const btnLimpiar = e.target;
-        const contenedor = btnLimpiar.closest('.autocomplete-container');
-        const inputBusqueda = contenedor.querySelector('#busqueda-cliente');
-        const inputHidden = contenedor.querySelector('#id_cliente_seleccionado');
+  // Limpiar selección
+  if (e.target && e.target.id === "limpiar-cliente") {
+    const btnLimpiar = e.target;
+    const contenedor = btnLimpiar.closest(".autocomplete-container");
+    const inputBusqueda = contenedor.querySelector("#busqueda-cliente");
+    const inputHidden = contenedor.querySelector("#id_cliente_seleccionado");
 
-        inputBusqueda.value = '';
-        inputBusqueda.disabled = false;
-        inputHidden.value = '';
-        btnLimpiar.style.display = 'none';
-        inputBusqueda.focus();
-    }
+    inputBusqueda.value = "";
+    inputBusqueda.disabled = false;
+    inputHidden.value = "";
+    btnLimpiar.style.display = "none";
+    inputBusqueda.focus();
+  }
 
-    // Cerrar lista al hacer clic fuera
-    if (!e.target.closest('.autocomplete-container')) {
-        document.querySelectorAll('.lista-autocomplete').forEach(l => l.style.display = 'none');
-    }
+  // Cerrar lista al hacer clic fuera
+  if (!e.target.closest(".autocomplete-container")) {
+    document
+      .querySelectorAll(".lista-autocomplete")
+      .forEach((l) => (l.style.display = "none"));
+  }
 });
-
 
 // FUNCIONES DE UTILIDAD (GLOBALES)
-function abrirModalOrden(id) { document.getElementById(id).style.display = 'flex'; }
-function cerrarModalOrden(id) { document.getElementById(id).style.display = 'none'; }
-function abrirModalClienteExpress() {
-    document.getElementById('modalClienteExpress').style.display = 'block';
-    document.getElementById('form-cliente-express').reset();
+function abrirModalOrden(id) {
+  document.getElementById(id).style.display = "flex";
 }
-function cerrarModalClienteExpress() { document.getElementById('modalClienteExpress').style.display = 'none'; }
+function cerrarModalOrden(id) {
+  document.getElementById(id).style.display = "none";
+}
+function abrirModalClienteExpress() {
+  document.getElementById("modalClienteExpress").style.display = "block";
+  document.getElementById("form-cliente-express").reset();
+}
+function cerrarModalClienteExpress() {
+  document.getElementById("modalClienteExpress").style.display = "none";
+}
 
 function calcularSaldoOrden() {
-    const costo = parseFloat(document.getElementById('crear-costo').value) || 0;
-    const anticipo = parseFloat(document.getElementById('crear-anticipo').value) || 0;
-    document.getElementById('crear-saldo').value = (costo - anticipo).toFixed(2);
+  const costo = parseFloat(document.getElementById("crear-costo").value) || 0;
+  const anticipo =
+    parseFloat(document.getElementById("crear-anticipo").value) || 0;
+  document.getElementById("crear-saldo").value = (costo - anticipo).toFixed(2);
 }
 
 function previewEvidencia(input) {
-    const container = document.getElementById('preview-container');
-    container.innerHTML = ''; 
-    if (input.files) {
-        Array.from(input.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.style.width = '50px'; img.style.height = '50px'; img.style.objectFit = 'cover';
-                img.style.borderRadius = '4px'; img.style.border = '1px solid #ddd';
-                container.appendChild(img);
-            }
-            reader.readAsDataURL(file);
-        });
-    }
+  const container = document.getElementById("preview-container");
+  container.innerHTML = "";
+  if (input.files) {
+    Array.from(input.files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.style.width = "50px";
+        img.style.height = "50px";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "4px";
+        img.style.border = "1px solid #ddd";
+        container.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 }
 // LÓGICA DE CÁMARA WEB
 let streamCamara = null;
 let fotosCapturadas = [];
 
-document.addEventListener('click', function(e) {
-    // Activar
-    if(e.target && e.target.id === 'btn-activar-camara') {
-        const video = document.getElementById('video-webcam');
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function(stream) {
-                streamCamara = stream;
-                video.srcObject = stream;
-                video.play();
-                document.getElementById('camera-preview').style.display = 'block';
-                e.target.style.display = 'none';
-                document.getElementById('btn-tomar-foto').style.display = 'inline-block';
-            })
-            .catch(err => Swal.fire('Error', 'No se pudo acceder a la cámara.', 'error'));
-    }
-    
-    // Capturar
-    if(e.target && e.target.id === 'btn-tomar-foto') {
-        const video = document.getElementById('video-webcam');
-        const canvas = document.getElementById('canvas-webcam');
-        const container = document.getElementById('preview-container');
-        
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        
-        canvas.toBlob(function(blob) {
-            const archivo = new File([blob], "foto_webcam_" + Date.now() + ".jpg", { type: "image/jpeg" });
-            fotosCapturadas.push(archivo);
-            
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(blob);
-            img.style.width = '50px'; img.style.height = '50px'; img.style.objectFit = 'cover';
-            img.style.border = '1px solid #28a745'; img.style.borderRadius = '4px';
-            container.appendChild(img);
-            
-            // Efecto flash
-            video.style.opacity = 0.5;
-            setTimeout(() => video.style.opacity = 1, 100);
-        }, 'image/jpeg', 0.95);
-    }
+document.addEventListener("click", function (e) {
+  // Activar
+  if (e.target && e.target.id === "btn-activar-camara") {
+    const video = document.getElementById("video-webcam");
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then(function (stream) {
+        streamCamara = stream;
+        video.srcObject = stream;
+        video.play();
+        document.getElementById("camera-preview").style.display = "block";
+        e.target.style.display = "none";
+        document.getElementById("btn-tomar-foto").style.display =
+          "inline-block";
+      })
+      .catch((err) =>
+        Swal.fire("Error", "No se pudo acceder a la cámara.", "error"),
+      );
+  }
+
+  // Capturar
+  if (e.target && e.target.id === "btn-tomar-foto") {
+    const video = document.getElementById("video-webcam");
+    const canvas = document.getElementById("canvas-webcam");
+    const container = document.getElementById("preview-container");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+
+    canvas.toBlob(
+      function (blob) {
+        const archivo = new File([blob], "foto_webcam_" + Date.now() + ".jpg", {
+          type: "image/jpeg",
+        });
+        fotosCapturadas.push(archivo);
+
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(blob);
+        img.style.width = "50px";
+        img.style.height = "50px";
+        img.style.objectFit = "cover";
+        img.style.border = "1px solid #28a745";
+        img.style.borderRadius = "4px";
+        container.appendChild(img);
+
+        // Efecto flash
+        video.style.opacity = 0.5;
+        setTimeout(() => (video.style.opacity = 1), 100);
+      },
+      "image/jpeg",
+      0.95,
+    );
+  }
 });
 
 // FUNCIÓN MATEMÁTICA PARA EL MODAL DE EDITAR (LIBERADA GLOBALMENTE)
 function calcularSaldoEdit() {
-    const costo = parseFloat(document.getElementById('edit-costo').value) || 0;
-    const anticipoAcumulado = parseFloat(document.getElementById('edit-anticipo').value) || 0;
-    const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
-    
-    // El saldo es el costo menos lo que ya había dado, menos lo que está dando ahorita
-    let saldoFinal = costo - (anticipoAcumulado + nuevoAbono);
-    
-    // Evitamos que el saldo sea negativo visualmente
-    if (saldoFinal < 0) saldoFinal = 0; 
-    
-    const inputSaldo = document.getElementById('edit-saldo');
-    if (inputSaldo) {
-        inputSaldo.value = saldoFinal.toFixed(2);
-    }
+  const costo = parseFloat(document.getElementById("edit-costo").value) || 0;
+  const anticipoAcumulado =
+    parseFloat(document.getElementById("edit-anticipo").value) || 0;
+  const nuevoAbono =
+    parseFloat(document.getElementById("edit-nuevo-abono").value) || 0;
+
+  // El saldo es el costo menos lo que ya había dado, menos lo que está dando ahorita
+  let saldoFinal = costo - (anticipoAcumulado + nuevoAbono);
+
+  // Evitamos que el saldo sea negativo visualmente
+  if (saldoFinal < 0) saldoFinal = 0;
+
+  const inputSaldo = document.getElementById("edit-saldo");
+  if (inputSaldo) {
+    inputSaldo.value = saldoFinal.toFixed(2);
+  }
 }
 
-
 // MANEJO DE TODOS LOS FORMULARIOS (SUBMITS)
-document.addEventListener('submit', function(e) {
-    
-    // GUARDAR CLIENTE EXPRESS
-    if (e.target && e.target.id === 'form-cliente-express') {
-        e.preventDefault();
-        e.stopPropagation();
+document.addEventListener("submit", function (e) {
+  // GUARDAR CLIENTE EXPRESS
+  if (e.target && e.target.id === "form-cliente-express") {
+    e.preventDefault();
+    e.stopPropagation();
 
-        const formData = new FormData(e.target);
+    const formData = new FormData(e.target);
 
-        fetch('cruds/guardar_cliente_express.php', { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                cerrarModalClienteExpress();
-                const inputBusqueda = document.getElementById('busqueda-cliente');
-                const inputHidden = document.getElementById('id_cliente_seleccionado');
-                const btnLimpiar = document.getElementById('limpiar-cliente');
-                const listaResultados = document.getElementById('lista-resultados-clientes');
+    fetch("cruds/guardar_cliente_express.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          cerrarModalClienteExpress();
+          const inputBusqueda = document.getElementById("busqueda-cliente");
+          const inputHidden = document.getElementById(
+            "id_cliente_seleccionado",
+          );
+          const btnLimpiar = document.getElementById("limpiar-cliente");
+          const listaResultados = document.getElementById(
+            "lista-resultados-clientes",
+          );
 
-                if (inputBusqueda && inputHidden) {
-                    inputBusqueda.value = `${data.nombre_completo} (${data.telefono})`;
-                    inputBusqueda.disabled = true; 
-                    inputHidden.value = data.id;   
-                    if (btnLimpiar) btnLimpiar.style.display = 'inline';
-                    if (listaResultados) listaResultados.style.display = 'none';
-                }
-                Swal.fire({ icon: 'success', title: 'Cliente creado', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, returnFocus: false });
-            } else {
-                Swal.fire({ title: 'Error', text: data.message, icon: 'error', returnFocus: false });
-            }
-        });
+          if (inputBusqueda && inputHidden) {
+            inputBusqueda.value = `${data.nombre_completo} (${data.telefono})`;
+            inputBusqueda.disabled = true;
+            inputHidden.value = data.id;
+            if (btnLimpiar) btnLimpiar.style.display = "inline";
+            if (listaResultados) listaResultados.style.display = "none";
+          }
+          Swal.fire({
+            icon: "success",
+            title: "Cliente creado",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            returnFocus: false,
+          });
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: data.message,
+            icon: "error",
+            returnFocus: false,
+          });
+        }
+      });
+  }
+
+  // CREAR ORDEN (INCLUYE FOTOS WEBCAM)
+  if (e.target && e.target.id === "form-crearOrden") {
+    e.preventDefault();
+    const form = e.target;
+    let hayErrores = false;
+
+    function validarCampo(selector, esSelect = false) {
+      const campo = form.querySelector(selector);
+      if (!campo) return true;
+
+      const valor = campo.value.trim();
+      if (valor === "") {
+        campo.classList.add("input-error");
+        campo.style.border = "1px solid #d33";
+        hayErrores = true;
+        campo.addEventListener(
+          esSelect ? "change" : "input",
+          function () {
+            this.classList.remove("input-error");
+            this.style.border = "";
+          },
+          { once: true },
+        );
+        return false;
+      } else {
+        campo.classList.remove("input-error");
+        campo.style.border = "";
+        return true;
+      }
     }
 
-    // CREAR ORDEN (INCLUYE FOTOS WEBCAM)
-    if (e.target && e.target.id === 'form-crearOrden') {
-        e.preventDefault();
-        const form = e.target;
-        let hayErrores = false;
+    const idCliente = document.getElementById("id_cliente_seleccionado").value;
+    const cajaBusquedaCliente = document.getElementById("busqueda-cliente");
+    if (!idCliente || idCliente.trim() === "") {
+      if (cajaBusquedaCliente) {
+        cajaBusquedaCliente.classList.add("input-error");
+        hayErrores = true;
+        cajaBusquedaCliente.addEventListener(
+          "input",
+          function () {
+            this.classList.remove("input-error");
+          },
+          { once: true },
+        );
+      }
+    } else {
+      if (cajaBusquedaCliente)
+        cajaBusquedaCliente.classList.remove("input-error");
+    }
 
-        function validarCampo(selector, esSelect = false) {
-            const campo = form.querySelector(selector);
-            if (!campo) return true;
-            
-            const valor = campo.value.trim();
-            if (valor === "") {
-                campo.classList.add("input-error");
-                campo.style.border = "1px solid #d33"; 
-                hayErrores = true;
-                campo.addEventListener(esSelect ? "change" : "input", function() {
-                    this.classList.remove("input-error");
-                    this.style.border = ""; 
-                }, { once: true });
-                return false;
-            } else {
-                campo.classList.remove("input-error");
-                campo.style.border = ""; 
-                return true;
-            }
-        }
+    validarCampo('[name="tipo_equipo"]', true);
+    validarCampo('[name="marca"]', true);
+    validarCampo('[name="tipo_servicio"]', true);
+    validarCampo('[name="modelo"]');
+    validarCampo('[name="falla"]');
 
-        const idCliente = document.getElementById('id_cliente_seleccionado').value;
-        const cajaBusquedaCliente = document.getElementById('busqueda-cliente');
-        if (!idCliente || idCliente.trim() === "") {
-            if(cajaBusquedaCliente) {
-                cajaBusquedaCliente.classList.add("input-error");
-                hayErrores = true;
-                cajaBusquedaCliente.addEventListener("input", function() {
-                    this.classList.remove("input-error");
-                }, { once: true });
-            }
-        } else {
-            if(cajaBusquedaCliente) cajaBusquedaCliente.classList.remove("input-error");
-        }
+    // BLINDAJE EXTRA: Si hay anticipo, exigir método de pago
+    const anticipoIngresado =
+      parseFloat(document.getElementById("crear-anticipo").value) || 0;
+    const selectMetodoPagoCrear = document.getElementById("crear-metodo-pago");
 
-        validarCampo('[name="tipo_equipo"]', true);
-        validarCampo('[name="marca"]', true);
-        validarCampo('[name="tipo_servicio"]', true);
-        validarCampo('[name="modelo"]');
-        validarCampo('[name="falla"]');
+    if (anticipoIngresado > 0) {
+      // Reutilizamos tu función auxiliar para pintar de rojo
+      validarCampo("#crear-metodo-pago", true);
+    } else {
+      // Si el anticipo es 0, le quitamos el rojo por si se arrepintió
+      if (selectMetodoPagoCrear) {
+        selectMetodoPagoCrear.classList.remove("input-error");
+        selectMetodoPagoCrear.style.border = "";
+      }
+    }
 
-        // BLINDAJE EXTRA: Si hay anticipo, exigir método de pago
-        const anticipoIngresado = parseFloat(document.getElementById('crear-anticipo').value) || 0;
-        const selectMetodoPagoCrear = document.getElementById('crear-metodo-pago');
-        
-        if (anticipoIngresado > 0) {
-            // Reutilizamos tu función auxiliar para pintar de rojo
-            validarCampo('#crear-metodo-pago', true);
-        } else {
-            // Si el anticipo es 0, le quitamos el rojo por si se arrepintió
-            if(selectMetodoPagoCrear) {
-                selectMetodoPagoCrear.classList.remove("input-error");
-                selectMetodoPagoCrear.style.border = "";
-            }
-        }
+    if (hayErrores) {
+      Swal.fire({
+        title: "Faltan datos",
+        text: "Por favor, revisa y completa los campos marcados en rojo.",
+        icon: "warning",
+        returnFocus: false,
+        confirmButtonColor: "#3085d6",
+      });
+      return;
+    }
 
-        if (hayErrores) {
-            Swal.fire({
-                title: "Faltan datos",
-                text: "Por favor, revisa y completa los campos marcados en rojo.",
-                icon: "warning",
-                returnFocus: false,
-                confirmButtonColor: '#3085d6'
-            });
-            return; 
-        }
+    const formData = new FormData(form);
 
-        const formData = new FormData(form);
-        
-        if (typeof fotosCapturadas !== 'undefined' && fotosCapturadas.length > 0) {
-            fotosCapturadas.forEach((foto, index) => {
-                formData.append('evidencias[]', foto, `webcam_foto_${index}.jpg`);
-            });
-        }
+    if (typeof fotosCapturadas !== "undefined" && fotosCapturadas.length > 0) {
+      fotosCapturadas.forEach((foto, index) => {
+        formData.append("evidencias[]", foto, `webcam_foto_${index}.jpg`);
+      });
+    }
 
-        Swal.fire({ title: 'Procesando...', text: 'Generando orden...', allowOutsideClick: false, returnFocus: false, didOpen: () => Swal.showLoading() });
+    Swal.fire({
+      title: "Procesando...",
+      text: "Generando orden...",
+      allowOutsideClick: false,
+      returnFocus: false,
+      didOpen: () => Swal.showLoading(),
+    });
 
-        fetch('cruds/procesar_crear_orden.php', { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                cerrarModalOrden('crear-modalOrden');
-                form.reset();
-                document.getElementById('preview-container').innerHTML = '';
-                
-                fotosCapturadas = []; 
-                if(streamCamara) streamCamara.getTracks().forEach(track => track.stop());
-                document.getElementById('camera-preview').style.display = 'none';
-                document.getElementById('btn-activar-camara').style.display = 'inline-block';
-                document.getElementById('btn-tomar-foto').style.display = 'none';
+    fetch("cruds/procesar_crear_orden.php", { method: "POST", body: formData })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          cerrarModalOrden("crear-modalOrden");
+          form.reset();
+          document.getElementById("preview-container").innerHTML = "";
 
-                if(cajaBusquedaCliente) { cajaBusquedaCliente.value = ''; cajaBusquedaCliente.disabled = false; }
-                if(document.getElementById('limpiar-cliente')) document.getElementById('limpiar-cliente').style.display = 'none';
-                
-                Swal.fire({
-                    title: '¡Orden Creada!',
-                    html: `<p>${data.message}</p>
+          fotosCapturadas = [];
+          if (streamCamara)
+            streamCamara.getTracks().forEach((track) => track.stop());
+          document.getElementById("camera-preview").style.display = "none";
+          document.getElementById("btn-activar-camara").style.display =
+            "inline-block";
+          document.getElementById("btn-tomar-foto").style.display = "none";
+
+          if (cajaBusquedaCliente) {
+            cajaBusquedaCliente.value = "";
+            cajaBusquedaCliente.disabled = false;
+          }
+          if (document.getElementById("limpiar-cliente"))
+            document.getElementById("limpiar-cliente").style.display = "none";
+
+          Swal.fire({
+            title: "¡Orden Creada!",
+            html: `<p>${data.message}</p>
                            <div style="display: flex; justify-content: center; margin: 15px 0;">
                                <div id="qrcode-container"></div>
                            </div>
                            <p style="font-size: 12px; color: #666;">Escanea para ver el rastreo</p>`,
-                    icon: 'success',
-                    returnFocus: false,
-                    confirmButtonText: '<i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp',
-                    showCancelButton: true,
-                    cancelButtonText: 'Cerrar',
-                    didOpen: () => {
-                         new QRCode(document.getElementById("qrcode-container"), {
-                            text: data.token_qr, width: 128, height: 128
-                        });
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const tel = data.datos_whatsapp.telefono.replace(/\D/g,'');
-                        const msg = encodeURIComponent(data.datos_whatsapp.mensaje);
-                        window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
-                    }
-                    if(document.getElementById("ordenes-link")) document.getElementById("ordenes-link").click(); 
-                });
-            } else {
-                Swal.fire({ title: 'Error', text: data.message, icon: 'error', returnFocus: false });
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            Swal.fire({ title: 'Error', text: 'Fallo en el servidor', icon: 'error', returnFocus: false });
-        });
-    }
-
-    // EDITAR ORDEN 
-    if (e.target && e.target.id === "form-editarOrden") {
-        e.preventDefault();
-        
-        const form = e.target; 
-        const estadoActual = document.getElementById('edit-estado').value;
-        const diagActual = document.getElementById('edit-diagnostico').value.trim();
-        const costoActual = parseFloat(document.getElementById('edit-costo').value || 0).toFixed(2);
-        const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
-        
-        const costoOriginal = parseFloat(form.dataset.costoOrig) || 0;
-        const anticipoOriginal = parseFloat(document.getElementById('edit-anticipo').value) || 0;
-        const saldoRestanteReal = costoOriginal - anticipoOriginal;
-        const metodoPagoEdit = document.getElementById('edit-metodo-pago');
-        
-        // BLINDAJE EXTRA: Si ingresa un nuevo abono, el método de pago es obligatorio
-        if (nuevoAbono > 0 && (!metodoPagoEdit.value || metodoPagoEdit.value.trim() === "")) {
-            metodoPagoEdit.classList.add("input-error");
-            metodoPagoEdit.style.border = "1px solid #d33";
-            
-            Swal.fire({
-                title: "Falta Método de Pago",
-                text: "Si estás registrando un abono, debes seleccionar con qué método te pagó el cliente.",
-                icon: "warning",
-                returnFocus: false,
-                confirmButtonColor: '#3085d6'
-            });
-
-            // Quitamos el rojo cuando seleccione algo
-            metodoPagoEdit.addEventListener("change", function() {
-                this.classList.remove("input-error");
-                this.style.border = "1px solid green"; // Regresa al verde original
-            }, { once: true });
-
-            return; // Detenemos la actualización para que no pase
-        }
-
-        if (nuevoAbono > saldoRestanteReal && saldoRestanteReal > 0) {
-            Swal.fire({
-                title: "Abono excedido",
-                text: `El cliente solo debe $${saldoRestanteReal.toFixed(2)}. No puedes abonar $${nuevoAbono.toFixed(2)}.`,
-                icon: "error",
-                returnFocus: false
-            });
-            return;
-        }
-
-        if (estadoActual === form.dataset.estadoOrig && 
-            diagActual === form.dataset.diagOrig && 
-            costoActual === form.dataset.costoOrig && 
-            nuevoAbono === 0) { 
-            
-            Swal.fire({
-                icon: 'info',
-                title: 'Sin cambios',
-                text: 'No has modificado ningún dato ni ingresado un nuevo abono.',
-                returnFocus: false,
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-            });
-            return; 
-        }
-
-        const formData = new FormData(form);
-
-        Swal.fire({
-            title: "Guardando cambios...",
-            allowOutsideClick: false,
+            icon: "success",
             returnFocus: false,
-            didOpen: () => Swal.showLoading(),
-        });
-
-        fetch("cruds/procesar_editar_orden.php", { method: "POST", body: formData })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data.success) {
-                cerrarModalOrden("editar-modalOrden");
-                Swal.fire({
-                    icon: "success", 
-                    title: "¡Actualizado!",
-                    text: data.message,
-                    returnFocus: false,
-                    showConfirmButton: false,
-                    timer: 2000,           
-                    timerProgressBar: true    
-                }).then(() => {
-                    if (document.getElementById("ordenes-link")) {
-                        document.getElementById("ordenes-link").click();
-                    }
-                });
-            } else {
-                Swal.fire({ title: "Error", text: data.message, icon: "error", returnFocus: false });
+            confirmButtonText:
+              '<i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp',
+            showCancelButton: true,
+            cancelButtonText: "Cerrar",
+            didOpen: () => {
+              new QRCode(document.getElementById("qrcode-container"), {
+                text: data.token_qr,
+                width: 128,
+                height: 128,
+              });
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const tel = data.datos_whatsapp.telefono.replace(/\D/g, "");
+              const msg = encodeURIComponent(data.datos_whatsapp.mensaje);
+              window.open(`https://wa.me/${tel}?text=${msg}`, "_blank");
             }
-        })
-        .catch((err) => {
-            console.error(err);
-            Swal.fire({ title: "Error", text: "Ocurrió un problema en la red.", icon: "error", returnFocus: false });
+            if (document.getElementById("ordenes-link"))
+              document.getElementById("ordenes-link").click();
+          });
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: data.message,
+            icon: "error",
+            returnFocus: false,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        Swal.fire({
+          title: "Error",
+          text: "Fallo en el servidor",
+          icon: "error",
+          returnFocus: false,
         });
+      });
+  }
+
+  // EDITAR ORDEN
+  if (e.target && e.target.id === "form-editarOrden") {
+    e.preventDefault();
+
+    const form = e.target;
+    const estadoActual = document.getElementById("edit-estado").value;
+    const diagActual = document.getElementById("edit-diagnostico").value.trim();
+    const costoActual = parseFloat(
+      document.getElementById("edit-costo").value || 0,
+    ).toFixed(2);
+    const nuevoAbono =
+      parseFloat(document.getElementById("edit-nuevo-abono").value) || 0;
+
+    const costoOriginal = parseFloat(form.dataset.costoOrig) || 0;
+    const anticipoOriginal =
+      parseFloat(document.getElementById("edit-anticipo").value) || 0;
+    const saldoRestanteReal = costoOriginal - anticipoOriginal;
+    const metodoPagoEdit = document.getElementById("edit-metodo-pago");
+
+    // BLINDAJE EXTRA: Si ingresa un nuevo abono, el método de pago es obligatorio
+    if (
+      nuevoAbono > 0 &&
+      (!metodoPagoEdit.value || metodoPagoEdit.value.trim() === "")
+    ) {
+      metodoPagoEdit.classList.add("input-error");
+      metodoPagoEdit.style.border = "1px solid #d33";
+
+      Swal.fire({
+        title: "Falta Método de Pago",
+        text: "Si estás registrando un abono, debes seleccionar con qué método te pagó el cliente.",
+        icon: "warning",
+        returnFocus: false,
+        confirmButtonColor: "#3085d6",
+      });
+
+      // Quitamos el rojo cuando seleccione algo
+      metodoPagoEdit.addEventListener(
+        "change",
+        function () {
+          this.classList.remove("input-error");
+          this.style.border = "1px solid green"; // Regresa al verde original
+        },
+        { once: true },
+      );
+
+      return; // Detenemos la actualización para que no pase
     }
+
+    if (nuevoAbono > saldoRestanteReal && saldoRestanteReal > 0) {
+      Swal.fire({
+        title: "Abono excedido",
+        text: `El cliente solo debe $${saldoRestanteReal.toFixed(2)}. No puedes abonar $${nuevoAbono.toFixed(2)}.`,
+        icon: "error",
+        returnFocus: false,
+      });
+      return;
+    }
+
+    if (
+      estadoActual === form.dataset.estadoOrig &&
+      diagActual === form.dataset.diagOrig &&
+      costoActual === form.dataset.costoOrig &&
+      nuevoAbono === 0
+    ) {
+      Swal.fire({
+        icon: "info",
+        title: "Sin cambios",
+        text: "No has modificado ningún dato ni ingresado un nuevo abono.",
+        returnFocus: false,
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    const formData = new FormData(form);
+
+    Swal.fire({
+      title: "Guardando cambios...",
+      allowOutsideClick: false,
+      returnFocus: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    fetch("cruds/procesar_editar_orden.php", { method: "POST", body: formData })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          cerrarModalOrden("editar-modalOrden");
+          Swal.fire({
+            icon: "success",
+            title: "¡Actualizado!",
+            text: data.message,
+            returnFocus: false,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+          }).then(() => {
+            if (document.getElementById("ordenes-link")) {
+              document.getElementById("ordenes-link").click();
+            }
+          });
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: data.message,
+            icon: "error",
+            returnFocus: false,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        Swal.fire({
+          title: "Error",
+          text: "Ocurrió un problema en la red.",
+          icon: "error",
+          returnFocus: false,
+        });
+      });
+  }
 }); // <<< FIN DE TODOS LOS SUBMITS
 
 // MANEJO DE CLICS EN TABLA (EDITAR Y CANCELAR ORDENES) ***************************************
-document.addEventListener('click', function(e) {
-    
- // ABRIR MODAL EDITAR
-    const btnEditar = e.target.closest('.editarOrden');
-    if (btnEditar) {
-        const idOrden = btnEditar.getAttribute('data-id');
+document.addEventListener("click", function (e) {
+  // ABRIR MODAL EDITAR
+  const btnEditar = e.target.closest(".editarOrden");
+  if (btnEditar) {
+    const idOrden = btnEditar.getAttribute("data-id");
 
-        Swal.fire({ title: 'Cargando datos...', allowOutsideClick: false, returnFocus: false, didOpen: () => Swal.showLoading() });
+    Swal.fire({
+      title: "Cargando datos...",
+      allowOutsideClick: false,
+      returnFocus: false,
+      didOpen: () => Swal.showLoading(),
+    });
 
-        fetch(`cruds/obtener_orden.php?id=${idOrden}`)
-        .then(res => res.json())
-        .then(data => {
-            Swal.close();
-            if(data.success) {
-                document.getElementById('edit-id-orden').value = data.orden.id_orden;
-                document.getElementById('edit-folio-text').textContent = data.orden.id_orden;
-                document.getElementById('edit-estado').value = data.orden.id_estado_servicio;
-                document.getElementById('edit-falla').value = data.orden.falla;             
-                document.getElementById('edit-diagnostico').value = data.orden.diagnostico || ""; 
-                
-                // Costos y anticipos
-                document.getElementById('edit-mano-obra').value = data.orden.costo_servicio || 0;
-                document.getElementById('edit-anticipo').value = data.orden.anticipo_servicio || 0;
-                
-                // Limpiamos los campos de nuevos pagos
-                document.getElementById('edit-nuevo-abono').value = '0';
-                const selectMetP = document.getElementById('edit-metodo-pago');
-                if(selectMetP) {
-                    selectMetP.value = "";
-                    selectMetP.classList.remove("input-error");
-                    selectMetP.style.border = "1px solid green";
-                }
+    fetch(`cruds/obtener_orden.php?id=${idOrden}`)
+      .then((res) => res.json())
+      .then((data) => {
+        Swal.close();
+        if (data.success) {
+          document.getElementById("edit-id-orden").value = data.orden.id_orden;
+          document.getElementById("edit-folio-text").textContent =
+            data.orden.id_orden;
+          document.getElementById("edit-estado").value =
+            data.orden.id_estado_servicio;
+          document.getElementById("edit-falla").value = data.orden.falla;
+          document.getElementById("edit-diagnostico").value =
+            data.orden.diagnostico || "";
 
-                // Disparamos el cálculo
-                calcularSaldoEdit(); 
+          // Costos y anticipos
+          document.getElementById("edit-mano-obra").value =
+            data.orden.costo_servicio || 0;
+          document.getElementById("edit-anticipo").value =
+            data.orden.anticipo_servicio || 0;
 
-                
-                // LLENAR HISTORIAL DE PAGOS (AQUÍ ES EL LUGAR CORRECTO)              
-                const tbodyPagos = document.getElementById('tabla-historial-pagos');
-                if (tbodyPagos) {
-                    tbodyPagos.innerHTML = ''; // Limpiamos la tabla
-                    if (data.abonos && data.abonos.length > 0) {
-                        data.abonos.forEach(abono => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
+          // Limpiamos los campos de nuevos pagos
+          document.getElementById("edit-nuevo-abono").value = "0";
+          const selectMetP = document.getElementById("edit-metodo-pago");
+          if (selectMetP) {
+            selectMetP.value = "";
+            selectMetP.classList.remove("input-error");
+            selectMetP.style.border = "1px solid green";
+          }
+
+          // Disparamos el cálculo
+          calcularSaldoEdit();
+
+          // LLENAR HISTORIAL DE PAGOS (AQUÍ ES EL LUGAR CORRECTO)
+          const tbodyPagos = document.getElementById("tabla-historial-pagos");
+          if (tbodyPagos) {
+            tbodyPagos.innerHTML = ""; // Limpiamos la tabla
+            if (data.abonos && data.abonos.length > 0) {
+              data.abonos.forEach((abono) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
                                 <td style="padding: 5px; text-align: center;">${abono.fecha_abono}</td>
                                 <td style="padding: 5px; text-align: center; color: green; font-weight: bold;">$${parseFloat(abono.monto_abono).toFixed(2)}</td>
                                 <td style="padding: 5px; text-align: center;">${abono.metodo}</td>
                             `;
-                            tbodyPagos.appendChild(tr);
-                        });
-                    } else {
-                        tbodyPagos.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #888;">No hay abonos registrados.</td></tr>';
-                    }
-                }
+                tbodyPagos.appendChild(tr);
+              });
+            } else {
+              tbodyPagos.innerHTML =
+                '<tr><td colspan="3" style="text-align: center; color: #888;">No hay abonos registrados.</td></tr>';
+            }
+          }
 
-                const formEditar = document.getElementById('form-editarOrden');
-                formEditar.dataset.estadoOrig = data.orden.id_estado_servicio;
-                formEditar.dataset.diagOrig = data.orden.diagnostico || ''; 
-                formEditar.dataset.costoOrig = parseFloat(data.orden.costo_servicio).toFixed(2);
-                
-                // Limpiar refacciones visualmente por ahora
-                document.getElementById('tabla-refacciones-orden').innerHTML = `
+          const formEditar = document.getElementById("form-editarOrden");
+          formEditar.dataset.estadoOrig = data.orden.id_estado_servicio;
+          formEditar.dataset.diagOrig = data.orden.diagnostico || "";
+          formEditar.dataset.costoOrig = parseFloat(
+            data.orden.costo_servicio,
+          ).toFixed(2);
+
+          // Limpiar refacciones visualmente por ahora
+          document.getElementById("tabla-refacciones-orden").innerHTML = `
                     <tr id="fila-vacia-refacciones">
                         <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No se han agregado refacciones a esta orden.</td>
                     </tr>`;
-                document.getElementById('total-refacciones-input').value = 0;
-                document.getElementById('total-refacciones-text').textContent = "0.00";
-                
-                abrirModalOrden('editar-modalOrden');
-            } else {
-                Swal.fire({ title: 'Error', text: data.message, icon: 'error', returnFocus: false });
-            }
-        })
-        .catch(err => {
-            Swal.close();
-            console.error(err);
-            Swal.fire({ title: 'Error', text: 'No se pudo conectar con el servidor.', icon: 'error', returnFocus: false });
-        });
-    }
+          document.getElementById("total-refacciones-input").value = 0;
+          document.getElementById("total-refacciones-text").textContent =
+            "0.00";
 
-    // CANCELAR ORDEN
-    const btnEliminar = e.target.closest('.eliminarOrden');
-    if (btnEliminar) {
-        const idOrden = btnEliminar.getAttribute('data-id');
-
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: "La orden #" + idOrden + " será cancelada. No se borrará del historial.",
-            icon: 'warning',
+          abrirModalOrden("editar-modalOrden");
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: data.message,
+            icon: "error",
             returnFocus: false,
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, cancelar orden',
-            cancelButtonText: 'No, regresar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({ title: 'Procesando...', allowOutsideClick: false, returnFocus: false, didOpen: () => Swal.showLoading() });
-
-                fetch('cruds/procesar_eliminar_orden.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'id_orden=' + idOrden
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success) {
-                        Swal.fire({ title: '¡Cancelada!', text: data.message, icon: 'success', returnFocus: false }).then(() => {
-                            if(document.getElementById("ordenes-link")) {
-                                document.getElementById("ordenes-link").click(); 
-                            }
-                        });
-                    } else {
-                        Swal.fire({ title: 'Error', text: data.message, icon: 'error', returnFocus: false });
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    Swal.fire({ title: 'Error', text: 'Fallo de conexión.', icon: 'error', returnFocus: false });
-                });
-            }
+          });
+        }
+      })
+      .catch((err) => {
+        Swal.close();
+        console.error(err);
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo conectar con el servidor.",
+          icon: "error",
+          returnFocus: false,
         });
-    }
+      });
+  }
+
+  // CANCELAR ORDEN
+  const btnEliminar = e.target.closest(".eliminarOrden");
+  if (btnEliminar) {
+    const idOrden = btnEliminar.getAttribute("data-id");
+
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text:
+        "La orden #" +
+        idOrden +
+        " será cancelada. No se borrará del historial.",
+      icon: "warning",
+      returnFocus: false,
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sí, cancelar orden",
+      cancelButtonText: "No, regresar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Procesando...",
+          allowOutsideClick: false,
+          returnFocus: false,
+          didOpen: () => Swal.showLoading(),
+        });
+
+        fetch("cruds/procesar_eliminar_orden.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: "id_orden=" + idOrden,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire({
+                title: "¡Cancelada!",
+                text: data.message,
+                icon: "success",
+                returnFocus: false,
+              }).then(() => {
+                if (document.getElementById("ordenes-link")) {
+                  document.getElementById("ordenes-link").click();
+                }
+              });
+            } else {
+              Swal.fire({
+                title: "Error",
+                text: data.message,
+                icon: "error",
+                returnFocus: false,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            Swal.fire({
+              title: "Error",
+              text: "Fallo de conexión.",
+              icon: "error",
+              returnFocus: false,
+            });
+          });
+      }
+    });
+  }
 });
 
 // UTILIDADES FINALES (WHATSAPP, IMPRESIÓN, QR)
 function enviarWhatsOrden(telefono, folio, cliente, saldo, estado, taller) {
-    let tel = telefono.replace(/\D/g, '');
-    if (tel.length === 10) tel = '52' + tel;
+  let tel = telefono.replace(/\D/g, "");
+  if (tel.length === 10) tel = "52" + tel;
 
-    let mensaje = `¡Hola ${cliente}! Te contactamos de *${taller}*.\n\n`;
-    mensaje += `Te informamos que tu orden de servicio con *Folio #${folio}* se encuentra actualmente en estado: *${estado.toUpperCase()}*.\n\n`;
+  let mensaje = `¡Hola ${cliente}! Te contactamos de *${taller}*.\n\n`;
+  mensaje += `Te informamos que tu orden de servicio con *Folio #${folio}* se encuentra actualmente en estado: *${estado.toUpperCase()}*.\n\n`;
 
-    let saldoNum = parseFloat(saldo);
-    if (saldoNum > 0) {
-        mensaje += `*Saldo pendiente:* $${saldoNum.toFixed(2)}\n\n`;
-    } else {
-        mensaje += `*Saldo:* Equipo pagado en su totalidad.\n\n`;
-    }
+  let saldoNum = parseFloat(saldo);
+  if (saldoNum > 0) {
+    mensaje += `*Saldo pendiente:* $${saldoNum.toFixed(2)}\n\n`;
+  } else {
+    mensaje += `*Saldo:* Equipo pagado en su totalidad.\n\n`;
+  }
 
-    mensaje += `Si tienes alguna duda, responde a este mensaje. ¡Gracias por tu preferencia!`;
-    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`, '_blank');
+  mensaje += `Si tienes alguna duda, responde a este mensaje. ¡Gracias por tu preferencia!`;
+  window.open(
+    `https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`,
+    "_blank",
+  );
 }
 
 function imprimirTicket(idOrden) {
-    window.open(`cruds/imprimir_ticket.php?id=${idOrden}`, 'Ticket', 'width=400,height=600');
+  window.open(
+    `cruds/imprimir_ticket.php?id=${idOrden}`,
+    "Ticket",
+    "width=400,height=600",
+  );
 }
 
 function verQrOrden(token) {
-    const urlRastreo = `http://localhost/swaos/track.php?t=${token}`;
-    const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(urlRastreo)}`;
+  const urlRastreo = `http://localhost/swaos/track.php?t=${token}`;
+  const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(urlRastreo)}`;
 
-    Swal.fire({
-        title: 'Código de Rastreo',
-        text: 'Pide al cliente que escanee este código.',
-        imageUrl: urlImagenQR,
-        imageWidth: 250,
-        imageHeight: 250,
-        imageAlt: 'QR',
-        returnFocus: false,
-        confirmButtonText: 'Cerrar',
-        confirmButtonColor: '#34495e'
-    });
+  Swal.fire({
+    title: "Código de Rastreo",
+    text: "Pide al cliente que escanee este código.",
+    imageUrl: urlImagenQR,
+    imageWidth: 250,
+    imageHeight: 250,
+    imageAlt: "QR",
+    returnFocus: false,
+    confirmButtonText: "Cerrar",
+    confirmButtonColor: "#34495e",
+  });
 }
 
 // MINI PUNTO DE VENTA EN ORDENES (REFACCIONES)
 
-// 1. Reescribimos la función calcularSaldoEdit para que sume Refacciones + Mano de Obra
+// Reescribimos la función calcularSaldoEdit para que sume Refacciones + Mano de Obra
 function calcularSaldoEdit() {
-    const manoObra = parseFloat(document.getElementById('edit-mano-obra').value) || 0;
-    const totalRefacciones = parseFloat(document.getElementById('total-refacciones-input').value) || 0;
-    
-    // El costo total de la orden ahora se calcula solo
-    const costoTotal = manoObra + totalRefacciones;
-    document.getElementById('edit-costo').value = costoTotal.toFixed(2);
+  const manoObra =
+    parseFloat(document.getElementById("edit-mano-obra").value) || 0;
+  const totalRefacciones =
+    parseFloat(document.getElementById("total-refacciones-input").value) || 0;
 
-    const anticipoAcumulado = parseFloat(document.getElementById('edit-anticipo').value) || 0;
-    const nuevoAbono = parseFloat(document.getElementById('edit-nuevo-abono').value) || 0;
-    
-    let saldoFinal = costoTotal - (anticipoAcumulado + nuevoAbono);
-    if (saldoFinal < 0) saldoFinal = 0; 
-    
-    const inputSaldo = document.getElementById('edit-saldo');
-    if (inputSaldo) inputSaldo.value = saldoFinal.toFixed(2);
+  // El costo total de la orden ahora se calcula solo
+  const costoTotal = manoObra + totalRefacciones;
+  document.getElementById("edit-costo").value = costoTotal.toFixed(2);
+
+  const anticipoAcumulado =
+    parseFloat(document.getElementById("edit-anticipo").value) || 0;
+  const nuevoAbono =
+    parseFloat(document.getElementById("edit-nuevo-abono").value) || 0;
+
+  let saldoFinal = costoTotal - (anticipoAcumulado + nuevoAbono);
+  if (saldoFinal < 0) saldoFinal = 0;
+
+  const inputSaldo = document.getElementById("edit-saldo");
+  if (inputSaldo) inputSaldo.value = saldoFinal.toFixed(2);
 }
 
-// 2. Lógica para sumar las filas de la tabla de refacciones
+// Lógica para sumar las filas de la tabla de refacciones
 function recalcularTablaRefacciones() {
-    let total = 0;
-    const filas = document.querySelectorAll('.fila-refaccion');
-    
-    filas.forEach(fila => {
-        const cantidad = parseFloat(fila.querySelector('.input-cant').value) || 1;
-        const precio = parseFloat(fila.querySelector('.input-precio').value) || 0;
-        const subtotal = cantidad * precio;
-        
-        fila.querySelector('.td-subtotal').textContent = '$' + subtotal.toFixed(2);
-        total += subtotal;
-    });
+  let total = 0;
+  const filas = document.querySelectorAll(".fila-refaccion");
 
-    document.getElementById('total-refacciones-text').textContent = total.toFixed(2);
-    document.getElementById('total-refacciones-input').value = total.toFixed(2);
-    
-    // Mostramos u ocultamos el mensaje de "tabla vacía"
-    document.getElementById('fila-vacia-refacciones').style.display = filas.length === 0 ? 'table-row' : 'none';
-    
-    // Al recalcular las piezas, forzamos recalcular el saldo general de la orden
-    calcularSaldoEdit();
+  filas.forEach((fila) => {
+    const cantidad = parseFloat(fila.querySelector(".input-cant").value) || 1;
+    const precio = parseFloat(fila.querySelector(".input-precio").value) || 0;
+    const subtotal = cantidad * precio;
+
+    fila.querySelector(".td-subtotal").textContent = "$" + subtotal.toFixed(2);
+    total += subtotal;
+  });
+
+  document.getElementById("total-refacciones-text").textContent =
+    total.toFixed(2);
+  document.getElementById("total-refacciones-input").value = total.toFixed(2);
+
+  // Mostramos u ocultamos el mensaje de "tabla vacía"
+  document.getElementById("fila-vacia-refacciones").style.display =
+    filas.length === 0 ? "table-row" : "none";
+
+  // Al recalcular las piezas, forzamos recalcular el saldo general de la orden
+  calcularSaldoEdit();
 }
 
-// 3. Eliminar una pieza del carrito
+// Eliminar una pieza del carrito
 function eliminarRefaccion(btn) {
-    btn.closest('tr').remove();
-    recalcularTablaRefacciones();
+  btn.closest("tr").remove();
+  recalcularTablaRefacciones();
 }
 
-// 4. Agregar al carrito de mentiras (Frontend)
+//  Agregar al carrito de mentiras (Frontend)
 function agregarRefaccion(idProducto, nombre, precio) {
-    // Verificamos si ya está en la tabla para sumarle 1 en lugar de duplicar fila
-    const filaExistente = document.querySelector(`.fila-refaccion[data-id="${idProducto}"]`);
-    if (filaExistente) {
-        const inputCant = filaExistente.querySelector('.input-cant');
-        inputCant.value = parseInt(inputCant.value) + 1;
-        recalcularTablaRefacciones();
-        return;
-    }
+  // Verificamos si ya está en la tabla para sumarle 1 en lugar de duplicar fila
+  const filaExistente = document.querySelector(
+    `.fila-refaccion[data-id="${idProducto}"]`,
+  );
+  if (filaExistente) {
+    const inputCant = filaExistente.querySelector(".input-cant");
+    inputCant.value = parseInt(inputCant.value) + 1;
+    recalcularTablaRefacciones();
+    return;
+  }
 
-    const tbody = document.getElementById('tabla-refacciones-orden');
-    const tr = document.createElement('tr');
-    tr.className = 'fila-refaccion';
-    tr.dataset.id = idProducto;
+  const tbody = document.getElementById("tabla-refacciones-orden");
+  const tr = document.createElement("tr");
+  tr.className = "fila-refaccion";
+  tr.dataset.id = idProducto;
 
-    // Aquí inyectamos inputs invisibles (name="refacciones[]") para enviarlos a PHP
-    tr.innerHTML = `
+  // Aquí inyectamos inputs invisibles (name="refacciones[]") para enviarlos a PHP
+  tr.innerHTML = `
         <td style="padding: 5px;">
             ${nombre}
             <input type="hidden" name="refacciones_id[]" value="${idProducto}">
@@ -5524,59 +6487,790 @@ function agregarRefaccion(idProducto, nombre, precio) {
             <button type="button" onclick="eliminarRefaccion(this)" style="background: red; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
         </td>
     `;
-    
-    tbody.appendChild(tr);
-    recalcularTablaRefacciones();
+
+  tbody.appendChild(tr);
+  recalcularTablaRefacciones();
 }
 
-// 5. El Buscador Autocomplete
+// El Buscador Autocomplete
 let timeoutBusquedaProd;
-document.addEventListener('input', function(e) {
-    if (e.target && e.target.id === 'busqueda-producto-orden') {
-        const termino = e.target.value.trim();
-        const listaResultados = document.getElementById('lista-resultados-productos');
-        
-        clearTimeout(timeoutBusquedaProd);
-        listaResultados.innerHTML = '';
+document.addEventListener("input", function (e) {
+  if (e.target && e.target.id === "busqueda-producto-orden") {
+    const termino = e.target.value.trim();
+    const listaResultados = document.getElementById(
+      "lista-resultados-productos",
+    );
 
-        if (termino.length < 2) {
-            listaResultados.style.display = 'none';
-            return;
-        }
+    clearTimeout(timeoutBusquedaProd);
+    listaResultados.innerHTML = "";
 
-        timeoutBusquedaProd = setTimeout(() => {
-            // Este es el archivo PHP que crearemos enseguida para buscar el stock
-            fetch(`cruds/buscar_productos_orden.php?q=${encodeURIComponent(termino)}`)
-                .then(res => res.json())
-                .then(data => {
-                    listaResultados.innerHTML = ''; 
-                    if (data.length > 0) {
-                        listaResultados.style.display = 'block';
-                        data.forEach(prod => {
-                            const li = document.createElement('li');
-                            li.style.padding = "10px"; li.style.cursor = "pointer"; li.style.borderBottom = "1px solid #eee";
-                            
-                            // Si tiene stock 0, lo pintamos rojo pero igual dejamos agregarlo (por si llegó y no lo han metido al sistema)
-                            const stockTexto = prod.stock > 0 ? `<span style="color:green;">Stock: ${prod.stock}</span>` : `<span style="color:red;">Stock: ${prod.stock}</span>`;
-                            
-                            li.innerHTML = `<strong>${prod.codebar}</strong> - ${prod.nombre} | ${stockTexto} | $${prod.precio}`;
-                            
-                            // Evento de clic para agregarlo a la tabla
-                            li.onmousedown = function() {
-                                agregarRefaccion(prod.id, prod.nombre, parseFloat(prod.precio));
-                                e.target.value = '';
-                                listaResultados.style.display = 'none';
-                            };
-                            listaResultados.appendChild(li);
-                        });
-                    } else {
-                        listaResultados.style.display = 'block';
-                        listaResultados.innerHTML = '<li style="padding: 10px; color: red;">No se encontró el producto.</li>';
-                    }
-                }).catch(err => console.error(err));
-        }, 300);
+    if (termino.length < 2) {
+      listaResultados.style.display = "none";
+      return;
     }
+
+    timeoutBusquedaProd = setTimeout(() => {
+      // Este es el archivo PHP que crearemos enseguida para buscar el stock
+      fetch(`cruds/buscar_productos_orden.php?q=${encodeURIComponent(termino)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          listaResultados.innerHTML = "";
+          if (data.length > 0) {
+            listaResultados.style.display = "block";
+            data.forEach((prod) => {
+              const li = document.createElement("li");
+              li.style.padding = "10px";
+              li.style.cursor = "pointer";
+              li.style.borderBottom = "1px solid #eee";
+
+              // Si tiene stock 0, lo pintamos rojo pero igual dejamos agregarlo (por si llegó y no lo han metido al sistema)
+              const stockTexto =
+                prod.stock > 0
+                  ? `<span style="color:green;">Stock: ${prod.stock}</span>`
+                  : `<span style="color:red;">Stock: ${prod.stock}</span>`;
+
+              li.innerHTML = `<strong>${prod.codebar}</strong> - ${prod.nombre} | ${stockTexto} | $${prod.precio}`;
+
+              // Evento de clic para agregarlo a la tabla
+              li.onmousedown = function () {
+                agregarRefaccion(prod.id, prod.nombre, parseFloat(prod.precio));
+                e.target.value = "";
+                listaResultados.style.display = "none";
+              };
+              listaResultados.appendChild(li);
+            });
+          } else {
+            listaResultados.style.display = "block";
+            listaResultados.innerHTML =
+              '<li style="padding: 10px; color: red;">No se encontró el producto.</li>';
+          }
+        })
+        .catch((err) => console.error(err));
+    }, 300);
+  }
 });
+
+// Llamar Ventas ********************************************
+document
+  .getElementById("ventas-link")
+  .addEventListener("click", function (event) {
+    event.preventDefault(); // Evita la acción por defecto del enlace
+    fetch("catalogos/ventas.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+        inicializarPOS();
+      })
+      .catch((error) => {
+        console.error("Error al cargar el contenido:", error);
+      });
+  });
+
+// MOTOR DEL PUNTO DE VENTA (POS)
+let productosPOS = [];
+let carritoPOS = [];
+
+function inicializarPOS() {
+  carritoPOS = []; // Vaciamos el carrito al abrir la pantalla
+  cargarInventarioPOS();
+
+  // Activar buscador en tiempo real
+  let buscador = document.getElementById("buscar-producto-pos");
+  if (buscador) {
+    buscador.addEventListener("input", function (e) {
+      renderizarGridProductos(e.target.value);
+    });
+  }
+
+  // Activar botón de cobrar (lo conectaremos a PHP en el siguiente paso)
+  // BOTÓN COBRAR (CON POPUPS DE PAGO)
+  let btnCobrar = document.getElementById("pos-btn-cobrar");
+  if (btnCobrar) {
+    btnCobrar.addEventListener("click", function () {
+      if (carritoPOS.length === 0) return;
+
+      let totalVenta = carritoPOS.reduce(
+        (sum, item) => sum + item.precio * item.cantidad,
+        0,
+      );
+      let metodoPago = document.getElementById("pos-metodo-pago").value;
+
+      // PAGO EN EFECTIVO (Calculadora de Cambio)
+      if (metodoPago === "Efectivo") {
+        Swal.fire({
+          title: "Cobro en Efectivo 💵",
+          html: `<h2 style="color:#28a745; margin:10px 0;">Total: $${totalVenta.toFixed(2)}</h2>`,
+          input: "number",
+          inputAttributes: { step: "0.50", min: totalVenta },
+          inputPlaceholder: "¿Con cuánto paga el cliente?",
+          showCancelButton: true,
+          confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
+          cancelButtonText: "Cancelar",
+          inputValidator: (value) => {
+            if (!value) return "Debes ingresar una cantidad";
+            if (parseFloat(value) < totalVenta)
+              return "El pago es menor al total a cobrar";
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            let pagoReal = parseFloat(result.value);
+            let cambio = pagoReal - totalVenta;
+
+            // Mostramos el cambio en gigante y luego cobramos
+            Swal.fire({
+              icon: "info",
+              title: "Su Cambio es:",
+              html: `<h1 style="font-size: 40px; color: #007bff; margin: 0;">$${cambio.toFixed(2)}</h1>`,
+              confirmButtonText: "Aceptar e Imprimir",
+              allowOutsideClick: false,
+            }).then(() => {
+              // Mandamos total, metodo, PAGO REAL, CAMBIO, referencia vacía
+              procesarCobroEnBackend(
+                totalVenta,
+                metodoPago,
+                pagoReal,
+                cambio,
+                "",
+              );
+            });
+          }
+        });
+      }
+      // PAGO CON TARJETA (Pide Referencia)
+      else if (metodoPago === "Tarjeta") {
+        Swal.fire({
+          title: "Cobro con Tarjeta 💳",
+          text: `Total a cobrar: $${totalVenta.toFixed(2)}`,
+          input: "text",
+          inputPlaceholder: "Ingresa el No. de Autorización o Referencia",
+          showCancelButton: true,
+          confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
+          cancelButtonText: "Cancelar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Mandamos total, metodo, 0 de pago, 0 de cambio, y la REFERENCIA
+            procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, result.value);
+          }
+        });
+      }
+      // TRANSFERENCIA (Pasa directo)
+      else {
+        // Mandamos total, metodo, 0, 0, y referencia vacía
+        procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, "");
+      }
+    });
+  }
+  // Función global para enviar los datos a PHP
+  // Función global para enviar los datos a PHP (AHORA CON PAGO Y CAMBIO)
+  window.procesarCobroEnBackend = function (
+    totalVenta,
+    metodoPago,
+    pagoCliente,
+    cambioCliente,
+    referencia,
+  ) {
+    let btnCobrar = document.getElementById("pos-btn-cobrar");
+    btnCobrar.disabled = true;
+    btnCobrar.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> COBRANDO...';
+
+    let idClienteSeleccionado = document.getElementById("pos-id-cliente")
+      ? document.getElementById("pos-id-cliente").value
+      : 0;
+
+    let datosVenta = {
+      carrito: carritoPOS,
+      total: totalVenta,
+      metodo_pago: metodoPago,
+      referencia: referencia,
+      id_cliente: idClienteSeleccionado,
+      pago_cliente: pagoCliente, // <-- Agregamos el billete que dio el cliente
+      cambio_cliente: cambioCliente, // <-- Agregamos lo que le regresamos
+    };
+
+    fetch("../php/cruds/procesar_venta_mostrador.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datosVenta),
+    })
+      // ... (El resto del fetch queda igualito, con el then(res => res.json()) y el Swal.fire)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          carritoPOS = [];
+          cargarInventarioPOS();
+          actualizarCarritoUI();
+          btnCobrar.innerHTML =
+            '<i class="fa-solid fa-check-circle"></i> COBRAR';
+
+          let selectPago = document.getElementById("pos-metodo-pago");
+          if (selectPago) selectPago.value = "Efectivo";
+
+          localStorage.setItem("ultima_venta_pos", data.id_venta);
+          window.open(
+            "../php/cruds/imprimir_ticket_pos.php?id=" + data.id_venta,
+            "_blank",
+          );
+        } else {
+          Swal.fire("Error", data.message, "error");
+          btnCobrar.disabled = false;
+        }
+      });
+  };
+
+  // Botón de Reimprimir Último Ticket
+  let btnReimprimir = document.getElementById("btn-reimprimir-pos");
+  if (btnReimprimir) {
+    btnReimprimir.addEventListener("click", function () {
+      let ultimaVenta = localStorage.getItem("ultima_venta_pos");
+      if (ultimaVenta) {
+        window.open(
+          "../php/cruds/imprimir_ticket_pos.php?id=" + ultimaVenta,
+          "_blank",
+        );
+      } else {
+        Swal.fire(
+          "Aviso",
+          "No hay registros de ventas recientes en esta computadora.",
+          "info",
+        );
+      }
+    });
+  }
+  // BUSCADOR DE CLIENTES EN EL POS
+  let btnBuscarCliente = document.getElementById("btn-buscar-cliente-pos");
+  let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
+  let inputIdCliente = document.getElementById("pos-id-cliente");
+  let inputNombreCliente = document.getElementById("pos-nombre-cliente");
+
+  if (btnBuscarCliente) {
+    btnBuscarCliente.addEventListener("click", function () {
+      // Vamos a la API por la lista de clientes
+      fetch("../php/funciones/api_clientes_pos.php")
+        .then((res) => res.json())
+        .then((clientes) => {
+          if (clientes.error) {
+            Swal.fire("Error", "No se pudieron cargar los clientes.", "error");
+            return;
+          }
+
+          // Armamos las opciones de la lista
+          let options =
+            '<option value="0" selected>Público en General</option>';
+          clientes.forEach((c) => {
+            options += `<option value="${c.id_cliente}">${c.nombre}- ${c.papellido} - ${c.telefono}</option>`;
+          });
+
+          // Mostramos el SweetAlert con Buscador Integrado
+          Swal.fire({
+            title: "Seleccionar Cliente 👤",
+            html: `
+                      <input type="search" id="swal-search-cliente" class="swal2-input" placeholder="🔍 Buscar por nombre o teléfono..." autocomplete="off" style="width: 90%; max-width: 100%; margin: 0 auto 15px auto; display: block; box-sizing: border-box;">
+                      <select id="swal-select-cliente" size="6" style="width: 90%; height:140px !important; max-width: 100%; overflow-y: auto; overflow-x: hidden; padding: 10px; font-size: 15px; border: 1px solid #d9d9d9; border-radius: 8px; outline: none; display: block; margin: 0 auto; box-sizing: border-box; background: #fff; color: #333;">
+                          ${options}
+                      </select>
+                  `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-check"></i> Asignar',
+            cancelButtonText: "Cancelar",
+            didOpen: () => {
+              // Variables del buscador y la lista
+              let buscador = document.getElementById("swal-search-cliente");
+              let select = document.getElementById("swal-select-cliente");
+              let opciones = select.getElementsByTagName("option");
+
+              // Ponemos el cursor automáticamente en el buscador
+              buscador.focus();
+
+              // Filtramos la lista en tiempo real mientras escribe
+              buscador.addEventListener("keyup", function () {
+                let filtro = this.value.toLowerCase();
+                for (let i = 0; i < opciones.length; i++) {
+                  let texto = opciones[i].textContent.toLowerCase();
+                  // Siempre mostrar "Público en General" o si coincide la búsqueda
+                  if (opciones[i].value === "0" || texto.includes(filtro)) {
+                    opciones[i].style.display = "";
+                  } else {
+                    opciones[i].style.display = "none";
+                  }
+                }
+              });
+
+              // Asignar al dar Doble Clic en el nombre
+              select.addEventListener("dblclick", function () {
+                Swal.clickConfirm(); // Simula el clic en el botón "Asignar"
+              });
+            },
+            preConfirm: () => {
+              let select = document.getElementById("swal-select-cliente");
+              if (select.selectedIndex === -1) {
+                Swal.showValidationMessage("Selecciona un cliente de la lista");
+                return false;
+              }
+              return {
+                id: select.value,
+                texto: select.options[select.selectedIndex].text,
+              };
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              let cliente = result.value;
+              inputIdCliente.value = cliente.id;
+
+              if (cliente.id === "0") {
+                inputNombreCliente.value = "";
+                btnQuitarCliente.style.display = "none";
+              } else {
+                // Extraemos solo el nombre (sin el teléfono) para el encabezado
+                let soloNombre = cliente.texto.split(" - ")[0];
+                inputNombreCliente.value = soloNombre;
+                btnQuitarCliente.style.display = "inline-block";
+              }
+            }
+          });
+        });
+    });
+  }
+
+  // Botón rojo de la "X" para cancelar el cliente y regresar a Público en General
+  if (btnQuitarCliente) {
+    btnQuitarCliente.addEventListener("click", function () {
+      inputIdCliente.value = "0";
+      inputNombreCliente.value = "";
+      this.style.display = "none"; // Ocultamos la "X"
+    });
+  }
+
+  // BOTÓN DE RETIRO DE CAJA (GASTOS)
+  let btnRetiroCaja = document.getElementById("btn-retiro-caja-pos");
+  if (btnRetiroCaja) {
+    btnRetiroCaja.addEventListener("click", function () {
+      Swal.fire({
+        title: "Retiro de Efectivo",
+        html: `
+                  <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Registra el dinero que tomas físicamente del cajón.</p>
+                  <input type="text" id="swal-motivo-retiro" class="swal2-input" placeholder="Motivo (Ej. Pago de agua, comida...)" autocomplete="off" style="width: 85%;">
+                  <input type="number" id="swal-monto-retiro" class="swal2-input" placeholder="$ Monto a retirar" step="0.50" min="0.50" style="width: 85%;">
+              `,
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        confirmButtonText:
+          '<i class="fa-solid fa-hand-holding-dollar"></i> Registrar Retiro',
+        cancelButtonText: "Cancelar",
+        preConfirm: () => {
+          let motivo = document
+            .getElementById("swal-motivo-retiro")
+            .value.trim();
+          let monto = parseFloat(
+            document.getElementById("swal-monto-retiro").value,
+          );
+
+          if (!motivo) {
+            Swal.showValidationMessage(
+              "Debes escribir un motivo para el corte.",
+            );
+            return false;
+          }
+          if (!monto || monto <= 0) {
+            Swal.showValidationMessage(
+              "Ingresa una cantidad válida mayor a 0.",
+            );
+            return false;
+          }
+
+          return { motivo: motivo, monto: monto };
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Lo mandamos al servidor para guardarlo
+          fetch("../php/funciones/registrar_retiro_caja.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(result.value),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Retiro Registrado",
+                  text: `Se restaron $${result.value.monto.toFixed(2)} de la caja.`,
+                  timer: 2000,
+                  showConfirmButton: false,
+                });
+              } else {
+                Swal.fire("Error", data.message, "error");
+              }
+            });
+        }
+      });
+    });
+  }
+}
+
+//  Traer productos de la base de datos
+function cargarInventarioPOS() {
+  // Asegúrate de que la ruta apunte correctamente a tu archivo
+  fetch("../php/funciones/api_productos_pos.php")
+    .then((res) => res.json())
+    .then((data) => {
+      if (!data.error) {
+        productosPOS = data;
+        renderizarGridProductos("");
+      } else {
+        console.error(data.error);
+      }
+    })
+    .catch((err) => console.error("Error al cargar POS", err));
+}
+
+//  Dibujar las tarjetas de productos
+function renderizarGridProductos(filtro = "") {
+  let grid = document.getElementById("grid-productos-pos");
+  if (!grid) return;
+
+  grid.innerHTML = "";
+  filtro = filtro.toLowerCase();
+
+  // Filtramos el arreglo de productos
+  let filtrados = productosPOS.filter(
+    (p) =>
+      p.nombre_prod.toLowerCase().includes(filtro) ||
+      (p.codigo_prod && p.codigo_prod.toLowerCase().includes(filtro)),
+  );
+
+  if (filtrados.length === 0) {
+    grid.innerHTML =
+      '<div style="grid-column: 1 / -1; text-align: center; color: #888;">No se encontraron productos.</div>';
+    return;
+  }
+
+  // Dibujamos cada tarjeta
+  filtrados.forEach((prod) => {
+    let card = document.createElement("div");
+    card.className = "producto-card";
+    card.innerHTML = `
+            <div class="prod-nombre">${prod.nombre_prod}</div>
+            <div class="prod-precio">$${parseFloat(prod.p_venta).toFixed(2)}</div>
+            <div class="prod-stock">Stock: ${prod.stock}</div>
+        `;
+    // Al darle clic, lo mandamos al carrito
+    card.addEventListener("click", () => agregarAlCarrito(prod));
+    grid.appendChild(card);
+  });
+}
+
+// Lógica del Carrito
+function agregarAlCarrito(producto) {
+  // Asegurarnos de que el stock sea un NÚMERO real y no un texto fantasma
+  let stockReal = parseInt(producto.stock);
+  let item = carritoPOS.find((i) => i.id_prod === producto.id_prod);
+
+  if (item) {
+    if (item.cantidad < stockReal) {
+      item.cantidad++;
+    } else {
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({ icon: "warning", title: "Stock insuficiente", text: "No hay más unidades.", timer: 1500 });
+      } else {
+        alert("Stock insuficiente: No hay más unidades disponibles.");
+      }
+    }
+  } else {
+    carritoPOS.push({
+      id_prod: producto.id_prod,
+      nombre: producto.nombre_prod,
+      precio: parseFloat(producto.p_venta),
+      cantidad: 1,
+      stock_max: stockReal, // Guardado como número real puro
+    });
+  }
+  actualizarCarritoUI();
+}
+
+// BOTONES: Sumar, Restar y Eliminar
+window.modificarCantidad = function (id_prod, delta) {
+  let item = carritoPOS.find((i) => i.id_prod === id_prod);
+  if (!item) return;
+
+  // Forzamos a que ambos sean números puros antes de sumarlos/restarlos
+  item.cantidad = parseInt(item.cantidad) + parseInt(delta);
+
+  if (item.cantidad <= 0) {
+    carritoPOS = carritoPOS.filter((i) => i.id_prod !== id_prod); // Adiós producto
+  } else if (item.cantidad > item.stock_max) {
+    item.cantidad = item.stock_max; // Topamos al máximo stock (número puro)
+  }
+  actualizarCarritoUI();
+};
+
+// CAJA DE TEXTO: Función "Dictadora"
+window.fijarCantidad = function(id_prod, cantidadStr) {
+    let item = carritoPOS.find(i => i.id_prod === id_prod);
+    if (!item) return;
+
+    let nuevaC = parseInt(cantidadStr);
+    
+    // Si borran el número o ponen letras, lo regresamos a 1
+    if (isNaN(nuevaC) || nuevaC <= 0) {
+        item.cantidad = 1;
+    } 
+    // Si piden más del stock, los topamos al máximo
+    else if (nuevaC > item.stock_max) {
+        item.cantidad = item.stock_max; // Número puro
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({icon: 'warning', title: 'Stock límite', text: `Solo tenemos ${item.stock_max} disponibles.`, timer: 1500});
+        } else {
+            alert(`Stock límite: Solo tenemos ${item.stock_max} disponibles.`);
+        }
+    } 
+    // Si todo está bien, le asignamos el número exacto
+    else {
+        item.cantidad = nuevaC;
+    }
+    
+    actualizarCarritoUI();
+};
+
+// Dibujar la tabla del carrito y calcular el gran total (VERSIÓN BLINDADA)
+function actualizarCarritoUI() {
+  let tbody = document.getElementById("tabla-carrito-pos");
+  let totalArticulosSpan = document.getElementById("pos-total-articulos");
+  let granTotalSpan = document.getElementById("pos-gran-total");
+  let btnCobrar = document.getElementById("pos-btn-cobrar");
+
+  tbody.innerHTML = "";
+  let granTotal = 0;
+  let totalArticulos = 0;
+
+  if (carritoPOS.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="4" style="text-align: center; color: #999; padding: 30px 10px;">El carrito está vacío.</td></tr>';
+    btnCobrar.disabled = true;
+    totalArticulosSpan.textContent = "0";
+    granTotalSpan.textContent = "$0.00";
+    return;
+  }
+
+  carritoPOS.forEach((item) => {
+    let subtotal = item.precio * item.cantidad;
+    granTotal += subtotal;
+    totalArticulos += item.cantidad;
+
+    // Ya no usamos onclick en el HTML, dejamos las clases listas para JS
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+            <td style="font-size: 14px; font-weight: 600;">${item.nombre}</td>
+            <td style="text-align: center; white-space: nowrap;">
+                <button class="btn-qty btn-restar-pos">-</button>
+                <input type="number" class="input-qty pos-cantidad-manual" value="${item.cantidad}" min="1" max="${item.stock_max}" style="width: 50px; text-align: center; font-weight: bold; border: 1px solid #ddd; border-radius: 4px; margin: 0 5px; outline: none;">
+                <button class="btn-qty btn-sumar-pos">+</button>
+            </td>
+            <td style="text-align: right; color: #28a745; font-weight: bold;">$${subtotal.toFixed(2)}</td>
+            <td style="text-align: right;">
+                <button class="btn-remove btn-quitar-pos" title="Quitar">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        `;
+
+    // BOTONES DEL CARRITO PARA AUMENTAR O DISMINUIR CANTIDAD DEL PRODUCTO
+    tr.querySelector(".btn-restar-pos").addEventListener("click", function () {
+      modificarCantidad(item.id_prod, -1);
+    });
+
+    tr.querySelector(".btn-sumar-pos").addEventListener("click", function () {
+      modificarCantidad(item.id_prod, 1);
+    });
+
+    tr.querySelector(".btn-quitar-pos").addEventListener("click", function () {
+      modificarCantidad(item.id_prod, -item.cantidad);
+    });
+
+         //  Si el usuario escribe el número a mano
+        // Usamos 'change' para cuando el usuario da Enter o clic afuera
+        tr.querySelector('.pos-cantidad-manual').addEventListener('change', function() {
+            fijarCantidad(item.id_prod, this.value);
+        });
+        
+        // Usamos 'keyup' para evitar que se quede pasmado si escriben y borran rápido
+        tr.querySelector('.pos-cantidad-manual').addEventListener('keyup', function(e) {
+            if(e.key === 'Enter') {
+                fijarCantidad(item.id_prod, this.value);
+            }
+        });
+
+        tbody.appendChild(tr);
+  });
+
+  totalArticulosSpan.textContent = totalArticulos;
+  granTotalSpan.textContent = `$${granTotal.toFixed(2)}`;
+  btnCobrar.disabled = false;
+}
+
+// Llamar corte de caja ********************************************
+document
+  .getElementById("corte-link")
+  .addEventListener("click", function (event) {
+    event.preventDefault(); // Evita la acción por defecto del enlace
+    fetch("catalogos/corte_caja.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+        inicializarCorteCaja()
+      })
+      .catch((error) => {
+        console.error("Error al cargar el contenido:", error);
+      });
+  });
+
+// MÓDULO: CORTE DE CAJA (REPORTE Z)
+function inicializarCorteCaja() {
+    // Traer los totales del día
+    fetch('../php/funciones/api_corte_caja.php')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Llenamos las tarjetas visuales
+            document.getElementById('corte-fecha-actual').textContent = data.fecha;
+            document.getElementById('corte-total-efectivo').textContent = `$${data.efectivo.toFixed(2)}`;
+            document.getElementById('corte-total-tarjeta').textContent = `$${data.tarjeta.toFixed(2)}`;
+            document.getElementById('corte-total-transferencia').textContent = `$${data.transferencia.toFixed(2)}`;
+            
+            // Guardamos el efectivo esperado escondido en la memoria para usarlo luego
+            window.efectivoEsperadoSistema = data.efectivo;
+            // Guardamos los retiros para el ticket
+            window.retirosCorte = data.retiros; 
+            
+            // Si el cajero ya hizo ventas, habilitamos la caja para contar
+            if (data.efectivo > 0 || data.tarjeta > 0 || data.transferencia > 0) {
+                activarCuadreFisico();
+            } else {
+                document.getElementById('corte-mensaje-resultado').style.display = 'block';
+                document.getElementById('corte-mensaje-resultado').textContent = "No hay ventas registradas el día de hoy.";
+                document.getElementById('corte-mensaje-resultado').className = "resultado-cuadre cuadre-sobra";
+            }
+        }
+    })
+    .catch(err => console.error("Error al cargar corte:", err));
+}
+
+// Lógica del Cajero contando los billetes
+function activarCuadreFisico() {
+  let inputFisico = document.getElementById("corte-efectivo-fisico");
+  let mensaje = document.getElementById("corte-mensaje-resultado");
+  let btnCerrar = document.getElementById("btn-procesar-corte");
+
+  inputFisico.addEventListener("keyup", function () {
+    let fisico = parseFloat(this.value);
+    let esperado = window.efectivoEsperadoSistema;
+
+    mensaje.style.display = "block";
+
+    if (isNaN(fisico) || fisico === "") {
+      mensaje.textContent = "Esperando conteo...";
+      mensaje.className = "resultado-cuadre";
+      btnCerrar.disabled = true;
+      return;
+    }
+
+    let diferencia = fisico - esperado;
+
+    if (diferencia === 0) {
+      mensaje.textContent = " ¡CUADRE PERFECTO! ($0.00)";
+      mensaje.className = "resultado-cuadre cuadre-ok";
+      btnCerrar.disabled = false; // Se prende el botón para imprimir
+    } else if (diferencia < 0) {
+      mensaje.textContent = ` ¡FALTAN $${Math.abs(diferencia).toFixed(2)} EN LA CAJA!`;
+      mensaje.className = "resultado-cuadre cuadre-falta";
+      btnCerrar.disabled = false; // Le dejamos cerrar pero quedará registrado el robo/error
+    } else {
+      mensaje.textContent = ` SOBRAN $${diferencia.toFixed(2)} EN LA CAJA.`;
+      mensaje.className = "resultado-cuadre cuadre-sobra";
+      btnCerrar.disabled = false;
+    }
+  });
+  //  EVENTO DEL BOTÓN CERRAR TURNO 
+  btnCerrar.onclick = function () {
+    let fisico = parseFloat(inputFisico.value);
+    let esperado = window.efectivoEsperadoSistema;
+    let diferencia = fisico - esperado;
+
+    // Limpiamos los textos para sacar solo los números puros
+    let tarjeta = parseFloat(
+      document
+        .getElementById("corte-total-tarjeta")
+        .textContent.replace("$", ""),
+    );
+    let transferencia = parseFloat(
+      document
+        .getElementById("corte-total-transferencia")
+        .textContent.replace("$", ""),
+    );
+    let retiros = window.retirosCorte || 0;
+
+    let datosCorte = {
+      esperado,
+      fisico,
+      diferencia,
+      tarjeta,
+      transferencia,
+      retiros,
+    };
+
+    Swal.fire({
+      title: "¿Imprimir Corte Z?",
+      text: "Se guardará el registro del turno y se imprimirá el ticket.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545",
+      confirmButtonText: '<i class="fa-solid fa-lock"></i> Sí, Cerrar Caja',
+      cancelButtonText: "Revisar de nuevo",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        btnCerrar.disabled = true;
+        btnCerrar.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+        fetch("../php/funciones/procesar_corte_caja.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(datosCorte),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire({
+                icon: "success",
+                title: "¡Turno Cerrado!",
+                text: "El corte ha sido registrado exitosamente.",
+                timer: 2000,
+                showConfirmButton: false,
+              }).then(() => {
+                // Abrimos el ticket en otra pestaña
+                window.open(
+                  "../php/cruds/imprimir_ticket_corte.php?id=" + data.id_corte,
+                  "_blank",
+                );
+
+                // Reseteamos la pantalla
+                btnCerrar.innerHTML =
+                  '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
+                inputFisico.value = "";
+                inicializarCorteCaja();
+              });
+            } else {
+              Swal.fire("Error", data.message, "error");
+              btnCerrar.disabled = false;
+              btnCerrar.innerHTML =
+                '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
+            }
+          });
+      }
+    });
+  };
+}
 
 // Llamar informes *****************************************************************
 document

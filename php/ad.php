@@ -12,7 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $roles_permitidos = ["superusuario"];
 include "verificar_sesion.php";
 
-/*
+
 //Verificar si hay una sesión activa y si el rol está permitido
 if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos)) {
     header("Location: ../index.php?error=acceso_denegado");
@@ -37,7 +37,7 @@ if (isset($_SESSION['last_token'])) {
 
 // Actualizar el último token utilizado
 $_SESSION['last_token'] = $current_token;
-*/
+
 ?>
 
 <!DOCTYPE html>
@@ -201,11 +201,25 @@ $_SESSION['last_token'] = $current_token;
             </li>
 
             <!--Ventas-->
-            <li>
-                <a href="#" id="ventas-link" class="nav-link">
-                    <i class="fa-solid fa-cash-register"></i>
-                    <span class="titles_btns disabled-link">VENTAS</span>
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-wrench"></i>
+                    <span class="titles_btns">VENTAS</span>
                 </a>
+                <ul>
+                    <li>
+                        <a href="#" id="ventas-link" class="nav-link">
+                            <i class="fa-solid fa-cash-register"></i>
+                            <span class="titles_btns">Punto de venta</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="corte-link" class="nav-link">
+                            <i class="fa-solid fa-calculator"></i>
+                            <span class="titles_btns">Corte de caja</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
             <!--Cotizaciones-->
@@ -321,7 +335,7 @@ $_SESSION['last_token'] = $current_token;
         </div>
     </div>
 
-    <!--Scripts JS-->
+    <!--Scripts JS ******************************************-->
 
     <!--Libreria para las graficas JS-->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

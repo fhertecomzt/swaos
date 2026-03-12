@@ -35,9 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$id_estado_servicio, $diagnostico, $costo_servicio, $anticipo_total, $saldo_servicio, $id_orden]);
 
         //ACTUALIZAR REFACCIONES Y STOCK
-        $id_taller = $_SESSION['id_taller'] ?? 1;
+        $id_taller = $_SESSION['taller_id'] ?? 1;
 
-        // 1. Devolver al inventario las piezas que tenía antes esta orden (para evitar descuadres)
+        // Devolver al inventario las piezas que tenía antes esta orden (para evitar descuadres)
         $stmtViejas = $dbh->prepare("SELECT id_prod, cantidad FROM orden_refacciones WHERE id_orden = :id_orden");
         $stmtViejas->execute([':id_orden' => $id_orden]);
         $piezasViejas = $stmtViejas->fetchAll(PDO::FETCH_ASSOC);
@@ -51,10 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ]);
         }
 
-        // 2. Limpiar la tabla intermedia de esta orden para reconstruirla
+        // Limpiar la tabla intermedia de esta orden para reconstruirla
         $dbh->prepare("DELETE FROM orden_refacciones WHERE id_orden = :id_orden")->execute([':id_orden' => $id_orden]);
 
-        // 3. Insertar las nuevas piezas y descontar el stock actualizado
+        // Insertar las nuevas piezas y descontar el stock actualizado
         if (isset($_POST['refacciones_id']) && is_array($_POST['refacciones_id'])) {
             for ($i = 0; $i < count($_POST['refacciones_id']); $i++) {
                 $id_p = $_POST['refacciones_id'][$i];
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        // 2. Si hay dinero de por medio, registramos el abono para el corte de caja
+        // Si hay dinero de por medio, registramos el abono para el corte de caja
         // REGISTRO DE PAGO (NUEVO ABONO)
         if ($nuevo_abono > 0) {
             $id_usuario = $_SESSION['idusuario'] ?? 1;
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmtAbono = $dbh->prepare($sqlAbono);
             $stmtAbono->execute([$id_orden, $nuevo_abono, $id_usuario, $metodo_pago]);
 
-            // --- NUEVO: REGISTRO EN LA CAJA GENERAL (ventas) ---
+            // REGISTRO EN LA CAJA GENERAL (ventas)
             // Decidimos el tipo de movimiento: Si el saldo quedó en $0 o menos, es liquidación.
             $tipo_movimiento = ($saldo_servicio <= 0) ? 'Liquidacion Orden' : 'Abono Orden';
 

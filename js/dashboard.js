@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
         }
 
-        // 1. ACTUALIZAR LAS TARJETAS (Con IDs blindados)
+        // ACTUALIZAR LAS TARJETAS (Con IDs blindados)
         let elPendientes = document.getElementById("dash-pendientes");
         let elListas = document.getElementById("dash-listas");
         let elProductos = document.getElementById("dash-productos");
@@ -41,8 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
           elVentas.textContent = ventasFormateadas;
         }
 
-        // 2. DIBUJAR LA GRÁFICA DE DONA
-
+        // DIBUJAR LA GRÁFICA DE DONA
         let canvasElement = document.getElementById("miGraficaEquipos");
         if (canvasElement && data.grafica) {
           let etiquetas = data.grafica.map((item) => item.estado);
@@ -98,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         }
 
-        // 3. LLENAR LA TABLA DE ÚLTIMAS ÓRDENES
+        // LLENAR LA TABLA DE ÚLTIMAS ÓRDENES
         let tbody = document.getElementById("tabla-ultimas-ordenes");
         if (tbody && data.ultimas_ordenes) {
           tbody.innerHTML = ""; // Limpiamos la tabla
@@ -199,7 +198,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let linkId = elementoClickeado.getAttribute("data-menu-link");
         let menuLink = document.getElementById(linkId);
 
-        // --- TRUCO UX: Dejar nota secreta para abrir el modal ---
+        // UX: Dejar nota secreta para abrir el modal
         if (elementoClickeado.classList.contains("btn-nueva-orden")) {
           sessionStorage.setItem("autoAbrirModal", "btn-crear-orden");
         } else if (elementoClickeado.classList.contains("btn-nuevo-cliente")) {
