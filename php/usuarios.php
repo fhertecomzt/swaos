@@ -292,7 +292,7 @@ $usuarios = obtenerUsuarios($dbh);
                     </div>
 
                     <button type="submit">Actualizar</button>
-                    <span class="cancelarModal" onclick="cerrarModalRol('editar-modalUser')" type=" submit">Cancelar</span>
+                    <span class="cancelarModal" onclick="cerrarModalUser('editar-modalUser')" type=" submit">Cancelar</span>
                 </form>
             </div>
         </div>

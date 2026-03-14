@@ -1445,7 +1445,7 @@ function validarFormularioUser(event, tipo = "crear") {
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      returnFocus: false, // <-- ¡EL FIN DEL ERROR ARIA-HIDDEN!
+      returnFocus: false, 
       confirmButtonColor: "#3085d6",
       confirmButtonText: "Entendido",
     });
@@ -6379,7 +6379,7 @@ function imprimirTicket(idOrden) {
 }
 
 function verQrOrden(token) {
-  const urlRastreo = `http://localhost/swaos/track.php?t=${token}`;
+  const urlRastreo = `https://swaos.rf.gd/swaos/track.php?t=${token}`;
   const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(urlRastreo)}`;
 
   Swal.fire({

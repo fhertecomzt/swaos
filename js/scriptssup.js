@@ -20,69 +20,28 @@ if (document.getElementById("usuariossup-link")) {
     });
 }
 
-function abrirModalUser(id) {
+function abrirModalUserSup(id) {
   document.getElementById(id).style.display = "flex";
 }
-function cerrarModalUser(id) {
+function cerrarModalUserSup(id) {
   document.getElementById(id).style.display = "none";
 }
 
 // MOTOR DE REGLAS (Crear y Editar Super Usuario)
-function validarFormularioUser(event, tipo = "crear") {
+function validarFormularioUserSup(event, tipo = "crear") {
   event.preventDefault();
   const prefijo = tipo === "crear" ? "crear" : "editar";
 
   const reglasValidacion = [
-    {
-      id: `${prefijo}-usuario`,
-      tipo: "texto",
-      min: 3,
-      mensaje: "El usuario debe tener al menos 3 caracteres.",
-    },
-    {
-      id: `${prefijo}-nombre`,
-      tipo: "texto",
-      min: 3,
-      mensaje: "El nombre debe tener al menos 3 caracteres.",
-    },
-    {
-      id: `${prefijo}-papellido`,
-      tipo: "texto",
-      min: 3,
-      mensaje: "El primer apellido debe tener al menos 3 caracteres.",
-    },
-    {
-      id: `${prefijo}-sapellido`,
-      tipo: "texto",
-      min: 3,
-      mensaje: "El segundo apellido debe tener al menos 3 caracteres.",
-    },
-    {
-      id: `${prefijo}-email`,
-      tipo: "email",
-      mensaje: "Debes ingresar un correo electrónico válido.",
-    },
-    {
-      id: `${prefijo}-rol`,
-      tipo: "select",
-      mensaje: "Debes seleccionar un rol.",
-    },
-    {
-      id: `${prefijo}-tienda`,
-      tipo: "select",
-      mensaje: "Debes seleccionar un taller.",
-    },
-    {
-      id: `${prefijo}-password1`,
-      tipo: "password",
-      mensaje:
-        "La contraseña debe tener al menos 6 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.",
-    },
-    {
-      id: `${prefijo}-password2`,
-      tipo: "confirmacion",
-      mensaje: "Las contraseñas no coinciden.",
-    },
+    { id: `${prefijo}-usuario`, tipo: "texto", min: 3, mensaje: "El usuario debe tener al menos 3 caracteres." },
+    { id: `${prefijo}-nombre`, tipo: "texto", min: 3, mensaje: "El nombre debe tener al menos 3 caracteres." },
+    { id: `${prefijo}-papellido`, tipo: "texto", min: 3, mensaje: "El primer apellido debe tener al menos 3 caracteres." },
+    { id: `${prefijo}-sapellido`, tipo: "texto", min: 3, mensaje: "El segundo apellido debe tener al menos 3 caracteres." },
+    { id: `${prefijo}-email`, tipo: "email", mensaje: "Debes ingresar un correo electrónico válido." },
+    { id: `${prefijo}-rol`, tipo: "select", mensaje: "Debes seleccionar un rol." },
+    { id: `${prefijo}-tienda`, tipo: "select", mensaje: "Debes seleccionar un taller." },
+    { id: `${prefijo}-password1`, tipo: "password", mensaje: "La contraseña debe tener al menos 6 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial." },
+    { id: `${prefijo}-password2`, tipo: "confirmacion", mensaje: "Las contraseñas no coinciden." },
   ];
 
   const errores = [];
@@ -101,20 +60,13 @@ function validarFormularioUser(event, tipo = "crear") {
 
     if (regla.tipo === "texto" && valor.length < regla.min) esValido = false;
     else if (regla.tipo === "select" && valor === "") esValido = false;
-    else if (
-      regla.tipo === "email" &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor)
-    )
-      esValido = false;
+    else if (regla.tipo === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor)) esValido = false;
     else if (regla.tipo === "password") {
-      const regexPass =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+      const regexPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
       if (tipo === "crear" && valor === "") esValido = false;
       if (valor !== "" && !regexPass.test(valor)) esValido = false;
     } else if (regla.tipo === "confirmacion") {
-      const pass1 = document
-        .getElementById(`${prefijo}-password1`)
-        .value.trim();
+      const pass1 = document.getElementById(`${prefijo}-password1`).value.trim();
       if (tipo === "crear" && valor === "") esValido = false;
       if (valor !== pass1) esValido = false;
     }
@@ -140,18 +92,15 @@ function validarFormularioUser(event, tipo = "crear") {
     return;
   }
 
-  const usuarioInput = document
-    .getElementById(`${prefijo}-usuario`)
-    .value.trim();
-  const idInput =
-    tipo === "editar" ? document.getElementById("editar-idusuario").value : 0;
+  const usuarioInput = document.getElementById(`${prefijo}-usuario`).value.trim();
+  const idInput = tipo === "editar" ? document.getElementById("editar-idusuario").value : 0;
 
-  verificarDuplicadoUser(usuarioInput, idInput).then((esDuplicado) => {
-    if (!esDuplicado) procesarFormularioUser(event.target, tipo);
+  verificarDuplicadoUserSup(usuarioInput, idInput).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioUserSup(event.target, tipo);
   });
 }
 
-function verificarDuplicadoUser(usuario, id = 0) {
+function verificarDuplicadoUserSup(usuario, id = 0) {
   return fetch("cruds/verificar_nombre_usuario.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -174,25 +123,20 @@ function verificarDuplicadoUser(usuario, id = 0) {
     .catch(() => true);
 }
 
-function procesarFormularioUser(formulario, tipo) {
+function procesarFormularioUserSup(formulario, tipo) {
   const formData = new FormData(formulario);
-  const url =
-    tipo === "crear"
-      ? "cruds/procesar_crear_user_sup.php"
-      : "cruds/editar_user_sup.php";
+  const url = tipo === "crear" ? "cruds/procesar_crear_user_sup.php" : "cruds/editar_user_sup.php";
 
   fetch(url, { method: "POST", body: formData })
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        cerrarModalUser(`${tipo}-modalUserSup`);
+        cerrarModalUserSup(`${tipo}-modalUserSup`);
         if (tipo === "crear") formulario.reset();
 
         Swal.fire({
           title: "¡Éxito!",
-          text:
-            data.message ||
-            `Usuario ${tipo === "crear" ? "registrado" : "actualizado"}.`,
+          text: data.message || `SuperUsuario ${tipo === "crear" ? "registrado" : "actualizado"}.`,
           icon: "success",
           returnFocus: false,
           showConfirmButton: false,
@@ -203,26 +147,21 @@ function procesarFormularioUser(formulario, tipo) {
           }
         });
       } else {
-        Swal.fire(
-          "Atención",
-          data.message || "Ocurrió un problema.",
-          "warning",
-        );
+        Swal.fire("Atención", data.message || "Ocurrió un problema.", "warning");
       }
     })
     .catch((error) => {
-      console.error("Error en procesarFormularioUser:", error);
+      console.error("Error en procesarFormularioUserSup:", error);
       Swal.fire("Error", "Ocurrió un error inesperado.", "error");
     });
 }
-
 // OBTENER DATOS PARA EDITAR USUARIO Y EVENTOS SUBMIT
 document.addEventListener("DOMContentLoaded", function () {
   document.body.addEventListener("submit", function (event) {
     if (event.target && event.target.id === "form-crearUserSup") {
-      validarFormularioUser(event, "crear");
+      validarFormularioUserSup(event, "crear");
     } else if (event.target && event.target.id === "form-editarUserSup") {
-      validarFormularioUser(event, "editar");
+      validarFormularioUserSup(event, "editar");
     }
   });
 
@@ -254,7 +193,7 @@ document.addEventListener("DOMContentLoaded", function () {
               document.getElementById("editar-password1").value = "";
               document.getElementById("editar-password2").value = "";
 
-              abrirModalUser("editar-modalUserSup");
+              abrirModalUserSup("editar-modalUserSup");
             }
           } else {
             Swal.fire(

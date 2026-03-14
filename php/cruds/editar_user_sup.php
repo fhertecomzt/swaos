@@ -117,6 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                  nombre = :nombre,
                  p_appellido = :appaterno,
                  s_appellido = :apmaterno,
+                 email = :email,
                  id_rol = :idrol,
                  password = :password1,
                  taller_id = :sucursales_id,
@@ -131,6 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       ":nombre" => $nombre,
       ":appaterno" => $papellido,
       ":apmaterno" => $sapellido,
+      ":email" => $email,
       ":idrol" => $rol,
       ":password1" => $passwordHash,
       ":sucursales_id" => $tienda,
@@ -142,9 +144,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Verificamos si hubo una actualización
     if ($stmt->rowCount() > 0) {
       $response["success"] = true;
-      $response["message"] = "SuperUsuario actualizado correctamente.";
+      $response["message"] = "Actualizado correctamente.";
     } else {
-      $response["message"] = "No se realizaron cambios en el SuperUsuario.";
+      $response["message"] = "No se realizaron cambios.";
     }
   } catch (PDOException $e) {
     $response["message"] = "Error de base de datos: " . $e->getMessage();

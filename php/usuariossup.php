@@ -18,7 +18,7 @@ $usuarios = obtenerUsuariosSup($dbh);
 ?>
 
 <div class="containerr">
-  <button class="boton" onclick="abrirModalUser('crear-modalUserSup')">Nuevo</button>
+  <button class="boton" onclick="abrirModalUserSup('crear-modalUserSup')">Nuevo</button>
 
   <!-- Filtro de estatus -->
   <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
@@ -86,7 +86,7 @@ $usuarios = obtenerUsuariosSup($dbh);
     <!-- Modal para crear Usuario -->
     <div id="crear-modalUserSup" class="modal" style="display: none;">
       <div class="modal-contentUsuariosSup" style="height: 700px;">
-        <span title="Cerrar" class="close" onclick="cerrarModalUser('crear-modalUserSup')">&times;</span>
+        <span title="Cerrar" class="close" onclick="cerrarModalUserSup('crear-modalUserSup')">&times;</span>
         <h2 class="tittle">Crear SuperUsuario</h2>
         <form id="form-crearUserSup" enctype="multipart/form-data" novalidate>
 
@@ -182,7 +182,7 @@ $usuarios = obtenerUsuariosSup($dbh);
           </div>
 
           <button type="submit">Guardar</button>
-          <span class="cancelarModal" onclick="cerrarModal('crear-modalUserSup')" type=" submit">Cancelar</span>
+          <span class="cancelarModal" onclick="cerrarModalSup('crear-modalUserSup')" type=" submit">Cancelar</span>
 
         </form>
       </div>
@@ -191,7 +191,7 @@ $usuarios = obtenerUsuariosSup($dbh);
     <!-- Modal para editar Usuario editarUserSup  -->
     <div id="editar-modalUserSup" class="modal" style="display: none;">
       <div class="modal-contentUsuariosSup" style="height: 700px;">
-        <span title="Cerrar" class="close" onclick="cerrarModalUser('editar-modalUserSup')">&times;</span>
+        <span title="Cerrar" class="close" onclick="cerrarModalUserSup('editar-modalUserSup')">&times;</span>
         <h2 class="tittle">Editar SuperUsuario</h2>
 
         <form id="form-editarUserSup" novalidate>

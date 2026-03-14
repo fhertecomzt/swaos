@@ -40,7 +40,7 @@ include "funciones/activoinactivo.php";
                     </tr>
                     <tr>
                         <th>Taller:</th>
-                        <td><?php echo $_SESSION['email']; ?></td>
+                        <td><?php echo $_SESSION['nombre_t']; ?></td>
                     </tr>
                     <tr>
                         <th>Contraseña:</th>
