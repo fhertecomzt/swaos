@@ -220,9 +220,9 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
 
           <div class="form-group laquinta">
             <label for="crear-precio1">Precio:</label>
-            <input type="number" id="crear-precio1" name="precio1" autocomplete="off"
+            <input type="number" step="0.01" id="crear-precio1" name="precio1" autocomplete="off"
               pattern="^\d+(\.\d{1,2})?$"
-              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" disabled required>
+              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" readonly required>
           </div>
 
 
@@ -381,10 +381,10 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
 
         <div class="form-group laquinta">
           <label for="editar-precio1">Precio:</label>
-          <input type="text" id="editar-precio1" name="precio1" autocomplete="off"
+          <input type="number" step="0.01" id="editar-precio1" name="precio1" autocomplete="off"
             pattern="^\d+(\.\d{1,3})?$"
             title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')" min="0" maxlength="10" disabled required>
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')" min="0" maxlength="10" readonly required>
         </div>
       </div>
 
