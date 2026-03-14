@@ -8,18 +8,17 @@ try {
   $clientes = $dbh->query("SELECT COUNT(*) as total FROM clientes WHERE estatus = 0")->fetch(PDO::FETCH_ASSOC)['total'];
   $proveedores = $dbh->query("SELECT COUNT(*) as total FROM proveedores WHERE estatus = 0")->fetch(PDO::FETCH_ASSOC)['total'];
 
-  // VENTAS DEL TURNO ACTUAL: Sumamos solo el dinero del cajero activo que NO ha sido cerrado en un Corte Z
+  // VENTAS DEL TURNO ACTUAL: Cálculo estricto de Entradas menos Salidas
   $id_usuario_dashboard = $_SESSION['id_usuario'] ?? $_SESSION['idusuario'] ?? 1;
 
   $stmtVentas = $dbh->prepare("
-      SELECT SUM(
-          CASE 
-              WHEN tipo_movimiento LIKE 'Retiro:%' THEN -total 
-              ELSE total 
-          END
+      SELECT (
+          COALESCE(SUM(CASE WHEN tipo_movimiento LIKE '%Venta%' OR tipo_movimiento LIKE '%Abono%' OR tipo_movimiento LIKE '%Anticipo%' OR tipo_movimiento LIKE '%Ingreso%' THEN total ELSE 0 END), 0) 
+          - 
+          COALESCE(SUM(CASE WHEN tipo_movimiento LIKE '%Retiro%' OR tipo_movimiento LIKE '%Salida%' THEN total ELSE 0 END), 0)
       ) as ingresos_hoy 
       FROM ventas 
-      WHERE id_corte IS NULL AND id_usuario = ?
+      WHERE id_corte IS NULL AND id_usuario = ? AND LOWER(metodo_pago) IN ('efectivo', '1', '')
   ");
   $stmtVentas->execute([$id_usuario_dashboard]);
   $resultadoVentas = $stmtVentas->fetch(PDO::FETCH_ASSOC);

@@ -1,54 +1,71 @@
 <?php
 session_start();
-require '../conexion.php'; 
+require '../conexion.php';
 header('Content-Type: application/json');
 
-date_default_timezone_set('America/Mazatlan'); 
+date_default_timezone_set('America/Mazatlan');
 
 try {
-  // Identificamos quién es el cajero que está pidiendo el corte
   $id_usuario = $_SESSION['id_usuario'] ?? $_SESSION['idusuario'] ?? 1;
 
-  // Sumamos todas las ENTRADAS (Que tengan el candado abierto y sean de ESTE cajero)
-  $sqlIngresos = "SELECT metodo_pago, SUM(total) as suma 
+  // ENTRADAS: Todo lo que suma dinero a la caja (Ventas, Abonos, Ingresos de fondo)
+  $sqlIngresos = "SELECT LOWER(metodo_pago) as metodo, SUM(total) as suma 
                     FROM ventas 
                     WHERE id_corte IS NULL AND id_usuario = ? 
-                    AND tipo_movimiento NOT LIKE 'Retiro:%'
-                    GROUP BY metodo_pago";
+                    AND (tipo_movimiento LIKE '%Venta%' OR tipo_movimiento LIKE '%Abono%' OR tipo_movimiento LIKE '%Anticipo%' OR tipo_movimiento LIKE '%Ingreso%')
+                    GROUP BY LOWER(metodo_pago)";
   $stmt = $dbh->prepare($sqlIngresos);
   $stmt->execute([$id_usuario]);
   $ingresos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-  $total_efectivo = 0;
-  $total_tarjeta = 0;
-  $total_transferencia = 0;
+  $total_efectivo_in = 0;
+  $total_tarjeta_in = 0;
+  $total_transferencia_in = 0;
 
   foreach ($ingresos as $row) {
-    if ($row['metodo_pago'] === 'Efectivo') $total_efectivo += $row['suma'];
-    if ($row['metodo_pago'] === 'Tarjeta') $total_tarjeta += $row['suma'];
-    if ($row['metodo_pago'] === 'Transferencia') $total_transferencia += $row['suma'];
+    $metodo = trim($row['metodo']);
+    if ($metodo === 'efectivo' || $metodo === '1' || $metodo === '') $total_efectivo_in += floatval($row['suma']);
+    if ($metodo === 'tarjeta' || $metodo === '2') $total_tarjeta_in += floatval($row['suma']);
+    if ($metodo === 'transferencia' || $metodo === '3') $total_transferencia_in += floatval($row['suma']);
   }
 
-  // Sumamos las SALIDAS (Retiros de ESTE cajero con candado abierto)
-  $sqlRetiros = "SELECT SUM(total) as suma_retiros 
+  // SALIDAS: Todo lo que resta dinero (Devoluciones, Retiros, Cortes)
+  $sqlRetiros = "SELECT LOWER(metodo_pago) as metodo, SUM(total) as suma_retiros 
                    FROM ventas 
                    WHERE id_corte IS NULL AND id_usuario = ? 
-                   AND tipo_movimiento LIKE 'Retiro:%'";
+                   AND (tipo_movimiento LIKE '%Retiro%' OR tipo_movimiento LIKE '%Corte%' OR tipo_movimiento LIKE '%Salida%')
+                   GROUP BY LOWER(metodo_pago)";
   $stmtRetiros = $dbh->prepare($sqlRetiros);
   $stmtRetiros->execute([$id_usuario]);
-  $retiros = $stmtRetiros->fetch(PDO::FETCH_ASSOC);
+  $retiros = $stmtRetiros->fetchAll(PDO::FETCH_ASSOC);
 
-  $total_retiros = $retiros['suma_retiros'] ? floatval($retiros['suma_retiros']) : 0;
+  $total_efectivo_out = 0;
+  $total_tarjeta_out = 0;
+  $total_transferencia_out = 0;
+  $total_retiros_global = 0; // Para imprimir el total de salidas en el ticket
 
-  // Efectivo Neto
-  $efectivo_caja = $total_efectivo - $total_retiros;
+  foreach ($retiros as $row) {
+    $metodo = trim($row['metodo']);
+    $monto = floatval($row['suma_retiros']);
+    $total_retiros_global += $monto;
+
+    // Si devuelves a una Tarjeta, NO te descuenta billetes físicos del Efectivo
+    if ($metodo === 'efectivo' || $metodo === '1' || $metodo === '') $total_efectivo_out += $monto;
+    if ($metodo === 'tarjeta' || $metodo === '2') $total_tarjeta_out += $monto;
+    if ($metodo === 'transferencia' || $metodo === '3') $total_transferencia_out += $monto;
+  }
+
+  //  MATEMÁTICA PURA (NETO)
+  $efectivo_neto = $total_efectivo_in - $total_efectivo_out;
+  $tarjeta_neto = $total_tarjeta_in - $total_tarjeta_out;
+  $transferencia_neto = $total_transferencia_in - $total_transferencia_out;
 
   echo json_encode([
     'success' => true,
-    'efectivo' => $efectivo_caja,
-    'tarjeta' => $total_tarjeta,
-    'transferencia' => $total_transferencia,
-    'retiros' => $total_retiros,
+    'efectivo' => $efectivo_neto,
+    'tarjeta' => $tarjeta_neto,
+    'transferencia' => $transferencia_neto,
+    'retiros' => $total_retiros_global,
     'fecha' => date('d/m/Y H:i')
   ]);
 } catch (Exception $e) {

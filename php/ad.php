@@ -18,7 +18,7 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos)) 
     header("Location: ../index.php?error=acceso_denegado");
     exit;
 }
-
+/*
 // Generar un token único en cada acceso
 $current_token = bin2hex(random_bytes(32));
 $_SESSION['current_token'] = $current_token;
@@ -37,7 +37,7 @@ if (isset($_SESSION['last_token'])) {
 
 // Actualizar el último token utilizado
 $_SESSION['last_token'] = $current_token;
-
+*/
 ?>
 
 <!DOCTYPE html>
@@ -217,6 +217,12 @@ $_SESSION['last_token'] = $current_token;
                         <a href="#" id="corte-link" class="nav-link">
                             <i class="fa-solid fa-calculator"></i>
                             <span class="titles_btns">Corte de caja</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="historialventas-link" class="nav-link">
+                            <i class="fa-solid fa-book"></i>
+                            <span class="titles_btns">Historial ventas</span>
                         </a>
                     </li>
                 </ul>

@@ -37,7 +37,7 @@ try {
   $id_venta = $dbh->lastInsertId();
 
   // Preparamos las herramientas para guardar el detalle y descontar el stock
-  $sqlDetalle = "INSERT INTO detalle_ventas (id_venta, concepto, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
+  $sqlDetalle = "INSERT INTO detalle_ventas (id_venta, id_producto, concepto, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?, ?)";
   $stmtDetalle = $dbh->prepare($sqlDetalle);
 
   $sqlInventario = "UPDATE inventario_sucursal SET stock = stock - ? WHERE id_prod = ? AND idtaller = ?";
@@ -47,8 +47,8 @@ try {
   foreach ($carrito as $item) {
     $subtotal = $item['cantidad'] * $item['precio'];
 
-    // Guardamos el renglón en el ticket (detalle_ventas)
-    $stmtDetalle->execute([$id_venta, $item['nombre'], $item['cantidad'], $item['precio'], $subtotal]);
+    // pasamos $item['id_prod'] en la segunda posición (justo después del $id_venta)
+    $stmtDetalle->execute([$id_venta, $item['id_prod'], $item['nombre'], $item['cantidad'], $item['precio'], $subtotal]);
 
     // Descontamos las piezas exactas del inventario físico
     $stmtInventario->execute([$item['cantidad'], $item['id_prod'], $id_taller]);

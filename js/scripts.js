@@ -6970,8 +6970,13 @@ function agregarAlCarrito(producto) {
     if (item.cantidad < stockReal) {
       item.cantidad++;
     } else {
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({ icon: "warning", title: "Stock insuficiente", text: "No hay más unidades.", timer: 1500 });
+      if (typeof Swal !== "undefined") {
+        Swal.fire({
+          icon: "warning",
+          title: "Stock insuficiente",
+          text: "No hay más unidades.",
+          timer: 1500,
+        });
       } else {
         alert("Stock insuficiente: No hay más unidades disponibles.");
       }
@@ -7005,31 +7010,36 @@ window.modificarCantidad = function (id_prod, delta) {
 };
 
 // CAJA DE TEXTO: Función "Dictadora"
-window.fijarCantidad = function(id_prod, cantidadStr) {
-    let item = carritoPOS.find(i => i.id_prod === id_prod);
-    if (!item) return;
+window.fijarCantidad = function (id_prod, cantidadStr) {
+  let item = carritoPOS.find((i) => i.id_prod === id_prod);
+  if (!item) return;
 
-    let nuevaC = parseInt(cantidadStr);
-    
-    // Si borran el número o ponen letras, lo regresamos a 1
-    if (isNaN(nuevaC) || nuevaC <= 0) {
-        item.cantidad = 1;
-    } 
-    // Si piden más del stock, los topamos al máximo
-    else if (nuevaC > item.stock_max) {
-        item.cantidad = item.stock_max; // Número puro
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({icon: 'warning', title: 'Stock límite', text: `Solo tenemos ${item.stock_max} disponibles.`, timer: 1500});
-        } else {
-            alert(`Stock límite: Solo tenemos ${item.stock_max} disponibles.`);
-        }
-    } 
-    // Si todo está bien, le asignamos el número exacto
-    else {
-        item.cantidad = nuevaC;
+  let nuevaC = parseInt(cantidadStr);
+
+  // Si borran el número o ponen letras, lo regresamos a 1
+  if (isNaN(nuevaC) || nuevaC <= 0) {
+    item.cantidad = 1;
+  }
+  // Si piden más del stock, los topamos al máximo
+  else if (nuevaC > item.stock_max) {
+    item.cantidad = item.stock_max; // Número puro
+    if (typeof Swal !== "undefined") {
+      Swal.fire({
+        icon: "warning",
+        title: "Stock límite",
+        text: `Solo tenemos ${item.stock_max} disponibles.`,
+        timer: 1500,
+      });
+    } else {
+      alert(`Stock límite: Solo tenemos ${item.stock_max} disponibles.`);
     }
-    
-    actualizarCarritoUI();
+  }
+  // Si todo está bien, le asignamos el número exacto
+  else {
+    item.cantidad = nuevaC;
+  }
+
+  actualizarCarritoUI();
 };
 
 // Dibujar la tabla del carrito y calcular el gran total (VERSIÓN BLINDADA)
@@ -7088,20 +7098,26 @@ function actualizarCarritoUI() {
       modificarCantidad(item.id_prod, -item.cantidad);
     });
 
-         //  Si el usuario escribe el número a mano
-        // Usamos 'change' para cuando el usuario da Enter o clic afuera
-        tr.querySelector('.pos-cantidad-manual').addEventListener('change', function() {
-            fijarCantidad(item.id_prod, this.value);
-        });
-        
-        // Usamos 'keyup' para evitar que se quede pasmado si escriben y borran rápido
-        tr.querySelector('.pos-cantidad-manual').addEventListener('keyup', function(e) {
-            if(e.key === 'Enter') {
-                fijarCantidad(item.id_prod, this.value);
-            }
-        });
+    //  Si el usuario escribe el número a mano
+    // Usamos 'change' para cuando el usuario da Enter o clic afuera
+    tr.querySelector(".pos-cantidad-manual").addEventListener(
+      "change",
+      function () {
+        fijarCantidad(item.id_prod, this.value);
+      },
+    );
 
-        tbody.appendChild(tr);
+    // Usamos 'keyup' para evitar que se quede pasmado si escriben y borran rápido
+    tr.querySelector(".pos-cantidad-manual").addEventListener(
+      "keyup",
+      function (e) {
+        if (e.key === "Enter") {
+          fijarCantidad(item.id_prod, this.value);
+        }
+      },
+    );
+
+    tbody.appendChild(tr);
   });
 
   totalArticulosSpan.textContent = totalArticulos;
@@ -7118,7 +7134,7 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        inicializarCorteCaja()
+        inicializarCorteCaja();
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -7127,33 +7143,39 @@ document
 
 // MÓDULO: CORTE DE CAJA (REPORTE Z)
 function inicializarCorteCaja() {
-    // Traer los totales del día
-    fetch('../php/funciones/api_corte_caja.php')
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            // Llenamos las tarjetas visuales
-            document.getElementById('corte-fecha-actual').textContent = data.fecha;
-            document.getElementById('corte-total-efectivo').textContent = `$${data.efectivo.toFixed(2)}`;
-            document.getElementById('corte-total-tarjeta').textContent = `$${data.tarjeta.toFixed(2)}`;
-            document.getElementById('corte-total-transferencia').textContent = `$${data.transferencia.toFixed(2)}`;
-            
-            // Guardamos el efectivo esperado escondido en la memoria para usarlo luego
-            window.efectivoEsperadoSistema = data.efectivo;
-            // Guardamos los retiros para el ticket
-            window.retirosCorte = data.retiros; 
-            
-            // Si el cajero ya hizo ventas, habilitamos la caja para contar
-            if (data.efectivo > 0 || data.tarjeta > 0 || data.transferencia > 0) {
-                activarCuadreFisico();
-            } else {
-                document.getElementById('corte-mensaje-resultado').style.display = 'block';
-                document.getElementById('corte-mensaje-resultado').textContent = "No hay ventas registradas el día de hoy.";
-                document.getElementById('corte-mensaje-resultado').className = "resultado-cuadre cuadre-sobra";
-            }
+  // Traer los totales del día
+  fetch("../php/funciones/api_corte_caja.php")
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        // Llenamos las tarjetas visuales
+        document.getElementById("corte-fecha-actual").textContent = data.fecha;
+        document.getElementById("corte-total-efectivo").textContent =
+          `$${data.efectivo.toFixed(2)}`;
+        document.getElementById("corte-total-tarjeta").textContent =
+          `$${data.tarjeta.toFixed(2)}`;
+        document.getElementById("corte-total-transferencia").textContent =
+          `$${data.transferencia.toFixed(2)}`;
+
+        // Guardamos el efectivo esperado escondido en la memoria para usarlo luego
+        window.efectivoEsperadoSistema = data.efectivo;
+        // Guardamos los retiros para el ticket
+        window.retirosCorte = data.retiros;
+
+        // Si el cajero ya hizo ventas, habilitamos la caja para contar
+        if (data.efectivo > 0 || data.tarjeta > 0 || data.transferencia > 0) {
+          activarCuadreFisico();
+        } else {
+          document.getElementById("corte-mensaje-resultado").style.display =
+            "block";
+          document.getElementById("corte-mensaje-resultado").textContent =
+            "No hay ventas registradas el día de hoy.";
+          document.getElementById("corte-mensaje-resultado").className =
+            "resultado-cuadre cuadre-sobra";
         }
+      }
     })
-    .catch(err => console.error("Error al cargar corte:", err));
+    .catch((err) => console.error("Error al cargar corte:", err));
 }
 
 // Lógica del Cajero contando los billetes
@@ -7191,7 +7213,7 @@ function activarCuadreFisico() {
       btnCerrar.disabled = false;
     }
   });
-  //  EVENTO DEL BOTÓN CERRAR TURNO 
+  //  EVENTO DEL BOTÓN CERRAR TURNO
   btnCerrar.onclick = function () {
     let fisico = parseFloat(inputFisico.value);
     let esperado = window.efectivoEsperadoSistema;
@@ -7270,6 +7292,363 @@ function activarCuadreFisico() {
       }
     });
   };
+}
+
+// Llamar Historial de ventas *****************************************************************
+document
+  .getElementById("historialventas-link")
+  .addEventListener("click", function (event) {
+    event.preventDefault();
+    fetch("../php/operaciones/historial_ventas.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+
+        //  Forzamos las cajitas de fecha al día local exacto
+        let hoyLocal = new Date().toLocaleDateString("en-CA"); // Formato YYYY-MM-DD
+        document.getElementById("filtro-fecha-inicio").value = hoyLocal;
+        document.getElementById("filtro-fecha-fin").value = hoyLocal;
+
+        // AQUÍ VA EL EVENTO (Detecta el Enter o la "X" nativa del buscador)
+        document
+          .getElementById("filtro-texto")
+          .addEventListener("search", function () {
+            cargarHistorial();
+          });
+
+        cargarHistorial();
+      })
+      .catch((error) => console.error("Error al cargar el contenido:", error));
+  });
+
+// FUNCIONES DEL HISTORIAL DE VENTAS
+function cargarHistorial() {
+  let fechaInicio = document.getElementById("filtro-fecha-inicio").value;
+  let fechaFin = document.getElementById("filtro-fecha-fin").value;
+  let texto = document.getElementById("filtro-texto").value;
+
+  //  CODIFICAMOS EL TEXTO: Para que espacios ("Público en General") no rompan la URL
+  let url = `../php/funciones/api_historial_ventas.php?inicio=${fechaInicio}&fin=${fechaFin}&buscar=${encodeURIComponent(texto)}`;
+
+  fetch(url)
+    .then((res) => res.json())
+    .then((data) => {
+      let tbody = document.getElementById("tabla-historial");
+      if (!tbody) return;
+
+      // DESTRUIMOS DATATABLES ANTES DE TOCAR EL HTML
+      if ($.fn.DataTable.isDataTable("#tabla-historial-ventas")) {
+        $("#tabla-historial-ventas").DataTable().destroy();
+      }
+
+      //  SI HAY ERROR SQL LO MOSTRAMOS
+      if (data.error) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red; font-weight: bold;">🚨 ${data.error}</td></tr>`;
+        return;
+      }
+
+      // LIMPIAMOS LA TABLA
+      tbody.innerHTML = "";
+
+      //  SI HAY DATOS, DIBUJAMOS LAS FILAS (Si no, DataTables pondrá su propio mensaje)
+      if (data.length > 0) {
+        data.forEach((venta) => {
+          let badgeClass = "est-listo";
+          let estatusTexto = venta.estatus || "Completada";
+
+          if (estatusTexto === "Cancelada") badgeClass = "est-cancelado";
+          if (estatusTexto === "Devolución Parcial")
+            badgeClass = "est-revisión";
+
+          let disableBotones =
+            estatusTexto === "Cancelada"
+              ? 'disabled style="opacity: 0.5; cursor: not-allowed;"'
+              : "";
+
+          let fila = `
+                    <tr>
+                        <td><strong>#${venta.id_venta}</strong></td>
+                        <td>${venta.fecha_venta}</td>
+                        <td>${venta.nombre_cliente}</td>
+                        <td><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
+                        <td><span class="badge-estado ${badgeClass}">${estatusTexto}</span></td>
+                        <td style="text-align: center;" class="tbl">
+                            <button class="editar" title="Reimprimir Ticket" onclick="reimprimirVenta(${venta.id_venta})">
+                                <i class="fa-solid fa-print" style="font-size: 16px;"></i>
+                            </button>
+                            <button class="editar" title="Devolución Parcial" onclick="abrirDevolucion(${venta.id_venta})" ${disableBotones} style="color: #f39c12;">
+                                <i class="fa-solid fa-boxes-packing" style="font-size: 16px;"></i>
+                            </button>
+                            <button class="eliminar" title="Cancelar Venta Completa" onclick="cancelarVentaTotal(${venta.id_venta})" ${disableBotones}>
+                                <i class="fa-solid fa-ban" style="font-size: 16px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+          tbody.innerHTML += fila;
+        });
+      }
+
+      // VOLVEMOS A ENCENDER DATATABLES
+      let cantidadRegistros = parseInt(
+        document.getElementById("cantidad-registros").value,
+      );
+
+      let miTabla = $("#tabla-historial-ventas").DataTable({
+        language: {
+          decimal: "",
+          emptyTable: "No se encontraron ventas con esos filtros.",
+          info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty: "Mostrando 0 a 0 de 0 registros",
+          infoFiltered: "(filtrado de _MAX_ registros en total)",
+          infoPostFix: "",
+          thousands: ",",
+          lengthMenu: "Mostrar _MENU_ registros",
+          loadingRecords: "Cargando...",
+          processing: "Procesando...",
+          search: "Buscar:",
+          zeroRecords: "No se encontraron resultados",
+          paginate: {
+            first: "Primero",
+            last: "Último",
+            next: "Siguiente",
+            previous: "Anterior",
+          },
+        },
+        pageLength: cantidadRegistros === -1 ? 10000 : cantidadRegistros, // -1 es Todos
+        order: [],
+        info: true,
+        lengthChange: false,
+        searching: false,
+        scrollY: "50vh",
+        scrollCollapse: true,
+        scrollX: true,
+      });
+
+      // Activamos la reacción inmediata del select "Mostrar: X"
+      $("#cantidad-registros")
+        .off("change")
+        .on("change", function () {
+          let val = parseInt($(this).val());
+          miTabla.page.len(val === -1 ? 10000 : val).draw();
+        });
+    })
+    .catch((err) => {
+      console.error("Error al cargar historial:", err);
+    });
+}
+
+function reimprimirVenta(idVenta) {
+  window.open("../php/cruds/imprimir_ticket_pos.php?id=" + idVenta, "_blank");
+}
+
+function abrirDevolucion(idVenta) {
+  // Vamos a buscar qué compró el cliente en ese folio
+  fetch("../php/operaciones/api_detalle_ticket.php?id=" + idVenta)
+    .then((res) => res.json())
+    .then((detalles) => {
+      // Si solo fueron servicios o abonos, le avisamos que no hay nada físico que devolver
+      if (detalles.length === 0) {
+        Swal.fire(
+          "Atención",
+          "Este ticket no tiene productos físicos o ya fue devuelto por completo.",
+          "info",
+        );
+        return;
+      }
+
+      // Construimos una tabla HTML para meterla en el SweetAlert
+      let html =
+        '<table class="table table-bordered table-striped" style="font-size: 14px; text-align: left;">';
+      html +=
+        '<thead class="thead-dark"><tr><th>Producto</th><th style="text-align:center;">Compró</th><th style="text-align:center;">Devolver</th></tr></thead><tbody>';
+
+      detalles.forEach((item) => {
+        html += `<tr>
+                <td style="vertical-align: middle;">${item.concepto}</td>
+                <td style="text-align:center; vertical-align: middle;"><strong>${item.cantidad}</strong></td>
+                <td style="text-align:center; width: 120px;">
+                    <input type="number" class="form-control input-devolucion" 
+                           data-iddetalle="${item.id_detalle}" 
+                           data-idproducto="${item.id_producto}" 
+                           data-precio="${item.precio_unitario}" 
+                           min="0" max="${item.cantidad}" value="0" style="text-align: center;">
+                </td>
+            </tr>`;
+      });
+      html += "</tbody></table>";
+
+      // Lanzamos el SweetAlert con la tabla adentro
+      Swal.fire({
+        title: `<i class="fa-solid fa-boxes-packing" style="color: #f39c12;"></i> Devolución - Folio #${idVenta}`,
+        html: html,
+        width: "600px", // Lo hacemos más ancho para que quepa la tabla
+        showCancelButton: true,
+        confirmButtonColor: "#f39c12",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Procesar Devolución",
+        cancelButtonText: "Cancelar",
+        preConfirm: () => {
+          // 4. Cuando el usuario le da a "Procesar", recolectamos cuántos quiso devolver
+          let devoluciones = [];
+          document.querySelectorAll(".input-devolucion").forEach((input) => {
+            let cantDevolver = parseInt(input.value);
+            if (cantDevolver > 0) {
+              devoluciones.push({
+                id_detalle: input.dataset.iddetalle,
+                id_producto: input.dataset.idproducto,
+                precio: parseFloat(input.dataset.precio),
+                cantidad_devolver: cantDevolver,
+              });
+            }
+          });
+
+          if (devoluciones.length === 0) {
+            Swal.showValidationMessage(
+              "Debes seleccionar al menos 1 pieza para devolver.",
+            );
+          }
+          return devoluciones;
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Preparamos el paquete de datos en formato JSON
+          let payload = {
+            id_venta: idVenta,
+            devoluciones: result.value,
+          };
+
+          // Hacemos la llamada al servidor
+          fetch("../php/operaciones/procesar_devolucion_parcial.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                // 🚀 ¡Éxito! Mostramos mensaje y recargamos la tabla
+                Swal.fire("¡Procesado!", data.mensaje, "success");
+                cargarHistorial();
+              } else {
+                Swal.fire("Atención", data.mensaje, "error");
+              }
+            })
+            .catch((err) => {
+              console.error("Error al procesar devolución:", err);
+              Swal.fire(
+                "Error",
+                "No se pudo conectar con el servidor",
+                "error",
+              );
+            });
+        }
+      });
+    })
+    .catch((err) => console.error("Error al cargar detalles:", err));
+}
+
+function cancelarVentaTotal(idVenta) {
+  Swal.fire({
+    title: `¿Anular el ticket #${idVenta}?`,
+    text: "El estatus cambiará a Cancelado y TODAS las piezas regresarán a tu inventario. Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: '<i class="fa-solid fa-ban"></i> Sí, anular venta',
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Preparamos el paquete de datos para PHP
+      let formData = new FormData();
+      formData.append("id_venta", idVenta);
+
+      // Se lo mandamos a nuestro nuevo archivo PHP
+      fetch("../php/operaciones/cancelar_venta_total.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            // Si todo salió bien, mostramos palomita verde
+            Swal.fire("¡Anulada!", data.mensaje, "success");
+            // ¡Y recargamos la tabla para que el semáforo se ponga ROJO!
+            cargarHistorial();
+          } else {
+            // Si PHP nos mandó un error, lo mostramos (ej. tabla incorrecta)
+            Swal.fire("Atención", data.mensaje, "error");
+          }
+        })
+        .catch((err) => {
+          console.error("Error al cancelar:", err);
+          Swal.fire(
+            "Error de red",
+            "No se pudo conectar con el servidor.",
+            "error",
+          );
+        });
+    }
+  });
+}
+
+// FUNCIÓN PARA INGRESAR EFECTIVO A LA CAJA
+function ingresarEfectivo() {
+    Swal.fire({
+        title: '<i class="fa-solid fa-money-bill-trend-up" style="color:#28a745;"></i> Ingresar Efectivo',
+        html: `
+            <div style="text-align: left;">
+                <label style="font-weight: bold; font-size: 14px;">Monto a ingresar ($):</label>
+                <input type="number" id="monto-ingreso" class="swal2-input" placeholder="Ej. 500" style="margin-top: 5px;">
+                
+                <label style="font-weight: bold; font-size: 14px; margin-top: 15px; display: block;">Motivo / Concepto:</label>
+                <input type="text" id="concepto-ingreso" class="swal2-input" placeholder="Ej. Fondo de caja para devoluciones" style="margin-top: 5px;">
+            </div>
+        `,
+        confirmButtonColor: '#28a745',
+        confirmButtonText: 'Registrar Ingreso',
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            const monto = Swal.getPopup().querySelector('#monto-ingreso').value;
+            const concepto = Swal.getPopup().querySelector('#concepto-ingreso').value;
+            if (!monto || monto <= 0) {
+                Swal.showValidationMessage(`Por favor, ingresa un monto válido.`);
+            }
+            if (!concepto) {
+                Swal.showValidationMessage(`Por favor, escribe el motivo del ingreso.`);
+            }
+            return { monto: monto, concepto: concepto }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let formData = new FormData();
+            formData.append('monto', result.value.monto);
+            formData.append('concepto', result.value.concepto);
+
+            fetch('../php/operaciones/ingresar_efectivo.php', { 
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('¡Ingreso Exitoso!', 'El dinero ya está disponible en tu caja.', 'success');
+                    
+                    // Si tienes una función que recarga la pantalla de corte de caja, puedes llamarla aquí
+                    // ej: cargarPantallaCorte(); 
+                    
+                } else {
+                    Swal.fire('Error', data.mensaje, 'error');
+                }
+            })
+            .catch(err => {
+                console.error("Error al ingresar efectivo:", err);
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            });
+        }
+    });
 }
 
 // Llamar informes *****************************************************************

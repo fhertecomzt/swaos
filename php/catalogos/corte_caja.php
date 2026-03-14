@@ -147,6 +147,12 @@
     <div>
       <h2 style="margin: 0; color: #333;"><i class="fa-solid fa-cash-register"></i> Corte de Caja (Reporte Z)</h2>
       <p style="margin: 5px 0 0 0; color: #888;">Resumen de ingresos del turno actual</p>
+
+    </div>
+    <div style="margin-bottom: 20px; text-align: right;">
+      <button type="button" class="btn btn-success" onclick="ingresarEfectivo()" style="background-color: #28a745; border-color: #28a745; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <i class="fa-solid fa-money-bill-trend-up"></i> Ingresar Efectivo
+      </button>
     </div>
     <div style="text-align: right;">
       <strong style="font-size: 18px; color: #007bff;" id="corte-fecha-actual">Cargando fecha...</strong>

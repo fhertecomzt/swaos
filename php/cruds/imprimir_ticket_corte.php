@@ -13,8 +13,22 @@ try {
 
   if (!$corte) die("Corte no encontrado.");
 
-  // Cálculo Total Ingresos (sin contar el efectivo físico, solo lo esperado por sistema)
-  $totalIngresos = $corte['efectivo_esperado'] + $corte['total_tarjeta'] + $corte['total_transferencia'] + $corte['total_retiros'];
+  // Separamos el Efectivo de Ventas del Efectivo inyectado (Fondo de Caja)
+  $stmtEfectivo = $dbh->prepare("
+      SELECT 
+          SUM(CASE WHEN tipo_movimiento LIKE '%Ingreso%' THEN total ELSE 0 END) as fondo_caja,
+          SUM(CASE WHEN tipo_movimiento NOT LIKE '%Ingreso%' AND tipo_movimiento NOT LIKE 'Retiro:%' THEN total ELSE 0 END) as ventas_efectivo
+      FROM ventas 
+      WHERE id_corte = ? AND LOWER(metodo_pago) IN ('efectivo', '1', '')
+  ");
+  $stmtEfectivo->execute([$id_corte]);
+  $desgloseEfectivo = $stmtEfectivo->fetch(PDO::FETCH_ASSOC);
+
+  $efectivo_ventas = $desgloseEfectivo['ventas_efectivo'] ? floatval($desgloseEfectivo['ventas_efectivo']) : 0;
+  $efectivo_fondo = $desgloseEfectivo['fondo_caja'] ? floatval($desgloseEfectivo['fondo_caja']) : 0;
+
+  // Cálculo Total Ingresos SÓLO de lo que suma a la caja
+  $totalIngresos = $efectivo_ventas + $efectivo_fondo + $corte['total_tarjeta'] + $corte['total_transferencia'];
 
   //  DESGLOSE POR ORIGEN CON CANDADO
   $stmtDesglose = $dbh->prepare("
@@ -24,7 +38,6 @@ try {
         AND tipo_movimiento NOT LIKE 'Retiro:%' 
         GROUP BY tipo_movimiento
     ");
-  // Le pasamos directamente el ID del corte que estamos imprimiendo
   $stmtDesglose->execute([$id_corte]);
   $desgloseOrigen = $stmtDesglose->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
@@ -117,7 +130,8 @@ try {
     <div class="divisor"></div>
     <div class="centrado" style="font-weight: bold; margin-bottom: 5px;">INGRESOS DEL TURNO</div>
 
-    <div class="fila"><span>Efectivo (Ventas):</span> <span>$<?= number_format($corte['efectivo_esperado'] + $corte['total_retiros'], 2) ?></span></div>
+    <div class="fila"><span>Efectivo (Ventas):</span> <span>$<?= number_format($efectivo_ventas, 2) ?></span></div>
+    <div class="fila"><span>Fondo de Caja:</span> <span>$<?= number_format($efectivo_fondo, 2) ?></span></div>
     <div class="fila"><span>Tarjetas (TDD/TDC):</span> <span>$<?= number_format($corte['total_tarjeta'], 2) ?></span></div>
     <div class="fila"><span>Transferencias:</span> <span>$<?= number_format($corte['total_transferencia'], 2) ?></span></div>
 
@@ -133,9 +147,12 @@ try {
         <span>$<?= number_format($origen['suma'], 2) ?></span>
       </div>
     <?php endforeach; ?>
+
     <div class="divisor"></div>
     <div class="centrado" style="font-weight: bold; margin-bottom: 5px;">MOVIMIENTOS DE CAJA</div>
-    <div class="fila" style="color: #666;"><span>(-) Retiros/Gastos:</span> <span>-$<?= number_format($corte['total_retiros'], 2) ?></span></div>
+
+    <div class="fila" style="color: #666;"><span>(-) Retiros/Gastos:</span> <span>$<?= number_format($corte['total_retiros'], 2) ?></span></div>
+
     <div class="fila resaltado"><span>EFECTIVO ESPERADO:</span> <span>$<?= number_format($corte['efectivo_esperado'], 2) ?></span></div>
 
     <div class="cuadre-caja">
@@ -162,7 +179,7 @@ try {
 
   <script>
     window.onload = function() {
-      window.print();
+      // window.print(); // Descomenta esta línea en producción para que imprima automático
     }
   </script>
 
