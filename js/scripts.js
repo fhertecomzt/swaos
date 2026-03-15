@@ -6621,7 +6621,7 @@ function inicializarPOS() {
               icon: "info",
               title: "Su Cambio es:",
               html: `<h1 style="font-size: 40px; color: #007bff; margin: 0;">$${cambio.toFixed(2)}</h1>`,
-              confirmButtonText: "Aceptar e Imprimir",
+              confirmButtonText: "Continuar a Entrega de Ticket",
               allowOutsideClick: false,
             }).then(() => {
               // Mandamos total, metodo, PAGO REAL, CAMBIO, referencia vacía
@@ -6693,7 +6693,6 @@ function inicializarPOS() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datosVenta),
     })
-      // ... (El resto del fetch queda igualito, con el then(res => res.json()) y el Swal.fire)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -6707,14 +6706,32 @@ function inicializarPOS() {
           if (selectPago) selectPago.value = "Efectivo";
 
           localStorage.setItem("ultima_venta_pos", data.id_venta);
-          window.open(
-            "../php/cruds/imprimir_ticket_pos.php?id=" + data.id_venta,
-            "_blank",
+
+          //  llamamos al Modal
+          let nombreCliente = document.getElementById("pos-nombre-cliente")
+            ? document.getElementById("pos-nombre-cliente").value
+            : "";
+          if (!nombreCliente || nombreCliente === "") nombreCliente = "Cliente";
+
+          // Si PHP ya devuelve data.telefono lo usamos, si no, va vacío para pedirlo manual
+          let telefonoCliente = data.telefono || "";
+
+          // Llamamos a la ventana mágica
+          mostrarOpcionesTicket(
+            data.id_venta,
+            telefonoCliente,
+            nombreCliente,
+            totalVenta,
           );
         } else {
           Swal.fire("Error", data.message, "error");
           btnCobrar.disabled = false;
         }
+      })
+      .catch((error) => {
+        console.error("Error en el cobro:", error);
+        Swal.fire("Error", "Ocurrió un error en el servidor.", "error");
+        btnCobrar.disabled = false;
       });
   };
 
@@ -7648,6 +7665,131 @@ function ingresarEfectivo() {
                 Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             });
         }
+    });
+}
+
+// VENTANA DE OPCIONES DE TICKET (WHATSAPP, CORREO, IMPRIMIR)
+function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total) {
+    Swal.fire({
+        title: '¡Venta Exitosa!',
+        text: '¿Cómo deseas entregar el comprobante?',
+        icon: 'success',
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-brands fa-whatsapp"></i> WhatsApp',
+        confirmButtonColor: '#25D366', 
+        denyButtonText: '<i class="fa-solid fa-print"></i> Imprimir',
+        denyButtonColor: '#3085d6',    
+        cancelButtonText: '<i class="fa-solid fa-envelope"></i> Correo',
+        cancelButtonColor: '#dc3545',  
+        allowOutsideClick: false       
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Clic en WhatsApp
+            enviarTicketWhatsApp(telefonoCliente, nombreCliente, idTicket, total);
+        } else if (result.isDenied) {
+            // Clic en Imprimir
+            imprimirTicketFisico(idTicket);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // Clic en Correo 
+            enviarTicketCorreo(nombreCliente, idTicket);
+        }
+    });
+}
+
+// MOTOR DE ENVÍO POR WHATSAPP (Con captura manual)
+function enviarTicketWhatsApp(telefono, nombre, folio, total) {
+    if (!telefono || telefono.trim() === '' || telefono === '0') {
+        Swal.fire({
+            title: 'Número de WhatsApp',
+            html: '<p style="font-size:14px;">Ingresa el número a 10 dígitos del cliente:</p>',
+            input: 'number',
+            inputPlaceholder: 'Ej. 5512345678',
+            showCancelButton: true,
+            confirmButtonText: 'Enviar <i class="fa-brands fa-whatsapp"></i>',
+            confirmButtonColor: '#25D366',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                ejecutarWhatsApp(result.value, nombre, folio, total);
+            }
+        });
+    } else {
+        ejecutarWhatsApp(telefono, nombre, folio, total);
+    }
+}
+
+function ejecutarWhatsApp(telefono, nombre, folio, total) {
+    let linkTicket = new URL("../php/cruds/imprimir_ticket_pos.php?id=" + folio, window.location.href).href;
+
+    let mensaje = `Hola *${nombre}*, gracias por tu compra.\n\n`;
+    mensaje += ` *Folio:* #${folio}\n`;
+    mensaje += ` *Total:* $${parseFloat(total).toFixed(2)}\n\n`;
+    mensaje += `Puedes descargar tu comprobante digital en el siguiente enlace:\n${linkTicket}\n\n`;
+    mensaje += `¡Vuelve pronto! `;
+
+    let celLimpio = telefono.replace(/\D/g,'');
+    if(celLimpio.length === 10) celLimpio = "52" + celLimpio; 
+
+    let urlWhatsApp = `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`;
+    window.open(urlWhatsApp, '_blank');
+}
+
+function imprimirTicketFisico(folio) {
+    window.open(`../php/cruds/imprimir_ticket_pos.php?id=${folio}`, '_blank');
+}
+
+// MOTOR DE ENVÍO POR CORREO ELECTRÓNICO
+function enviarTicketCorreo(nombre, folio) {
+    Swal.fire({
+        title: 'Enviar por Correo',
+        html: '<p style="font-size:14px;">Ingresa el correo electrónico del cliente:</p>',
+        input: 'email',
+        inputPlaceholder: 'cliente@empresa.com',
+        showCancelButton: true,
+        confirmButtonText: 'Enviar Ticket <i class="fa-solid fa-paper-plane"></i>',
+        confirmButtonColor: '#dc3545',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            ejecutarEnvioCorreo(result.value, nombre, folio);
+        }
+    });
+}
+
+function ejecutarEnvioCorreo(email, nombre, folio) {
+    Swal.fire({
+        title: 'Enviando Correo...',
+        text: 'Conectando con el servidor postal',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    let linkTicket = new URL("../php/cruds/imprimir_ticket_pos.php?id=" + folio, window.location.href).href;
+
+    fetch("../php/cruds/enviar_ticket_correo.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+            email: email, 
+            nombre: nombre, 
+            folio: folio,
+            link: linkTicket
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire('¡Enviado!', 'El ticket ha sido enviado al correo del cliente.', 'success');
+        } else {
+            Swal.fire('Error', data.message || 'No se pudo enviar el correo.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error("Error al enviar correo:", error);
+        Swal.fire('Error', 'Hubo un problema de conexión con el servidor.', 'error');
     });
 }
 
