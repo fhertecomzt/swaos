@@ -229,11 +229,19 @@ $_SESSION['last_token'] = $current_token;
             </li>
 
             <!--Cotizaciones-->
-            <li>
-                <a href="#" id="ventas-link" class="nav-link">
-                    <i class="fa-solid fa-magnifying-glass-dollar"></i>
-                    <span class="titles_btns disabled-link">COTIZACIONES</span>
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-address-card"></i>
+                    <span class="titles_btns">COTIZACIONES</span>
                 </a>
+                <ul>
+                    <li>
+                        <a href="#" id="cotizaciones-link" class="nav-link">
+                            <i class="fa-solid fa-magnifying-glass-dollar"></i>
+                            <span class="titles_btns">Cotizaciones</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
             <!--Citas-->

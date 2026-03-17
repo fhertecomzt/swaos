@@ -1445,7 +1445,7 @@ function validarFormularioUser(event, tipo = "crear") {
       title: "Faltan datos",
       html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
       icon: "warning",
-      returnFocus: false, 
+      returnFocus: false,
       confirmButtonColor: "#3085d6",
       confirmButtonText: "Entendido",
     });
@@ -2872,6 +2872,7 @@ document
         console.error("Error al cargar el contenido:", error);
       });
   });
+
 function abrirModalMarca(id) {
   document.getElementById(id).style.display = "flex";
 }
@@ -5713,13 +5714,6 @@ function abrirModalOrden(id) {
 function cerrarModalOrden(id) {
   document.getElementById(id).style.display = "none";
 }
-function abrirModalClienteExpress() {
-  document.getElementById("modalClienteExpress").style.display = "block";
-  document.getElementById("form-cliente-express").reset();
-}
-function cerrarModalClienteExpress() {
-  document.getElementById("modalClienteExpress").style.display = "none";
-}
 
 function calcularSaldoOrden() {
   const costo = parseFloat(document.getElementById("crear-costo").value) || 0;
@@ -5808,7 +5802,7 @@ document.addEventListener("click", function (e) {
   }
 });
 
-// FUNCIÓN MATEMÁTICA PARA EL MODAL DE EDITAR (LIBERADA GLOBALMENTE)
+// FUNCIÓN MATEMÁTICA PARA EL MODAL DE EDITAR 
 function calcularSaldoEdit() {
   const costo = parseFloat(document.getElementById("edit-costo").value) || 0;
   const anticipoAcumulado =
@@ -5828,59 +5822,180 @@ function calcularSaldoEdit() {
   }
 }
 
+// ALTA EXPRÉS DE CLIENTES
+window.abrirModalClienteExpress = function () {
+  Swal.fire({
+    title: "Alta Exprés de Cliente 👤",
+    html: `
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">Captura los datos básicos para enviarle su comprobante.</p>
+            <input id="swal-cli-nombre" class="swal2-input" placeholder="Nombre(s) *" style="width: 85%;">
+            <input id="swal-cli-papellido" class="swal2-input" placeholder="Primer Apellido *" style="width: 85%;">
+            <input id="swal-cli-sapellido" class="swal2-input" placeholder="Segundo Apellido" style="width: 85%;">
+            
+            <input id="swal-cli-telefono" type="tel" class="swal2-input" placeholder="Teléfono a 10 dígitos *" style="width: 85%;" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
+            
+            <input id="swal-cli-correo" type="email" class="swal2-input" placeholder="Correo (Opcional)" style="width: 85%;">
+        `,
+    showCancelButton: true,
+    confirmButtonText:
+      '<i class="fa-solid fa-floppy-disk"></i> Guardar y Asignar',
+    confirmButtonColor: "#28a745",
+    cancelButtonText: "Cancelar",
+    preConfirm: () => {
+      // Obtenemos los valores
+      let nombre = document.getElementById("swal-cli-nombre").value.trim();
+      let papellido = document
+        .getElementById("swal-cli-papellido")
+        .value.trim();
+      let sapellido = document
+        .getElementById("swal-cli-sapellido")
+        .value.trim();
+      let telefono = document.getElementById("swal-cli-telefono").value.trim();
+      let correo = document.getElementById("swal-cli-correo").value.trim();
+
+      // EXPRESIÓN REGULAR: Solo letras, acentos, ñ y espacios
+      const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+
+      // VALIDACIONES ESTRICTAS DE NOMBRES
+      if (nombre.length < 3) {
+        Swal.showValidationMessage(
+          "El nombre debe tener al menos 3 caracteres.",
+        );
+        return false;
+      }
+      if (!regexLetras.test(nombre)) {
+        Swal.showValidationMessage("El nombre solo debe contener letras.");
+        return false;
+      }
+
+      if (papellido.length < 3) {
+        Swal.showValidationMessage(
+          "El primer apellido debe tener al menos 3 caracteres.",
+        );
+        return false;
+      }
+      if (!regexLetras.test(papellido)) {
+        Swal.showValidationMessage(
+          "El primer apellido solo debe contener letras.",
+        );
+        return false;
+      }
+
+      if (sapellido !== "") {
+        if (sapellido.length < 3) {
+          Swal.showValidationMessage(
+            "Si escribes segundo apellido, debe ser de 3 caracteres mínimo.",
+          );
+          return false;
+        }
+        if (!regexLetras.test(sapellido)) {
+          Swal.showValidationMessage(
+            "El segundo apellido solo debe contener letras.",
+          );
+          return false;
+        }
+      }
+
+      // Teléfono (ya está limitado a 10 por el HTML, pero aseguramos que escriban los 10)
+      if (telefono.length !== 10) {
+        Swal.showValidationMessage(
+          "El teléfono debe tener exactamente 10 números.",
+        );
+        return false;
+      }
+
+      // Correo
+      if (correo !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        Swal.showValidationMessage(
+          "Debes ingresar un formato de correo electrónico válido.",
+        );
+        return false;
+      }
+
+      return { nombre, papellido, sapellido, telefono, correo };
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: "Guardando...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      let formData = new FormData();
+      formData.append("nombre", result.value.nombre);
+      formData.append("papellido", result.value.papellido);
+      formData.append("sapellido", result.value.sapellido);
+      formData.append("telefono", result.value.telefono);
+      formData.append("email", result.value.correo);
+
+      fetch("cruds/guardar_cliente_express.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            // ÓRDENES DE SERVICIO
+            const inputBusqueda = document.getElementById("busqueda-cliente");
+            const inputHidden = document.getElementById(
+              "id_cliente_seleccionado",
+            );
+            const btnLimpiar = document.getElementById("limpiar-cliente");
+            const listaResultados = document.getElementById(
+              "lista-resultados-clientes",
+            );
+
+            if (inputBusqueda && inputHidden) {
+              inputBusqueda.value = `${data.nombre_completo} (${data.telefono})`;
+              inputBusqueda.disabled = true;
+              inputHidden.value = data.id;
+              if (btnLimpiar) btnLimpiar.style.display = "inline";
+              if (listaResultados) listaResultados.style.display = "none";
+            }
+
+            // COTIZACIONES
+            const inputHiddenCot = document.getElementById("cot-id-cliente");
+            const inputNombreCot =
+              document.getElementById("cot-nombre-cliente");
+            const btnQuitarCot = document.getElementById(
+              "btn-quitar-cliente-cot",
+            );
+
+            if (inputHiddenCot && inputNombreCot) {
+              inputHiddenCot.value = data.id;
+              inputNombreCot.value = data.nombre_completo;
+              if (btnQuitarCot) btnQuitarCot.style.display = "inline-block";
+            }
+
+            Swal.fire({
+              icon: "success",
+              title: "¡Cliente Asignado!",
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 3000,
+            });
+          } else {
+            Swal.fire(
+              "Error",
+              data.message || "No se pudo guardar el cliente.",
+              "error",
+            );
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          Swal.fire("Error", "Error de conexión con el servidor", "error");
+        });
+    }
+  });
+};
+
 // MANEJO DE TODOS LOS FORMULARIOS (SUBMITS)
 document.addEventListener("submit", function (e) {
-  // GUARDAR CLIENTE EXPRESS
-  if (e.target && e.target.id === "form-cliente-express") {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const formData = new FormData(e.target);
-
-    fetch("cruds/guardar_cliente_express.php", {
-      method: "POST",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          cerrarModalClienteExpress();
-          const inputBusqueda = document.getElementById("busqueda-cliente");
-          const inputHidden = document.getElementById(
-            "id_cliente_seleccionado",
-          );
-          const btnLimpiar = document.getElementById("limpiar-cliente");
-          const listaResultados = document.getElementById(
-            "lista-resultados-clientes",
-          );
-
-          if (inputBusqueda && inputHidden) {
-            inputBusqueda.value = `${data.nombre_completo} (${data.telefono})`;
-            inputBusqueda.disabled = true;
-            inputHidden.value = data.id;
-            if (btnLimpiar) btnLimpiar.style.display = "inline";
-            if (listaResultados) listaResultados.style.display = "none";
-          }
-          Swal.fire({
-            icon: "success",
-            title: "Cliente creado",
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 3000,
-            returnFocus: false,
-          });
-        } else {
-          Swal.fire({
-            title: "Error",
-            text: data.message,
-            icon: "error",
-            returnFocus: false,
-          });
-        }
-      });
-  }
-
   // CREAR ORDEN (INCLUYE FOTOS WEBCAM)
   if (e.target && e.target.id === "form-crearOrden") {
     e.preventDefault();
@@ -5937,7 +6052,7 @@ document.addEventListener("submit", function (e) {
     validarCampo('[name="modelo"]');
     validarCampo('[name="falla"]');
 
-    // BLINDAJE EXTRA: Si hay anticipo, exigir método de pago
+    // Si hay anticipo, exigir método de pago
     const anticipoIngresado =
       parseFloat(document.getElementById("crear-anticipo").value) || 0;
     const selectMetodoPagoCrear = document.getElementById("crear-metodo-pago");
@@ -6071,7 +6186,7 @@ document.addEventListener("submit", function (e) {
     const saldoRestanteReal = costoOriginal - anticipoOriginal;
     const metodoPagoEdit = document.getElementById("edit-metodo-pago");
 
-    // BLINDAJE EXTRA: Si ingresa un nuevo abono, el método de pago es obligatorio
+    // Si ingresa un nuevo abono, el método de pago es obligatorio
     if (
       nuevoAbono > 0 &&
       (!metodoPagoEdit.value || metodoPagoEdit.value.trim() === "")
@@ -6174,7 +6289,7 @@ document.addEventListener("submit", function (e) {
         });
       });
   }
-}); // <<< FIN DE TODOS LOS SUBMITS
+}); 
 
 // MANEJO DE CLICS EN TABLA (EDITAR Y CANCELAR ORDENES) ***************************************
 document.addEventListener("click", function (e) {
@@ -6396,7 +6511,6 @@ function verQrOrden(token) {
 }
 
 // MINI PUNTO DE VENTA EN ORDENES (REFACCIONES)
-
 // Reescribimos la función calcularSaldoEdit para que sume Refacciones + Mano de Obra
 function calcularSaldoEdit() {
   const manoObra =
@@ -6569,9 +6683,70 @@ document
 // MOTOR DEL PUNTO DE VENTA (POS)
 let productosPOS = [];
 let carritoPOS = [];
+window.idCotizacionOrigenPOS = 0; // Para recordar si venimos de una cotización
 
 function inicializarPOS() {
-  carritoPOS = []; // Vaciamos el carrito al abrir la pantalla
+  carritoPOS = [];
+  window.idCotizacionOrigenPOS = 0; // La reseteamos a 0 por si es una venta normal
+
+  let cotizacionPendiente = sessionStorage.getItem("cotizacion_a_venta");
+
+  if (cotizacionPendiente) {
+    let dataCot = JSON.parse(cotizacionPendiente);
+
+    //LE DAMOS LA MEMORIA AL POS:
+    window.idCotizacionOrigenPOS = dataCot.cotizacion.id_cotizacion;
+
+    // Inyectamos los datos del cliente en la caja (si es que había uno)
+    setTimeout(() => {
+      // Pequeño delay para asegurar que el DOM cargó
+      let inputIdClienteVenta = document.getElementById("pos-id-cliente");
+      let inputNombreClienteVenta =
+        document.getElementById("pos-nombre-cliente");
+      let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
+
+      if (inputIdClienteVenta)
+        inputIdClienteVenta.value = dataCot.cotizacion.id_cliente;
+      if (inputNombreClienteVenta && dataCot.cotizacion.id_cliente != "0") {
+        // Si no es público en general, llenamos el campo y mostramos la "X"
+        inputNombreClienteVenta.value =
+          dataCot.cotizacion.nombre_cliente_completo;
+        if (btnQuitarCliente) btnQuitarCliente.style.display = "inline-block";
+      }
+    }, 100);
+
+    // Pasamos todos los productos de la cotización al carrito de ventas
+    dataCot.detalles.forEach((det) => {
+      carritoPOS.push({
+        id_interno: "cot_" + det.id_detalle,
+        id_prod_real: det.id_producto,
+        nombre: det.concepto,
+        precio: parseFloat(det.precio_unitario),
+        cantidad: parseInt(det.cantidad),
+        stock_max: 9999, // Ignoramos stock por si era concepto libre
+      });
+    });
+    // Le ordenamos a la pantalla que redibuje la tabla con los productos nuevos
+    if (typeof actualizarCarritoUI === "function") {
+      actualizarCarritoUI();
+    }
+
+    //  Limpiamos la memoria del navegador para que no se vuelva a cargar en el futuro
+    sessionStorage.removeItem("cotizacion_a_venta");
+
+    // Alerta de éxito para el cajero
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+    });
+    Toast.fire({
+      icon: "success",
+      title: "Cotización #" + dataCot.cotizacion.id_cotizacion + " cargada.",
+    });
+  } 
+
   cargarInventarioPOS();
 
   // Activar buscador en tiempo real
@@ -6598,7 +6773,7 @@ function inicializarPOS() {
       // PAGO EN EFECTIVO (Calculadora de Cambio)
       if (metodoPago === "Efectivo") {
         Swal.fire({
-          title: "Cobro en Efectivo 💵",
+          title: "Cobro en Efectivo ",
           html: `<h2 style="color:#28a745; margin:10px 0;">Total: $${totalVenta.toFixed(2)}</h2>`,
           input: "number",
           inputAttributes: { step: "0.50", min: totalVenta },
@@ -6639,7 +6814,7 @@ function inicializarPOS() {
       // PAGO CON TARJETA (Pide Referencia)
       else if (metodoPago === "Tarjeta") {
         Swal.fire({
-          title: "Cobro con Tarjeta 💳",
+          title: "Cobro con Tarjeta",
           text: `Total a cobrar: $${totalVenta.toFixed(2)}`,
           input: "text",
           inputPlaceholder: "Ingresa el No. de Autorización o Referencia",
@@ -6660,7 +6835,7 @@ function inicializarPOS() {
       }
     });
   }
-  // Función global para enviar los datos a PHP
+
   // Función global para enviar los datos a PHP (AHORA CON PAGO Y CAMBIO)
   window.procesarCobroEnBackend = function (
     totalVenta,
@@ -6684,8 +6859,9 @@ function inicializarPOS() {
       metodo_pago: metodoPago,
       referencia: referencia,
       id_cliente: idClienteSeleccionado,
-      pago_cliente: pagoCliente, // <-- Agregamos el billete que dio el cliente
-      cambio_cliente: cambioCliente, // <-- Agregamos lo que le regresamos
+      pago_cliente: pagoCliente,
+      cambio_cliente: cambioCliente,
+      id_cotizacion_origen: window.idCotizacionOrigenPOS, 
     };
 
     fetch("../php/cruds/procesar_venta_mostrador.php", {
@@ -7059,7 +7235,7 @@ window.fijarCantidad = function (id_prod, cantidadStr) {
   actualizarCarritoUI();
 };
 
-// Dibujar la tabla del carrito y calcular el gran total (VERSIÓN BLINDADA)
+// Dibujar la tabla del carrito y calcular el gran total 
 function actualizarCarritoUI() {
   let tbody = document.getElementById("tabla-carrito-pos");
   let totalArticulosSpan = document.getElementById("pos-total-articulos");
@@ -7506,7 +7682,7 @@ function abrirDevolucion(idVenta) {
         confirmButtonText: "Procesar Devolución",
         cancelButtonText: "Cancelar",
         preConfirm: () => {
-          // 4. Cuando el usuario le da a "Procesar", recolectamos cuántos quiso devolver
+          // Cuando el usuario le da a "Procesar", recolectamos cuántos quiso devolver
           let devoluciones = [];
           document.querySelectorAll(".input-devolucion").forEach((input) => {
             let cantDevolver = parseInt(input.value);
@@ -7612,9 +7788,10 @@ function cancelarVentaTotal(idVenta) {
 
 // FUNCIÓN PARA INGRESAR EFECTIVO A LA CAJA
 function ingresarEfectivo() {
-    Swal.fire({
-        title: '<i class="fa-solid fa-money-bill-trend-up" style="color:#28a745;"></i> Ingresar Efectivo',
-        html: `
+  Swal.fire({
+    title:
+      '<i class="fa-solid fa-money-bill-trend-up" style="color:#28a745;"></i> Ingresar Efectivo',
+    html: `
             <div style="text-align: left;">
                 <label style="font-weight: bold; font-size: 14px;">Monto a ingresar ($):</label>
                 <input type="number" id="monto-ingreso" class="swal2-input" placeholder="Ej. 500" style="margin-top: 5px;">
@@ -7623,175 +7800,966 @@ function ingresarEfectivo() {
                 <input type="text" id="concepto-ingreso" class="swal2-input" placeholder="Ej. Fondo de caja para devoluciones" style="margin-top: 5px;">
             </div>
         `,
-        confirmButtonColor: '#28a745',
-        confirmButtonText: 'Registrar Ingreso',
-        showCancelButton: true,
-        cancelButtonText: 'Cancelar',
-        preConfirm: () => {
-            const monto = Swal.getPopup().querySelector('#monto-ingreso').value;
-            const concepto = Swal.getPopup().querySelector('#concepto-ingreso').value;
-            if (!monto || monto <= 0) {
-                Swal.showValidationMessage(`Por favor, ingresa un monto válido.`);
-            }
-            if (!concepto) {
-                Swal.showValidationMessage(`Por favor, escribe el motivo del ingreso.`);
-            }
-            return { monto: monto, concepto: concepto }
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let formData = new FormData();
-            formData.append('monto', result.value.monto);
-            formData.append('concepto', result.value.concepto);
+    confirmButtonColor: "#28a745",
+    confirmButtonText: "Registrar Ingreso",
+    showCancelButton: true,
+    cancelButtonText: "Cancelar",
+    preConfirm: () => {
+      const monto = Swal.getPopup().querySelector("#monto-ingreso").value;
+      const concepto = Swal.getPopup().querySelector("#concepto-ingreso").value;
+      if (!monto || monto <= 0) {
+        Swal.showValidationMessage(`Por favor, ingresa un monto válido.`);
+      }
+      if (!concepto) {
+        Swal.showValidationMessage(`Por favor, escribe el motivo del ingreso.`);
+      }
+      return { monto: monto, concepto: concepto };
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let formData = new FormData();
+      formData.append("monto", result.value.monto);
+      formData.append("concepto", result.value.concepto);
 
-            fetch('../php/operaciones/ingresar_efectivo.php', { 
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('¡Ingreso Exitoso!', 'El dinero ya está disponible en tu caja.', 'success');
-                    
-                    // Si tienes una función que recarga la pantalla de corte de caja, puedes llamarla aquí
-                    // ej: cargarPantallaCorte(); 
-                    
-                } else {
-                    Swal.fire('Error', data.mensaje, 'error');
-                }
-            })
-            .catch(err => {
-                console.error("Error al ingresar efectivo:", err);
-                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-            });
-        }
-    });
+      fetch("../php/operaciones/ingresar_efectivo.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            Swal.fire(
+              "¡Ingreso Exitoso!",
+              "El dinero ya está disponible en tu caja.",
+              "success",
+            );
+
+          } else {
+            Swal.fire("Error", data.mensaje, "error");
+          }
+        })
+        .catch((err) => {
+          console.error("Error al ingresar efectivo:", err);
+          Swal.fire("Error", "No se pudo conectar con el servidor", "error");
+        });
+    }
+  });
 }
 
 // VENTANA DE OPCIONES DE TICKET (WHATSAPP, CORREO, IMPRIMIR)
-function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total) {
-    Swal.fire({
-        title: '¡Venta Exitosa!',
-        text: '¿Cómo deseas entregar el comprobante?',
-        icon: 'success',
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: '<i class="fa-brands fa-whatsapp"></i> WhatsApp',
-        confirmButtonColor: '#25D366', 
-        denyButtonText: '<i class="fa-solid fa-print"></i> Imprimir',
-        denyButtonColor: '#3085d6',    
-        cancelButtonText: '<i class="fa-solid fa-envelope"></i> Correo',
-        cancelButtonColor: '#dc3545',  
-        allowOutsideClick: false       
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Clic en WhatsApp
-            enviarTicketWhatsApp(telefonoCliente, nombreCliente, idTicket, total);
-        } else if (result.isDenied) {
-            // Clic en Imprimir
-            imprimirTicketFisico(idTicket);
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-            // Clic en Correo 
-            enviarTicketCorreo(nombreCliente, idTicket);
-        }
-    });
+function mostrarOpcionesTicket(
+  idTicket,
+  telefonoCliente,
+  nombreCliente,
+  total,
+) {
+  Swal.fire({
+    title: "¡Venta Exitosa!",
+    text: "¿Cómo deseas entregar el comprobante?",
+    icon: "success",
+    showDenyButton: true,
+    showCancelButton: true,
+    confirmButtonText: '<i class="fa-brands fa-whatsapp"></i> WhatsApp',
+    confirmButtonColor: "#25D366",
+    denyButtonText: '<i class="fa-solid fa-print"></i> Imprimir',
+    denyButtonColor: "#3085d6",
+    cancelButtonText: '<i class="fa-solid fa-envelope"></i> Correo',
+    cancelButtonColor: "#dc3545",
+    allowOutsideClick: false,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Clic en WhatsApp
+      enviarTicketWhatsApp(telefonoCliente, nombreCliente, idTicket, total);
+    } else if (result.isDenied) {
+      // Clic en Imprimir
+      imprimirTicketFisico(idTicket);
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      // Clic en Correo
+      enviarTicketCorreo(nombreCliente, idTicket);
+    }
+  });
 }
 
 // MOTOR DE ENVÍO POR WHATSAPP (Con captura manual)
 function enviarTicketWhatsApp(telefono, nombre, folio, total) {
-    if (!telefono || telefono.trim() === '' || telefono === '0') {
-        Swal.fire({
-            title: 'Número de WhatsApp',
-            html: '<p style="font-size:14px;">Ingresa el número a 10 dígitos del cliente:</p>',
-            input: 'number',
-            inputPlaceholder: 'Ej. 5512345678',
-            showCancelButton: true,
-            confirmButtonText: 'Enviar <i class="fa-brands fa-whatsapp"></i>',
-            confirmButtonColor: '#25D366',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                ejecutarWhatsApp(result.value, nombre, folio, total);
-            }
-        });
-    } else {
-        ejecutarWhatsApp(telefono, nombre, folio, total);
-    }
+  if (!telefono || telefono.trim() === "" || telefono === "0") {
+    Swal.fire({
+      title: "Número de WhatsApp",
+      html: '<p style="font-size:14px;">Ingresa el número a 10 dígitos del cliente:</p>',
+      input: "number",
+      inputPlaceholder: "Ej. 5512345678",
+      showCancelButton: true,
+      confirmButtonText: 'Enviar <i class="fa-brands fa-whatsapp"></i>',
+      confirmButtonColor: "#25D366",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        ejecutarWhatsApp(result.value, nombre, folio, total);
+      }
+    });
+  } else {
+    ejecutarWhatsApp(telefono, nombre, folio, total);
+  }
 }
 
 function ejecutarWhatsApp(telefono, nombre, folio, total) {
-    let linkTicket = new URL("../php/cruds/imprimir_ticket_pos.php?id=" + folio, window.location.href).href;
+  let linkTicket = new URL(
+    "../php/cruds/imprimir_ticket_pos.php?id=" + folio,
+    window.location.href,
+  ).href;
 
-    let mensaje = `Hola *${nombre}*, gracias por tu compra.\n\n`;
-    mensaje += ` *Folio:* #${folio}\n`;
-    mensaje += ` *Total:* $${parseFloat(total).toFixed(2)}\n\n`;
-    mensaje += `Puedes descargar tu comprobante digital en el siguiente enlace:\n${linkTicket}\n\n`;
-    mensaje += `¡Vuelve pronto! `;
+  let mensaje = `Hola *${nombre}*, gracias por tu compra.\n\n`;
+  mensaje += ` *Folio:* #${folio}\n`;
+  mensaje += ` *Total:* $${parseFloat(total).toFixed(2)}\n\n`;
+  mensaje += `Puedes descargar tu comprobante digital en el siguiente enlace:\n${linkTicket}\n\n`;
+  mensaje += `¡Vuelve pronto! `;
 
-    let celLimpio = telefono.replace(/\D/g,'');
-    if(celLimpio.length === 10) celLimpio = "52" + celLimpio; 
+  let celLimpio = telefono.replace(/\D/g, "");
+  if (celLimpio.length === 10) celLimpio = "52" + celLimpio;
 
-    let urlWhatsApp = `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`;
-    window.open(urlWhatsApp, '_blank');
+  let urlWhatsApp = `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`;
+  window.open(urlWhatsApp, "_blank");
 }
 
 function imprimirTicketFisico(folio) {
-    window.open(`../php/cruds/imprimir_ticket_pos.php?id=${folio}`, '_blank');
+  window.open(`../php/cruds/imprimir_ticket_pos.php?id=${folio}`, "_blank");
 }
 
 // MOTOR DE ENVÍO POR CORREO ELECTRÓNICO
 function enviarTicketCorreo(nombre, folio) {
-    Swal.fire({
-        title: 'Enviar por Correo',
-        html: '<p style="font-size:14px;">Ingresa el correo electrónico del cliente:</p>',
-        input: 'email',
-        inputPlaceholder: 'cliente@empresa.com',
-        showCancelButton: true,
-        confirmButtonText: 'Enviar Ticket <i class="fa-solid fa-paper-plane"></i>',
-        confirmButtonColor: '#dc3545',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed && result.value) {
-            ejecutarEnvioCorreo(result.value, nombre, folio);
-        }
-    });
+  Swal.fire({
+    title: "Enviar por Correo",
+    html: '<p style="font-size:14px;">Ingresa el correo electrónico del cliente:</p>',
+    input: "email",
+    inputPlaceholder: "cliente@empresa.com",
+    showCancelButton: true,
+    confirmButtonText: 'Enviar Ticket <i class="fa-solid fa-paper-plane"></i>',
+    confirmButtonColor: "#dc3545",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed && result.value) {
+      ejecutarEnvioCorreo(result.value, nombre, folio);
+    }
+  });
 }
 
 function ejecutarEnvioCorreo(email, nombre, folio) {
-    Swal.fire({
-        title: 'Enviando Correo...',
-        text: 'Conectando con el servidor postal',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
+  Swal.fire({
+    title: "Enviando Correo...",
+    text: "Conectando con el servidor postal",
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
 
-    let linkTicket = new URL("../php/cruds/imprimir_ticket_pos.php?id=" + folio, window.location.href).href;
+  let linkTicket = new URL(
+    "../php/cruds/imprimir_ticket_pos.php?id=" + folio,
+    window.location.href,
+  ).href;
 
-    fetch("../php/cruds/enviar_ticket_correo.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-            email: email, 
-            nombre: nombre, 
-            folio: folio,
-            link: linkTicket
-        })
+  fetch("../php/cruds/enviar_ticket_correo.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: email,
+      nombre: nombre,
+      folio: folio,
+      link: linkTicket,
+    }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        Swal.fire(
+          "¡Enviado!",
+          "El ticket ha sido enviado al correo del cliente.",
+          "success",
+        );
+      } else {
+        Swal.fire(
+          "Error",
+          data.message || "No se pudo enviar el correo.",
+          "error",
+        );
+      }
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire('¡Enviado!', 'El ticket ha sido enviado al correo del cliente.', 'success');
-        } else {
-            Swal.fire('Error', data.message || 'No se pudo enviar el correo.', 'error');
-        }
-    })
-    .catch(error => {
-        console.error("Error al enviar correo:", error);
-        Swal.fire('Error', 'Hubo un problema de conexión con el servidor.', 'error');
+    .catch((error) => {
+      console.error("Error al enviar correo:", error);
+      Swal.fire(
+        "Error",
+        "Hubo un problema de conexión con el servidor.",
+        "error",
+      );
     });
 }
+
+// LLamar cotizaciones ***********************************************
+document
+  .getElementById("cotizaciones-link")
+  .addEventListener("click", function (event) {
+    event.preventDefault(); // Evita la acción por defecto del enlace
+    fetch("catalogos/cotizaciones.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+        inicializarTablaGenerica(
+          "#tabla-cotizaciones",
+          "#buscarboxcot",
+          "#cantidad-registros",
+        );
+      })
+      .catch((error) => {
+        console.error("Error al cargar el contenido de cotizaciones:", error);
+      });
+  });
+
+let carritoCot = [];
+let productosCot = []; // Reutilizamos la API del POS
+
+function inicializarCotizaciones() {
+  carritoCot = [];
+  cargarInventarioCot();
+
+  // Buscador
+  let buscador = document.getElementById("buscar-producto-cot");
+  if (buscador) {
+    buscador.addEventListener("input", function (e) {
+      renderizarGridCotizaciones(e.target.value);
+    });
+  }
+
+  // Botón Guardar Cotización
+  let btnGuardar = document.getElementById("btn-guardar-cot");
+  if (btnGuardar) {
+    btnGuardar.addEventListener("click", guardarCotizacion);
+  }
+}
+
+// Traer inventario usando la API que ya tienes del POS
+function cargarInventarioCot() {
+  fetch("../php/funciones/api_productos_pos.php")
+    .then((res) => res.json())
+    .then((data) => {
+      if (!data.error) {
+        productosCot = data;
+        renderizarGridCotizaciones("");
+      }
+    });
+}
+
+// Dibujar cuadritos de productos
+function renderizarGridCotizaciones(filtro = "") {
+  let grid = document.getElementById("grid-productos-cot");
+  if (!grid) return;
+  grid.innerHTML = "";
+  filtro = filtro.toLowerCase();
+
+  let filtrados = productosCot.filter((p) =>
+    p.nombre_prod.toLowerCase().includes(filtro),
+  );
+
+  filtrados.forEach((prod) => {
+    let card = document.createElement("div");
+    card.className = "producto-card"; // Usa tu misma clase CSS del POS
+    card.innerHTML = `
+            <div class="prod-nombre">${prod.nombre_prod}</div>
+            <div class="prod-precio">$${parseFloat(prod.p_venta).toFixed(2)}</div>
+            <div class="prod-stock">Stock Actual: ${prod.stock}</div>
+        `;
+    // Al cotizar NO nos importa si no hay stock, pero le avisamos
+    card.addEventListener("click", () =>
+      agregarAlCarritoCot(
+        prod.id_prod,
+        prod.nombre_prod,
+        prod.p_venta,
+        1,
+        prod.stock,
+      ),
+    );
+    grid.appendChild(card);
+  });
+}
+
+// Agregar conceptos que no existen en inventario
+window.agregarConceptoLibre = function () {
+  Swal.fire({
+    title: "Agregar Servicio / Concepto Libre",
+    html: `
+            <input id="swal-concepto" class="swal2-input" placeholder="Descripción (Ej. Mano de obra, Cableado...)" autocomplete="off">
+            <input id="swal-precio" type="number" class="swal2-input" placeholder="Precio Unitario (Ej. 1500)" step="0.50" min="0">
+            <input id="swal-cantidad" type="number" class="swal2-input" placeholder="Cantidad" value="1" min="1">
+        `,
+    showCancelButton: true,
+    confirmButtonText: '<i class="fa-solid fa-plus"></i> Añadir a Cotización',
+    confirmButtonColor: "#ffc107",
+    preConfirm: () => {
+      let concepto = document.getElementById("swal-concepto").value.trim();
+      let precio = parseFloat(document.getElementById("swal-precio").value);
+      let cantidad = parseInt(document.getElementById("swal-cantidad").value);
+
+      if (!concepto) {
+        Swal.showValidationMessage("Escribe una descripción");
+        return false;
+      }
+      if (!precio || precio < 0) {
+        Swal.showValidationMessage("Ingresa un precio válido");
+        return false;
+      }
+      if (!cantidad || cantidad < 1) {
+        Swal.showValidationMessage("Ingresa una cantidad válida");
+        return false;
+      }
+
+      return { concepto, precio, cantidad };
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Mandamos NULL como ID porque no existe en la BD
+      agregarAlCarritoCot(
+        null,
+        result.value.concepto,
+        result.value.precio,
+        result.value.cantidad,
+        9999,
+      );
+    }
+  });
+};
+
+// Lógica del carrito de cotizaciones (Acepta NULLs)
+function agregarAlCarritoCot(id_prod, nombre, precio, cantidad, stock_max) {
+  // Si id_prod es null, usamos un ID temporal (ej. un timestamp) solo para el DOM
+  let id_interno = id_prod === null ? "libre_" + Date.now() : id_prod;
+
+  let item = carritoCot.find((i) => i.id_interno === id_interno);
+
+  if (item) {
+    item.cantidad += cantidad;
+  } else {
+    carritoCot.push({
+      id_interno: id_interno,
+      id_prod_real: id_prod, // null si es libre, ID real si es del catálogo
+      nombre: nombre,
+      precio: parseFloat(precio),
+      cantidad: parseInt(cantidad),
+      stock_max: parseInt(stock_max), // Para cotizar podemos ignorar el tope si quieres
+    });
+  }
+  actualizarCarritoCotUI();
+}
+
+function eliminarDelCarritoCot(id_interno) {
+  carritoCot = carritoCot.filter((i) => i.id_interno !== id_interno);
+  actualizarCarritoCotUI();
+}
+
+function actualizarCarritoCotUI() {
+  let tbody = document.getElementById("tabla-carrito-cot");
+  let totalSpan = document.getElementById("cot-gran-total");
+  let totalArticulosSpan = document.getElementById("cot-total-articulos");
+
+  // Nuevos Span del Desglose
+  let subtotalSpan = document.getElementById("cot-subtotal");
+  let ivaSpan = document.getElementById("cot-iva");
+  let btnGuardar = document.getElementById("btn-guardar-cot");
+
+  // Leemos el IVA desde la base de datos
+  let tasaIvaInput = document.getElementById("tasa-iva-global");
+  let tasaIva = tasaIvaInput ? parseFloat(tasaIvaInput.value) : 16;
+  let factorIva = 1 + tasaIva / 100;
+
+  tbody.innerHTML = "";
+  let granTotalBruto = 0;
+  let totalArticulos = 0;
+
+  if (carritoCot.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="4" style="text-align: center; padding: 20px;">No hay conceptos a cotizar.</td></tr>';
+    btnGuardar.disabled = true;
+    totalSpan.textContent = "$0.00";
+    totalArticulosSpan.textContent = "0";
+    if (subtotalSpan) subtotalSpan.textContent = "$0.00";
+    if (ivaSpan) ivaSpan.textContent = "$0.00";
+    return;
+  }
+
+  carritoCot.forEach((item) => {
+    let subtotalBrutoItem = item.precio * item.cantidad;
+    granTotalBruto += subtotalBrutoItem;
+    totalArticulos += item.cantidad;
+
+    // Quitamos el IVA solo para la visualización de la tabla
+    let precioNeto = item.precio / factorIva;
+    let subtotalNetoItem = precioNeto * item.cantidad;
+
+    let badge =
+      item.id_prod_real === null
+        ? '<span style="background: #ffc107; color: #000; font-size: 10px; padding: 2px 5px; border-radius: 3px; margin-left: 5px;">LIBRE</span>'
+        : "";
+
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+            <td style="font-size: 14px;">${item.nombre} ${badge}</td>
+            <td style="text-align: center; font-weight: bold;">${item.cantidad}</td>
+            <td style="text-align: right; color: #28a745; font-weight: bold;">$${subtotalNetoItem.toFixed(2)}</td>
+            <td style="text-align: right;">
+                <button class="btn" style="background-color: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;" onclick="eliminarDelCarritoCot('${item.id_interno}')" title="Quitar">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        `;
+    tbody.appendChild(tr);
+  });
+
+  // Calculamos Subtotal General y el IVA General para el final
+  let subtotalGeneral = granTotalBruto / factorIva;
+  let ivaGeneral = granTotalBruto - subtotalGeneral;
+
+  if (subtotalSpan) subtotalSpan.textContent = "$" + subtotalGeneral.toFixed(2);
+  if (ivaSpan) ivaSpan.textContent = "$" + ivaGeneral.toFixed(2);
+  totalSpan.textContent = `$${granTotalBruto.toFixed(2)}`;
+  totalArticulosSpan.textContent = totalArticulos;
+  btnGuardar.disabled = false;
+}
+
+// GUARDAR COTIZACIÓN EN BASE DE DATOS
+function guardarCotizacion() {
+  if (carritoCot.length === 0) {
+    Swal.fire("Atención", "El carrito de cotización está vacío.", "warning");
+    return;
+  }
+
+  let idCliente = document.getElementById("cot-id-cliente").value;
+  let totalCotizacion = carritoCot.reduce(
+    (sum, item) => sum + item.precio * item.cantidad,
+    0,
+  );
+
+  let btnGuardar = document.getElementById("btn-guardar-cot");
+  btnGuardar.disabled = true;
+  btnGuardar.innerHTML =
+    '<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO...';
+
+  // EL EMPAQUE AHORA INCLUYE EL ID
+  let datosCotizacion = {
+    id_cotizacion: window.idCotizacionEditando || 0, // Manda el ID o manda 0
+    id_cliente: idCliente,
+    total: totalCotizacion,
+    carrito: carritoCot,
+  };
+
+  fetch("../php/cruds/procesar_crear_cotizacion.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(datosCotizacion),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        Swal.fire({
+          title:
+            window.idCotizacionEditando > 0 ? "¡Actualizada!" : "¡Guardada!",
+          text: "Se procesó correctamente el Folio #" + data.id_cotizacion,
+          icon: "success",
+          showCancelButton: true,
+          confirmButtonText: '<i class="fa-solid fa-print"></i> Imprimir / PDF',
+          cancelButtonText: "Regresar al Historial",
+          confirmButtonColor: "#3085d6",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.open(
+              "../php/cruds/imprimir_cotizacion.php?id=" +
+                data.id_cotizacion +
+                "&token=" +
+                data.token,
+              "_blank",
+            );
+          }
+          // Limpiamos y regresamos al menú de cotizaciones
+          if (document.getElementById("cotizaciones-link")) {
+            document.getElementById("cotizaciones-link").click();
+          }
+        });
+      } else {
+        Swal.fire("Error", data.message, "error");
+        btnGuardar.disabled = false;
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      Swal.fire("Error", "Error de conexión con el servidor.", "error");
+      btnGuardar.disabled = false;
+    });
+}
+
+// BUSCADOR DE CLIENTES PARA COTIZACIONES
+function inicializarCotizaciones() {
+  carritoCot = [];
+  cargarInventarioCot();
+
+  // Buscador de productos
+  let buscador = document.getElementById("buscar-producto-cot");
+  if (buscador) {
+    buscador.addEventListener("input", function (e) {
+      renderizarGridCotizaciones(e.target.value);
+    });
+  }
+
+  // Botón Guardar Cotización
+  let btnGuardar = document.getElementById("btn-guardar-cot");
+  if (btnGuardar) {
+    btnGuardar.addEventListener("click", guardarCotizacion);
+  }
+
+  // BUSCADOR DE CLIENTES
+  let btnBuscarClienteCot = document.getElementById("btn-buscar-cliente-cot");
+  let btnQuitarClienteCot = document.getElementById("btn-quitar-cliente-cot");
+  let inputIdClienteCot = document.getElementById("cot-id-cliente");
+  let inputNombreClienteCot = document.getElementById("cot-nombre-cliente");
+
+  if (btnBuscarClienteCot) {
+    // Le quitamos el DOMContentLoaded porque ya estamos dentro del inicializador
+    btnBuscarClienteCot.addEventListener("click", function () {
+      fetch("../php/funciones/api_clientes_pos.php")
+        .then((res) => res.json())
+        .then((clientes) => {
+          if (clientes.error) {
+            Swal.fire("Error", "No se pudieron cargar los clientes.", "error");
+            return;
+          }
+
+          let options =
+            '<option value="0" selected>Público en General</option>';
+          clientes.forEach((c) => {
+            options += `<option value="${c.id_cliente}">${c.nombre} ${c.papellido} - ${c.telefono}</option>`;
+          });
+
+          Swal.fire({
+            title: "Seleccionar Cliente",
+            html: `
+                            <input type="search" id="swal-search-cliente-cot" class="swal2-input" placeholder="Buscar por nombre o teléfono..." autocomplete="off" style="width: 90%; margin: 0 auto 10px auto; display: block;">
+                            <select id="swal-select-cliente-cot" size="6" style="width: 90%; height:140px; margin: 0 auto; display: block; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                ${options}
+                            </select>
+                        `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-check"></i> Asignar',
+            cancelButtonText: "Cancelar",
+            didOpen: () => {
+              let buscadorSwal = document.getElementById(
+                "swal-search-cliente-cot",
+              );
+              let selectSwal = document.getElementById(
+                "swal-select-cliente-cot",
+              );
+              let opcionesSwal = selectSwal.options;
+
+              buscadorSwal.focus();
+              buscadorSwal.addEventListener("keyup", function () {
+                let filtro = this.value.toLowerCase();
+                for (let i = 0; i < opcionesSwal.length; i++) {
+                  let texto = opcionesSwal[i].text.toLowerCase();
+                  opcionesSwal[i].style.display =
+                    opcionesSwal[i].value === "0" || texto.includes(filtro)
+                      ? ""
+                      : "none";
+                }
+              });
+
+              selectSwal.addEventListener("dblclick", () =>
+                Swal.clickConfirm(),
+              );
+            },
+            preConfirm: () => {
+              let selectSwal = document.getElementById(
+                "swal-select-cliente-cot",
+              );
+              if (selectSwal.selectedIndex === -1) {
+                Swal.showValidationMessage("Selecciona un cliente");
+                return false;
+              }
+              return {
+                id: selectSwal.value,
+                texto: selectSwal.options[selectSwal.selectedIndex].text,
+              };
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              let cliente = result.value;
+              inputIdClienteCot.value = cliente.id;
+
+              if (cliente.id === "0") {
+                inputNombreClienteCot.value = "Público en General";
+                btnQuitarClienteCot.style.display = "none";
+              } else {
+                inputNombreClienteCot.value = cliente.texto.split(" - ")[0];
+                btnQuitarClienteCot.style.display = "inline-block";
+              }
+            }
+          });
+        });
+    });
+  }
+
+  if (btnQuitarClienteCot) {
+    btnQuitarClienteCot.addEventListener("click", function () {
+      inputIdClienteCot.value = "0";
+      inputNombreClienteCot.value = "Público en General";
+      this.style.display = "none";
+    });
+  }
+}
+
+// MÓDULO DE COTIZACIONES (Dashboard y Funciones Globales)
+
+window.idCotizacionEditando = 0; // Variable Global
+
+window.cargarVistaCotizacion = function (archivo) {
+  window.idCotizacionEditando = 0; // Reset a 0 porque es NUEVA
+  fetch(archivo)
+    .then((response) => response.text())
+    .then((html) => {
+      document.getElementById("content-area").innerHTML = html;
+      if (typeof window.inicializarCotizaciones === "function") {
+        window.inicializarCotizaciones();
+      }
+    })
+    .catch((error) =>
+      console.error("Error al cargar la vista de cotizaciones:", error),
+    );
+};
+
+// Botón Enviar WhatsApp (COTIZACIONES)
+window.enviarCotizacionWhatsApp = function (id) {
+  // Mostramos un loading mientras vamos al servidor por el teléfono del cliente
+  Swal.fire({
+    title: "Obteniendo datos...",
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+
+  fetch("../php/cruds/obtener_datos_wa_cotizacion.php?id=" + id)
+    .then((res) => res.json())
+    .then((data) => {
+      Swal.close();
+
+      if (data.success) {
+        //Abrimos la ventana confirmando el número
+        Swal.fire({
+          title: "Enviar por WhatsApp",
+          html: `
+                    <p style="font-size:14px; color:#555; margin-bottom:15px;">
+                        Verifica el número para enviar la cotización <strong>#${id}</strong>:
+                    </p>
+                    <input type="number" id="wa-telefono-cot" class="swal2-input" placeholder="Teléfono a 10 dígitos" value="${data.telefono}" style="width: 80%;">
+                `,
+          showCancelButton: true,
+          confirmButtonText:
+            'Enviar Mensaje <i class="fa-brands fa-whatsapp"></i>',
+          confirmButtonColor: "#25D366",
+          cancelButtonText: "Cancelar",
+          preConfirm: () => {
+            let tel = document.getElementById("wa-telefono-cot").value.trim();
+            if (tel.length < 10) {
+              Swal.showValidationMessage(
+                "Ingresa un número válido a 10 dígitos.",
+              );
+              return false;
+            }
+            return tel;
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            let telefonoFinal = result.value;
+
+            //Construimos la URL con el Token de Seguridad Encriptado
+            let linkCotizacion = new URL(
+              "../php/cruds/imprimir_cotizacion.php?id=" +
+                id +
+                "&token=" +
+                data.token,
+              window.location.href,
+            ).href;
+
+            // Armamos un mensaje bien estructurado
+            let mensaje = `Hola *${data.nombre}* ,\n\n`;
+            mensaje += `Te compartimos tu *Cotización #${id}* por un total de *$${parseFloat(data.total).toFixed(2)}*.\n\n`;
+            mensaje += `Puedes ver e imprimir tu presupuesto detallado en el siguiente enlace:\n${linkCotizacion}\n\n`;
+            mensaje += `Si tienes alguna duda, estamos a tus órdenes. ¡Excelente día!`;
+
+            // Limpiamos el teléfono por si tiene espacios y le agregamos la lada +52 (México)
+            let celLimpio = telefonoFinal.replace(/\D/g, "");
+            if (celLimpio.length === 10) celLimpio = "52" + celLimpio;
+
+            // Abrimos la API de WhatsApp (Abrirá Web en PC o la App en Celular)
+            window.open(
+              `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`,
+              "_blank",
+            );
+          }
+        });
+      } else {
+        Swal.fire("Error", data.message, "error");
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      Swal.fire("Error", "Fallo de conexión con el servidor.", "error");
+    });
+};
+
+window.editarCotizacion = function (id) {
+  Swal.fire({
+    title: "Abriendo cotización...",
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+
+  fetch("../php/cruds/obtener_cotizacion_completa.php?id=" + id)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        window.idCotizacionEditando = id; // Avisamos al sistema que estamos EDITANDO
+
+        // Reutilizamos tu vista del carrito
+        fetch("cruds/crear_cotizacion.php")
+          .then((response) => response.text())
+          .then((html) => {
+            document.getElementById("content-area").innerHTML = html;
+
+            if (typeof window.inicializarCotizaciones === "function") {
+              window.inicializarCotizaciones();
+            }
+
+            // Inyectamos el Cliente
+            document.getElementById("cot-id-cliente").value =
+              data.cotizacion.id_cliente;
+            document.getElementById("cot-nombre-cliente").value =
+              data.cotizacion.nombre_cliente_completo;
+            if (data.cotizacion.id_cliente != "0") {
+              let btnQuitar = document.getElementById("btn-quitar-cliente-cot");
+              if (btnQuitar) btnQuitar.style.display = "inline-block";
+            }
+
+            // Inyectamos los Productos
+            carritoCot = [];
+            data.detalles.forEach((det) => {
+              carritoCot.push({
+                id_interno: "old_" + det.id_detalle,
+                id_prod_real: det.id_producto,
+                nombre: det.concepto,
+                precio: parseFloat(det.precio_unitario),
+                cantidad: parseInt(det.cantidad),
+                stock_max: 9999,
+              });
+            });
+
+            actualizarCarritoCotUI();
+
+            // Cambiamos el botón Verde a Amarillo
+            let btnGuardar = document.getElementById("btn-guardar-cot");
+            if (btnGuardar) {
+              btnGuardar.innerHTML =
+                '<i class="fa-solid fa-pen-to-square"></i> ACTUALIZAR COTIZACIÓN #' +
+                id;
+              btnGuardar.style.backgroundColor = "#ffc107";
+              btnGuardar.style.color = "#000";
+            }
+
+            Swal.close();
+          });
+      } else {
+        Swal.fire("Error", data.message, "error");
+      }
+    });
+};
+
+// Botón Enviar por Correo (USANDO PHPMAILER)
+window.enviarCotizacionCorreo = function (id) {
+  Swal.fire({
+    title: "Obteniendo datos...",
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+
+  // Buscamos el correo del cliente en la BD
+  fetch("../php/cruds/obtener_email_cotizacion.php?id=" + id)
+    .then((res) => res.json())
+    .then((data) => {
+      Swal.close();
+      if (data.success) {
+        // Abrimos la ventana con el correo pre-llenado (si existe)
+        Swal.fire({
+          title: "Enviar por Correo",
+          html: `
+                    <p style="font-size:14px; color:#555; margin-bottom:15px;">
+                        Verifica el correo para la cotización <strong>#${id}</strong>:
+                    </p>
+                    <input type="email" id="swal-correo-cot" class="swal2-input" value="${data.email}" placeholder="ejemplo@correo.com" style="width: 80%;">
+                `,
+          showCancelButton: true,
+          confirmButtonText: 'Enviar <i class="fa-solid fa-paper-plane"></i>',
+          confirmButtonColor: "#6f42c1",
+          preConfirm: () => {
+            let correo = document
+              .getElementById("swal-correo-cot")
+              .value.trim();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+              Swal.showValidationMessage("Ingresa un correo válido.");
+              return false;
+            }
+            return correo;
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: "Enviando correo...",
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              },
+            });
+
+            // Le quitamos 'ad.php' a la ruta para que quede limpia (Ej: http://localhost/swaos/php/)
+            let urlBase =
+              window.location.origin +
+              window.location.pathname.replace("ad.php", "");
+            let linkAproximado =
+              urlBase + "../php/cruds/imprimir_cotizacion.php?id=" + id;
+
+            // Mandamos todo al PHPMailer en formato JSON
+            fetch("../php/cruds/enviar_correo_cotizacion.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id_cotizacion: id,
+                email: result.value,
+                nombre: data.nombre,
+                total: data.total,
+                url_base: urlBase,
+              }),
+            })
+              .then((res) => res.json())
+              .then((resData) => {
+                if (resData.success) {
+                  Swal.fire("¡Enviado!", resData.message, "success");
+                } else {
+                  Swal.fire("Error", resData.message, "error");
+                }
+              });
+          }
+        });
+      }
+    });
+};
+
+// Botón Convertir Cotización a Venta
+window.convertirAVenta = function (id) {
+  Swal.fire({
+    title: "¿Convertir a Venta? 🛒",
+    text: "Enviaremos los productos de esta cotización al Punto de Venta para ser cobrados.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#28a745",
+    confirmButtonText: "Sí, ir a caja",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: "Preparando caja...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      // Vamos por los datos completos de la cotización
+      fetch("../php/cruds/obtener_cotizacion_completa.php?id=" + id)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            // Guardamos la cotización en la memoria temporal del navegador
+            sessionStorage.setItem("cotizacion_a_venta", JSON.stringify(data));
+            Swal.close();
+            // Damos un clic "fantasma" a tu menú de VENTAS para cambiar de pantalla
+            // NOTA: Asegúrase de que el ID de tu menú lateral de ventas se llame "ventas-link"
+            let btnVentas = document.getElementById("ventas-link");
+            if (btnVentas) {
+              btnVentas.click();
+            } else {
+              Swal.fire(
+                "Aviso",
+                "Ve manualmente al módulo de Ventas, tu carrito ya te está esperando.",
+                "info",
+              );
+            }
+          } else {
+            Swal.fire("Error", data.message, "error");
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          Swal.fire("Error", "Fallo de conexión con el servidor.", "error");
+        });
+    }
+  });
+};
+
+// Botón Cancelar Cotización (Conectado a BD)
+window.cancelarCotizacion = function (id) {
+  Swal.fire({
+    title: "¿Cancelar Cotización?",
+    text: "El estatus cambiará a 'Cancelada'. Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#dc3545",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: '<i class="fa-solid fa-ban"></i> Sí, cancelar',
+    cancelButtonText: "No, regresar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: "Cancelando...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      let formData = new FormData();
+      formData.append("id_cotizacion", id);
+
+      fetch("../php/cruds/cancelar_cotizacion.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            Swal.fire("¡Cancelada!", data.message, "success").then(() => {
+              // Recargamos la tabla limpiamente haciendo clic fantasma en el menú
+              if (document.getElementById("cotizaciones-link")) {
+                document.getElementById("cotizaciones-link").click();
+              }
+            });
+          } else {
+            Swal.fire("Atención", data.message, "warning");
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          Swal.fire("Error", "Fallo de conexión con el servidor.", "error");
+        });
+    }
+  });
+};
 
 // Llamar informes *****************************************************************
 document

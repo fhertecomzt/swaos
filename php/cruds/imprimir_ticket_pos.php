@@ -65,9 +65,17 @@ try {
     $totalArticulos += $item['cantidad'];
   }
 
-  // Matemáticas Fiscales (Por ahora global al 16%)
+  // OBTENEMOS LA TASA DE IVA DINÁMICA DESDE TU TABLA
+  $tasaIva = 16.00;
+  $stmtIva = $dbh->query("SELECT tasa FROM impuestos WHERE idimpuesto = 1 AND estatus = 0");
+  if ($row = $stmtIva->fetch(PDO::FETCH_ASSOC)) {
+    $tasaIva = floatval($row['tasa']);
+  }
+  $factorIva = 1 + ($tasaIva / 100);
+
+  // Matemáticas Fiscales Dinámicas
   $total = $venta['total'];
-  $subtotal = $total / 1.16;
+  $subtotal = $total / $factorIva;
   $iva = $total - $subtotal;
 
   // Función de Números a Letras
@@ -251,12 +259,16 @@ try {
           <th class="td-precio">Importe</th>
         </tr>
       </thead>
+
       <tbody>
-        <?php foreach ($detalles as $item): ?>
+        <?php foreach ($detalles as $item):
+          // Limpiamos el precio del artículo para que el ticket cuadre visualmente
+          $subtotalItemNeto = $item['subtotal'] / $factorIva;
+        ?>
           <tr>
             <td class="td-cant"><?= $item['cantidad'] ?></td>
             <td class="td-producto"><?= $item['concepto'] ?></td>
-            <td class="td-precio">$<?= number_format($item['subtotal'], 2) ?></td>
+            <td class="td-precio">$<?= number_format($subtotalItemNeto, 2) ?></td>
           </tr>
         <?php endforeach; ?>
       </tbody>
@@ -268,7 +280,7 @@ try {
         <span>$<?= number_format($subtotal, 2) ?></span>
       </div>
       <div class="fila-total">
-        <span>IVA (16%):</span>
+        <span>IVA (<?= $tasaIva ?>%):</span>
         <span>$<?= number_format($iva, 2) ?></span>
       </div>
       <div class="fila-total gran-total">
@@ -276,6 +288,7 @@ try {
         <span>$<?= number_format($total, 2) ?></span>
       </div>
     </div>
+
     <div style="text-align: right; font-size: 10px; margin-top: 5px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
       <strong>Total de artículos: <?= $totalArticulos ?></strong>
     </div>

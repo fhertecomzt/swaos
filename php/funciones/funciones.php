@@ -162,3 +162,26 @@ function obtenerOrdenesDashboard($dbh, $limit = 50)
     return [];
   }
 }
+
+// Obtener Cotizaciones con detalles (JOIN con clientes)
+function obtenerCotizacionesDashboard($dbh, $limit = 100)
+{
+  try {
+    $sql = "SELECT c.id_cotizacion, c.fecha_creacion, c.total, c.estatus, 
+                   cl.nombre_cliente, cl.papellido_cliente, cl.sapellido_cliente 
+            FROM cotizaciones c
+            LEFT JOIN clientes cl ON c.id_cliente = cl.id_cliente
+            ORDER BY c.id_cotizacion DESC
+            LIMIT :limit";
+
+    $stmt = $dbh->prepare($sql);
+    $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  } catch (Exception $e) {
+    // Si hay error, regresamos un arreglo vacío para no romper la pantalla
+    error_log("Error en obtenerCotizacionesDashboard: " . $e->getMessage());
+    return [];
+  }
+}

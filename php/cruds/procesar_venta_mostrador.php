@@ -21,6 +21,8 @@ $id_cliente = (isset($datos['id_cliente']) && $datos['id_cliente'] > 0) ? $datos
 $pago_cliente = isset($datos['pago_cliente']) ? floatval($datos['pago_cliente']) : 0;
 $cambio_cliente = isset($datos['cambio_cliente']) ? floatval($datos['cambio_cliente']) : 0;
 
+$id_cotizacion_origen = $datos['id_cotizacion_origen'] ?? 0;
+
 try {
   // Encendemos el motor de transacciones 
   $dbh->beginTransaction();
@@ -47,11 +49,22 @@ try {
   foreach ($carrito as $item) {
     $subtotal = $item['cantidad'] * $item['precio'];
 
-    // pasamos $item['id_prod'] en la segunda posición (justo después del $id_venta)
-    $stmtDetalle->execute([$id_venta, $item['id_prod'], $item['nombre'], $item['cantidad'], $item['precio'], $subtotal]);
+    // ARMADURA: Buscamos el ID con cualquier nombre que traiga el JS. Si es un concepto libre, le ponemos 0.
+    $id_producto_final = $item['id_prod'] ?? $item['id_prod_real'] ?? $item['id_producto'] ?? 0;
 
-    // Descontamos las piezas exactas del inventario físico
-    $stmtInventario->execute([$item['cantidad'], $item['id_prod'], $id_taller]);
+    // Guardamos el detalle usando nuestra variable blindada
+    $stmtDetalle->execute([$id_venta, $id_producto_final, $item['nombre'], $item['cantidad'], $item['precio'], $subtotal]);
+
+    // Solo descontamos del inventario si es un producto real (ID mayor a 0)
+    if ($id_producto_final > 0) {
+      $stmtInventario->execute([$item['cantidad'], $id_producto_final, $id_taller]);
+    }
+  }
+
+  // Si esta venta vino de una cotización, la marcamos como Aprobada
+  if ($id_cotizacion_origen > 0) {
+    $stmtCot = $dbh->prepare("UPDATE cotizaciones SET estatus = 'Aprobada' WHERE id_cotizacion = ?");
+    $stmtCot->execute([$id_cotizacion_origen]);
   }
 
   // Si todo es correcto, guardamos los cambios y cerramos la bóveda

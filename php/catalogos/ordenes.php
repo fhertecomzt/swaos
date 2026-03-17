@@ -9,7 +9,6 @@ include "../verificar_sesion.php";
 require "../conexion.php";
 include "../funciones/funciones.php";
 
-// 1. OBTENCIÓN DE CATÁLOGOS USANDO FUNCIONES.PHP
 // El 'true' al final activa el filtro WHERE estatus = 0
 // Clientes (Traemos 2000 por si tienes muchos, página 1, solo activos)
 $clientes = obtenerRegistros($dbh, "clientes", "id_cliente, nombre_cliente, papellido_cliente", "ASC", "nombre_cliente", 2000, 1, true);
@@ -138,7 +137,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
               <span id="limpiar-cliente" style="display:none; cursor:pointer; color:red; font-size: 12px;">[x] Cambiar cliente</span>
               <p></p>
 
-              <small style="color: blue; cursor: pointer;" onclick="abrirModalClienteExpress()">+ Nuevo Cliente Rápido</small>
+              <button type="button" onclick="abrirModalClienteExpress()" class="btn" style="background-color: #28a745; padding: 0 15px;" title="Nuevo Cliente Exprés"><i class="fa-solid fa-user-plus"></i></button>
             </div>
           </div>
         </div>
@@ -282,40 +281,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
     </form>
   </div>
 </div>
-<!-- Modal para crear un cliente express -->
-<div id="modalClienteExpress" class="modal" style="display: none; z-index: 2000; background-color: rgba(0,0,0,0.85);">
-  <div class="modal-contentProductos" style="max-width: 500px; margin-top: 10%;">
-    <span class="close" onclick="cerrarModalClienteExpress()">&times;</span>
-    <h3 class="tittle">Nuevo Cliente Rápido</h3>
 
-    <form id="form-cliente-express" novalidate>
-      <div class="form-group">
-        <label>Nombre:</label>
-        <input type="text" name="nombre" required autocomplete="off">
-      </div>
-
-      <div class="form-group">
-        <label>Primer Apellido:</label>
-        <input type="text" name="apellido" required autocomplete="off">
-      </div>
-
-      <div class="form-group">
-        <label>Teléfono (WhatsApp):</label>
-        <input type="text" name="telefono" required pattern="[0-9]+" title="Solo números" maxlength="10">
-      </div>
-
-      <div class="form-group">
-        <label>Email (Opcional):</label>
-        <input type="email" name="email">
-      </div>
-
-      <div style="text-align: right; margin-top: 15px;">
-        <button type="submit" class="boton-guardar">Guardar y Seleccionar</button>
-        <span class="cancelarModal" onclick="cerrarModalClienteExpress()">Cancelar</span>
-      </div>
-    </form>
-  </div>
-</div>
 <!-- Modal para editar Orden -->
 <div id="editar-modalOrden" class="modal" style="display: none; z-index: 1050;">
   <div class="modal-contentOrdenes" style="max-width: 950px;"> <span class="close" onclick="cerrarModalOrden('editar-modalOrden')">&times;</span>
@@ -454,10 +420,10 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </details>
         </div>
 
-      <div style="margin-top: 20px; text-align: right;">
-        <button type="submit" class="boton-guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
-        <span class="cancelarModal" onclick="cerrarModalOrden('editar-modalOrden')">Cancelar</span>
-      </div>
+        <div style="margin-top: 20px; text-align: right;">
+          <button type="submit" class="boton-guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
+          <span class="cancelarModal" onclick="cerrarModalOrden('editar-modalOrden')">Cancelar</span>
+        </div>
     </form>
   </div>
 </div>

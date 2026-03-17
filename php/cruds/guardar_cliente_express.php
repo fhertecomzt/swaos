@@ -1,42 +1,53 @@
 <?php
-// cruds/guardar_cliente_express.php
-require "../conexion.php";
+header("Content-Type: application/json");
+require '../conexion.php'; 
 
-header('Content-Type: application/json');
+$nombre = trim($_POST['nombre'] ?? '');
+$papellido = trim($_POST['papellido'] ?? '');
+$sapellido = trim($_POST['sapellido'] ?? '');
+$telefono = trim($_POST['telefono'] ?? '');
+$email = trim($_POST['email'] ?? '');
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  try {
-    if (empty($_POST['nombre']) || empty($_POST['telefono'])) {
-      echo json_encode(["success" => false, "message" => "Nombre y teléfono son obligatorios"]);
-      exit;
-    }
+//Validación de seguridad en el servidor
+if (strlen($nombre) < 3 || strlen($papellido) < 3 || strlen($telefono) !== 10) {
+  echo json_encode(['success' => false, 'message' => 'Datos inválidos o incompletos rechazados por el servidor.']);
+  exit;
+}
 
-    // CORRECCIÓN: Ahora insertamos NULL en los campos de dirección
-    // Nota como quitamos los ceros y 'Sin dirección'
-    $sql = "INSERT INTO clientes (
-                    nombre_cliente, papellido_cliente, tel_cliente, email_cliente, estatus, 
-                    calle_cliente, noext_cliente, noint_cliente, 
-                    id_edo_c, id_munici_c, id_col_c, id_cp_c, rfc_cliente
-                ) VALUES (?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'XAXX010101000')";
+try {
+  // La tabla exige que ciertos campos NO sean nulos, les ponemos valores por defecto
+  $rfc_default = 'XAXX010101000'; // RFC de Público en General obligatorio para tu tabla
+  $estatus = 0; // 0 = Cliente Activo
 
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute([
-      $_POST['nombre'],
-      $_POST['apellido'] ?? '',
-      $_POST['telefono'],
-      $_POST['email'] ?? 'sin@correo.com'
-    ]);
+  // INSERCIÓN EXACTA respetando las columnas de tu archivo SQL
+  $stmt = $dbh->prepare("
+        INSERT INTO clientes 
+        (nombre_cliente, papellido_cliente, sapellido_cliente, rfc_cliente, tel_cliente, email_cliente, estatus) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
 
-    $id_nuevo = $dbh->lastInsertId();
+  $stmt->execute([
+    $nombre,
+    $papellido,
+    $sapellido,
+    $rfc_default,
+    $telefono,
+    $email,
+    $estatus
+  ]);
 
-    echo json_encode([
-      "success" => true,
-      "id" => $id_nuevo,
-      "nombre_completo" => $_POST['nombre'] . ' ' . ($_POST['apellido'] ?? ''),
-      "telefono" => $_POST['telefono']
-    ]);
-  } catch (PDOException $e) {
-    // Tip: Si sigue fallando, esto nos dirá exactamente por qué
-    echo json_encode(["success" => false, "message" => "Error BD: " . $e->getMessage()]);
-  }
+  // Obtenemos el ID del cliente recién creado
+  $idNuevo = $dbh->lastInsertId();
+
+  // Armamos el nombre completo para devolvérselo a la pantalla de cotizaciones/órdenes
+  $nombreCompleto = trim($nombre . ' ' . $papellido . ' ' . $sapellido);
+
+  echo json_encode([
+    'success' => true,
+    'id' => $idNuevo,
+    'nombre_completo' => $nombreCompleto,
+    'telefono' => $telefono
+  ]);
+} catch (Exception $e) {
+  echo json_encode(['success' => false, 'message' => 'Error en la Base de Datos: ' . $e->getMessage()]);
 }

@@ -1,3 +1,4 @@
 .DS_Store
 php/conexion.php
 php/config_keys.php
+php/config_correo.php
