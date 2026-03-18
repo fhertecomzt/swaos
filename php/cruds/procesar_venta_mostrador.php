@@ -82,16 +82,20 @@ try {
   // Si todo es correcto, guardamos los cambios y cerramos la bóveda
   $dbh->commit();
 
-  // AHORA SÍ, MANDAMOS EL TELÉFONO Y EL EMAIL DE REGRESO A JAVASCRIPT
+  //  Generamos el Token Único para el enlace
+  $llave_secreta = "SWAOS_S3CR3T_2026_!#";
+  $token_venta = hash('sha256', $id_venta . $llave_secreta);
+
+  // MANDAMOS EL TELÉFONO, EL EMAIL Y EL TOKEN DE REGRESO A JAVASCRIPT
   echo json_encode([
     'success' => true,
     'message' => 'Venta registrada con éxito',
     'id_venta' => $id_venta,
     'telefono' => $tel_cliente,
-    'email' => $email_cliente
+    'email' => $email_cliente,
+    'token' => $token_venta
   ]);
 } catch (Exception $e) {
-  // Si algo explotó, cancelamos todo para que no haya robos fantasma
   $dbh->rollBack();
   echo json_encode(['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()]);
 }

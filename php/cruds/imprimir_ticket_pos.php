@@ -6,7 +6,23 @@ if (!isset($_GET['id'])) {
   die("Error: No se proporcionó el folio de la venta.");
 }
 
+$id_taller = $_SESSION['taller_id'] ?? 1; // Tomamos el taller activo de la sesión
 $id_venta = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
+$token_recibido = $_GET['token'] ?? '';
+
+// llave secreta que solo tu servidor conoce
+$llave_secreta = "SWAOS_S3CR3T_2026_!#";
+
+// Generamos matemáticamente la firma exacta que debería tener este ticket
+$token_correcto = hash('sha256', $id_venta . $llave_secreta);
+
+// Si NO es un empleado logueado en el sistema, le exigimos la firma
+if (!isset($_SESSION['id_usuario']) && !isset($_SESSION['idusuario'])) {
+  if ($token_recibido !== $token_correcto) {
+    die("<h2 style='color:red; text-align:center; font-family: Courier New; margin-top:50px;'> Acceso Denegado: El enlace del ticket es inválido o ha sido alterado.</h2>");
+  }
+}
+
 $id_taller = $_SESSION['taller_id'] ?? 1; // Tomamos el taller activo de la sesión
 
 try {

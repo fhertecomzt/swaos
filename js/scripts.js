@@ -6910,15 +6910,17 @@ function inicializarPOS() {
                   ? document.getElementById("pos-nombre-cliente").value
                   : "";
                 if (!nombreCliente || nombreCliente === "") nombreCliente = "Cliente";
-
                 let telefonoCliente = data.telefono || "";
                 let emailCliente = data.email || "";
+                let tokenTicket = data.token || "";
+
                   mostrarOpcionesTicket(
                     data.id_venta,
                     telefonoCliente,
                     nombreCliente,
                     totalVenta,
                     emailCliente,
+                    tokenTicket
                   );
               } else {
                 Swal.fire("Error", data.message, "error");
@@ -7824,7 +7826,7 @@ function ingresarEfectivo() {
 }
 
 // VENTANA DE OPCIONES DE TICKET (WHATSAPP, CORREO, IMPRIMIR)
-function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total, emailCliente = "") {
+function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total, emailCliente = "", tokenTicket = "") { // 🔥 Recibe Token
   Swal.fire({
     title: "¡Venta Exitosa!",
     text: "¿Cómo deseas entregar el comprobante?",
@@ -7840,21 +7842,17 @@ function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total, 
     allowOutsideClick: false,
   }).then((result) => {
     if (result.isConfirmed) {
-      // Clic en WhatsApp
-      enviarTicketWhatsApp(telefonoCliente, nombreCliente, idTicket, total);
+      enviarTicketWhatsApp(telefonoCliente, nombreCliente, idTicket, total, tokenTicket);
     } else if (result.isDenied) {
-      // Clic en Imprimir
-      imprimirTicketFisico(idTicket);
+      imprimirTicketFisico(idTicket, tokenTicket);
     } else if (result.dismiss === Swal.DismissReason.cancel) {
-      // Clic en Correo
-      enviarTicketCorreo(nombreCliente, idTicket, emailCliente);
+      enviarTicketCorreo(nombreCliente, idTicket, emailCliente, tokenTicket);
     }
   });
 }
 
-// MOTOR DE ENVÍO POR WHATSAPP con confirmación siempre)
-function enviarTicketWhatsApp(telefono, nombre, folio, total) {
-  // Aseguramos que si viene "0" o null, lo deje en blanco para que el cajero lo llene
+// MOTOR DE ENVÍO POR WHATSAPP (Con confirmación siempre y Token)
+function enviarTicketWhatsApp(telefono, nombre, folio, total, tokenTicket = "") {
   let telPrellenado = (!telefono || telefono === "0") ? "" : telefono;
 
   Swal.fire({
@@ -7879,14 +7877,15 @@ function enviarTicketWhatsApp(telefono, nombre, folio, total) {
     }
   }).then((result) => {
     if (result.isConfirmed) {
-      ejecutarWhatsApp(result.value, nombre, folio, total);
+      ejecutarWhatsApp(result.value, nombre, folio, total, tokenTicket);
     }
   });
 }
 
-function ejecutarWhatsApp(telefono, nombre, folio, total) {
+function ejecutarWhatsApp(telefono, nombre, folio, total, tokenTicket = "") {
+  // Ahora el enlace de WhatsApp lleva el Token secreto incrustado
   let linkTicket = new URL(
-    "../php/cruds/imprimir_ticket_pos.php?id=" + folio,
+    "../php/cruds/imprimir_ticket_pos.php?id=" + folio + "&token=" + tokenTicket,
     window.location.href,
   ).href;
 
@@ -7899,16 +7898,15 @@ function ejecutarWhatsApp(telefono, nombre, folio, total) {
   let celLimpio = telefono.replace(/\D/g, "");
   if (celLimpio.length === 10) celLimpio = "52" + celLimpio;
 
-  let urlWhatsApp = `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`;
-  window.open(urlWhatsApp, "_blank");
+  window.open(`https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`, "_blank");
 }
 
-function imprimirTicketFisico(folio) {
-  window.open(`../php/cruds/imprimir_ticket_pos.php?id=${folio}`, "_blank");
+function imprimirTicketFisico(folio, tokenTicket = "") {
+  window.open(`../php/cruds/imprimir_ticket_pos.php?id=${folio}&token=${tokenTicket}`, "_blank");
 }
 
-// MOTOR DE ENVÍO POR CORREO ELECTRÓNICO (Con confirmación siempre)
-function enviarTicketCorreo(nombre, folio, correoCliente = "") {
+// MOTOR DE ENVÍO POR CORREO ELECTRÓNICO (Con confirmación siempre y Token)
+function enviarTicketCorreo(nombre, folio, correoCliente = "", tokenTicket = "") {
   Swal.fire({
     title: "Enviar por Correo",
     html: `
@@ -7931,60 +7929,36 @@ function enviarTicketCorreo(nombre, folio, correoCliente = "") {
     }
   }).then((result) => {
     if (result.isConfirmed && result.value) {
-      ejecutarEnvioCorreo(result.value, nombre, folio);
+      ejecutarEnvioCorreo(result.value, nombre, folio, tokenTicket);
     }
   });
 }
 
-function ejecutarEnvioCorreo(email, nombre, folio) {
+function ejecutarEnvioCorreo(email, nombre, folio, tokenTicket = "") {
   Swal.fire({
     title: "Enviando Correo...",
     text: "Conectando con el servidor postal",
     allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    },
+    didOpen: () => { Swal.showLoading(); },
   });
 
+  // Ahora el enlace por correo lleva el Token secreto incrustado
   let linkTicket = new URL(
-    "../php/cruds/imprimir_ticket_pos.php?id=" + folio,
+    "../php/cruds/imprimir_ticket_pos.php?id=" + folio + "&token=" + tokenTicket,
     window.location.href,
   ).href;
 
   fetch("../php/cruds/enviar_ticket_correo.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: email,
-      nombre: nombre,
-      folio: folio,
-      link: linkTicket,
-    }),
+    body: JSON.stringify({ email: email, nombre: nombre, folio: folio, link: linkTicket }),
   })
     .then((res) => res.json())
     .then((data) => {
-      if (data.success) {
-        Swal.fire(
-          "¡Enviado!",
-          "El ticket ha sido enviado al correo del cliente.",
-          "success",
-        );
-      } else {
-        Swal.fire(
-          "Error",
-          data.message || "No se pudo enviar el correo.",
-          "error",
-        );
-      }
+      if (data.success) Swal.fire("¡Enviado!", "El ticket ha sido enviado al correo.", "success");
+      else Swal.fire("Error", data.message || "No se pudo enviar el correo.", "error");
     })
-    .catch((error) => {
-      console.error("Error al enviar correo:", error);
-      Swal.fire(
-        "Error",
-        "Hubo un problema de conexión con el servidor.",
-        "error",
-      );
-    });
+    .catch((error) => Swal.fire("Error", "Hubo un problema de conexión.", "error"));
 }
 
 // LLamar cotizaciones ***********************************************
