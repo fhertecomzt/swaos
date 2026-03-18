@@ -265,6 +265,10 @@
       <i class="fa-solid fa-magnifying-glass"></i>
     </button>
 
+    <button type="button" class="btn" style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; border: none; margin-left: 5px;" onclick="abrirModalClienteExpress()" title="Alta Rápida de Cliente">
+      <i class="fa-solid fa-user-plus"></i>
+    </button>
+
     <button id="btn-quitar-cliente-pos" style="background: #dc3545; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; display: none;" title="Regresar a Público en General">
       <i class="fa-solid fa-xmark"></i>
     </button>

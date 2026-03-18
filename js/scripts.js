@@ -5964,10 +5964,18 @@ window.abrirModalClienteExpress = function () {
               "btn-quitar-cliente-cot",
             );
 
-            if (inputHiddenCot && inputNombreCot) {
-              inputHiddenCot.value = data.id;
-              inputNombreCot.value = data.nombre_completo;
-              if (btnQuitarCot) btnQuitarCot.style.display = "inline-block";
+            //  PUNTO DE VENTA (POS)
+            const inputHiddenPOS = document.getElementById("pos-id-cliente");
+            const inputNombrePOS =
+              document.getElementById("pos-nombre-cliente");
+            const btnQuitarPOS = document.getElementById(
+              "btn-quitar-cliente-pos",
+            );
+
+            if (inputHiddenPOS && inputNombrePOS) {
+              inputHiddenPOS.value = data.id;
+              inputNombrePOS.value = data.nombre_completo.split(" ")[0]; // Solo ponemos el primer nombre
+              if (btnQuitarPOS) btnQuitarPOS.style.display = "inline-block";
             }
 
             Swal.fire({
@@ -6904,13 +6912,14 @@ function inicializarPOS() {
                 if (!nombreCliente || nombreCliente === "") nombreCliente = "Cliente";
 
                 let telefonoCliente = data.telefono || "";
-
-                mostrarOpcionesTicket(
-                  data.id_venta,
-                  telefonoCliente,
-                  nombreCliente,
-                  totalVenta,
-                );
+                let emailCliente = data.email || "";
+                  mostrarOpcionesTicket(
+                    data.id_venta,
+                    telefonoCliente,
+                    nombreCliente,
+                    totalVenta,
+                    emailCliente,
+                  );
               } else {
                 Swal.fire("Error", data.message, "error");
                 btnCobrar.disabled = false;
@@ -7815,12 +7824,7 @@ function ingresarEfectivo() {
 }
 
 // VENTANA DE OPCIONES DE TICKET (WHATSAPP, CORREO, IMPRIMIR)
-function mostrarOpcionesTicket(
-  idTicket,
-  telefonoCliente,
-  nombreCliente,
-  total,
-) {
+function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total, emailCliente = "") {
   Swal.fire({
     title: "¡Venta Exitosa!",
     text: "¿Cómo deseas entregar el comprobante?",
@@ -7843,31 +7847,41 @@ function mostrarOpcionesTicket(
       imprimirTicketFisico(idTicket);
     } else if (result.dismiss === Swal.DismissReason.cancel) {
       // Clic en Correo
-      enviarTicketCorreo(nombreCliente, idTicket);
+      enviarTicketCorreo(nombreCliente, idTicket, emailCliente);
     }
   });
 }
 
-// MOTOR DE ENVÍO POR WHATSAPP (Con captura manual)
+// MOTOR DE ENVÍO POR WHATSAPP con confirmación siempre)
 function enviarTicketWhatsApp(telefono, nombre, folio, total) {
-  if (!telefono || telefono.trim() === "" || telefono === "0") {
-    Swal.fire({
-      title: "Número de WhatsApp",
-      html: '<p style="font-size:14px;">Ingresa el número a 10 dígitos del cliente:</p>',
-      input: "number",
-      inputPlaceholder: "Ej. 5512345678",
-      showCancelButton: true,
-      confirmButtonText: 'Enviar <i class="fa-brands fa-whatsapp"></i>',
-      confirmButtonColor: "#25D366",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed && result.value) {
-        ejecutarWhatsApp(result.value, nombre, folio, total);
+  // Aseguramos que si viene "0" o null, lo deje en blanco para que el cajero lo llene
+  let telPrellenado = (!telefono || telefono === "0") ? "" : telefono;
+
+  Swal.fire({
+    title: "Enviar por WhatsApp",
+    html: `
+        <p style="font-size:14px; color:#555; margin-bottom:15px;">
+            Verifica el número para enviar el ticket <strong>#${folio}</strong>:
+        </p>
+        <input type="number" id="wa-telefono-pos" class="swal2-input" placeholder="Teléfono a 10 dígitos" value="${telPrellenado}" style="width: 80%;">
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Enviar <i class="fa-brands fa-whatsapp"></i>',
+    confirmButtonColor: "#25D366",
+    cancelButtonText: "Cancelar",
+    preConfirm: () => {
+      let tel = document.getElementById("wa-telefono-pos").value.trim();
+      if (tel.length < 10) {
+        Swal.showValidationMessage("Ingresa un número válido a 10 dígitos.");
+        return false;
       }
-    });
-  } else {
-    ejecutarWhatsApp(telefono, nombre, folio, total);
-  }
+      return tel;
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      ejecutarWhatsApp(result.value, nombre, folio, total);
+    }
+  });
 }
 
 function ejecutarWhatsApp(telefono, nombre, folio, total) {
@@ -7893,17 +7907,28 @@ function imprimirTicketFisico(folio) {
   window.open(`../php/cruds/imprimir_ticket_pos.php?id=${folio}`, "_blank");
 }
 
-// MOTOR DE ENVÍO POR CORREO ELECTRÓNICO
-function enviarTicketCorreo(nombre, folio) {
+// MOTOR DE ENVÍO POR CORREO ELECTRÓNICO (Con confirmación siempre)
+function enviarTicketCorreo(nombre, folio, correoCliente = "") {
   Swal.fire({
     title: "Enviar por Correo",
-    html: '<p style="font-size:14px;">Ingresa el correo electrónico del cliente:</p>',
-    input: "email",
-    inputPlaceholder: "cliente@empresa.com",
+    html: `
+        <p style="font-size:14px; color:#555; margin-bottom:15px;">
+            Verifica el correo electrónico para enviar el ticket <strong>#${folio}</strong>:
+        </p>
+        <input type="email" id="correo-email-pos" class="swal2-input" placeholder="cliente@empresa.com" value="${correoCliente}" style="width: 80%;">
+    `,
     showCancelButton: true,
     confirmButtonText: 'Enviar Ticket <i class="fa-solid fa-paper-plane"></i>',
     confirmButtonColor: "#dc3545",
     cancelButtonText: "Cancelar",
+    preConfirm: () => {
+      let email = document.getElementById("correo-email-pos").value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        Swal.showValidationMessage("Ingresa un correo electrónico válido.");
+        return false;
+      }
+      return email;
+    }
   }).then((result) => {
     if (result.isConfirmed && result.value) {
       ejecutarEnvioCorreo(result.value, nombre, folio);

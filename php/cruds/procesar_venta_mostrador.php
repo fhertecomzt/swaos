@@ -17,7 +17,7 @@ $id_taller = $_SESSION['taller_id'] ?? 1;
 $metodo_pago = $datos['metodo_pago'];
 $total_venta = $datos['total'];
 $carrito = $datos['carrito'];
-$id_cliente = (isset($datos['id_cliente']) && $datos['id_cliente'] > 0) ? $datos['id_cliente'] : null;
+$id_cliente = (isset($datos['id_cliente']) && $datos['id_cliente'] > 0) ? $datos['id_cliente'] : 0;
 $pago_cliente = isset($datos['pago_cliente']) ? floatval($datos['pago_cliente']) : 0;
 $cambio_cliente = isset($datos['cambio_cliente']) ? floatval($datos['cambio_cliente']) : 0;
 
@@ -66,10 +66,30 @@ try {
     $stmtCot = $dbh->prepare("UPDATE cotizaciones SET estatus = 'Aprobada' WHERE id_cotizacion = ?");
     $stmtCot->execute([$id_cotizacion_origen]);
   }
+  // BUSCAMOS LOS DATOS DEL CLIENTE PARA EL TICKET
+  $tel_cliente = "";
+  $email_cliente = "";
+  if ($id_cliente > 0) {
+    $stmtCli = $dbh->prepare("SELECT tel_cliente, email_cliente FROM clientes WHERE id_cliente = ?");
+    $stmtCli->execute([$id_cliente]);
+    $cli = $stmtCli->fetch(PDO::FETCH_ASSOC);
+    if ($cli) {
+      $tel_cliente = $cli['tel_cliente'] ?? '';
+      $email_cliente = $cli['email_cliente'] ?? '';
+    }
+  }
 
   // Si todo es correcto, guardamos los cambios y cerramos la bóveda
   $dbh->commit();
-  echo json_encode(['success' => true, 'message' => 'Venta registrada con éxito', 'id_venta' => $id_venta]);
+
+  // AHORA SÍ, MANDAMOS EL TELÉFONO Y EL EMAIL DE REGRESO A JAVASCRIPT
+  echo json_encode([
+    'success' => true,
+    'message' => 'Venta registrada con éxito',
+    'id_venta' => $id_venta,
+    'telefono' => $tel_cliente,
+    'email' => $email_cliente
+  ]);
 } catch (Exception $e) {
   // Si algo explotó, cancelamos todo para que no haya robos fantasma
   $dbh->rollBack();
