@@ -6686,419 +6686,412 @@ let carritoPOS = [];
 window.idCotizacionOrigenPOS = 0; // Para recordar si venimos de una cotización
 
 function inicializarPOS() {
-  carritoPOS = [];
-  window.idCotizacionOrigenPOS = 0; // La reseteamos a 0 por si es una venta normal
-
-  let cotizacionPendiente = sessionStorage.getItem("cotizacion_a_venta");
-
-  if (cotizacionPendiente) {
-    let dataCot = JSON.parse(cotizacionPendiente);
-
-    //LE DAMOS LA MEMORIA AL POS:
-    window.idCotizacionOrigenPOS = dataCot.cotizacion.id_cotizacion;
-
-    // Inyectamos los datos del cliente en la caja (si es que había uno)
-    setTimeout(() => {
-      // Pequeño delay para asegurar que el DOM cargó
-      let inputIdClienteVenta = document.getElementById("pos-id-cliente");
-      let inputNombreClienteVenta =
-        document.getElementById("pos-nombre-cliente");
-      let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
-
-      if (inputIdClienteVenta)
-        inputIdClienteVenta.value = dataCot.cotizacion.id_cliente;
-      if (inputNombreClienteVenta && dataCot.cotizacion.id_cliente != "0") {
-        // Si no es público en general, llenamos el campo y mostramos la "X"
-        inputNombreClienteVenta.value =
-          dataCot.cotizacion.nombre_cliente_completo;
-        if (btnQuitarCliente) btnQuitarCliente.style.display = "inline-block";
-      }
-    }, 100);
-
-    // Pasamos todos los productos de la cotización al carrito de ventas
-    dataCot.detalles.forEach((det) => {
-      carritoPOS.push({
-        id_interno: "cot_" + det.id_detalle,
-        id_prod_real: det.id_producto,
-        nombre: det.concepto,
-        precio: parseFloat(det.precio_unitario),
-        cantidad: parseInt(det.cantidad),
-        stock_max: 9999, // Ignoramos stock por si era concepto libre
-      });
-    });
-    // Le ordenamos a la pantalla que redibuje la tabla con los productos nuevos
-    if (typeof actualizarCarritoUI === "function") {
-      actualizarCarritoUI();
-    }
-
-    //  Limpiamos la memoria del navegador para que no se vuelva a cargar en el futuro
-    sessionStorage.removeItem("cotizacion_a_venta");
-
-    // Alerta de éxito para el cajero
-    const Toast = Swal.mixin({
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 3000,
-    });
-    Toast.fire({
-      icon: "success",
-      title: "Cotización #" + dataCot.cotizacion.id_cotizacion + " cargada.",
-    });
-  } 
-
-  cargarInventarioPOS();
-
-  // Activar buscador en tiempo real
-  let buscador = document.getElementById("buscar-producto-pos");
-  if (buscador) {
-    buscador.addEventListener("input", function (e) {
-      renderizarGridProductos(e.target.value);
-    });
-  }
-
-  // Activar botón de cobrar (lo conectaremos a PHP en el siguiente paso)
-  // BOTÓN COBRAR (CON POPUPS DE PAGO)
-  let btnCobrar = document.getElementById("pos-btn-cobrar");
-  if (btnCobrar) {
-    btnCobrar.addEventListener("click", function () {
-      if (carritoPOS.length === 0) return;
-
-      let totalVenta = carritoPOS.reduce(
-        (sum, item) => sum + item.precio * item.cantidad,
-        0,
-      );
-      let metodoPago = document.getElementById("pos-metodo-pago").value;
-
-      // PAGO EN EFECTIVO (Calculadora de Cambio)
-      if (metodoPago === "Efectivo") {
-        Swal.fire({
-          title: "Cobro en Efectivo ",
-          html: `<h2 style="color:#28a745; margin:10px 0;">Total: $${totalVenta.toFixed(2)}</h2>`,
-          input: "number",
-          inputAttributes: { step: "0.50", min: totalVenta },
-          inputPlaceholder: "¿Con cuánto paga el cliente?",
-          showCancelButton: true,
-          confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
-          cancelButtonText: "Cancelar",
-          inputValidator: (value) => {
-            if (!value) return "Debes ingresar una cantidad";
-            if (parseFloat(value) < totalVenta)
-              return "El pago es menor al total a cobrar";
-          },
-        }).then((result) => {
-          if (result.isConfirmed) {
-            let pagoReal = parseFloat(result.value);
-            let cambio = pagoReal - totalVenta;
-
-            // Mostramos el cambio en gigante y luego cobramos
+  // Verificamos si hay cortes pendientes de días anteriores
+  fetch("../php/funciones/verificar_corte_pendiente.php")
+    .then(res => res.json())
+    .then(data => {
+        if (data.bloquear) {
             Swal.fire({
-              icon: "info",
-              title: "Su Cambio es:",
-              html: `<h1 style="font-size: 40px; color: #007bff; margin: 0;">$${cambio.toFixed(2)}</h1>`,
-              confirmButtonText: "Continuar a Entrega de Ticket",
-              allowOutsideClick: false,
+                title: "¡Corte Pendiente!",
+                text: "Detectamos ventas de días anteriores sin cerrar. Debes realizar tu Corte de Caja antes de iniciar un nuevo turno de ventas.",
+                icon: "error",
+                allowOutsideClick: false,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: '<i class="fa-solid fa-cash-register"></i> Ir a Corte de Caja'
             }).then(() => {
-              // Mandamos total, metodo, PAGO REAL, CAMBIO, referencia vacía
-              procesarCobroEnBackend(
-                totalVenta,
-                metodoPago,
-                pagoReal,
-                cambio,
-                "",
-              );
+                // Redirigimos al usuario a la pantalla de Corte a la fuerza
+                if(document.getElementById("corte-link")) {
+                    document.getElementById("corte-link").click();
+                }
             });
-          }
-        });
-      }
-      // PAGO CON TARJETA (Pide Referencia)
-      else if (metodoPago === "Tarjeta") {
-        Swal.fire({
-          title: "Cobro con Tarjeta",
-          text: `Total a cobrar: $${totalVenta.toFixed(2)}`,
-          input: "text",
-          inputPlaceholder: "Ingresa el No. de Autorización o Referencia",
-          showCancelButton: true,
-          confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
-          cancelButtonText: "Cancelar",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // Mandamos total, metodo, 0 de pago, 0 de cambio, y la REFERENCIA
-            procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, result.value);
-          }
-        });
-      }
-      // TRANSFERENCIA (Pasa directo)
-      else {
-        // Mandamos total, metodo, 0, 0, y referencia vacía
-        procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, "");
-      }
-    });
-  }
-
-  // Función global para enviar los datos a PHP (AHORA CON PAGO Y CAMBIO)
-  window.procesarCobroEnBackend = function (
-    totalVenta,
-    metodoPago,
-    pagoCliente,
-    cambioCliente,
-    referencia,
-  ) {
-    let btnCobrar = document.getElementById("pos-btn-cobrar");
-    btnCobrar.disabled = true;
-    btnCobrar.innerHTML =
-      '<i class="fa-solid fa-spinner fa-spin"></i> COBRANDO...';
-
-    let idClienteSeleccionado = document.getElementById("pos-id-cliente")
-      ? document.getElementById("pos-id-cliente").value
-      : 0;
-
-    let datosVenta = {
-      carrito: carritoPOS,
-      total: totalVenta,
-      metodo_pago: metodoPago,
-      referencia: referencia,
-      id_cliente: idClienteSeleccionado,
-      pago_cliente: pagoCliente,
-      cambio_cliente: cambioCliente,
-      id_cotizacion_origen: window.idCotizacionOrigenPOS, 
-    };
-
-    fetch("../php/cruds/procesar_venta_mostrador.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(datosVenta),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          carritoPOS = [];
-          cargarInventarioPOS();
-          actualizarCarritoUI();
-          btnCobrar.innerHTML =
-            '<i class="fa-solid fa-check-circle"></i> COBRAR';
-
-          let selectPago = document.getElementById("pos-metodo-pago");
-          if (selectPago) selectPago.value = "Efectivo";
-
-          localStorage.setItem("ultima_venta_pos", data.id_venta);
-
-          //  llamamos al Modal
-          let nombreCliente = document.getElementById("pos-nombre-cliente")
-            ? document.getElementById("pos-nombre-cliente").value
-            : "";
-          if (!nombreCliente || nombreCliente === "") nombreCliente = "Cliente";
-
-          // Si PHP ya devuelve data.telefono lo usamos, si no, va vacío para pedirlo manual
-          let telefonoCliente = data.telefono || "";
-
-          // Llamamos a la ventana mágica
-          mostrarOpcionesTicket(
-            data.id_venta,
-            telefonoCliente,
-            nombreCliente,
-            totalVenta,
-          );
-        } else {
-          Swal.fire("Error", data.message, "error");
-          btnCobrar.disabled = false;
+            
+            // Ocultamos la interfaz del POS para que no pueda vender nada
+            let posContainer = document.getElementById("pos-container"); 
+            if(posContainer) posContainer.style.opacity = "0.2";
+            if(posContainer) posContainer.style.pointerEvents = "none";
+            return; // Detenemos la ejecución del POS aquí mismo
         }
-      })
-      .catch((error) => {
-        console.error("Error en el cobro:", error);
-        Swal.fire("Error", "Ocurrió un error en el servidor.", "error");
-        btnCobrar.disabled = false;
-      });
-  };
 
-  // Botón de Reimprimir Último Ticket
-  let btnReimprimir = document.getElementById("btn-reimprimir-pos");
-  if (btnReimprimir) {
-    btnReimprimir.addEventListener("click", function () {
-      let ultimaVenta = localStorage.getItem("ultima_venta_pos");
-      if (ultimaVenta) {
-        window.open(
-          "../php/cruds/imprimir_ticket_pos.php?id=" + ultimaVenta,
-          "_blank",
-        );
-      } else {
-        Swal.fire(
-          "Aviso",
-          "No hay registros de ventas recientes en esta computadora.",
-          "info",
-        );
-      }
-    });
-  }
-  // BUSCADOR DE CLIENTES EN EL POS
-  let btnBuscarCliente = document.getElementById("btn-buscar-cliente-pos");
-  let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
-  let inputIdCliente = document.getElementById("pos-id-cliente");
-  let inputNombreCliente = document.getElementById("pos-nombre-cliente");
+        // SI NO HAY BLOQUEO, CONTINÚA EL FLUJO NORMAL DEL POS
+        carritoPOS = [];
+        window.idCotizacionOrigenPOS = 0; // La reseteamos a 0 por si es una venta normal
 
-  if (btnBuscarCliente) {
-    btnBuscarCliente.addEventListener("click", function () {
-      // Vamos a la API por la lista de clientes
-      fetch("../php/funciones/api_clientes_pos.php")
-        .then((res) => res.json())
-        .then((clientes) => {
-          if (clientes.error) {
-            Swal.fire("Error", "No se pudieron cargar los clientes.", "error");
-            return;
+        let cotizacionPendiente = sessionStorage.getItem("cotizacion_a_venta");
+
+        if (cotizacionPendiente) {
+          let dataCot = JSON.parse(cotizacionPendiente);
+
+          //LE DAMOS LA MEMORIA AL POS:
+          window.idCotizacionOrigenPOS = dataCot.cotizacion.id_cotizacion;
+
+          // Inyectamos los datos del cliente en la caja (si es que había uno)
+          setTimeout(() => {
+            // Pequeño delay para asegurar que el DOM cargó
+            let inputIdClienteVenta = document.getElementById("pos-id-cliente");
+            let inputNombreClienteVenta = document.getElementById("pos-nombre-cliente");
+            let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
+
+            if (inputIdClienteVenta)
+              inputIdClienteVenta.value = dataCot.cotizacion.id_cliente;
+            
+            if (inputNombreClienteVenta && dataCot.cotizacion.id_cliente != "0") {
+              // Si no es público en general, llenamos el campo y mostramos la "X"
+              inputNombreClienteVenta.value = dataCot.cotizacion.nombre_cliente_completo;
+              if (btnQuitarCliente) btnQuitarCliente.style.display = "inline-block";
+            }
+          }, 100);
+
+          // Pasamos todos los productos de la cotización al carrito de ventas
+          dataCot.detalles.forEach((det) => {
+            carritoPOS.push({
+              id_interno: "cot_" + det.id_detalle,
+              id_prod: det.id_producto, // CORREGIDO PARA QUE NO MARQUE ERROR EN PHP
+              nombre: det.concepto,
+              precio: parseFloat(det.precio_unitario),
+              cantidad: parseInt(det.cantidad),
+              stock_max: 9999, // Ignoramos stock por si era concepto libre
+            });
+          });
+          
+          // Le ordenamos a la pantalla que redibuje la tabla con los productos nuevos
+          if (typeof actualizarCarritoUI === "function") {
+            actualizarCarritoUI();
           }
 
-          // Armamos las opciones de la lista
-          let options =
-            '<option value="0" selected>Público en General</option>';
-          clientes.forEach((c) => {
-            options += `<option value="${c.id_cliente}">${c.nombre}- ${c.papellido} - ${c.telefono}</option>`;
-          });
+          // Limpiamos la memoria del navegador para que no se vuelva a cargar en el futuro
+          sessionStorage.removeItem("cotizacion_a_venta");
 
-          // Mostramos el SweetAlert con Buscador Integrado
-          Swal.fire({
-            title: "Seleccionar Cliente 👤",
-            html: `
+          // Alerta de éxito para el cajero
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+          });
+          Toast.fire({
+            icon: "success",
+            title: "Cotización #" + dataCot.cotizacion.id_cotizacion + " cargada.",
+          });
+        } 
+
+        cargarInventarioPOS();
+
+        // Activar buscador en tiempo real
+        let buscador = document.getElementById("buscar-producto-pos");
+        if (buscador) {
+          buscador.addEventListener("input", function (e) {
+            renderizarGridProductos(e.target.value);
+          });
+        }
+
+        // Activar botón de cobrar (lo conectaremos a PHP en el siguiente paso)
+        let btnCobrar = document.getElementById("pos-btn-cobrar");
+        if (btnCobrar) {
+          btnCobrar.addEventListener("click", function () {
+            if (carritoPOS.length === 0) return;
+
+            let totalVenta = carritoPOS.reduce(
+              (sum, item) => sum + item.precio * item.cantidad,
+              0,
+            );
+            let metodoPago = document.getElementById("pos-metodo-pago").value;
+
+            // PAGO EN EFECTIVO (Calculadora de Cambio)
+            if (metodoPago === "Efectivo") {
+              Swal.fire({
+                title: "Cobro en Efectivo ",
+                html: `<h2 style="color:#28a745; margin:10px 0;">Total: $${totalVenta.toFixed(2)}</h2>`,
+                input: "number",
+                inputAttributes: { step: "0.50", min: totalVenta },
+                inputPlaceholder: "¿Con cuánto paga el cliente?",
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
+                cancelButtonText: "Cancelar",
+                inputValidator: (value) => {
+                  if (!value) return "Debes ingresar una cantidad";
+                  if (parseFloat(value) < totalVenta)
+                    return "El pago es menor al total a cobrar";
+                },
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  let pagoReal = parseFloat(result.value);
+                  let cambio = pagoReal - totalVenta;
+
+                  // Mostramos el cambio en gigante y luego cobramos
+                  Swal.fire({
+                    icon: "info",
+                    title: "Su Cambio es:",
+                    html: `<h1 style="font-size: 40px; color: #007bff; margin: 0;">$${cambio.toFixed(2)}</h1>`,
+                    confirmButtonText: "Continuar a Entrega de Ticket",
+                    allowOutsideClick: false,
+                  }).then(() => {
+                    procesarCobroEnBackend(totalVenta, metodoPago, pagoReal, cambio, "");
+                  });
+                }
+              });
+            }
+            // PAGO CON TARJETA (Pide Referencia)
+            else if (metodoPago === "Tarjeta") {
+              Swal.fire({
+                title: "Cobro con Tarjeta",
+                text: `Total a cobrar: $${totalVenta.toFixed(2)}`,
+                input: "text",
+                inputPlaceholder: "Ingresa el No. de Autorización o Referencia",
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
+                cancelButtonText: "Cancelar",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, result.value);
+                }
+              });
+            }
+            // TRANSFERENCIA (Pasa directo)
+            else {
+              procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, "");
+            }
+          });
+        }
+
+        // Función global para enviar los datos a PHP
+        window.procesarCobroEnBackend = function (
+          totalVenta,
+          metodoPago,
+          pagoCliente,
+          cambioCliente,
+          referencia,
+        ) {
+          let btnCobrar = document.getElementById("pos-btn-cobrar");
+          btnCobrar.disabled = true;
+          btnCobrar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> COBRANDO...';
+
+          let idClienteSeleccionado = document.getElementById("pos-id-cliente")
+            ? document.getElementById("pos-id-cliente").value
+            : 0;
+
+          let datosVenta = {
+            carrito: carritoPOS,
+            total: totalVenta,
+            metodo_pago: metodoPago,
+            referencia: referencia,
+            id_cliente: idClienteSeleccionado,
+            pago_cliente: pagoCliente,
+            cambio_cliente: cambioCliente,
+            id_cotizacion_origen: window.idCotizacionOrigenPOS, 
+          };
+
+          fetch("../php/cruds/procesar_venta_mostrador.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datosVenta),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                carritoPOS = [];
+                cargarInventarioPOS();
+                actualizarCarritoUI();
+                btnCobrar.innerHTML = '<i class="fa-solid fa-check-circle"></i> COBRAR';
+
+                let selectPago = document.getElementById("pos-metodo-pago");
+                if (selectPago) selectPago.value = "Efectivo";
+
+                localStorage.setItem("ultima_venta_pos", data.id_venta);
+
+                let nombreCliente = document.getElementById("pos-nombre-cliente")
+                  ? document.getElementById("pos-nombre-cliente").value
+                  : "";
+                if (!nombreCliente || nombreCliente === "") nombreCliente = "Cliente";
+
+                let telefonoCliente = data.telefono || "";
+
+                mostrarOpcionesTicket(
+                  data.id_venta,
+                  telefonoCliente,
+                  nombreCliente,
+                  totalVenta,
+                );
+              } else {
+                Swal.fire("Error", data.message, "error");
+                btnCobrar.disabled = false;
+              }
+            })
+            .catch((error) => {
+              console.error("Error en el cobro:", error);
+              Swal.fire("Error", "Ocurrió un error en el servidor.", "error");
+              btnCobrar.disabled = false;
+            });
+        };
+
+        // Botón de Reimprimir Último Ticket
+        let btnReimprimir = document.getElementById("btn-reimprimir-pos");
+        if (btnReimprimir) {
+          btnReimprimir.addEventListener("click", function () {
+            let ultimaVenta = localStorage.getItem("ultima_venta_pos");
+            if (ultimaVenta) {
+              window.open(
+                "../php/cruds/imprimir_ticket_pos.php?id=" + ultimaVenta,
+                "_blank",
+              );
+            } else {
+              Swal.fire("Aviso", "No hay registros de ventas recientes en esta computadora.", "info");
+            }
+          });
+        }
+
+        // BUSCADOR DE CLIENTES EN EL POS
+        let btnBuscarCliente = document.getElementById("btn-buscar-cliente-pos");
+        let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
+        let inputIdCliente = document.getElementById("pos-id-cliente");
+        let inputNombreCliente = document.getElementById("pos-nombre-cliente");
+
+        if (btnBuscarCliente) {
+          btnBuscarCliente.addEventListener("click", function () {
+            fetch("../php/funciones/api_clientes_pos.php")
+              .then((res) => res.json())
+              .then((clientes) => {
+                if (clientes.error) {
+                  Swal.fire("Error", "No se pudieron cargar los clientes.", "error");
+                  return;
+                }
+
+                let options = '<option value="0" selected>Público en General</option>';
+                clientes.forEach((c) => {
+                  options += `<option value="${c.id_cliente}">${c.nombre}- ${c.papellido} - ${c.telefono}</option>`;
+                });
+
+                Swal.fire({
+                  title: "Seleccionar Cliente 👤",
+                  html: `
                       <input type="search" id="swal-search-cliente" class="swal2-input" placeholder="🔍 Buscar por nombre o teléfono..." autocomplete="off" style="width: 90%; max-width: 100%; margin: 0 auto 15px auto; display: block; box-sizing: border-box;">
                       <select id="swal-select-cliente" size="6" style="width: 90%; height:140px !important; max-width: 100%; overflow-y: auto; overflow-x: hidden; padding: 10px; font-size: 15px; border: 1px solid #d9d9d9; border-radius: 8px; outline: none; display: block; margin: 0 auto; box-sizing: border-box; background: #fff; color: #333;">
                           ${options}
                       </select>
                   `,
-            showCancelButton: true,
-            confirmButtonText: '<i class="fa-solid fa-check"></i> Asignar',
-            cancelButtonText: "Cancelar",
-            didOpen: () => {
-              // Variables del buscador y la lista
-              let buscador = document.getElementById("swal-search-cliente");
-              let select = document.getElementById("swal-select-cliente");
-              let opciones = select.getElementsByTagName("option");
+                  showCancelButton: true,
+                  confirmButtonText: '<i class="fa-solid fa-check"></i> Asignar',
+                  cancelButtonText: "Cancelar",
+                  didOpen: () => {
+                    let buscador = document.getElementById("swal-search-cliente");
+                    let select = document.getElementById("swal-select-cliente");
+                    let opciones = select.getElementsByTagName("option");
 
-              // Ponemos el cursor automáticamente en el buscador
-              buscador.focus();
+                    buscador.focus();
 
-              // Filtramos la lista en tiempo real mientras escribe
-              buscador.addEventListener("keyup", function () {
-                let filtro = this.value.toLowerCase();
-                for (let i = 0; i < opciones.length; i++) {
-                  let texto = opciones[i].textContent.toLowerCase();
-                  // Siempre mostrar "Público en General" o si coincide la búsqueda
-                  if (opciones[i].value === "0" || texto.includes(filtro)) {
-                    opciones[i].style.display = "";
-                  } else {
-                    opciones[i].style.display = "none";
+                    buscador.addEventListener("keyup", function () {
+                      let filtro = this.value.toLowerCase();
+                      for (let i = 0; i < opciones.length; i++) {
+                        let texto = opciones[i].textContent.toLowerCase();
+                        if (opciones[i].value === "0" || texto.includes(filtro)) {
+                          opciones[i].style.display = "";
+                        } else {
+                          opciones[i].style.display = "none";
+                        }
+                      }
+                    });
+
+                    select.addEventListener("dblclick", function () {
+                      Swal.clickConfirm();
+                    });
+                  },
+                  preConfirm: () => {
+                    let select = document.getElementById("swal-select-cliente");
+                    if (select.selectedIndex === -1) {
+                      Swal.showValidationMessage("Selecciona un cliente de la lista");
+                      return false;
+                    }
+                    return {
+                      id: select.value,
+                      texto: select.options[select.selectedIndex].text,
+                    };
+                  },
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    let cliente = result.value;
+                    inputIdCliente.value = cliente.id;
+
+                    if (cliente.id === "0") {
+                      inputNombreCliente.value = "";
+                      btnQuitarCliente.style.display = "none";
+                    } else {
+                      let soloNombre = cliente.texto.split(" - ")[0];
+                      inputNombreCliente.value = soloNombre;
+                      btnQuitarCliente.style.display = "inline-block";
+                    }
                   }
-                }
+                });
               });
-
-              // Asignar al dar Doble Clic en el nombre
-              select.addEventListener("dblclick", function () {
-                Swal.clickConfirm(); // Simula el clic en el botón "Asignar"
-              });
-            },
-            preConfirm: () => {
-              let select = document.getElementById("swal-select-cliente");
-              if (select.selectedIndex === -1) {
-                Swal.showValidationMessage("Selecciona un cliente de la lista");
-                return false;
-              }
-              return {
-                id: select.value,
-                texto: select.options[select.selectedIndex].text,
-              };
-            },
-          }).then((result) => {
-            if (result.isConfirmed) {
-              let cliente = result.value;
-              inputIdCliente.value = cliente.id;
-
-              if (cliente.id === "0") {
-                inputNombreCliente.value = "";
-                btnQuitarCliente.style.display = "none";
-              } else {
-                // Extraemos solo el nombre (sin el teléfono) para el encabezado
-                let soloNombre = cliente.texto.split(" - ")[0];
-                inputNombreCliente.value = soloNombre;
-                btnQuitarCliente.style.display = "inline-block";
-              }
-            }
           });
-        });
-    });
-  }
+        }
 
-  // Botón rojo de la "X" para cancelar el cliente y regresar a Público en General
-  if (btnQuitarCliente) {
-    btnQuitarCliente.addEventListener("click", function () {
-      inputIdCliente.value = "0";
-      inputNombreCliente.value = "";
-      this.style.display = "none"; // Ocultamos la "X"
-    });
-  }
+        if (btnQuitarCliente) {
+          btnQuitarCliente.addEventListener("click", function () {
+            inputIdCliente.value = "0";
+            inputNombreCliente.value = "";
+            this.style.display = "none";
+          });
+        }
 
-  // BOTÓN DE RETIRO DE CAJA (GASTOS)
-  let btnRetiroCaja = document.getElementById("btn-retiro-caja-pos");
-  if (btnRetiroCaja) {
-    btnRetiroCaja.addEventListener("click", function () {
-      Swal.fire({
-        title: "Retiro de Efectivo",
-        html: `
+        // BOTÓN DE RETIRO DE CAJA (GASTOS)
+        let btnRetiroCaja = document.getElementById("btn-retiro-caja-pos");
+        if (btnRetiroCaja) {
+          btnRetiroCaja.addEventListener("click", function () {
+            Swal.fire({
+              title: "Retiro de Efectivo",
+              html: `
                   <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Registra el dinero que tomas físicamente del cajón.</p>
                   <input type="text" id="swal-motivo-retiro" class="swal2-input" placeholder="Motivo (Ej. Pago de agua, comida...)" autocomplete="off" style="width: 85%;">
                   <input type="number" id="swal-monto-retiro" class="swal2-input" placeholder="$ Monto a retirar" step="0.50" min="0.50" style="width: 85%;">
               `,
-        showCancelButton: true,
-        confirmButtonColor: "#dc3545",
-        confirmButtonText:
-          '<i class="fa-solid fa-hand-holding-dollar"></i> Registrar Retiro',
-        cancelButtonText: "Cancelar",
-        preConfirm: () => {
-          let motivo = document
-            .getElementById("swal-motivo-retiro")
-            .value.trim();
-          let monto = parseFloat(
-            document.getElementById("swal-monto-retiro").value,
-          );
+              showCancelButton: true,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: '<i class="fa-solid fa-hand-holding-dollar"></i> Registrar Retiro',
+              cancelButtonText: "Cancelar",
+              preConfirm: () => {
+                let motivo = document.getElementById("swal-motivo-retiro").value.trim();
+                let monto = parseFloat(document.getElementById("swal-monto-retiro").value);
 
-          if (!motivo) {
-            Swal.showValidationMessage(
-              "Debes escribir un motivo para el corte.",
-            );
-            return false;
-          }
-          if (!monto || monto <= 0) {
-            Swal.showValidationMessage(
-              "Ingresa una cantidad válida mayor a 0.",
-            );
-            return false;
-          }
+                if (!motivo) {
+                  Swal.showValidationMessage("Debes escribir un motivo para el corte.");
+                  return false;
+                }
+                if (!monto || monto <= 0) {
+                  Swal.showValidationMessage("Ingresa una cantidad válida mayor a 0.");
+                  return false;
+                }
 
-          return { motivo: motivo, monto: monto };
-        },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // Lo mandamos al servidor para guardarlo
-          fetch("../php/funciones/registrar_retiro_caja.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(result.value),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.success) {
-                Swal.fire({
-                  icon: "success",
-                  title: "Retiro Registrado",
-                  text: `Se restaron $${result.value.monto.toFixed(2)} de la caja.`,
-                  timer: 2000,
-                  showConfirmButton: false,
-                });
-              } else {
-                Swal.fire("Error", data.message, "error");
+                return { motivo: motivo, monto: monto };
+              },
+            }).then((result) => {
+              if (result.isConfirmed) {
+                fetch("../php/funciones/registrar_retiro_caja.php", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(result.value),
+                })
+                  .then((res) => res.json())
+                  .then((data) => {
+                    if (data.success) {
+                      Swal.fire({
+                        icon: "success",
+                        title: "Retiro Registrado",
+                        text: `Se restaron $${result.value.monto.toFixed(2)} de la caja.`,
+                        timer: 2000,
+                        showConfirmButton: false,
+                      });
+                    } else {
+                      Swal.fire("Error", data.message, "error");
+                    }
+                  });
               }
             });
+          });
         }
-      });
+        
+    })
+    .catch(err => {
+        console.error("Error al verificar corte:", err);
     });
-  }
 }
 
 //  Traer productos de la base de datos
@@ -7334,119 +7327,102 @@ document
       });
   });
 
-// MÓDULO: CORTE DE CAJA (REPORTE Z)
+// MÓDULO: CORTE DE CAJA (REPORTE Z) - VERSIÓN CORTE CIEGO 
 function inicializarCorteCaja() {
-  // Traer los totales del día
   fetch("../php/funciones/api_corte_caja.php")
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
-        // Llenamos las tarjetas visuales
         document.getElementById("corte-fecha-actual").textContent = data.fecha;
-        document.getElementById("corte-total-efectivo").textContent =
-          `$${data.efectivo.toFixed(2)}`;
-        document.getElementById("corte-total-tarjeta").textContent =
-          `$${data.tarjeta.toFixed(2)}`;
-        document.getElementById("corte-total-transferencia").textContent =
-          `$${data.transferencia.toFixed(2)}`;
+        
+        //  CORTE CIEGO: Ocultamos los totales visuales con signos de interrogación
+        document.getElementById("corte-total-efectivo").textContent = "$ ??.??";
+        document.getElementById("corte-total-tarjeta").textContent = "$ ??.??";
+        document.getElementById("corte-total-transferencia").textContent = "$ ??.??";
 
-        // Guardamos el efectivo esperado escondido en la memoria para usarlo luego
+        //  GUARDAMOS LOS DATOS REALES EN SECRETO EN LA MEMORIA
         window.efectivoEsperadoSistema = data.efectivo;
-        // Guardamos los retiros para el ticket
+        window.tarjetaEsperada = data.tarjeta;
+        window.transferenciaEsperada = data.transferencia;
         window.retirosCorte = data.retiros;
 
-        // Si el cajero ya hizo ventas, habilitamos la caja para contar
         if (data.efectivo > 0 || data.tarjeta > 0 || data.transferencia > 0) {
-          activarCuadreFisico();
+          activarCuadreFisicoCiego();
         } else {
-          document.getElementById("corte-mensaje-resultado").style.display =
-            "block";
-          document.getElementById("corte-mensaje-resultado").textContent =
-            "No hay ventas registradas el día de hoy.";
-          document.getElementById("corte-mensaje-resultado").className =
-            "resultado-cuadre cuadre-sobra";
+          document.getElementById("corte-mensaje-resultado").style.display = "block";
+          document.getElementById("corte-mensaje-resultado").textContent = "No hay ventas registradas en el turno actual.";
+          document.getElementById("corte-mensaje-resultado").className = "resultado-cuadre cuadre-sobra";
         }
       }
     })
     .catch((err) => console.error("Error al cargar corte:", err));
 }
 
-// Lógica del Cajero contando los billetes
-function activarCuadreFisico() {
+// Lógica del Cajero (Corte Ciego)
+function activarCuadreFisicoCiego() {
   let inputFisico = document.getElementById("corte-efectivo-fisico");
   let mensaje = document.getElementById("corte-mensaje-resultado");
   let btnCerrar = document.getElementById("btn-procesar-corte");
 
-  inputFisico.addEventListener("keyup", function () {
-    let fisico = parseFloat(this.value);
-    let esperado = window.efectivoEsperadoSistema;
+  // Limpiamos la pantalla inicial
+  mensaje.style.display = "block";
+  mensaje.textContent = "Cuenta el dinero del cajón e ingresa el monto total.";
+  mensaje.className = "resultado-cuadre";
+  btnCerrar.disabled = false;
 
-    mensaje.style.display = "block";
-
-    if (isNaN(fisico) || fisico === "") {
-      mensaje.textContent = "Esperando conteo...";
-      mensaje.className = "resultado-cuadre";
-      btnCerrar.disabled = true;
-      return;
-    }
-
-    let diferencia = fisico - esperado;
-
-    if (diferencia === 0) {
-      mensaje.textContent = " ¡CUADRE PERFECTO! ($0.00)";
-      mensaje.className = "resultado-cuadre cuadre-ok";
-      btnCerrar.disabled = false; // Se prende el botón para imprimir
-    } else if (diferencia < 0) {
-      mensaje.textContent = ` ¡FALTAN $${Math.abs(diferencia).toFixed(2)} EN LA CAJA!`;
-      mensaje.className = "resultado-cuadre cuadre-falta";
-      btnCerrar.disabled = false; // Le dejamos cerrar pero quedará registrado el robo/error
-    } else {
-      mensaje.textContent = ` SOBRAN $${diferencia.toFixed(2)} EN LA CAJA.`;
-      mensaje.className = "resultado-cuadre cuadre-sobra";
-      btnCerrar.disabled = false;
-    }
-  });
-  //  EVENTO DEL BOTÓN CERRAR TURNO
+  // EVENTO DEL BOTÓN CERRAR TURNO (Aquí ocurre la revelación)
   btnCerrar.onclick = function () {
     let fisico = parseFloat(inputFisico.value);
     let esperado = window.efectivoEsperadoSistema;
+
+    if (isNaN(fisico) || fisico < 0) {
+        Swal.fire("Atención", "Debes ingresar cuánto dinero físico contaste en la caja.", "warning");
+        return;
+    }
+
     let diferencia = fisico - esperado;
 
-    // Limpiamos los textos para sacar solo los números puros
-    let tarjeta = parseFloat(
-      document
-        .getElementById("corte-total-tarjeta")
-        .textContent.replace("$", ""),
-    );
-    let transferencia = parseFloat(
-      document
-        .getElementById("corte-total-transferencia")
-        .textContent.replace("$", ""),
-    );
-    let retiros = window.retirosCorte || 0;
+    // Preparamos el veredicto
+    let titulo = "";
+    let htmlMensaje = "";
+    let icono = "";
 
-    let datosCorte = {
-      esperado,
-      fisico,
-      diferencia,
-      tarjeta,
-      transferencia,
-      retiros,
-    };
+    if (diferencia === 0) {
+        titulo = "¡Cuadre Perfecto! ";
+        htmlMensaje = `El sistema esperaba <b>$${esperado.toFixed(2)}</b> y contaste exactamente <b>$${fisico.toFixed(2)}</b>.`;
+        icono = "success";
+    } else if (diferencia < 0) {
+        titulo = "¡Faltante Detectado! ";
+        htmlMensaje = `Faltan <b style="color:red;">$${Math.abs(diferencia).toFixed(2)}</b> en caja.<br><br>El sistema esperaba <b>$${esperado.toFixed(2)}</b> y solo declaraste <b>$${fisico.toFixed(2)}</b>.`;
+        icono = "warning";
+    } else {
+        titulo = "¡Sobrante Detectado! ";
+        htmlMensaje = `Sobran <b style="color:green;">$${diferencia.toFixed(2)}</b> en caja.<br><br>El sistema esperaba <b>$${esperado.toFixed(2)}</b> y declaraste <b>$${fisico.toFixed(2)}</b>.`;
+        icono = "info";
+    }
 
     Swal.fire({
-      title: "¿Imprimir Corte Z?",
-      text: "Se guardará el registro del turno y se imprimirá el ticket.",
-      icon: "warning",
+      title: titulo,
+      html: htmlMensaje + "<br><br>¿Confirmar este resultado e Imprimir Corte Z?",
+      icon: icono,
       showCancelButton: true,
       confirmButtonColor: "#dc3545",
-      confirmButtonText: '<i class="fa-solid fa-lock"></i> Sí, Cerrar Caja',
-      cancelButtonText: "Revisar de nuevo",
+      confirmButtonText: '<i class="fa-solid fa-lock"></i> Sí, Cerrar Turno',
+      cancelButtonText: "Cancelar, volver a contar"
     }).then((result) => {
       if (result.isConfirmed) {
         btnCerrar.disabled = true;
-        btnCerrar.innerHTML =
-          '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+        btnCerrar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+        // Armamos el empaque leyendo desde nuestra memoria secreta
+        let datosCorte = {
+          esperado: esperado,
+          fisico: fisico,
+          diferencia: diferencia,
+          tarjeta: window.tarjetaEsperada,
+          transferencia: window.transferenciaEsperada,
+          retiros: window.retirosCorte
+        };
 
         fetch("../php/funciones/procesar_corte_caja.php", {
           method: "POST",
@@ -7463,23 +7439,15 @@ function activarCuadreFisico() {
                 timer: 2000,
                 showConfirmButton: false,
               }).then(() => {
-                // Abrimos el ticket en otra pestaña
-                window.open(
-                  "../php/cruds/imprimir_ticket_corte.php?id=" + data.id_corte,
-                  "_blank",
-                );
-
-                // Reseteamos la pantalla
-                btnCerrar.innerHTML =
-                  '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
+                window.open("../php/cruds/imprimir_ticket_corte.php?id=" + data.id_corte, "_blank");
+                btnCerrar.innerHTML = '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
                 inputFisico.value = "";
-                inicializarCorteCaja();
+                inicializarCorteCaja(); // Recargamos para que todo vuelva a cero
               });
             } else {
               Swal.fire("Error", data.message, "error");
               btnCerrar.disabled = false;
-              btnCerrar.innerHTML =
-                '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
+              btnCerrar.innerHTML = '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
             }
           });
       }
