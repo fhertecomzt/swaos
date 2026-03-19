@@ -44,7 +44,7 @@ $_SESSION['last_token'] = $current_token;
 <html>
 
 <head>
-    <meta charset="utf8mb4">
+    <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Administrador SWAOS</title>
@@ -245,11 +245,19 @@ $_SESSION['last_token'] = $current_token;
             </li>
 
             <!--Citas-->
-            <li>
-                <a href="#" id="ventas-link" class="nav-link">
-                    <i class="fa-solid fa-calendar"></i>
-                    <span class="titles_btns disabled-link">CITAS</span>
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span class="titles_btns">CITAS</span>
                 </a>
+                <ul>
+                    <li>
+                        <a href="#" id="citas-link" class="nav-link">
+                            <i class="fa-regular fa-calendar"></i>
+                            <span class="titles_btns">Citas</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
             <!--Cliente-->
@@ -364,6 +372,10 @@ $_SESSION['last_token'] = $current_token;
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <!--Scripts Para el FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.global.min.js"></script>
 
     <script src="../js/dashboard.js"></script>
     <script src="../js/scripts.js"></script>

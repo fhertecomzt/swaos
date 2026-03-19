@@ -5533,7 +5533,7 @@ document.addEventListener("click", function (event) {
   }
 });
 
-// Llamar Ordenes de servicio *************************************************
+/// Llamar Ordenes de servicio *************************************************
 document
   .getElementById("ordenes-link")
   .addEventListener("click", function (event) {
@@ -5550,7 +5550,7 @@ document
           "#cantidad-registros",
         );
 
-        // Revisamos si el Dashboard nos dejó un mensaje secreto
+        //  Filtros del Dashboard 
         let filtroGuardado = sessionStorage.getItem("filtroDashboard");
 
         if (filtroGuardado) {
@@ -5598,6 +5598,14 @@ document
             sessionStorage.removeItem("filtroDashboard");
           }, 200);
         }
+
+        // Conversión de Cita a Orden 
+        setTimeout(() => {
+          if (typeof revisarConversionCita === "function") {
+            revisarConversionCita();
+          }
+        }, 150);
+
       })
       .catch((error) => console.error("Error al cargar contenido:", error));
   });
@@ -5802,7 +5810,7 @@ document.addEventListener("click", function (e) {
   }
 });
 
-// FUNCIÓN MATEMÁTICA PARA EL MODAL DE EDITAR 
+// FUNCIÓN MATEMÁTICA PARA EL MODAL DE EDITAR
 function calcularSaldoEdit() {
   const costo = parseFloat(document.getElementById("edit-costo").value) || 0;
   const anticipoAcumulado =
@@ -5825,7 +5833,7 @@ function calcularSaldoEdit() {
 // ALTA EXPRÉS DE CLIENTES
 window.abrirModalClienteExpress = function () {
   Swal.fire({
-    title: "Alta Exprés de Cliente 👤",
+    title: "Alta Exprés de Cliente",
     html: `
             <p style="font-size:13px; color:#666; margin-bottom:15px;">Captura los datos básicos para enviarle su comprobante.</p>
             <input id="swal-cli-nombre" class="swal2-input" placeholder="Nombre(s) *" style="width: 85%;">
@@ -6297,7 +6305,7 @@ document.addEventListener("submit", function (e) {
         });
       });
   }
-}); 
+});
 
 // MANEJO DE CLICS EN TABLA (EDITAR Y CANCELAR ORDENES) ***************************************
 document.addEventListener("click", function (e) {
@@ -6696,412 +6704,453 @@ window.idCotizacionOrigenPOS = 0; // Para recordar si venimos de una cotización
 function inicializarPOS() {
   // Verificamos si hay cortes pendientes de días anteriores
   fetch("../php/funciones/verificar_corte_pendiente.php")
-    .then(res => res.json())
-    .then(data => {
-        if (data.bloquear) {
-            Swal.fire({
-                title: "¡Corte Pendiente!",
-                text: "Detectamos ventas de días anteriores sin cerrar. Debes realizar tu Corte de Caja antes de iniciar un nuevo turno de ventas.",
-                icon: "error",
-                allowOutsideClick: false,
-                confirmButtonColor: "#dc3545",
-                confirmButtonText: '<i class="fa-solid fa-cash-register"></i> Ir a Corte de Caja'
-            }).then(() => {
-                // Redirigimos al usuario a la pantalla de Corte a la fuerza
-                if(document.getElementById("corte-link")) {
-                    document.getElementById("corte-link").click();
-                }
-            });
-            
-            // Ocultamos la interfaz del POS para que no pueda vender nada
-            let posContainer = document.getElementById("pos-container"); 
-            if(posContainer) posContainer.style.opacity = "0.2";
-            if(posContainer) posContainer.style.pointerEvents = "none";
-            return; // Detenemos la ejecución del POS aquí mismo
-        }
-
-        // SI NO HAY BLOQUEO, CONTINÚA EL FLUJO NORMAL DEL POS
-        carritoPOS = [];
-        window.idCotizacionOrigenPOS = 0; // La reseteamos a 0 por si es una venta normal
-
-        let cotizacionPendiente = sessionStorage.getItem("cotizacion_a_venta");
-
-        if (cotizacionPendiente) {
-          let dataCot = JSON.parse(cotizacionPendiente);
-
-          //LE DAMOS LA MEMORIA AL POS:
-          window.idCotizacionOrigenPOS = dataCot.cotizacion.id_cotizacion;
-
-          // Inyectamos los datos del cliente en la caja (si es que había uno)
-          setTimeout(() => {
-            // Pequeño delay para asegurar que el DOM cargó
-            let inputIdClienteVenta = document.getElementById("pos-id-cliente");
-            let inputNombreClienteVenta = document.getElementById("pos-nombre-cliente");
-            let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
-
-            if (inputIdClienteVenta)
-              inputIdClienteVenta.value = dataCot.cotizacion.id_cliente;
-            
-            if (inputNombreClienteVenta && dataCot.cotizacion.id_cliente != "0") {
-              // Si no es público en general, llenamos el campo y mostramos la "X"
-              inputNombreClienteVenta.value = dataCot.cotizacion.nombre_cliente_completo;
-              if (btnQuitarCliente) btnQuitarCliente.style.display = "inline-block";
-            }
-          }, 100);
-
-          // Pasamos todos los productos de la cotización al carrito de ventas
-          dataCot.detalles.forEach((det) => {
-            carritoPOS.push({
-              id_interno: "cot_" + det.id_detalle,
-              id_prod: det.id_producto, // CORREGIDO PARA QUE NO MARQUE ERROR EN PHP
-              nombre: det.concepto,
-              precio: parseFloat(det.precio_unitario),
-              cantidad: parseInt(det.cantidad),
-              stock_max: 9999, // Ignoramos stock por si era concepto libre
-            });
-          });
-          
-          // Le ordenamos a la pantalla que redibuje la tabla con los productos nuevos
-          if (typeof actualizarCarritoUI === "function") {
-            actualizarCarritoUI();
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.bloquear) {
+        Swal.fire({
+          title: "¡Corte Pendiente!",
+          text: "Detectamos ventas de días anteriores sin cerrar. Debes realizar tu Corte de Caja antes de iniciar un nuevo turno de ventas.",
+          icon: "error",
+          allowOutsideClick: false,
+          confirmButtonColor: "#dc3545",
+          confirmButtonText:
+            '<i class="fa-solid fa-cash-register"></i> Ir a Corte de Caja',
+        }).then(() => {
+          // Redirigimos al usuario a la pantalla de Corte a la fuerza
+          if (document.getElementById("corte-link")) {
+            document.getElementById("corte-link").click();
           }
+        });
 
-          // Limpiamos la memoria del navegador para que no se vuelva a cargar en el futuro
-          sessionStorage.removeItem("cotizacion_a_venta");
+        // Ocultamos la interfaz del POS para que no pueda vender nada
+        let posContainer = document.getElementById("pos-container");
+        if (posContainer) posContainer.style.opacity = "0.2";
+        if (posContainer) posContainer.style.pointerEvents = "none";
+        return; // Detenemos la ejecución del POS aquí mismo
+      }
 
-          // Alerta de éxito para el cajero
-          const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 3000,
+      // SI NO HAY BLOQUEO, CONTINÚA EL FLUJO NORMAL DEL POS
+      carritoPOS = [];
+      window.idCotizacionOrigenPOS = 0; // La reseteamos a 0 por si es una venta normal
+
+      let cotizacionPendiente = sessionStorage.getItem("cotizacion_a_venta");
+
+      if (cotizacionPendiente) {
+        let dataCot = JSON.parse(cotizacionPendiente);
+
+        //LE DAMOS LA MEMORIA AL POS:
+        window.idCotizacionOrigenPOS = dataCot.cotizacion.id_cotizacion;
+
+        // Inyectamos los datos del cliente en la caja (si es que había uno)
+        setTimeout(() => {
+          // Pequeño delay para asegurar que el DOM cargó
+          let inputIdClienteVenta = document.getElementById("pos-id-cliente");
+          let inputNombreClienteVenta =
+            document.getElementById("pos-nombre-cliente");
+          let btnQuitarCliente = document.getElementById(
+            "btn-quitar-cliente-pos",
+          );
+
+          if (inputIdClienteVenta)
+            inputIdClienteVenta.value = dataCot.cotizacion.id_cliente;
+
+          if (inputNombreClienteVenta && dataCot.cotizacion.id_cliente != "0") {
+            // Si no es público en general, llenamos el campo y mostramos la "X"
+            inputNombreClienteVenta.value =
+              dataCot.cotizacion.nombre_cliente_completo;
+            if (btnQuitarCliente)
+              btnQuitarCliente.style.display = "inline-block";
+          }
+        }, 100);
+
+        // Pasamos todos los productos de la cotización al carrito de ventas
+        dataCot.detalles.forEach((det) => {
+          carritoPOS.push({
+            id_interno: "cot_" + det.id_detalle,
+            id_prod: det.id_producto, // CORREGIDO PARA QUE NO MARQUE ERROR EN PHP
+            nombre: det.concepto,
+            precio: parseFloat(det.precio_unitario),
+            cantidad: parseInt(det.cantidad),
+            stock_max: 9999, // Ignoramos stock por si era concepto libre
           });
-          Toast.fire({
-            icon: "success",
-            title: "Cotización #" + dataCot.cotizacion.id_cotizacion + " cargada.",
-          });
-        } 
+        });
 
-        cargarInventarioPOS();
-
-        // Activar buscador en tiempo real
-        let buscador = document.getElementById("buscar-producto-pos");
-        if (buscador) {
-          buscador.addEventListener("input", function (e) {
-            renderizarGridProductos(e.target.value);
-          });
+        // Le ordenamos a la pantalla que redibuje la tabla con los productos nuevos
+        if (typeof actualizarCarritoUI === "function") {
+          actualizarCarritoUI();
         }
 
-        // Activar botón de cobrar (lo conectaremos a PHP en el siguiente paso)
-        let btnCobrar = document.getElementById("pos-btn-cobrar");
-        if (btnCobrar) {
-          btnCobrar.addEventListener("click", function () {
-            if (carritoPOS.length === 0) return;
+        // Limpiamos la memoria del navegador para que no se vuelva a cargar en el futuro
+        sessionStorage.removeItem("cotizacion_a_venta");
 
-            let totalVenta = carritoPOS.reduce(
-              (sum, item) => sum + item.precio * item.cantidad,
-              0,
-            );
-            let metodoPago = document.getElementById("pos-metodo-pago").value;
+        // Alerta de éxito para el cajero
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+        });
+        Toast.fire({
+          icon: "success",
+          title:
+            "Cotización #" + dataCot.cotizacion.id_cotizacion + " cargada.",
+        });
+      }
 
-            // PAGO EN EFECTIVO (Calculadora de Cambio)
-            if (metodoPago === "Efectivo") {
-              Swal.fire({
-                title: "Cobro en Efectivo ",
-                html: `<h2 style="color:#28a745; margin:10px 0;">Total: $${totalVenta.toFixed(2)}</h2>`,
-                input: "number",
-                inputAttributes: { step: "0.50", min: totalVenta },
-                inputPlaceholder: "¿Con cuánto paga el cliente?",
-                showCancelButton: true,
-                confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
-                cancelButtonText: "Cancelar",
-                inputValidator: (value) => {
-                  if (!value) return "Debes ingresar una cantidad";
-                  if (parseFloat(value) < totalVenta)
-                    return "El pago es menor al total a cobrar";
-                },
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  let pagoReal = parseFloat(result.value);
-                  let cambio = pagoReal - totalVenta;
+      cargarInventarioPOS();
 
-                  // Mostramos el cambio en gigante y luego cobramos
-                  Swal.fire({
-                    icon: "info",
-                    title: "Su Cambio es:",
-                    html: `<h1 style="font-size: 40px; color: #007bff; margin: 0;">$${cambio.toFixed(2)}</h1>`,
-                    confirmButtonText: "Continuar a Entrega de Ticket",
-                    allowOutsideClick: false,
-                  }).then(() => {
-                    procesarCobroEnBackend(totalVenta, metodoPago, pagoReal, cambio, "");
-                  });
-                }
-              });
-            }
-            // PAGO CON TARJETA (Pide Referencia)
-            else if (metodoPago === "Tarjeta") {
-              Swal.fire({
-                title: "Cobro con Tarjeta",
-                text: `Total a cobrar: $${totalVenta.toFixed(2)}`,
-                input: "text",
-                inputPlaceholder: "Ingresa el No. de Autorización o Referencia",
-                showCancelButton: true,
-                confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
-                cancelButtonText: "Cancelar",
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, result.value);
-                }
-              });
-            }
-            // TRANSFERENCIA (Pasa directo)
-            else {
-              procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, "");
-            }
-          });
-        }
+      // Activar buscador en tiempo real
+      let buscador = document.getElementById("buscar-producto-pos");
+      if (buscador) {
+        buscador.addEventListener("input", function (e) {
+          renderizarGridProductos(e.target.value);
+        });
+      }
 
-        // Función global para enviar los datos a PHP
-        window.procesarCobroEnBackend = function (
-          totalVenta,
-          metodoPago,
-          pagoCliente,
-          cambioCliente,
-          referencia,
-        ) {
-          let btnCobrar = document.getElementById("pos-btn-cobrar");
-          btnCobrar.disabled = true;
-          btnCobrar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> COBRANDO...';
+      // Activar botón de cobrar (lo conectaremos a PHP en el siguiente paso)
+      let btnCobrar = document.getElementById("pos-btn-cobrar");
+      if (btnCobrar) {
+        btnCobrar.addEventListener("click", function () {
+          if (carritoPOS.length === 0) return;
 
-          let idClienteSeleccionado = document.getElementById("pos-id-cliente")
-            ? document.getElementById("pos-id-cliente").value
-            : 0;
+          let totalVenta = carritoPOS.reduce(
+            (sum, item) => sum + item.precio * item.cantidad,
+            0,
+          );
+          let metodoPago = document.getElementById("pos-metodo-pago").value;
 
-          let datosVenta = {
-            carrito: carritoPOS,
-            total: totalVenta,
-            metodo_pago: metodoPago,
-            referencia: referencia,
-            id_cliente: idClienteSeleccionado,
-            pago_cliente: pagoCliente,
-            cambio_cliente: cambioCliente,
-            id_cotizacion_origen: window.idCotizacionOrigenPOS, 
-          };
+          // PAGO EN EFECTIVO (Calculadora de Cambio)
+          if (metodoPago === "Efectivo") {
+            Swal.fire({
+              title: "Cobro en Efectivo ",
+              html: `<h2 style="color:#28a745; margin:10px 0;">Total: $${totalVenta.toFixed(2)}</h2>`,
+              input: "number",
+              inputAttributes: { step: "0.50", min: totalVenta },
+              inputPlaceholder: "¿Con cuánto paga el cliente?",
+              showCancelButton: true,
+              confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
+              cancelButtonText: "Cancelar",
+              inputValidator: (value) => {
+                if (!value) return "Debes ingresar una cantidad";
+                if (parseFloat(value) < totalVenta)
+                  return "El pago es menor al total a cobrar";
+              },
+            }).then((result) => {
+              if (result.isConfirmed) {
+                let pagoReal = parseFloat(result.value);
+                let cambio = pagoReal - totalVenta;
 
-          fetch("../php/cruds/procesar_venta_mostrador.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(datosVenta),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.success) {
-                carritoPOS = [];
-                cargarInventarioPOS();
-                actualizarCarritoUI();
-                btnCobrar.innerHTML = '<i class="fa-solid fa-check-circle"></i> COBRAR';
-
-                let selectPago = document.getElementById("pos-metodo-pago");
-                if (selectPago) selectPago.value = "Efectivo";
-
-                localStorage.setItem("ultima_venta_pos", data.id_venta);
-
-                let nombreCliente = document.getElementById("pos-nombre-cliente")
-                  ? document.getElementById("pos-nombre-cliente").value
-                  : "";
-                if (!nombreCliente || nombreCliente === "") nombreCliente = "Cliente";
-                let telefonoCliente = data.telefono || "";
-                let emailCliente = data.email || "";
-                let tokenTicket = data.token || "";
-
-                  mostrarOpcionesTicket(
-                    data.id_venta,
-                    telefonoCliente,
-                    nombreCliente,
+                // Mostramos el cambio en gigante y luego cobramos
+                Swal.fire({
+                  icon: "info",
+                  title: "Su Cambio es:",
+                  html: `<h1 style="font-size: 40px; color: #007bff; margin: 0;">$${cambio.toFixed(2)}</h1>`,
+                  confirmButtonText: "Continuar a Entrega de Ticket",
+                  allowOutsideClick: false,
+                }).then(() => {
+                  procesarCobroEnBackend(
                     totalVenta,
-                    emailCliente,
-                    tokenTicket
+                    metodoPago,
+                    pagoReal,
+                    cambio,
+                    "",
                   );
-              } else {
-                Swal.fire("Error", data.message, "error");
-                btnCobrar.disabled = false;
+                });
               }
-            })
-            .catch((error) => {
-              console.error("Error en el cobro:", error);
-              Swal.fire("Error", "Ocurrió un error en el servidor.", "error");
-              btnCobrar.disabled = false;
             });
+          }
+          // PAGO CON TARJETA (Pide Referencia)
+          else if (metodoPago === "Tarjeta") {
+            Swal.fire({
+              title: "Cobro con Tarjeta",
+              text: `Total a cobrar: $${totalVenta.toFixed(2)}`,
+              input: "text",
+              inputPlaceholder: "Ingresa el No. de Autorización o Referencia",
+              showCancelButton: true,
+              confirmButtonText: '<i class="fa-solid fa-check"></i> Procesar',
+              cancelButtonText: "Cancelar",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                procesarCobroEnBackend(
+                  totalVenta,
+                  metodoPago,
+                  0,
+                  0,
+                  result.value,
+                );
+              }
+            });
+          }
+          // TRANSFERENCIA (Pasa directo)
+          else {
+            procesarCobroEnBackend(totalVenta, metodoPago, 0, 0, "");
+          }
+        });
+      }
+
+      // Función global para enviar los datos a PHP
+      window.procesarCobroEnBackend = function (
+        totalVenta,
+        metodoPago,
+        pagoCliente,
+        cambioCliente,
+        referencia,
+      ) {
+        let btnCobrar = document.getElementById("pos-btn-cobrar");
+        btnCobrar.disabled = true;
+        btnCobrar.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> COBRANDO...';
+
+        let idClienteSeleccionado = document.getElementById("pos-id-cliente")
+          ? document.getElementById("pos-id-cliente").value
+          : 0;
+
+        let datosVenta = {
+          carrito: carritoPOS,
+          total: totalVenta,
+          metodo_pago: metodoPago,
+          referencia: referencia,
+          id_cliente: idClienteSeleccionado,
+          pago_cliente: pagoCliente,
+          cambio_cliente: cambioCliente,
+          id_cotizacion_origen: window.idCotizacionOrigenPOS,
         };
 
-        // Botón de Reimprimir Último Ticket
-        let btnReimprimir = document.getElementById("btn-reimprimir-pos");
-        if (btnReimprimir) {
-          btnReimprimir.addEventListener("click", function () {
-            let ultimaVenta = localStorage.getItem("ultima_venta_pos");
-            if (ultimaVenta) {
-              window.open(
-                "../php/cruds/imprimir_ticket_pos.php?id=" + ultimaVenta,
-                "_blank",
+        fetch("../php/cruds/procesar_venta_mostrador.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(datosVenta),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              carritoPOS = [];
+              cargarInventarioPOS();
+              actualizarCarritoUI();
+              btnCobrar.innerHTML =
+                '<i class="fa-solid fa-check-circle"></i> COBRAR';
+
+              let selectPago = document.getElementById("pos-metodo-pago");
+              if (selectPago) selectPago.value = "Efectivo";
+
+              localStorage.setItem("ultima_venta_pos", data.id_venta);
+
+              let nombreCliente = document.getElementById("pos-nombre-cliente")
+                ? document.getElementById("pos-nombre-cliente").value
+                : "";
+              if (!nombreCliente || nombreCliente === "")
+                nombreCliente = "Cliente";
+              let telefonoCliente = data.telefono || "";
+              let emailCliente = data.email || "";
+              let tokenTicket = data.token || "";
+
+              mostrarOpcionesTicket(
+                data.id_venta,
+                telefonoCliente,
+                nombreCliente,
+                totalVenta,
+                emailCliente,
+                tokenTicket,
               );
             } else {
-              Swal.fire("Aviso", "No hay registros de ventas recientes en esta computadora.", "info");
+              Swal.fire("Error", data.message, "error");
+              btnCobrar.disabled = false;
             }
+          })
+          .catch((error) => {
+            console.error("Error en el cobro:", error);
+            Swal.fire("Error", "Ocurrió un error en el servidor.", "error");
+            btnCobrar.disabled = false;
           });
-        }
+      };
 
-        // BUSCADOR DE CLIENTES EN EL POS
-        let btnBuscarCliente = document.getElementById("btn-buscar-cliente-pos");
-        let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
-        let inputIdCliente = document.getElementById("pos-id-cliente");
-        let inputNombreCliente = document.getElementById("pos-nombre-cliente");
+      // Botón de Reimprimir Último Ticket
+      let btnReimprimir = document.getElementById("btn-reimprimir-pos");
+      if (btnReimprimir) {
+        btnReimprimir.addEventListener("click", function () {
+          let ultimaVenta = localStorage.getItem("ultima_venta_pos");
+          if (ultimaVenta) {
+            window.open(
+              "../php/cruds/imprimir_ticket_pos.php?id=" + ultimaVenta,
+              "_blank",
+            );
+          } else {
+            Swal.fire(
+              "Aviso",
+              "No hay registros de ventas recientes en esta computadora.",
+              "info",
+            );
+          }
+        });
+      }
 
-        if (btnBuscarCliente) {
-          btnBuscarCliente.addEventListener("click", function () {
-            fetch("../php/funciones/api_clientes_pos.php")
-              .then((res) => res.json())
-              .then((clientes) => {
-                if (clientes.error) {
-                  Swal.fire("Error", "No se pudieron cargar los clientes.", "error");
-                  return;
-                }
+      // BUSCADOR DE CLIENTES EN EL POS
+      let btnBuscarCliente = document.getElementById("btn-buscar-cliente-pos");
+      let btnQuitarCliente = document.getElementById("btn-quitar-cliente-pos");
+      let inputIdCliente = document.getElementById("pos-id-cliente");
+      let inputNombreCliente = document.getElementById("pos-nombre-cliente");
 
-                let options = '<option value="0" selected>Público en General</option>';
-                clientes.forEach((c) => {
-                  options += `<option value="${c.id_cliente}">${c.nombre}- ${c.papellido} - ${c.telefono}</option>`;
-                });
+      if (btnBuscarCliente) {
+        btnBuscarCliente.addEventListener("click", function () {
+          fetch("../php/funciones/api_clientes_pos.php")
+            .then((res) => res.json())
+            .then((clientes) => {
+              if (clientes.error) {
+                Swal.fire(
+                  "Error",
+                  "No se pudieron cargar los clientes.",
+                  "error",
+                );
+                return;
+              }
 
-                Swal.fire({
-                  title: "Seleccionar Cliente 👤",
-                  html: `
+              let options =
+                '<option value="0" selected>Público en General</option>';
+              clientes.forEach((c) => {
+                options += `<option value="${c.id_cliente}">${c.nombre}- ${c.papellido} - ${c.telefono}</option>`;
+              });
+
+              Swal.fire({
+                title: "Seleccionar Cliente 👤",
+                html: `
                       <input type="search" id="swal-search-cliente" class="swal2-input" placeholder="🔍 Buscar por nombre o teléfono..." autocomplete="off" style="width: 90%; max-width: 100%; margin: 0 auto 15px auto; display: block; box-sizing: border-box;">
                       <select id="swal-select-cliente" size="6" style="width: 90%; height:140px !important; max-width: 100%; overflow-y: auto; overflow-x: hidden; padding: 10px; font-size: 15px; border: 1px solid #d9d9d9; border-radius: 8px; outline: none; display: block; margin: 0 auto; box-sizing: border-box; background: #fff; color: #333;">
                           ${options}
                       </select>
                   `,
-                  showCancelButton: true,
-                  confirmButtonText: '<i class="fa-solid fa-check"></i> Asignar',
-                  cancelButtonText: "Cancelar",
-                  didOpen: () => {
-                    let buscador = document.getElementById("swal-search-cliente");
-                    let select = document.getElementById("swal-select-cliente");
-                    let opciones = select.getElementsByTagName("option");
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check"></i> Asignar',
+                cancelButtonText: "Cancelar",
+                didOpen: () => {
+                  let buscador = document.getElementById("swal-search-cliente");
+                  let select = document.getElementById("swal-select-cliente");
+                  let opciones = select.getElementsByTagName("option");
 
-                    buscador.focus();
+                  buscador.focus();
 
-                    buscador.addEventListener("keyup", function () {
-                      let filtro = this.value.toLowerCase();
-                      for (let i = 0; i < opciones.length; i++) {
-                        let texto = opciones[i].textContent.toLowerCase();
-                        if (opciones[i].value === "0" || texto.includes(filtro)) {
-                          opciones[i].style.display = "";
-                        } else {
-                          opciones[i].style.display = "none";
-                        }
+                  buscador.addEventListener("keyup", function () {
+                    let filtro = this.value.toLowerCase();
+                    for (let i = 0; i < opciones.length; i++) {
+                      let texto = opciones[i].textContent.toLowerCase();
+                      if (opciones[i].value === "0" || texto.includes(filtro)) {
+                        opciones[i].style.display = "";
+                      } else {
+                        opciones[i].style.display = "none";
                       }
-                    });
-
-                    select.addEventListener("dblclick", function () {
-                      Swal.clickConfirm();
-                    });
-                  },
-                  preConfirm: () => {
-                    let select = document.getElementById("swal-select-cliente");
-                    if (select.selectedIndex === -1) {
-                      Swal.showValidationMessage("Selecciona un cliente de la lista");
-                      return false;
                     }
-                    return {
-                      id: select.value,
-                      texto: select.options[select.selectedIndex].text,
-                    };
-                  },
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    let cliente = result.value;
-                    inputIdCliente.value = cliente.id;
+                  });
 
-                    if (cliente.id === "0") {
-                      inputNombreCliente.value = "";
-                      btnQuitarCliente.style.display = "none";
-                    } else {
-                      let soloNombre = cliente.texto.split(" - ")[0];
-                      inputNombreCliente.value = soloNombre;
-                      btnQuitarCliente.style.display = "inline-block";
-                    }
+                  select.addEventListener("dblclick", function () {
+                    Swal.clickConfirm();
+                  });
+                },
+                preConfirm: () => {
+                  let select = document.getElementById("swal-select-cliente");
+                  if (select.selectedIndex === -1) {
+                    Swal.showValidationMessage(
+                      "Selecciona un cliente de la lista",
+                    );
+                    return false;
                   }
-                });
+                  return {
+                    id: select.value,
+                    texto: select.options[select.selectedIndex].text,
+                  };
+                },
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  let cliente = result.value;
+                  inputIdCliente.value = cliente.id;
+
+                  if (cliente.id === "0") {
+                    inputNombreCliente.value = "";
+                    btnQuitarCliente.style.display = "none";
+                  } else {
+                    let soloNombre = cliente.texto.split(" - ")[0];
+                    inputNombreCliente.value = soloNombre;
+                    btnQuitarCliente.style.display = "inline-block";
+                  }
+                }
               });
-          });
-        }
+            });
+        });
+      }
 
-        if (btnQuitarCliente) {
-          btnQuitarCliente.addEventListener("click", function () {
-            inputIdCliente.value = "0";
-            inputNombreCliente.value = "";
-            this.style.display = "none";
-          });
-        }
+      if (btnQuitarCliente) {
+        btnQuitarCliente.addEventListener("click", function () {
+          inputIdCliente.value = "0";
+          inputNombreCliente.value = "";
+          this.style.display = "none";
+        });
+      }
 
-        // BOTÓN DE RETIRO DE CAJA (GASTOS)
-        let btnRetiroCaja = document.getElementById("btn-retiro-caja-pos");
-        if (btnRetiroCaja) {
-          btnRetiroCaja.addEventListener("click", function () {
-            Swal.fire({
-              title: "Retiro de Efectivo",
-              html: `
+      // BOTÓN DE RETIRO DE CAJA (GASTOS)
+      let btnRetiroCaja = document.getElementById("btn-retiro-caja-pos");
+      if (btnRetiroCaja) {
+        btnRetiroCaja.addEventListener("click", function () {
+          Swal.fire({
+            title: "Retiro de Efectivo",
+            html: `
                   <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Registra el dinero que tomas físicamente del cajón.</p>
                   <input type="text" id="swal-motivo-retiro" class="swal2-input" placeholder="Motivo (Ej. Pago de agua, comida...)" autocomplete="off" style="width: 85%;">
                   <input type="number" id="swal-monto-retiro" class="swal2-input" placeholder="$ Monto a retirar" step="0.50" min="0.50" style="width: 85%;">
               `,
-              showCancelButton: true,
-              confirmButtonColor: "#dc3545",
-              confirmButtonText: '<i class="fa-solid fa-hand-holding-dollar"></i> Registrar Retiro',
-              cancelButtonText: "Cancelar",
-              preConfirm: () => {
-                let motivo = document.getElementById("swal-motivo-retiro").value.trim();
-                let monto = parseFloat(document.getElementById("swal-monto-retiro").value);
+            showCancelButton: true,
+            confirmButtonColor: "#dc3545",
+            confirmButtonText:
+              '<i class="fa-solid fa-hand-holding-dollar"></i> Registrar Retiro',
+            cancelButtonText: "Cancelar",
+            preConfirm: () => {
+              let motivo = document
+                .getElementById("swal-motivo-retiro")
+                .value.trim();
+              let monto = parseFloat(
+                document.getElementById("swal-monto-retiro").value,
+              );
 
-                if (!motivo) {
-                  Swal.showValidationMessage("Debes escribir un motivo para el corte.");
-                  return false;
-                }
-                if (!monto || monto <= 0) {
-                  Swal.showValidationMessage("Ingresa una cantidad válida mayor a 0.");
-                  return false;
-                }
-
-                return { motivo: motivo, monto: monto };
-              },
-            }).then((result) => {
-              if (result.isConfirmed) {
-                fetch("../php/funciones/registrar_retiro_caja.php", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(result.value),
-                })
-                  .then((res) => res.json())
-                  .then((data) => {
-                    if (data.success) {
-                      Swal.fire({
-                        icon: "success",
-                        title: "Retiro Registrado",
-                        text: `Se restaron $${result.value.monto.toFixed(2)} de la caja.`,
-                        timer: 2000,
-                        showConfirmButton: false,
-                      });
-                    } else {
-                      Swal.fire("Error", data.message, "error");
-                    }
-                  });
+              if (!motivo) {
+                Swal.showValidationMessage(
+                  "Debes escribir un motivo para el corte.",
+                );
+                return false;
               }
-            });
+              if (!monto || monto <= 0) {
+                Swal.showValidationMessage(
+                  "Ingresa una cantidad válida mayor a 0.",
+                );
+                return false;
+              }
+
+              return { motivo: motivo, monto: monto };
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch("../php/funciones/registrar_retiro_caja.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(result.value),
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.success) {
+                    Swal.fire({
+                      icon: "success",
+                      title: "Retiro Registrado",
+                      text: `Se restaron $${result.value.monto.toFixed(2)} de la caja.`,
+                      timer: 2000,
+                      showConfirmButton: false,
+                    });
+                  } else {
+                    Swal.fire("Error", data.message, "error");
+                  }
+                });
+            }
           });
-        }
-        
+        });
+      }
     })
-    .catch(err => {
-        console.error("Error al verificar corte:", err);
+    .catch((err) => {
+      console.error("Error al verificar corte:", err);
     });
 }
 
@@ -7239,7 +7288,7 @@ window.fijarCantidad = function (id_prod, cantidadStr) {
   actualizarCarritoUI();
 };
 
-// Dibujar la tabla del carrito y calcular el gran total 
+// Dibujar la tabla del carrito y calcular el gran total
 function actualizarCarritoUI() {
   let tbody = document.getElementById("tabla-carrito-pos");
   let totalArticulosSpan = document.getElementById("pos-total-articulos");
@@ -7338,18 +7387,19 @@ document
       });
   });
 
-// MÓDULO: CORTE DE CAJA (REPORTE Z) - VERSIÓN CORTE CIEGO 
+// MÓDULO: CORTE DE CAJA (REPORTE Z) - VERSIÓN CORTE CIEGO
 function inicializarCorteCaja() {
   fetch("../php/funciones/api_corte_caja.php")
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
         document.getElementById("corte-fecha-actual").textContent = data.fecha;
-        
+
         //  CORTE CIEGO: Ocultamos los totales visuales con signos de interrogación
         document.getElementById("corte-total-efectivo").textContent = "$ ??.??";
         document.getElementById("corte-total-tarjeta").textContent = "$ ??.??";
-        document.getElementById("corte-total-transferencia").textContent = "$ ??.??";
+        document.getElementById("corte-total-transferencia").textContent =
+          "$ ??.??";
 
         //  GUARDAMOS LOS DATOS REALES EN SECRETO EN LA MEMORIA
         window.efectivoEsperadoSistema = data.efectivo;
@@ -7360,9 +7410,12 @@ function inicializarCorteCaja() {
         if (data.efectivo > 0 || data.tarjeta > 0 || data.transferencia > 0) {
           activarCuadreFisicoCiego();
         } else {
-          document.getElementById("corte-mensaje-resultado").style.display = "block";
-          document.getElementById("corte-mensaje-resultado").textContent = "No hay ventas registradas en el turno actual.";
-          document.getElementById("corte-mensaje-resultado").className = "resultado-cuadre cuadre-sobra";
+          document.getElementById("corte-mensaje-resultado").style.display =
+            "block";
+          document.getElementById("corte-mensaje-resultado").textContent =
+            "No hay ventas registradas en el turno actual.";
+          document.getElementById("corte-mensaje-resultado").className =
+            "resultado-cuadre cuadre-sobra";
         }
       }
     })
@@ -7387,8 +7440,12 @@ function activarCuadreFisicoCiego() {
     let esperado = window.efectivoEsperadoSistema;
 
     if (isNaN(fisico) || fisico < 0) {
-        Swal.fire("Atención", "Debes ingresar cuánto dinero físico contaste en la caja.", "warning");
-        return;
+      Swal.fire(
+        "Atención",
+        "Debes ingresar cuánto dinero físico contaste en la caja.",
+        "warning",
+      );
+      return;
     }
 
     let diferencia = fisico - esperado;
@@ -7399,31 +7456,33 @@ function activarCuadreFisicoCiego() {
     let icono = "";
 
     if (diferencia === 0) {
-        titulo = "¡Cuadre Perfecto! ";
-        htmlMensaje = `El sistema esperaba <b>$${esperado.toFixed(2)}</b> y contaste exactamente <b>$${fisico.toFixed(2)}</b>.`;
-        icono = "success";
+      titulo = "¡Cuadre Perfecto! ";
+      htmlMensaje = `El sistema esperaba <b>$${esperado.toFixed(2)}</b> y contaste exactamente <b>$${fisico.toFixed(2)}</b>.`;
+      icono = "success";
     } else if (diferencia < 0) {
-        titulo = "¡Faltante Detectado! ";
-        htmlMensaje = `Faltan <b style="color:red;">$${Math.abs(diferencia).toFixed(2)}</b> en caja.<br><br>El sistema esperaba <b>$${esperado.toFixed(2)}</b> y solo declaraste <b>$${fisico.toFixed(2)}</b>.`;
-        icono = "warning";
+      titulo = "¡Faltante Detectado! ";
+      htmlMensaje = `Faltan <b style="color:red;">$${Math.abs(diferencia).toFixed(2)}</b> en caja.<br><br>El sistema esperaba <b>$${esperado.toFixed(2)}</b> y solo declaraste <b>$${fisico.toFixed(2)}</b>.`;
+      icono = "warning";
     } else {
-        titulo = "¡Sobrante Detectado! ";
-        htmlMensaje = `Sobran <b style="color:green;">$${diferencia.toFixed(2)}</b> en caja.<br><br>El sistema esperaba <b>$${esperado.toFixed(2)}</b> y declaraste <b>$${fisico.toFixed(2)}</b>.`;
-        icono = "info";
+      titulo = "¡Sobrante Detectado! ";
+      htmlMensaje = `Sobran <b style="color:green;">$${diferencia.toFixed(2)}</b> en caja.<br><br>El sistema esperaba <b>$${esperado.toFixed(2)}</b> y declaraste <b>$${fisico.toFixed(2)}</b>.`;
+      icono = "info";
     }
 
     Swal.fire({
       title: titulo,
-      html: htmlMensaje + "<br><br>¿Confirmar este resultado e Imprimir Corte Z?",
+      html:
+        htmlMensaje + "<br><br>¿Confirmar este resultado e Imprimir Corte Z?",
       icon: icono,
       showCancelButton: true,
       confirmButtonColor: "#dc3545",
       confirmButtonText: '<i class="fa-solid fa-lock"></i> Sí, Cerrar Turno',
-      cancelButtonText: "Cancelar, volver a contar"
+      cancelButtonText: "Cancelar, volver a contar",
     }).then((result) => {
       if (result.isConfirmed) {
         btnCerrar.disabled = true;
-        btnCerrar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+        btnCerrar.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
 
         // Armamos el empaque leyendo desde nuestra memoria secreta
         let datosCorte = {
@@ -7432,7 +7491,7 @@ function activarCuadreFisicoCiego() {
           diferencia: diferencia,
           tarjeta: window.tarjetaEsperada,
           transferencia: window.transferenciaEsperada,
-          retiros: window.retirosCorte
+          retiros: window.retirosCorte,
         };
 
         fetch("../php/funciones/procesar_corte_caja.php", {
@@ -7450,15 +7509,20 @@ function activarCuadreFisicoCiego() {
                 timer: 2000,
                 showConfirmButton: false,
               }).then(() => {
-                window.open("../php/cruds/imprimir_ticket_corte.php?id=" + data.id_corte, "_blank");
-                btnCerrar.innerHTML = '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
+                window.open(
+                  "../php/cruds/imprimir_ticket_corte.php?id=" + data.id_corte,
+                  "_blank",
+                );
+                btnCerrar.innerHTML =
+                  '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
                 inputFisico.value = "";
                 inicializarCorteCaja(); // Recargamos para que todo vuelva a cero
               });
             } else {
               Swal.fire("Error", data.message, "error");
               btnCerrar.disabled = false;
-              btnCerrar.innerHTML = '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
+              btnCerrar.innerHTML =
+                '<i class="fa-solid fa-lock"></i> CERRAR TURNO E IMPRIMIR';
             }
           });
       }
@@ -7812,7 +7876,6 @@ function ingresarEfectivo() {
               "El dinero ya está disponible en tu caja.",
               "success",
             );
-
           } else {
             Swal.fire("Error", data.mensaje, "error");
           }
@@ -7826,7 +7889,15 @@ function ingresarEfectivo() {
 }
 
 // VENTANA DE OPCIONES DE TICKET (WHATSAPP, CORREO, IMPRIMIR)
-function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total, emailCliente = "", tokenTicket = "") { // 🔥 Recibe Token
+function mostrarOpcionesTicket(
+  idTicket,
+  telefonoCliente,
+  nombreCliente,
+  total,
+  emailCliente = "",
+  tokenTicket = "",
+) {
+  // 🔥 Recibe Token
   Swal.fire({
     title: "¡Venta Exitosa!",
     text: "¿Cómo deseas entregar el comprobante?",
@@ -7842,7 +7913,13 @@ function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total, 
     allowOutsideClick: false,
   }).then((result) => {
     if (result.isConfirmed) {
-      enviarTicketWhatsApp(telefonoCliente, nombreCliente, idTicket, total, tokenTicket);
+      enviarTicketWhatsApp(
+        telefonoCliente,
+        nombreCliente,
+        idTicket,
+        total,
+        tokenTicket,
+      );
     } else if (result.isDenied) {
       imprimirTicketFisico(idTicket, tokenTicket);
     } else if (result.dismiss === Swal.DismissReason.cancel) {
@@ -7852,8 +7929,14 @@ function mostrarOpcionesTicket(idTicket, telefonoCliente, nombreCliente, total, 
 }
 
 // MOTOR DE ENVÍO POR WHATSAPP (Con confirmación siempre y Token)
-function enviarTicketWhatsApp(telefono, nombre, folio, total, tokenTicket = "") {
-  let telPrellenado = (!telefono || telefono === "0") ? "" : telefono;
+function enviarTicketWhatsApp(
+  telefono,
+  nombre,
+  folio,
+  total,
+  tokenTicket = "",
+) {
+  let telPrellenado = !telefono || telefono === "0" ? "" : telefono;
 
   Swal.fire({
     title: "Enviar por WhatsApp",
@@ -7874,7 +7957,7 @@ function enviarTicketWhatsApp(telefono, nombre, folio, total, tokenTicket = "") 
         return false;
       }
       return tel;
-    }
+    },
   }).then((result) => {
     if (result.isConfirmed) {
       ejecutarWhatsApp(result.value, nombre, folio, total, tokenTicket);
@@ -7885,7 +7968,10 @@ function enviarTicketWhatsApp(telefono, nombre, folio, total, tokenTicket = "") 
 function ejecutarWhatsApp(telefono, nombre, folio, total, tokenTicket = "") {
   // Ahora el enlace de WhatsApp lleva el Token secreto incrustado
   let linkTicket = new URL(
-    "../php/cruds/imprimir_ticket_pos.php?id=" + folio + "&token=" + tokenTicket,
+    "../php/cruds/imprimir_ticket_pos.php?id=" +
+      folio +
+      "&token=" +
+      tokenTicket,
     window.location.href,
   ).href;
 
@@ -7898,15 +7984,26 @@ function ejecutarWhatsApp(telefono, nombre, folio, total, tokenTicket = "") {
   let celLimpio = telefono.replace(/\D/g, "");
   if (celLimpio.length === 10) celLimpio = "52" + celLimpio;
 
-  window.open(`https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`, "_blank");
+  window.open(
+    `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`,
+    "_blank",
+  );
 }
 
 function imprimirTicketFisico(folio, tokenTicket = "") {
-  window.open(`../php/cruds/imprimir_ticket_pos.php?id=${folio}&token=${tokenTicket}`, "_blank");
+  window.open(
+    `../php/cruds/imprimir_ticket_pos.php?id=${folio}&token=${tokenTicket}`,
+    "_blank",
+  );
 }
 
 // MOTOR DE ENVÍO POR CORREO ELECTRÓNICO (Con confirmación siempre y Token)
-function enviarTicketCorreo(nombre, folio, correoCliente = "", tokenTicket = "") {
+function enviarTicketCorreo(
+  nombre,
+  folio,
+  correoCliente = "",
+  tokenTicket = "",
+) {
   Swal.fire({
     title: "Enviar por Correo",
     html: `
@@ -7926,7 +8023,7 @@ function enviarTicketCorreo(nombre, folio, correoCliente = "", tokenTicket = "")
         return false;
       }
       return email;
-    }
+    },
   }).then((result) => {
     if (result.isConfirmed && result.value) {
       ejecutarEnvioCorreo(result.value, nombre, folio, tokenTicket);
@@ -7939,26 +8036,48 @@ function ejecutarEnvioCorreo(email, nombre, folio, tokenTicket = "") {
     title: "Enviando Correo...",
     text: "Conectando con el servidor postal",
     allowOutsideClick: false,
-    didOpen: () => { Swal.showLoading(); },
+    didOpen: () => {
+      Swal.showLoading();
+    },
   });
 
   // Ahora el enlace por correo lleva el Token secreto incrustado
   let linkTicket = new URL(
-    "../php/cruds/imprimir_ticket_pos.php?id=" + folio + "&token=" + tokenTicket,
+    "../php/cruds/imprimir_ticket_pos.php?id=" +
+      folio +
+      "&token=" +
+      tokenTicket,
     window.location.href,
   ).href;
 
   fetch("../php/cruds/enviar_ticket_correo.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: email, nombre: nombre, folio: folio, link: linkTicket }),
+    body: JSON.stringify({
+      email: email,
+      nombre: nombre,
+      folio: folio,
+      link: linkTicket,
+    }),
   })
     .then((res) => res.json())
     .then((data) => {
-      if (data.success) Swal.fire("¡Enviado!", "El ticket ha sido enviado al correo.", "success");
-      else Swal.fire("Error", data.message || "No se pudo enviar el correo.", "error");
+      if (data.success)
+        Swal.fire(
+          "¡Enviado!",
+          "El ticket ha sido enviado al correo.",
+          "success",
+        );
+      else
+        Swal.fire(
+          "Error",
+          data.message || "No se pudo enviar el correo.",
+          "error",
+        );
     })
-    .catch((error) => Swal.fire("Error", "Hubo un problema de conexión.", "error"));
+    .catch((error) =>
+      Swal.fire("Error", "Hubo un problema de conexión.", "error"),
+    );
 }
 
 // LLamar cotizaciones ***********************************************
@@ -8727,6 +8846,550 @@ window.cancelarCotizacion = function (id) {
     }
   });
 };
+
+// Llamar Citas ********************************************
+// (FullCalendar)
+let botonCitasMenu = document.getElementById("citas-link");
+
+if (botonCitasMenu) {
+  botonCitasMenu.addEventListener("click", function (event) {
+    event.preventDefault(); // Evita la acción por defecto del enlace
+    fetch("catalogos/citas.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+
+        setTimeout(() => {
+          if (typeof inicializarCalendarioSWAOS === "function") {
+            inicializarCalendarioSWAOS();
+          }
+        }, 100);
+      })
+      .catch((error) => {
+        console.error("Error al cargar el contenido:", error);
+      });
+  });
+}
+
+window.inicializarCalendarioSWAOS = function () {
+  let calendarEl = document.getElementById("calendario-citas");
+  if (!calendarEl) return;
+
+  // EL EXORCISMO: Si ya hay un calendario en memoria, lo destruimos antes de crear otro
+  if (window.calendarioSWAOSActivo) {
+    window.calendarioSWAOSActivo.destroy();
+  }
+
+  calendarEl.innerHTML = "";
+
+  // Instanciamos el calendario
+  let calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: "dayGridMonth",
+    locale: "es",
+    height: 500, // LO HICIMOS MÁS CHICO
+    headerToolbar: false, //APAGAMOS LA BARRA FEA POR DEFECTO
+    editable: true, // ¡Permite mover las citas con el mouse!
+    eventDurationEditable: false, // Evitamos que estiren la cita, solo moverla
+    eventOverlap: false, // No permite que suelten una cita encima de otra
+
+    // EVENTO: Cuando el usuario arrastra y suelta una cita en otro día/hora
+    eventDrop: function (info) {
+      let formData = new FormData();
+      formData.append("id_cita", info.event.id);
+
+      // Ajustamos al formato que necesita MySQL (YYYY-MM-DDTHH:mm)
+      let inicioIso = new Date(
+        info.event.start.getTime() -
+          info.event.start.getTimezoneOffset() * 60000,
+      )
+        .toISOString()
+        .slice(0, 16);
+      let finIso = new Date(
+        info.event.end.getTime() - info.event.end.getTimezoneOffset() * 60000,
+      )
+        .toISOString()
+        .slice(0, 16);
+
+      formData.append("fecha_inicio", inicioIso);
+      formData.append("fecha_fin", finIso);
+
+      fetch("../php/funciones/reprogramar_cita.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.success) {
+            Swal.fire("Error", data.message, "error");
+            info.revert(); // Regresa la cita a su lugar original si falla
+          } else {
+            // Pequeña notificación visual sin estorbar
+            const Toast = Swal.mixin({
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 2000,
+            });
+            Toast.fire({ icon: "success", title: "Cita Reprogramada" });
+          }
+        });
+    },
+
+    //  Cada que se cambia de vista, esto lee el mes y lo pega en nuestro <h2>
+    datesSet: function (info) {
+      let tituloEl = document.getElementById("titulo-calendario");
+      if (tituloEl) {
+        tituloEl.innerText = info.view.title;
+      }
+    },
+
+    // Leemos lo que manda PHP antes de dárselo al calendario
+    events: function (fetchInfo, successCallback, failureCallback) {
+      // Le pegamos la hora exacta a la URL para obligar al navegador a descargar datos frescos SIEMPRE
+      let urlFresco =
+        "../php/funciones/api_cargar_citas.php?t=" + new Date().getTime();
+      fetch(urlFresco)
+        .then((response) => response.text()) // Lo leemos como texto puro primero
+        .then((textoBruto) => {
+          try {
+            let datosJSON = JSON.parse(textoBruto);
+
+            // Verificamos si PHP mandó el arreglo de citas correctamente
+            if (Array.isArray(datosJSON)) {
+              successCallback(datosJSON);
+            } else {
+              console.error("🚨 PHP devolvió un objeto con error:", datosJSON);
+              Swal.fire(
+                "Error en BD",
+                datosJSON.error || "Revisa la consola.",
+                "error",
+              );
+              failureCallback("No es un arreglo");
+            }
+          } catch (error) {
+            console.error(
+              " ERROR FATAL DE PHP. Esto fue lo que respondió el servidor:",
+            );
+            console.error(textoBruto); // ¡AQUÍ VEREMOS EL ERROR REAL!
+            failureCallback(error);
+          }
+        })
+        .catch((error) => {
+          console.error("Error de conexión:", error);
+          failureCallback(error);
+        });
+    },
+
+    dateClick: function (info) {
+      abrirModalNuevaCita(info.dateStr);
+    },
+    // EVENTO: Cuando el usuario hace CLIC EN UNA CITA YA CREADA
+    eventClick: function (info) {
+      let props = info.event.extendedProps;
+
+      // Formateamos la fecha para que se lea bonita en español
+      let fechaInicio = info.event.start.toLocaleString("es-MX", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      // Si es a domicilio, mostramos la dirección, si no, la ocultamos
+      let htmlDireccion =
+        props.tipo === "Domicilio"
+          ? `<p style="margin-bottom: 8px;"><i class="fa-solid fa-map-location-dot" style="color:#fd7e14;"></i> <strong>Dirección:</strong> ${props.direccion}</p>`
+          : "";
+
+      // BOTÓN DE WHATSAPP INYECTADO EN EL HTML
+      // BOTÓN SIMPLIFICADO: Solo le pasamos el ID, la función se encargará del resto
+      let btnWhatsApp = `<button onclick="enviarWhatsCita('${info.event.id}')" style="width: 100%; margin-top: 15px; background-color: #25D366; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px;"><i class="fa-brands fa-whatsapp"></i> Enviar Recordatorio al Cliente</button>`;
+
+      let htmlDetalles = `
+        <div style="text-align: left; font-size: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+            <p style="margin-bottom: 8px;"><i class="fa-solid fa-user" style="color:#007bff;"></i> <strong>Cliente:</strong> ${props.cliente}</p>
+            <p style="margin-bottom: 8px;"><i class="fa-solid fa-phone" style="color:#6c757d;"></i> <strong>Tel:</strong> ${props.telefono || "No registrado"}</p>
+            <p style="margin-bottom: 8px;"><i class="fa-solid fa-tag" style="color:#6f42c1;"></i> <strong>Servicio:</strong> ${props.tipo}</p>
+            <p style="margin-bottom: 8px;"><i class="fa-solid fa-clock" style="color:#28a745;"></i> <strong>Agendado:</strong> <span style="text-transform: capitalize;">${fechaInicio}</span></p>
+            <p style="margin-bottom: 5px;"><strong><i class="fa-solid fa-circle-check" style="color:${info.event.backgroundColor};"></i> Estatus:</strong> 
+                <span style="font-weight:bold; color:${info.event.backgroundColor}; text-transform: uppercase;">${props.estatus}</span>
+            </p>
+            ${htmlDireccion}
+            <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
+            <p style="margin-bottom: 5px;"><strong>Motivo / Falla:</strong></p>
+            <p style="background: #fff; padding: 10px; border-radius: 4px; border: 1px dashed #ccc; margin: 0;">${props.motivo}</p>
+            ${btnWhatsApp}
+        </div>
+      `;
+
+      Swal.fire({
+        title: "Cita #" + info.event.id,
+        html: htmlDetalles,
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonColor: "#28a745",
+        denyButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText:
+          '<i class="fa-solid fa-file-invoice"></i> Crear Orden de Servicio',
+        denyButtonText: '<i class="fa-solid fa-ban"></i> Cancelar Cita',
+        cancelButtonText: "Cerrar",
+        showConfirmButton: props.estatus !== "Atendida", // Se oculta si ya se atendió
+        showDenyButton: props.estatus !== "Atendida", // Se oculta si ya se atendió
+        width: "500px",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          //  Avisamos a la BD que la cita ya fue Atendida
+          let formAtender = new FormData();
+          formAtender.append("id_cita", info.event.id);
+
+          fetch("../php/funciones/atender_cita.php", {
+            method: "POST",
+            body: formAtender,
+          })
+            .then(() => {
+              // Empacamos los datos de la cita en la maleta temporal del navegador
+              let datosConversion = {
+                id_cita: info.event.id,
+                id_cliente: props.id_cliente,
+                nombre_cliente: props.cliente,
+                falla: props.motivo,
+              };
+              sessionStorage.setItem(
+                "citaParaOrden",
+                JSON.stringify(datosConversion),
+              );
+
+              //  Cerramos la ventana actual
+              Swal.close();
+
+              // Simulamos un clic en tu menú lateral para abrir el módulo de Órdenes
+              let btnOrdenes = document.getElementById("ordenes-link");
+              if (btnOrdenes) {
+                btnOrdenes.click();
+              } else {
+                Swal.fire(
+                  "Error",
+                  "No se encontró el enlace al módulo de órdenes.",
+                  "error",
+                );
+              }
+            })
+            .catch((err) => console.error("Error al atender cita:", err));
+        } else if (result.isDenied) {
+          // Lógica Real para CANCELAR
+          Swal.fire({
+            title: "¿Cancelar Cita?",
+            text: "Se liberará este espacio en la agenda.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc3545",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Sí, Cancelar",
+            cancelButtonText: "No, mantener",
+          }).then((borrar) => {
+            if (borrar.isConfirmed) {
+              let formCancel = new FormData();
+              formCancel.append("id_cita", info.event.id);
+
+              fetch("../php/funciones/cancelar_cita.php", {
+                method: "POST",
+                body: formCancel,
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.success) {
+                    info.event.remove(); // Desaparece la cita del calendario visualmente
+                    Swal.fire("Cancelada", "La cita fue retirada.", "success");
+                  } else {
+                    Swal.fire("Error", data.message, "error");
+                  }
+                });
+            }
+          });
+        }
+      });
+    },
+  });
+
+  //  Renderizamos el calendario en la pantalla
+  // Guardamos el calendario nuevo en la variable global
+  window.calendarioSWAOSActivo = calendar;
+  calendar.render();
+
+  // CONECTAMOS NUESTROS BOTONES HTML CON LA API INTERNA DE FULLCALENDAR
+
+  let btnPrev = document.getElementById("btn-prev-cita");
+  if (btnPrev) btnPrev.onclick = () => calendar.prev();
+
+  let btnNext = document.getElementById("btn-next-cita");
+  if (btnNext) btnNext.onclick = () => calendar.next();
+
+  let btnHoy = document.getElementById("btn-hoy-cita");
+  if (btnHoy) btnHoy.onclick = () => calendar.today();
+
+  let btnMes = document.getElementById("btn-mes-cita");
+  if (btnMes) btnMes.onclick = () => calendar.changeView("dayGridMonth");
+
+  let btnSem = document.getElementById("btn-sem-cita");
+  if (btnSem) btnSem.onclick = () => calendar.changeView("timeGridWeek");
+
+  let btnDia = document.getElementById("btn-dia-cita");
+  if (btnDia) btnDia.onclick = () => calendar.changeView("timeGridDay");
+
+  let btnLista = document.getElementById("btn-lista-cita");
+  if (btnLista) btnLista.onclick = () => calendar.changeView("listWeek");
+};;;
+
+// FUNCIONES DEL MÓDULO DE CITAS
+
+window.abrirModalNuevaCita = function (fechaPreseleccionada = "") {
+  // Reseteamos el formulario completo
+  document.getElementById("form-crearCita").reset();
+  document.getElementById("div-direccion-cita").style.display = "none";
+
+  // Limpiamos la cajita del buscador de clientes
+  let inputBusqueda = document.getElementById("busqueda-cliente");
+  let inputHidden = document.getElementById("id_cliente_seleccionado");
+  let btnLimpiar = document.getElementById("limpiar-cliente");
+  if (inputBusqueda) {
+    inputBusqueda.value = "";
+    inputBusqueda.disabled = false;
+  }
+  if (inputHidden) inputHidden.value = "";
+  if (btnLimpiar) btnLimpiar.style.display = "none";
+
+  // LECTOR INTELIGENTE DE FECHA Y HORA
+  if (fechaPreseleccionada) {
+    // ¿Viene con hora incluida de la vista Semana/Día? (ej: 2026-03-18T14:30:00-07:00)
+    if (fechaPreseleccionada.includes("T")) {
+      // Cortamos exactamente hasta el minuto para el inicio "YYYY-MM-DDTHH:mm"
+      let inicioStr = fechaPreseleccionada.substring(0, 16);
+      document.getElementById("cita-fecha-inicio").value = inicioStr;
+
+      // Para la fecha final, le sumamos 1 hora usando el motor de JavaScript
+      let fechaObj = new Date(fechaPreseleccionada);
+      fechaObj.setHours(fechaObj.getHours() + 1);
+
+      // Reconstruimos el formato para el input HTML
+      let yyyy = fechaObj.getFullYear();
+      let mm = String(fechaObj.getMonth() + 1).padStart(2, "0");
+      let dd = String(fechaObj.getDate()).padStart(2, "0");
+      let hh = String(fechaObj.getHours()).padStart(2, "0");
+      let mins = String(fechaObj.getMinutes()).padStart(2, "0");
+
+      document.getElementById("cita-fecha-fin").value =
+        `${yyyy}-${mm}-${dd}T${hh}:${mins}`;
+    } else {
+      // Es un clic normal de la vista de MES (día entero)
+      document.getElementById("cita-fecha-inicio").value =
+        fechaPreseleccionada + "T10:00";
+      document.getElementById("cita-fecha-fin").value =
+        fechaPreseleccionada + "T11:00";
+    }
+  } else {
+    // Si hizo clic en el Botón Azul "Agendar Cita", ponemos la hora actual
+    let fechaObj = new Date();
+    let yyyy = fechaObj.getFullYear();
+    let mm = String(fechaObj.getMonth() + 1).padStart(2, "0");
+    let dd = String(fechaObj.getDate()).padStart(2, "0");
+    let hh = String(fechaObj.getHours()).padStart(2, "0");
+    let mins = String(fechaObj.getMinutes()).padStart(2, "0");
+
+    document.getElementById("cita-fecha-inicio").value =
+      `${yyyy}-${mm}-${dd}T${hh}:${mins}`;
+
+    // Final + 1 hora
+    fechaObj.setHours(fechaObj.getHours() + 1);
+    let hhFin = String(fechaObj.getHours()).padStart(2, "0");
+    document.getElementById("cita-fecha-fin").value =
+      `${yyyy}-${mm}-${dd}T${hhFin}:${mins}`;
+  }
+
+  // Mostramos la ventana
+  document.getElementById("crear-modalCita").style.display = "flex";
+};
+
+// Muestra u oculta el campo de Dirección dependiendo de lo que elijas
+window.toggleDireccionCita = function () {
+  let tipo = document.getElementById("cita-tipo").value;
+  let divDir = document.getElementById("div-direccion-cita");
+  if (tipo === "Domicilio") {
+    divDir.style.display = "block";
+  } else {
+    divDir.style.display = "none";
+  }
+};
+
+// Atrapar el guardado del formulario
+document.addEventListener("submit", function (e) {
+  if (e.target && e.target.id === "form-crearCita") {
+    e.preventDefault();
+
+    // Validaciones estrictas
+    let idCliente = document.getElementById("id_cliente_seleccionado").value;
+    if (!idCliente || idCliente === "") {
+      Swal.fire(
+        "Cliente Requerido",
+        "Debes buscar y seleccionar un cliente de la lista. Si es nuevo, dalo de alta.",
+        "warning",
+      );
+      return;
+    }
+
+    let tipoCita = document.getElementById("cita-tipo").value;
+    if (
+      tipoCita === "Domicilio" &&
+      document.getElementById("cita-direccion").value.trim() === ""
+    ) {
+      Swal.fire(
+        "Dirección Requerida",
+        "Debes ingresar la dirección para poder ir a realizar el servicio a domicilio.",
+        "warning",
+      );
+      return;
+    }
+
+    // VALIDACIÓN DE VIAJES EN EL TIEMPO
+    let fechaInicioInput = document.getElementById("cita-fecha-inicio").value;
+    let fechaInicioObj = new Date(fechaInicioInput);
+    let ahora = new Date();
+
+    // Le restamos 5 minutos a "ahora" por si el recepcionista se tarda escribiendo
+    ahora.setMinutes(ahora.getMinutes() - 5);
+
+    if (fechaInicioObj < ahora) {
+      Swal.fire(
+        "Fecha Inválida",
+        "No puedes agendar una cita en el pasado. Verifica la fecha y hora de inicio.",
+        "warning",
+      );
+      return;
+    }
+
+    let formData = new FormData(e.target);
+
+    Swal.fire({
+      title: "Agendando cita...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    // Lo mandamos al backend
+    fetch("../php/cruds/procesar_crear_cita.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          document.getElementById("crear-modalCita").style.display = "none";
+          Swal.fire("¡Agenda Confirmada!", data.message, "success").then(() => {
+            // Recargamos el módulo para ver la nueva cita pintada en el calendario
+            document.getElementById("citas-link").click();
+          });
+        } else {
+          Swal.fire("Error", data.message, "error");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        Swal.fire(
+          "Error",
+          "Ocurrió un problema de conexión con la base de datos.",
+          "error",
+        );
+      });
+  }
+});
+
+// Enviar Cita por WhatsApp (Estrategia de Dos Enlaces)
+window.enviarWhatsCita = function(idCita) { 
+    //  Jalamos toda la información directamente del calendario activo
+    let calendar = window.calendarioSWAOSActivo;
+    let evento = calendar.getEventById(idCita);
+    let props = evento.extendedProps;
+
+    let telefono = props.telefono;
+    if (!telefono || telefono === "undefined" || telefono === "null" || telefono === "") {
+        Swal.fire("Atención", "Este cliente no tiene teléfono registrado.", "warning");
+        return;
+    }
+
+    //  Formateamos la fecha para que se lea bonita
+    let fechaBonita = evento.start.toLocaleString("es-MX", {
+        weekday: "long", year: "numeric", month: "long", day: "numeric", 
+        hour: "2-digit", minute: "2-digit"
+    });
+
+    //  ARMAMOS EL ENLACE 1: Para iPhone / Outlook (.ics)
+    let urlBase = window.location.origin + window.location.pathname.replace("ad.php", "");
+    let linkIcs = urlBase + "../php/funciones/descargar_cita.php?id=" + idCita + "&token=" + props.token;
+
+    //  ARMAMOS EL ENLACE 2: Directo para Google Calendar (Android)
+    // Convertimos las fechas al formato exacto que exige Google (YYYYMMDDTHHMMSSZ)
+    let startISO = evento.start.toISOString().replace(/-|:|\.\d\d\d/g,"");
+    let endISO = evento.end ? evento.end.toISOString().replace(/-|:|\.\d\d\d/g,"") : startISO;
+    
+    let tituloUrl = encodeURIComponent("Cita SWAOS - " + props.tipo);
+    let detallesUrl = encodeURIComponent("Cliente: " + props.cliente + "\nMotivo: " + props.motivo);
+    let linkGoogle = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${tituloUrl}&details=${detallesUrl}&dates=${startISO}/${endISO}`;
+
+    // Construimos el Mensaje 
+    let mensaje = `Hola *${props.cliente}*, te confirmamos tu cita de Soporte Técnico SWAOS.\n\n`;
+    mensaje += `*Fecha:* ${fechaBonita}\n\n`;
+    mensaje += `*Agrega esta cita a tu agenda con 1 clic:* \n\n`;
+    mensaje += `*Si usas Android (Google):*\n${linkGoogle}\n\n`;
+    mensaje += `*Si usas iPhone (Apple):*\n${linkIcs}\n\n`;
+    mensaje += `¡Te esperamos!`;
+
+    // Limpiamos el teléfono y abrimos WhatsApp
+    let celLimpio = telefono.replace(/\D/g, "");
+    if (celLimpio.length === 10) celLimpio = "52" + celLimpio;
+
+    window.open(`https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`, "_blank");
+};
+
+// CONVERSIÓN DE CITA A ORDEN DE SERVICIO
+window.revisarConversionCita = function() {
+    // 1. Revisamos si hay un paquete esperando en la memoria
+    let paqueteDatos = sessionStorage.getItem("citaParaOrden");
+    
+    if (paqueteDatos) {
+        //  Desempacamos los datos
+        let cita = JSON.parse(paqueteDatos);
+
+        //  Abrimos la ventana modal de Nueva Orden automáticamente
+        if (typeof abrirModalOrden === "function") {
+            abrirModalOrden('crear-modalOrden');
+        } else {
+            document.getElementById("crear-modalOrden").style.display = "flex";
+        }
+
+        //  Auto-llenamos los campos con la información de la cita
+        setTimeout(() => {
+            // Cliente visible
+            let inputBusqueda = document.getElementById("busqueda-cliente");
+            if (inputBusqueda) inputBusqueda.value = cita.nombre_cliente;
+
+            // ID Cliente oculto (El más importante para la BD)
+            let inputId = document.getElementById("id_cliente_seleccionado");
+            if (inputId) inputId.value = cita.id_cliente;
+
+            // Falla reportada (Atrapada por su atributo 'name')
+            let textareaFalla = document.querySelector('#form-crearOrden textarea[name="falla"]');
+            if (textareaFalla) textareaFalla.value = cita.falla;
+
+        }, 200); // Le damos 200 milisegundos a la ventana para que termine de abrirse
+
+        //  Destruimos el paquete para que no se vuelva a abrir la próxima vez que entres a Órdenes
+        sessionStorage.removeItem("citaParaOrden");
+    }
+}
 
 // Llamar informes *****************************************************************
 document
