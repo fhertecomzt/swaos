@@ -40,7 +40,8 @@ try {
         'motivo' => $cita['motivo'],
         'direccion' => $cita['direccion_visita'],
         'estatus' => $cita['estatus'],
-        'token' => $token_cita // Token enviado con éxito
+        'token' => $token_cita, // Token enviado con éxito
+        'nombre_empresa' => $_SESSION['nombre_t'] ?? 'Taller de computadoras'
       ]
     ];
   }

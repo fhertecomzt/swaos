@@ -6510,7 +6510,7 @@ function imprimirTicket(idOrden) {
 }
 
 function verQrOrden(token) {
-  const urlRastreo = `https://swaos.rf.gd/swaos/track.php?t=${token}`;
+  const urlRastreo = `https://swaos.rf.gd/track.php?t=${token}`;
   const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(urlRastreo)}`;
 
   Swal.fire({
@@ -9308,51 +9308,83 @@ document.addEventListener("submit", function (e) {
 });
 
 // Enviar Cita por WhatsApp (Estrategia de Dos Enlaces)
-window.enviarWhatsCita = function(idCita) { 
-    //  Jalamos toda la información directamente del calendario activo
-    let calendar = window.calendarioSWAOSActivo;
-    let evento = calendar.getEventById(idCita);
-    let props = evento.extendedProps;
+window.enviarWhatsCita = function (idCita) {
+  //  Jalamos toda la información directamente del calendario activo
+  let calendar = window.calendarioSWAOSActivo;
+  let evento = calendar.getEventById(idCita);
+  let props = evento.extendedProps;
 
-    let telefono = props.telefono;
-    if (!telefono || telefono === "undefined" || telefono === "null" || telefono === "") {
-        Swal.fire("Atención", "Este cliente no tiene teléfono registrado.", "warning");
-        return;
-    }
+  let telefono = props.telefono;
+  if (
+    !telefono ||
+    telefono === "undefined" ||
+    telefono === "null" ||
+    telefono === ""
+  ) {
+    Swal.fire(
+      "Atención",
+      "Este cliente no tiene teléfono registrado.",
+      "warning",
+    );
+    return;
+  }
 
-    //  Formateamos la fecha para que se lea bonita
-    let fechaBonita = evento.start.toLocaleString("es-MX", {
-        weekday: "long", year: "numeric", month: "long", day: "numeric", 
-        hour: "2-digit", minute: "2-digit"
-    });
+  //  Formateamos la fecha para que se lea bonita
+  let fechaBonita = evento.start.toLocaleString("es-MX", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-    //  ARMAMOS EL ENLACE 1: Para iPhone / Outlook (.ics)
-    let urlBase = window.location.origin + window.location.pathname.replace("ad.php", "");
-    let linkIcs = urlBase + "../php/funciones/descargar_cita.php?id=" + idCita + "&token=" + props.token;
+  // ARMAMOS EL ENLACE 1: Para iPhone / Outlook (.ics) LIMPIO
+  // Solo tomamos el origen (ej. https://tudominio.com) y le pegamos la ruta directa
+  let urlBase = window.location.origin;
 
-    //  ARMAMOS EL ENLACE 2: Directo para Google Calendar (Android)
-    // Convertimos las fechas al formato exacto que exige Google (YYYYMMDDTHHMMSSZ)
-    let startISO = evento.start.toISOString().replace(/-|:|\.\d\d\d/g,"");
-    let endISO = evento.end ? evento.end.toISOString().replace(/-|:|\.\d\d\d/g,"") : startISO;
-    
-    let tituloUrl = encodeURIComponent("Cita SWAOS - " + props.tipo);
-    let detallesUrl = encodeURIComponent("Cliente: " + props.cliente + "\nMotivo: " + props.motivo);
-    let linkGoogle = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${tituloUrl}&details=${detallesUrl}&dates=${startISO}/${endISO}`;
+  // Asegúrate de que esta ruta sea exacta desde la raíz de tu servidor
+  let linkIcs =
+    urlBase +
+    "/php/funciones/descargar_cita.php?id=" +
+    idCita +
+    "&token=" +
+    props.token;
 
-    // Construimos el Mensaje 
-    let mensaje = `Hola *${props.cliente}*, te confirmamos tu cita de Soporte Técnico SWAOS.\n\n`;
-    mensaje += `*Fecha:* ${fechaBonita}\n\n`;
-    mensaje += `*Agrega esta cita a tu agenda con 1 clic:* \n\n`;
-    mensaje += `*Si usas Android (Google):*\n${linkGoogle}\n\n`;
-    mensaje += `*Si usas iPhone (Apple):*\n${linkIcs}\n\n`;
-    mensaje += `¡Te esperamos!`;
+  //  ARMAMOS EL ENLACE 2: Directo para Google Calendar (Android)
+  // Convertimos las fechas al formato exacto que exige Google (YYYYMMDDTHHMMSSZ)
+  let startISO = evento.start.toISOString().replace(/-|:|\.\d\d\d/g, "");
+  let endISO = evento.end
+    ? evento.end.toISOString().replace(/-|:|\.\d\d\d/g, "")
+    : startISO;
 
-    // Limpiamos el teléfono y abrimos WhatsApp
-    let celLimpio = telefono.replace(/\D/g, "");
-    if (celLimpio.length === 10) celLimpio = "52" + celLimpio;
+  // Usamos el nombre dinámico en el título del evento
+  let nombreEmpresa = props.nombre_empresa || "Taller de computadoras";
+  let tituloUrl = encodeURIComponent(
+    "Cita " + nombreEmpresa + " - " + props.tipo,
+  );
+  let detallesUrl = encodeURIComponent(
+    "Cliente: " + props.cliente + "\nMotivo: " + props.motivo,
+  );
+  let linkGoogle = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${tituloUrl}&details=${detallesUrl}&dates=${startISO}/${endISO}`;
 
-    window.open(`https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`, "_blank");
-};
+  // Usamos el nombre dinámico en el texto de WhatsApp
+  let mensaje = `Hola *${props.cliente}*, te confirmamos tu cita con *${nombreEmpresa}*.\n\n`;
+  mensaje += `*Fecha:* ${fechaBonita}\n\n`;
+  mensaje += `*Agrega esta cita a tu agenda con 1 clic:* \n\n`;
+  mensaje += `*Si usas Android (Google):*\n${linkGoogle}\n\n`;
+  mensaje += `*Si usas iPhone (Apple):*\n${linkIcs}\n\n`;
+  mensaje += `¡Te esperamos!`;
+
+  // Limpiamos el teléfono y abrimos WhatsApp
+  let celLimpio = telefono.replace(/\D/g, "");
+  if (celLimpio.length === 10) celLimpio = "52" + celLimpio;
+
+  window.open(
+    `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`,
+    "_blank",
+  );
+};;;
 
 // CONVERSIÓN DE CITA A ORDEN DE SERVICIO
 window.revisarConversionCita = function() {

@@ -82,7 +82,7 @@ if (empty($errores)) {
 
             // // Bloqueamos si la sesión está viva en otro lado
             // if ($user['session_token'] !== null) {
-            //     $_SESSION['errores'] = ["⚠️ Esta cuenta ya está en uso. Cierra la sesión activa o espera 10 minutos de inactividad."];
+            //     $_SESSION['errores'] = [" Esta cuenta ya está en uso. Cierra la sesión activa o espera 10 minutos de inactividad."];
             //     header("Location: ../index.php");
             //     exit;
             // }
