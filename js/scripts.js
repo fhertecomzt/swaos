@@ -9041,43 +9041,32 @@ window.inicializarCalendarioSWAOS = function () {
         width: "500px",
       }).then((result) => {
         if (result.isConfirmed) {
-          //  Avisamos a la BD que la cita ya fue Atendida
-          let formAtender = new FormData();
-          formAtender.append("id_cita", info.event.id);
+          // 1. Empacamos los datos de la cita (ahora sin cerrar la cita todavía)
+          let datosConversion = {
+            id_cita: info.event.id,
+            id_cliente: props.id_cliente,
+            nombre_cliente: props.cliente,
+            falla: props.motivo,
+          };
+          sessionStorage.setItem(
+            "citaParaOrden",
+            JSON.stringify(datosConversion),
+          );
 
-          fetch("../php/funciones/atender_cita.php", {
-            method: "POST",
-            body: formAtender,
-          })
-            .then(() => {
-              // Empacamos los datos de la cita en la maleta temporal del navegador
-              let datosConversion = {
-                id_cita: info.event.id,
-                id_cliente: props.id_cliente,
-                nombre_cliente: props.cliente,
-                falla: props.motivo,
-              };
-              sessionStorage.setItem(
-                "citaParaOrden",
-                JSON.stringify(datosConversion),
-              );
+          // 2. Cerramos la ventana actual
+          Swal.close();
 
-              //  Cerramos la ventana actual
-              Swal.close();
-
-              // Simulamos un clic en tu menú lateral para abrir el módulo de Órdenes
-              let btnOrdenes = document.getElementById("ordenes-link");
-              if (btnOrdenes) {
-                btnOrdenes.click();
-              } else {
-                Swal.fire(
-                  "Error",
-                  "No se encontró el enlace al módulo de órdenes.",
-                  "error",
-                );
-              }
-            })
-            .catch((err) => console.error("Error al atender cita:", err));
+          // 3. Simulamos un clic en tu menú lateral para abrir el módulo de Órdenes
+          let btnOrdenes = document.getElementById("ordenes-link");
+          if (btnOrdenes) {
+            btnOrdenes.click();
+          } else {
+            Swal.fire(
+              "Error",
+              "No se encontró el enlace al módulo de órdenes.",
+              "error",
+            );
+          }
         } else if (result.isDenied) {
           // Lógica Real para CANCELAR
           Swal.fire({
@@ -9388,38 +9377,43 @@ window.enviarWhatsCita = function (idCita) {
 
 // CONVERSIÓN DE CITA A ORDEN DE SERVICIO
 window.revisarConversionCita = function() {
-    // 1. Revisamos si hay un paquete esperando en la memoria
+    //  Revisamos si hay un paquete esperando en la memoria
     let paqueteDatos = sessionStorage.getItem("citaParaOrden");
     
     if (paqueteDatos) {
-        //  Desempacamos los datos
-        let cita = JSON.parse(paqueteDatos);
+      //  Desempacamos los datos
+      let cita = JSON.parse(paqueteDatos);
 
-        //  Abrimos la ventana modal de Nueva Orden automáticamente
-        if (typeof abrirModalOrden === "function") {
-            abrirModalOrden('crear-modalOrden');
-        } else {
-            document.getElementById("crear-modalOrden").style.display = "flex";
-        }
+      //  Abrimos la ventana modal de Nueva Orden automáticamente
+      if (typeof abrirModalOrden === "function") {
+        abrirModalOrden("crear-modalOrden");
+      } else {
+        document.getElementById("crear-modalOrden").style.display = "flex";
+      }
 
-        //  Auto-llenamos los campos con la información de la cita
-        setTimeout(() => {
-            // Cliente visible
-            let inputBusqueda = document.getElementById("busqueda-cliente");
-            if (inputBusqueda) inputBusqueda.value = cita.nombre_cliente;
+      // Auto-llenamos los campos con la información de la cita
+      setTimeout(() => {
+        // Cliente visible
+        let inputBusqueda = document.getElementById("busqueda-cliente");
+        if (inputBusqueda) inputBusqueda.value = cita.nombre_cliente;
 
-            // ID Cliente oculto (El más importante para la BD)
-            let inputId = document.getElementById("id_cliente_seleccionado");
-            if (inputId) inputId.value = cita.id_cliente;
+        // ID Cliente oculto
+        let inputId = document.getElementById("id_cliente_seleccionado");
+        if (inputId) inputId.value = cita.id_cliente;
 
-            // Falla reportada (Atrapada por su atributo 'name')
-            let textareaFalla = document.querySelector('#form-crearOrden textarea[name="falla"]');
-            if (textareaFalla) textareaFalla.value = cita.falla;
+        // Falla reportada
+        let textareaFalla = document.querySelector(
+          '#form-crearOrden textarea[name="falla"]',
+        );
+        if (textareaFalla) textareaFalla.value = cita.falla;
 
-        }, 200); // Le damos 200 milisegundos a la ventana para que termine de abrirse
+        // Guardamos el ID de la cita de donde venimos
+        let inputIdCita = document.getElementById("id_cita_origen");
+        if (inputIdCita) inputIdCita.value = cita.id_cita;
+      }, 200); // Le damos 200 milisegundos a la ventana para que termine de abrirse
 
-        //  Destruimos el paquete para que no se vuelva a abrir la próxima vez que entres a Órdenes
-        sessionStorage.removeItem("citaParaOrden");
+      //  Destruimos el paquete para que no se vuelva a abrir la próxima vez que entres a Órdenes
+      sessionStorage.removeItem("citaParaOrden");
     }
 }
 

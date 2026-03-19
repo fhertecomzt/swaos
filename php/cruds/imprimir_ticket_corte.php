@@ -2,12 +2,33 @@
 session_start();
 require '../conexion.php';
 
-if (!isset($_GET['id'])) die("Error: No se proporcionó el folio del corte.");
+// 1. Verificar que el usuario tenga sesión iniciada
+if (!isset($_SESSION['usuario'])) {
+  die(" Acceso denegado. Debes iniciar sesión.");
+}
 
+// 🔥 2. VALIDACIÓN Y SANITIZACIÓN (Todo en un solo lugar y desde el principio)
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+  die("Error: No se proporcionó el folio del corte.");
+}
+// Aquí limpiamos el número antes de que toque cualquier consulta SQL
 $id_corte = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
 
+
+// 3. EL CADENERO: Verificar que este corte le pertenezca a la empresa del usuario
+$id_taller_sesion = $_SESSION['taller_id'] ?? 1;
+
+$stmtSeguridad = $dbh->prepare("SELECT id_corte FROM cortes_caja WHERE id_corte = ? AND id_usuario = ?");
+$stmtSeguridad->execute([$id_corte, $id_taller_sesion]);
+
+if ($stmtSeguridad->rowCount() === 0) {
+  die(" ALERTA DE SEGURIDAD: El folio de corte no existe o no pertenece a tu sucursal.");
+}
+
+// 4. EL RESTO DE TU CÓDIGO...
 try {
   $stmt = $dbh->prepare("SELECT * FROM cortes_caja WHERE id_corte = ?");
+  // ...
   $stmt->execute([$id_corte]);
   $corte = $stmt->fetch(PDO::FETCH_ASSOC);
 

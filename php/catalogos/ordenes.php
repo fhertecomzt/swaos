@@ -119,6 +119,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 
     <form id="form-crearOrden" enctype="multipart/form-data" novalidate>
       <input type="hidden" name="id_usuario_sesion" value="<?php echo $_SESSION['id_usuario'] ?? 0; ?>">
+      <input type="hidden" id="id_cita_origen" name="id_cita_origen" value="0">
 
       <div class="form-grid-3">
         <div class="seccion-form">

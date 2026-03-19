@@ -8,11 +8,16 @@ date_default_timezone_set('America/Mazatlan');
 try {
   $id_usuario = $_SESSION['id_usuario'] ?? $_SESSION['idusuario'] ?? 1;
 
-  // ENTRADAS: Todo lo que suma dinero a la caja (Ventas, Abonos, Ingresos de fondo)
   $sqlIngresos = "SELECT LOWER(metodo_pago) as metodo, SUM(total) as suma 
                     FROM ventas 
                     WHERE id_corte IS NULL AND id_usuario = ? 
-                    AND (tipo_movimiento LIKE '%Venta%' OR tipo_movimiento LIKE '%Abono%' OR tipo_movimiento LIKE '%Anticipo%' OR tipo_movimiento LIKE '%Ingreso%')
+                    AND (
+                        tipo_movimiento LIKE '%Venta%' 
+                        OR tipo_movimiento LIKE '%Abono%' 
+                        OR tipo_movimiento LIKE '%Anticipo%' 
+                        OR tipo_movimiento LIKE '%Ingreso%'
+                        OR tipo_movimiento LIKE '%Liquidacion%'
+                    )
                     GROUP BY LOWER(metodo_pago)";
   $stmt = $dbh->prepare($sqlIngresos);
   $stmt->execute([$id_usuario]);
@@ -24,6 +29,7 @@ try {
 
   foreach ($ingresos as $row) {
     $metodo = trim($row['metodo']);
+    // IFNULL programático usando floatval para evitar errores matemáticos
     if ($metodo === 'efectivo' || $metodo === '1' || $metodo === '') $total_efectivo_in += floatval($row['suma']);
     if ($metodo === 'tarjeta' || $metodo === '2') $total_tarjeta_in += floatval($row['suma']);
     if ($metodo === 'transferencia' || $metodo === '3') $total_transferencia_in += floatval($row['suma']);
@@ -42,14 +48,13 @@ try {
   $total_efectivo_out = 0;
   $total_tarjeta_out = 0;
   $total_transferencia_out = 0;
-  $total_retiros_global = 0; // Para imprimir el total de salidas en el ticket
+  $total_retiros_global = 0;
 
   foreach ($retiros as $row) {
     $metodo = trim($row['metodo']);
     $monto = floatval($row['suma_retiros']);
     $total_retiros_global += $monto;
 
-    // Si devuelves a una Tarjeta, NO te descuenta billetes físicos del Efectivo
     if ($metodo === 'efectivo' || $metodo === '1' || $metodo === '') $total_efectivo_out += $monto;
     if ($metodo === 'tarjeta' || $metodo === '2') $total_tarjeta_out += $monto;
     if ($metodo === 'transferencia' || $metodo === '3') $total_transferencia_out += $monto;

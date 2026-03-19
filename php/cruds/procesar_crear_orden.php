@@ -34,8 +34,12 @@ try {
     $id_usuario = $_POST['id_usuario_sesion'];
   }
 
+  // AQUÍ RECIBIMOS EL ID DE LA CITA 
+  $id_cita_origen = $_POST['id_cita_origen'] ?? 0;
+
   //  VALIDAR CLIENTE
   $id_cliente = $_POST['id_cliente'] ?? null;
+
   if (empty($id_cliente)) {
     throw new Exception("Debes seleccionar un cliente.");
   }
@@ -101,21 +105,28 @@ try {
 
   $id_orden = $dbh->lastInsertId();
 
-  //  CAJA GENERAL: REGISTRAR EL ANTICIPO (NUEVO)
+  // REGISTRAR EL ANTICIPO 
   if ($anticipo > 0) {
-    // Creamos el ticket en ventas
-    $stmtVenta = $dbh->prepare("INSERT INTO ventas (id_cliente, id_usuario, id_orden, total, metodo_pago, tipo_movimiento) VALUES (?, ?, ?, ?, 'Efectivo', 'Anticipo Orden')");
-    $stmtVenta->execute([$id_cliente, $id_usuario, $id_orden, $anticipo]);
+    // Recibimos el método de pago real desde el formulario (1=Efectivo, 2=Tarjeta, 3=Transferencia)
+    $id_metodo_pago = $_POST['id_metodo_pago'] ?? 
+    // Lo traducimos a texto para la tabla de ventas
+    $metodo_texto = 'Efectivo';
+    if ($id_metodo_pago == 2) $metodo_texto = 'Tarjeta';
+    if ($id_metodo_pago == 3) $metodo_texto = 'Transferencia';
+
+    // Creamos el ticket en ventas con el método REAL
+    $stmtVenta = $dbh->prepare("INSERT INTO ventas (id_cliente, id_usuario, id_orden, total, metodo_pago, tipo_movimiento) VALUES (?, ?, ?, ?, ?, 'Anticipo Orden')");
+    $stmtVenta->execute([$id_cliente, $id_usuario, $id_orden, $anticipo, $metodo_texto]);
     $id_venta = $dbh->lastInsertId();
 
-    //  Especificamos el concepto en detalle_ventas
+    // Especificamos el concepto en detalle_ventas
     $concepto = "Anticipo de Reparación Orden #" . $id_orden;
     $stmtDetalle = $dbh->prepare("INSERT INTO detalle_ventas (id_venta, concepto, cantidad, precio_unitario, subtotal) VALUES (?, ?, 1, ?, ?)");
     $stmtDetalle->execute([$id_venta, $concepto, $anticipo, $anticipo]);
 
-    //  NUEVO: Lo guardamos en abonos_ordenes para que el modal lo pueda mostrar
-    $stmtAbonoInicial = $dbh->prepare("INSERT INTO abonos_ordenes (id_orden, monto_abono, id_usuario, id_metpago) VALUES (?, ?, ?, 1)");
-    $stmtAbonoInicial->execute([$id_orden, $anticipo, $id_usuario]);
+    // Lo guardamos en abonos_ordenes usando el ID del método de pago REAL (no el 1 fijo)
+    $stmtAbonoInicial = $dbh->prepare("INSERT INTO abonos_ordenes (id_orden, monto_abono, id_usuario, id_metpago) VALUES (?, ?, ?, ?)");
+    $stmtAbonoInicial->execute([$id_orden, $anticipo, $id_usuario, $id_metodo_pago]);
   }
 
     // SUBIR FOTOS
@@ -137,6 +148,14 @@ try {
     }
   }
 
+  // LÓGICA DE CIERRE DE CITA
+  // Si esta orden viene de una conversión de cita, la marcamos como Atendida
+  if ($id_cita_origen > 0) {
+    $stmtCita = $dbh->prepare("UPDATE citas SET estatus = 'Atendida', color_evento = '#28a745' WHERE id_cita = ?");
+    $stmtCita->execute([$id_cita_origen]);
+  }
+
+  // Confirmamos la transacción guardando todo permanentemente
   $dbh->commit();
 
   // RESPUESTA
