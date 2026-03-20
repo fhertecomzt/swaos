@@ -88,7 +88,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
                 <i class="fa-brands fa-whatsapp pointer-events-none"></i>
               </button>
 
-              <button title="Imprimir Ticket" class="btn-imprimir" style="background-color: #34495e; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;"
+              <button title="Imprimir Ticket Recepción" class="btn-imprimir" style="background-color: #34495e; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;"
                 onclick="imprimirTicket('<?php echo $ord['id_orden']; ?>')">
                 <i class="fa-solid fa-print pointer-events-none"></i>
               </button>
@@ -98,12 +98,35 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
                 <i class="fa-solid fa-qrcode"></i>
               </button>
 
-              <button title="Editar" class="editarOrden fa-solid fa-pen-to-square" data-id="<?php echo $ord['id_orden']; ?>" style="background-color: #c1c13c; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;"></button>
+              <?php
+              $estado_actual = strtolower(trim($ord['estado_servicio']));
 
-              <button title="Cancelar Orden" class="eliminarOrden" data-id="<?php echo $ord['id_orden']; ?>" style="background-color: #cb2c3c; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;">
-                <i class="fa-solid fa-trash pointer-events-none"></i>
-              </button>
+              if ($estado_actual === 'entregado'):
+              ?>
+                <button title="Imprimir Nota de Entrega Final" style="background-color: #0d6efd; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;"
+                  onclick="imprimirNotaEntrega('<?php echo $ord['id_orden']; ?>')">
+                  <i class="fa-solid fa-file-invoice"></i>
+                </button>
+
+                <button title="Orden Sellada (Entregada)" style="background-color: #6c757d; color: white; border-radius: 5px; padding: 5px 8px; cursor: not-allowed;">
+                  <i class="fa-solid fa-lock"></i>
+                </button>
+
+              <?php elseif ($estado_actual === 'cancelado'): ?>
+                <button title="Orden Cancelada Definitivamente" style="background-color: #dc3545; color: white; border-radius: 5px; padding: 5px 8px; cursor: not-allowed; opacity: 0.8;">
+                  <i class="fa-solid fa-ban"></i>
+                </button>
+
+              <?php else: ?>
+                <button title="Editar" class="editarOrden fa-solid fa-pen-to-square" data-id="<?php echo $ord['id_orden']; ?>" style="background-color: #c1c13c; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;"></button>
+
+                <button title="Cancelar Orden" class="eliminarOrden" data-id="<?php echo $ord['id_orden']; ?>" style="background-color: #cb2c3c; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer;">
+                  <i class="fa-solid fa-trash pointer-events-none"></i>
+                </button>
+              <?php endif; ?>
+
             </td>
+
           </tr>
         <?php endforeach; ?>
       </tbody>

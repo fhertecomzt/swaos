@@ -6680,6 +6680,13 @@ document.addEventListener("input", function (e) {
   }
 });
 
+// IMPRIMIR NOTA DE ENTREGA FINAL (58mm)
+window.imprimirNotaEntrega = function(id_orden) {
+    // Abrimos el ticket en una ventanita pequeña flotante ideal para miniprinters
+    let url = "../php/cruds/imprimir_nota_entrega.php?id=" + id_orden;
+    window.open(url, "NotaEntrega", "width=400,height=600,scrollbars=yes");
+};
+
 // Llamar Ventas ********************************************
 document
   .getElementById("ventas-link")
@@ -8889,7 +8896,7 @@ window.inicializarCalendarioSWAOS = function () {
   let calendarEl = document.getElementById("calendario-citas");
   if (!calendarEl) return;
 
-  // EL EXORCISMO: Si ya hay un calendario en memoria, lo destruimos antes de crear otro
+  // Si ya hay un calendario en memoria, lo destruimos antes de crear otro
   if (window.calendarioSWAOSActivo) {
     window.calendarioSWAOSActivo.destroy();
   }
