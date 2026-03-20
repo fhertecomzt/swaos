@@ -7563,7 +7563,7 @@ function cargarHistorial() {
   let fechaFin = document.getElementById("filtro-fecha-fin").value;
   let texto = document.getElementById("filtro-texto").value;
 
-  //  CODIFICAMOS EL TEXTO: Para que espacios ("Público en General") no rompan la URL
+  // Para que espacios ("Público en General") no rompan la URL
   let url = `../php/funciones/api_historial_ventas.php?inicio=${fechaInicio}&fin=${fechaFin}&buscar=${encodeURIComponent(texto)}`;
 
   fetch(url)
@@ -7579,36 +7579,49 @@ function cargarHistorial() {
 
       //  SI HAY ERROR SQL LO MOSTRAMOS
       if (data.error) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red; font-weight: bold;">🚨 ${data.error}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red; font-weight: bold;"> ${data.error}</td></tr>`;
         return;
       }
 
       // LIMPIAMOS LA TABLA
       tbody.innerHTML = "";
 
-      //  SI HAY DATOS, DIBUJAMOS LAS FILAS (Si no, DataTables pondrá su propio mensaje)
+    // SI HAY DATOS, DIBUJAMOS LAS FILAS (Si no, DataTables pondrá su propio mensaje)
       if (data.length > 0) {
         data.forEach((venta) => {
           let badgeClass = "est-listo";
           let estatusTexto = venta.estatus || "Completada";
 
           if (estatusTexto === "Cancelada") badgeClass = "est-cancelado";
-          if (estatusTexto === "Devolución Parcial")
-            badgeClass = "est-revisión";
+          if (estatusTexto === "Devolución Parcial") badgeClass = "est-revisión";
 
-          let disableBotones =
-            estatusTexto === "Cancelada"
+          let disableBotones = estatusTexto === "Cancelada"
               ? 'disabled style="opacity: 0.5; cursor: not-allowed;"'
               : "";
 
+          // 🔥 1. LA MAGIA DE LA ETIQUETA VISUAL
+          let tipo = venta.tipo_movimiento ? venta.tipo_movimiento.toUpperCase() : 'VENTA';
+          let badgeTipo = '';
+
+          if (tipo.includes('VENTA')) {
+              badgeTipo = `<span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-cart-shopping"></i> POS</span>`;
+          } else if (tipo.includes('ANTICIPO')) {
+              badgeTipo = `<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-hourglass-half"></i> ANTICIPO</span>`;
+          } else if (tipo.includes('ABONO') || tipo.includes('LIQUIDACION')) {
+              badgeTipo = `<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-money-bill-wave"></i> ${tipo}</span>`;
+          } else {
+              badgeTipo = `<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;">${tipo}</span>`;
+          }
+
+          // 🔥 2. IMPRIMIMOS EL HTML (Fíjate en el primer <td> del Folio)
           let fila = `
                     <tr>
-                        <td><strong>#${venta.id_venta}</strong></td>
-                        <td>${venta.fecha_venta}</td>
-                        <td>${venta.nombre_cliente}</td>
-                        <td><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
-                        <td><span class="badge-estado ${badgeClass}">${estatusTexto}</span></td>
-                        <td style="text-align: center;" class="tbl">
+                        <td style="vertical-align: middle;"><strong>#${venta.id_venta}</strong> <br> ${badgeTipo}</td>
+                        <td style="vertical-align: middle;">${venta.fecha_venta}</td>
+                        <td style="vertical-align: middle;">${venta.nombre_cliente}</td>
+                        <td style="vertical-align: middle;"><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
+                        <td style="vertical-align: middle;"><span class="badge-estado ${badgeClass}">${estatusTexto}</span></td>
+                        <td style="text-align: center; vertical-align: middle;" class="tbl">
                             <button class="editar" title="Reimprimir Ticket" onclick="reimprimirVenta(${venta.id_venta})">
                                 <i class="fa-solid fa-print" style="font-size: 16px;"></i>
                             </button>
@@ -7624,6 +7637,7 @@ function cargarHistorial() {
           tbody.innerHTML += fila;
         });
       }
+      
 
       // VOLVEMOS A ENCENDER DATATABLES
       let cantidadRegistros = parseInt(

@@ -11,15 +11,14 @@ $fecha_fin = !empty($_GET['fin']) ? $_GET['fin'] : date('Y-m-d');
 $buscar = !empty($_GET['buscar']) ? $_GET['buscar'] : '';
 
 try {
-  // LA CONSULTA (Ahora ignora Retiros y Abonos para no ensuciar tu pantalla)
+  // Agregamos tipo_movimiento y quitamos el bloqueo de Abonos/Anticipos
   $sql = "SELECT v.id_venta, DATE_FORMAT(v.fecha_venta, '%d/%m/%Y %H:%i') AS fecha_venta, v.total, v.estatus, 
-                   IFNULL(c.nombre_cliente, 'Público en General') AS nombre_cliente
+                   IFNULL(c.nombre_cliente, 'Público en General') AS nombre_cliente,
+                   v.tipo_movimiento
             FROM ventas v
             LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
             WHERE DATE(v.fecha_venta) BETWEEN :inicio AND :fin
-            AND v.tipo_movimiento NOT LIKE 'Retiro%' 
-            AND v.tipo_movimiento NOT LIKE 'Anticipo%' 
-            AND v.tipo_movimiento NOT LIKE 'Abono%'";
+            AND v.tipo_movimiento NOT LIKE 'Retiro%'"; // Solo escondemos los retiros de efectivo
 
   $parametros = [
     ':inicio' => $fecha_inicio,
@@ -42,6 +41,5 @@ try {
   // ENVIAMOS LOS DATOS
   echo json_encode($historial);
 } catch (PDOException $e) {
-  // EL CHIVATO: Si hay error, ahora sí nos lo va a decir en lugar de mandar []
   echo json_encode(['error' => 'Error SQL: ' . $e->getMessage()]);
 }
