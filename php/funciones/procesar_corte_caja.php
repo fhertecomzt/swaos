@@ -25,11 +25,8 @@ try {
   $id_usuario = $_SESSION['id_usuario'] ?? $_SESSION['idusuario'] ?? 1;
   $fisico = isset($datos['fisico']) ? floatval($datos['fisico']) : 0;
 
-  // =========================================================================
-  // EL CEREBRO GUARDIÁN: Recalculamos todo desde cero para evitar desajustes
-  // =========================================================================
-
-  // 1. Calcular Ingresos (Ya con la vacuna de 'Liquidacion')
+  // Recalculamos todo desde cero para evitar desajustes
+  // Calcular Ingresos (Ya con la vacuna de 'Liquidacion')
   $sqlIngresos = "SELECT LOWER(metodo_pago) as metodo, SUM(total) as suma 
                   FROM ventas 
                   WHERE id_corte IS NULL AND id_usuario = ? 
@@ -55,7 +52,7 @@ try {
     if ($metodo === 'transferencia' || $metodo === '3') $transferencia += floatval($row['suma']);
   }
 
-  // 2. Calcular Retiros/Salidas
+  // Calcular Retiros/Salidas
   $sqlRetiros = "SELECT LOWER(metodo_pago) as metodo, SUM(total) as suma_retiros 
                  FROM ventas 
                  WHERE id_corte IS NULL AND id_usuario = ? 
@@ -77,11 +74,9 @@ try {
     if ($metodo === 'transferencia' || $metodo === '3') $transferencia -= $monto;
   }
 
-  // 3. Matemática Final
+  // Matemática Final
   $esperado = $efectivo_in - $efectivo_out;
   $diferencia = $fisico - $esperado;
-
-  // =========================================================================
 
   // PREPARAMOS EL INSERT CON LOS DATOS BLINDADOS
   $sql = "INSERT INTO cortes_caja (id_usuario, efectivo_esperado, efectivo_fisico, diferencia, total_tarjeta, total_transferencia, total_retiros)

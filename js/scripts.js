@@ -7599,7 +7599,7 @@ function cargarHistorial() {
               ? 'disabled style="opacity: 0.5; cursor: not-allowed;"'
               : "";
 
-          // 🔥 1. LA MAGIA DE LA ETIQUETA VISUAL
+          // ETIQUETA VISUAL
           let tipo = venta.tipo_movimiento ? venta.tipo_movimiento.toUpperCase() : 'VENTA';
           let badgeTipo = '';
 
@@ -7613,7 +7613,7 @@ function cargarHistorial() {
               badgeTipo = `<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;">${tipo}</span>`;
           }
 
-          // 🔥 2. IMPRIMIMOS EL HTML (Fíjate en el primer <td> del Folio)
+          // Color en el primer <td> del Folio según el tipo de movimiento
           let fila = `
                     <tr>
                         <td style="vertical-align: middle;"><strong>#${venta.id_venta}</strong> <br> ${badgeTipo}</td>
@@ -7777,7 +7777,7 @@ function abrirDevolucion(idVenta) {
             .then((res) => res.json())
             .then((data) => {
               if (data.success) {
-                // 🚀 ¡Éxito! Mostramos mensaje y recargamos la tabla
+                // ¡Éxito! Mostramos mensaje y recargamos la tabla
                 Swal.fire("¡Procesado!", data.mensaje, "success");
                 cargarHistorial();
               } else {
@@ -9055,7 +9055,7 @@ window.inicializarCalendarioSWAOS = function () {
         width: "500px",
       }).then((result) => {
         if (result.isConfirmed) {
-          // 1. Empacamos los datos de la cita (ahora sin cerrar la cita todavía)
+          //  Empacamos los datos de la cita (ahora sin cerrar la cita todavía)
           let datosConversion = {
             id_cita: info.event.id,
             id_cliente: props.id_cliente,
@@ -9067,10 +9067,10 @@ window.inicializarCalendarioSWAOS = function () {
             JSON.stringify(datosConversion),
           );
 
-          // 2. Cerramos la ventana actual
+          //  Cerramos la ventana actual
           Swal.close();
 
-          // 3. Simulamos un clic en tu menú lateral para abrir el módulo de Órdenes
+          // Simulamos un clic en tu menú lateral para abrir el módulo de Órdenes
           let btnOrdenes = document.getElementById("ordenes-link");
           if (btnOrdenes) {
             btnOrdenes.click();
