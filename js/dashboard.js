@@ -29,41 +29,60 @@ document.addEventListener("DOMContentLoaded", function () {
         if (elProductos) elProductos.textContent = data.productos || 0;
         if (elClientes) elClientes.textContent = data.clientes || 0;
         if (elProveedores) elProveedores.textContent = data.proveedores || 0;
-        if (elVentas) {
-          // Le damos formato de moneda (Ej: $1,500.00)
-          let ventasFormateadas = parseFloat(data.ventas).toLocaleString(
-            "es-MX",
-            {
-              style: "currency",
-              currency: "MXN",
-            },
-          );
-          elVentas.textContent = ventasFormateadas;
-        }
 
-        // DIBUJAR LA GRÁFICA DE DONA
+        // TARJETAS FINANCIERAS (Con formato de Moneda)
+        let elVentasTotales = document.getElementById("dash-ventas-totales");
+        let elEfectivoCaja = document.getElementById("dash-efectivo-caja");
+        let elIngresosBanco = document.getElementById("dash-ingresos-banco");
+
+        if (elVentasTotales) {
+          elVentasTotales.textContent = parseFloat(
+            data.ventas_totales,
+          ).toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+        }
+        if (elEfectivoCaja) {
+          elEfectivoCaja.textContent = parseFloat(
+            data.efectivo_caja,
+          ).toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+        }
+        if (elIngresosBanco) {
+          elIngresosBanco.textContent = parseFloat(
+            data.ingresos_banco,
+          ).toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+        }
+        // DIBUJAR LA GRÁFICA DE DONA CON COLORES INTELIGENTES
         let canvasElement = document.getElementById("miGraficaEquipos");
         if (canvasElement && data.grafica) {
           let etiquetas = data.grafica.map((item) => item.estado);
           let valores = data.grafica.map((item) => item.total);
 
-          // ¿La gráfica existe en memoria Y su canvas es exactamente el que estamos viendo en pantalla?
+          // Lógica para asignar el color correcto según el nombre del estado
+          let coloresInteligentes = etiquetas.map((estado) => {
+            let est = estado.toLowerCase();
+            if (est.includes("entregado")) return "#198754"; // Verde éxito
+            if (est.includes("cancelado")) return "#dc3545"; // Rojo peligro
+            if (est.includes("terminado")) return "#0dcaf0"; // Cyan / Azul claro
+            if (
+              est.includes("revisión") ||
+              est.includes("revision") ||
+              est.includes("pendiente")
+            )
+              return "#ffc107"; // Amarillo alerta
+            return "#6c757d"; // Gris por defecto
+          });
+
           if (
             window.miGraficaInstancia &&
             window.miGraficaInstancia.ctx.canvas === canvasElement
           ) {
-            // Sí, sigue siendo la misma. Solo actualizamos los datos (Animación suave)
             window.miGraficaInstancia.data.labels = etiquetas;
             window.miGraficaInstancia.data.datasets[0].data = valores;
+            window.miGraficaInstancia.data.datasets[0].backgroundColor =
+              coloresInteligentes; // Actualizamos colores
             window.miGraficaInstancia.update();
           } else {
-            // No, regresamos de otra pestaña. El canvas es nuevo.
-            // Destruimos a la gráfica "fantasma" que se quedó en la memoria RAM
-            if (window.miGraficaInstancia) {
-              window.miGraficaInstancia.destroy();
-            }
+            if (window.miGraficaInstancia) window.miGraficaInstancia.destroy();
 
-            // Y creamos una gráfica totalmente nueva
             window.miGraficaInstancia = new Chart(
               canvasElement.getContext("2d"),
               {
@@ -73,14 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   datasets: [
                     {
                       data: valores,
-                      backgroundColor: [
-                        "#ff9d2f",
-                        "#2ecc71",
-                        "#3498db",
-                        "#9b59b6",
-                        "#e74c3c",
-                        "#34495e",
-                      ],
+                      backgroundColor: coloresInteligentes, // Usamos nuestros colores asignados
                       borderWidth: 0,
                       hoverOffset: 10,
                     },
@@ -97,21 +109,32 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         }
 
-        // LLENAR LA TABLA DE ÚLTIMAS ÓRDENES
+        // LLENAR LA TABLA DE ÚLTIMAS ÓRDENES CON BADGES
         let tbody = document.getElementById("tabla-ultimas-ordenes");
         if (tbody && data.ultimas_ordenes) {
-          tbody.innerHTML = ""; // Limpiamos la tabla
+          tbody.innerHTML = "";
 
           if (data.ultimas_ordenes.length === 0) {
             tbody.innerHTML =
               '<tr><td colspan="3" style="text-align:center;">No hay órdenes recientes</td></tr>';
           } else {
             data.ultimas_ordenes.forEach((orden) => {
-              // Agregamos la clase, el destino y el número de orden como filtro
-              let fila = `<tr class="fila-orden-reciente" data-menu-link="ordenes-link" data-filtro="${orden.id_orden}">
-                        <td><strong style="color: #007bff;">#${orden.id_orden}</strong></td>
-                        <td>${orden.cliente}</td>
-                        <td style="font-weight:bold; color:#555;">${orden.estado}</td>
+              // Lógica para el badge (Etiqueta visual)
+              let estadoStr = orden.estado.toUpperCase();
+              let badgeHtml = "";
+
+              if (estadoStr.includes("ENTREGADO")) {
+                badgeHtml = `<span style="background: #d1e7dd; color: #0f5132; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"><i class="fa-solid fa-check-circle"></i> ${orden.estado}</span>`;
+              } else if (estadoStr.includes("CANCELADO")) {
+                badgeHtml = `<span style="background: #f8d7da; color: #842029; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"><i class="fa-solid fa-ban"></i> ${orden.estado}</span>`;
+              } else {
+                badgeHtml = `<span style="background: #cff4fc; color: #055160; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"><i class="fa-solid fa-spinner"></i> ${orden.estado}</span>`;
+              }
+
+              let fila = `<tr class="fila-orden-reciente" data-menu-link="ordenes-link" data-filtro="${orden.id_orden}" style="cursor: pointer; transition: 0.2s;">
+                        <td style="vertical-align: middle;"><strong style="color: #0d6efd;">#${orden.id_orden}</strong></td>
+                        <td style="vertical-align: middle;">${orden.cliente}</td>
+                        <td style="vertical-align: middle;">${badgeHtml}</td>
                     </tr>`;
               tbody.innerHTML += fila;
             });

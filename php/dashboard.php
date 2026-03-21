@@ -9,95 +9,116 @@ include "verificar_sesion.php";
 <div class="container_dashboard" id="dashboard">
 
   <div class="cards" id="dashboard-cards">
-      <div class="card card-minimal" data-menu-link="ordenes-link" data-filtro="Pendientes">
-        <div>
-          <span class="card-numeros" id="dash-pendientes">0</span>
-          <p><span class="card-nombre">Órdenes pendientes</span></p>
-        </div>
-        <div class="card-icono text-warning"><i class="fa-solid fa-clock"></i></div>
+    <div class="card card-minimal" data-id="1" data-menu-link="ordenes-link" data-filtro="Pendientes">
+      <div>
+        <span class="card-numeros" id="dash-pendientes">0</span>
+        <p><span class="card-nombre">Órdenes pendientes</span></p>
       </div>
-      <div class="card card-minimal" data-menu-link="ordenes-link" data-filtro="Terminado">
-        <div>
-          <span class="card-numeros" id="dash-listas">0</span>
-          <p><span class="card-nombre">Órdenes listas</span></p>
-        </div>
-        <div class="card-icono text-success"><i class="fa-solid fa-check-double"></i></div>
-      </div>
-      <div class="card card-minimal" data-menu-link="productos-link">
-        <div>
-          <span class="card-numeros" id="dash-productos">0</span>
-          <p><span class="card-nombre">Productos</span></p>
-        </div>
-        <div class="card-icono text-info"><i class="fa-solid fa-boxes-stacked"></i></div>
-      </div>
-      <div class="card card-minimal" data-menu-link="clientes-link">
-        <div>
-          <span class="card-numeros" id="dash-clientes">0</span>
-          <p><span class="card-nombre">Clientes</span></p>
-        </div>
-        <div class="card-icono text-primary"><i class="fa-solid fa-people-group"></i></div>
-      </div>
-      <div class="card card-minimal" data-menu-link="proveedores-link">
-        <div>
-          <span class="card-numeros" id="dash-proveedores">0</span>
-          <p><span class="card-nombre">Proveedores</span></p>
-        </div>
-        <div class="card-icono text-secondary"><i class="fa-solid fa-truck-fast"></i></div>
-      </div>
-      <div class="card card-minimal" data-menu-link="corte-link">
-        <div>
-          <span class="card-numeros" id="dash-ventas">0</span>
-          <p><span class="card-nombre">Venta del día</span></p>
-        </div>
-        <div class="card-icono text-teal"><i class="fa-solid fa-money-check-dollar"></i></div>
-      </div>
+      <div class="card-icono text-warning"><i class="fa-solid fa-clock"></i></div>
     </div>
 
-    <div class="command-center">
-
-      <div class="panel-grafica">
-        <h3 class="panel-title">Estado de los Equipos</h3>
-        <div class="canvas-container">
-          <canvas id="miGraficaEquipos"></canvas>
-        </div>
+    <div class="card card-minimal" data-id="2" data-menu-link="ordenes-link" data-filtro="Terminado">
+      <div>
+        <span class="card-numeros" id="dash-listas">0</span>
+        <p><span class="card-nombre">Órdenes listas</span></p>
       </div>
+      <div class="card-icono text-success"><i class="fa-solid fa-check-double"></i></div>
+    </div>
 
-      <div class="panel-acciones">
-        <h3 class="panel-title">Acciones Rápidas</h3>
-        <div class="botones-accion">
-          <button class="btn-accion btn-nueva-orden" data-menu-link="ordenes-link">
-            <i class="fa-solid fa-plus"></i> Nueva Orden
-          </button>
-
-          <button class="btn-accion btn-nuevo-cliente" data-menu-link="clientes-link">
-            <i class="fa-solid fa-user-plus"></i> Nuevo Cliente
-          </button>
-
-          <button class="btn-accion btn-cobrar" data-menu-link="ventas-link">
-            <i class="fa-solid fa-cash-register"></i> Cobrar / Vender
-          </button>
-        </div>
+    <div class="card card-minimal" data-id="3" data-menu-link="productos-link">
+      <div>
+        <span class="card-numeros" id="dash-productos">0</span>
+        <p><span class="card-nombre">Productos</span></p>
       </div>
+      <div class="card-icono text-info"><i class="fa-solid fa-boxes-stacked"></i></div>
+    </div>
 
-      <div class="panel-tabla">
-        <h3 class="panel-title">Órdenes Recientes</h3>
-        <div class="tabla-responsive">
-          <table class="tabla-moderna">
-            <thead>
-              <tr>
-                <th>Folio</th>
-                <th>Cliente</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-ultimas-ordenes">
-              <tr>
-                <td colspan="3" style="text-align:center;">Cargando...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="card card-minimal" data-id="4" data-menu-link="clientes-link">
+      <div>
+        <span class="card-numeros" id="dash-clientes">0</span>
+        <p><span class="card-nombre">Clientes / Prov.</span></p>
       </div>
+      <div class="card-icono text-primary"><i class="fa-solid fa-users"></i></div>
+    </div>
 
+    <div class="card card-minimal" data-id="5" data-menu-link="proveedores-link">
+      <div>
+        <span class="card-numeros" id="dash-proveedores">0</span>
+        <p><span class="card-nombre">Proveedores</span></p>
+      </div>
+      <div class="card-icono text-secondary"><i class="fa-solid fa-truck-fast"></i></div>
+    </div>
+
+    <div class="card card-minimal" data-id="6" data-menu-link="historialventas-link">
+      <div>
+        <span class="card-numeros" id="dash-ventas-totales">$0.00</span>
+        <p><span class="card-nombre">Ventas Totales</span></p>
+      </div>
+      <div class="card-icono" style="color: #0d6efd;"><i class="fa-solid fa-chart-line"></i></div>
+    </div>
+
+    <div class="card card-minimal" data-id="7" data-menu-link="corte-link">
+      <div>
+        <span class="card-numeros" id="dash-efectivo-caja">$0.00</span>
+        <p><span class="card-nombre">Efectivo en Caja</span></p>
+      </div>
+      <div class="card-icono text-success"><i class="fa-solid fa-money-bill-wave"></i></div>
+    </div>
+
+    <div class="card card-minimal" data-id="8" data-menu-link="historialventas-link">
+      <div>
+        <span class="card-numeros" id="dash-ingresos-banco">$0.00</span>
+        <p><span class="card-nombre">Ingresos Banco</span></p>
+      </div>
+      <div class="card-icono" style="color: #6f42c1;"><i class="fa-solid fa-building-columns"></i></div>
     </div>
   </div>
+
+  <div class="command-center">
+
+    <div class="panel-grafica">
+      <h3 class="panel-title">Estado de los Equipos</h3>
+      <div class="canvas-container">
+        <canvas id="miGraficaEquipos"></canvas>
+      </div>
+    </div>
+
+    <div class="panel-acciones">
+      <h3 class="panel-title">Acciones Rápidas</h3>
+      <div class="botones-accion">
+        <button class="btn-accion btn-nueva-orden" data-menu-link="ordenes-link">
+          <i class="fa-solid fa-plus"></i> Nueva Orden
+        </button>
+
+        <button class="btn-accion btn-nuevo-cliente" data-menu-link="clientes-link">
+          <i class="fa-solid fa-user-plus"></i> Nuevo Cliente
+        </button>
+
+        <button class="btn-accion btn-cobrar" data-menu-link="ventas-link">
+          <i class="fa-solid fa-cash-register"></i> Cobrar / Vender
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-tabla">
+      <h3 class="panel-title">Órdenes Recientes</h3>
+      <div class="tabla-responsive">
+        <table class="tabla-moderna">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Cliente</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-ultimas-ordenes">
+            <tr>
+              <td colspan="3" style="text-align:center;">Cargando...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

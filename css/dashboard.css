@@ -47,13 +47,21 @@
   box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
 }
 
-/* Degradados Premium para cada tarjeta */
-.card-minimal:nth-child(1) { background: linear-gradient(135deg, #ff9d2f, #ff6126) !important; } /* Naranja/Rojo */
-.card-minimal:nth-child(2) { background: linear-gradient(135deg, #2ecc71, #1abc9c) !important; } /* Verde/Teal */
-.card-minimal:nth-child(3) { background: linear-gradient(135deg, #3498db, #2980b9) !important; } /* Azul */
-.card-minimal:nth-child(4) { background: linear-gradient(135deg, #9b59b6, #8e44ad) !important; } /* Morado */
-.card-minimal:nth-child(5) { background: linear-gradient(135deg, #546e7a, #37474f) !important; } /* Gris Oscuro */
-.card-minimal:nth-child(6) { background: linear-gradient(135deg, #00c6ff, #0072ff) !important; } /* Cyan/Azul vibrante */
+/* Degradados Premium para cada tarjeta (El color persigue a la tarjeta) */
+.card-minimal[data-id="1"] { background: linear-gradient(135deg, #ff9d2f, #ff6126) !important; } /* Naranja/Rojo - Pendientes */
+.card-minimal[data-id="2"] { background: linear-gradient(135deg, #2ecc71, #1abc9c) !important; } /* Verde/Teal - Listas */
+.card-minimal[data-id="3"] { background: linear-gradient(135deg, #3498db, #2980b9) !important; } /* Azul - Productos */
+.card-minimal[data-id="4"] { background: linear-gradient(135deg, #546e7a, #723254) !important; } /* Morado - Clientes */
+.card-minimal[data-id="5"] { background: linear-gradient(135deg, #723254, #37474f) !important; } /* Gris Oscuro - Proveedores */
+.card-minimal[data-id="6"] { background: linear-gradient(135deg, #8b64d4, #0072ff) !important; } /* Cyan/Azul vibrante - Ventas Totales */
+.card-minimal[data-id="7"] { background: linear-gradient(135deg, #198754, #8b64d4) !important; } /* Verde Esmeralda - Efectivo Caja */
+.card-minimal[data-id="8"] { background: linear-gradient(135deg, #8b64d4, #198754) !important; } /* Morado/Rosa - Ingresos Banco */
+
+/* Forzar que las letras e iconos de todas las tarjetas de color sean blancas */
+.card-minimal[data-id] * {
+    color: #ffffff !important;
+}
+
 
 /* Textos en color blanco para que resalten sobre el color */
 .card-numeros { font-size: 2.5rem; font-weight: 800; color: #ffffff !important; }
