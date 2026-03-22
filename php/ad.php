@@ -174,12 +174,6 @@ $_SESSION['last_token'] = $current_token;
                                 <span>PROVEEDORES</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="#" id="clientes-link" class="nav-link">
-                                <i class="fa-solid fa-people-group"></i>
-                                <span>CLIENTES</span>
-                            </a>
-                        </li>
                 </li>
             </ul>
 
@@ -261,11 +255,19 @@ $_SESSION['last_token'] = $current_token;
             </li>
 
             <!--Cliente-->
-            <li>
-                <a href="#" id="ventas-link" class="nav-link">
-                    <i class="fa-solid fa-user-tie"></i>
-                    <span class="titles_btns disabled-link">CLIENTE</span>
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-people-line"></i>
+                    <span class="titles_btns">CLIENTES</span>
                 </a>
+                <ul>
+                    <li>
+                        <a href="#" id="clientes-link" class="nav-link">
+                            <i class="fa-solid fa-people-group"></i>
+                            <span>CLIENTES</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
             <!--Reportes-->

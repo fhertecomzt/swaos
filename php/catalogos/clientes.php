@@ -59,10 +59,14 @@ $colonias = obtenerColonias($dbh);
                         <td data-lable="Estatus"><button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
                                 <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
                             </button></td>
-                        <td data-lable="Acciones:">
-                            <button title="Editar" class="editarCliente fa-solid fa-pen-to-square" data-id="<?php echo $u['id_cliente']; ?>"></button>
+                        <td data-lable="Acciones:" style="display: flex; gap: 5px; justify-content: center;">
+                            <button title="Ver Expediente 360" class="verExpediente" data-id="<?php echo $u['id_cliente']; ?>" style="background-color: #17a2b8; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer; border: none;">
+                                <i class="fa-solid fa-address-card pointer-events-none"></i>
+                            </button>
 
-                            <button title="Eliminar" class="eliminarCliente fa-solid fa-trash" data-id="<?php echo $u['id_cliente']; ?>"></button>
+                            <button title="Editar" class="editarCliente fa-solid fa-pen-to-square" data-id="<?php echo $u['id_cliente']; ?>" style="background-color: #c1c13c; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer; border: none;"></button>
+
+                            <button title="Eliminar" class="eliminarCliente fa-solid fa-trash" data-id="<?php echo $u['id_cliente']; ?>" style="background-color: #cb2c3c; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer; border: none;"></button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -315,6 +319,70 @@ $colonias = obtenerColonias($dbh);
                     <span class="cancelarModal" onclick="cerrarModalCliente('editar-modalCliente')" type=" submit">Cancelar</span>
 
                 </form>
+            </div>
+        </div>
+
+        <!-- Modal para expediente Cliente -->
+        <div id="expediente-modalCliente" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 900px; width: 95%;">
+                <span title="Cerrar" class="close" onclick="cerrarModalCliente('expediente-modalCliente')">&times;</span>
+                <h2 class="tittle"><i class="fa-solid fa-address-card"></i> Expediente del Cliente</h2>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                        <h4 style="margin-top: 0; color: #333; border-bottom: 2px solid #17a2b8; padding-bottom: 5px;">Perfil</h4>
+                        <h3 id="exp-nombre" style="margin: 5px 0; color: #0d6efd;">Cargando...</h3>
+                        <p style="margin: 5px 0; font-size: 13px;"><strong><i class="fa-solid fa-phone"></i></strong> <span id="exp-telefono">...</span></p>
+                        <p style="margin: 5px 0; font-size: 13px;"><strong><i class="fa-solid fa-envelope"></i></strong> <span id="exp-email">...</span></p>
+                        <p style="margin: 5px 0; font-size: 13px;"><strong><i class="fa-solid fa-map-location-dot"></i></strong> <span id="exp-direccion">...</span></p>
+                        <button id="exp-btn-whatsapp" class="btn-accion" style="background-color: #25D366; width: 100%; margin-top: 10px; border:none; padding: 8px; color: white; border-radius: 5px; cursor: pointer;">
+                            <i class="fa-brands fa-whatsapp"></i> Enviar Mensaje
+                        </button>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; display: flex; flex-direction: column; justify-content: center; text-align: center;">
+                        <h4 style="margin-top: 0; color: #333; border-bottom: 2px solid #28a745; padding-bottom: 5px; text-align: left;">Valor Acumulado</h4>
+                        <div style="font-size: 32px; font-weight: bold; color: #28a745;" id="exp-total-gastado">$0.00</div>
+                        <div style="font-size: 13px; color: #666;">Total invertido en el taller</div>
+                        <br>
+                        <div style="display: flex; justify-content: space-around; margin-top: 10px;">
+                            <div>
+                                <strong style="font-size: 20px; color: #333;" id="exp-total-ordenes">0</strong><br>
+                                <span style="font-size: 11px; color: #666;">Órdenes Totales</span>
+                            </div>
+                            <div>
+                                <strong style="font-size: 20px; color: #dc3545;" id="exp-total-canceladas">0</strong><br>
+                                <span style="font-size: 11px; color: #666;">Canceladas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="color: #333; border-bottom: 2px solid #6f42c1; padding-bottom: 5px;"><i class="fa-solid fa-laptop-medical"></i> Historial de Órdenes y Equipos</h4>
+
+                    <div class="tabla-responsive" style="max-height: 250px; overflow-y: auto;">
+                        <table class="tbl" style="width: 100%; font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>Folio</th>
+                                    <th>Fecha</th>
+                                    <th>Equipo</th>
+                                    <th>Falla / Servicio</th>
+                                    <th>Estado</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="exp-tabla-ordenes">
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Cargando historial...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

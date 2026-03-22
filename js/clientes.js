@@ -27,7 +27,7 @@ function cerrarModalCliente(id) {
   document.getElementById(id).style.display = "none";
 }
 
-// CREAR CLIENTE 
+// CREAR CLIENTE
 function validarFormularioCliente(event) {
   event.preventDefault();
 
@@ -130,26 +130,26 @@ function validarFormularioCliente(event) {
     }
   });
 
-if (errores.length > 0) {
-  // Quitar el cursor por seguridad
-  if (document.activeElement) {
-    document.activeElement.blur();
+  if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      },
+    });
+
+    return;
   }
-
-  Swal.fire({
-    title: "Faltan datos",
-    html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
-    icon: "warning",
-    confirmButtonColor: "#3085d6",
-    confirmButtonText: "Entendido",
-    // Esperamos a que la alerta desaparezca al 100%
-    didClose: () => {
-      if (primerCampoConError) primerCampoConError.focus();
-    },
-  });
-
-  return;
-}
 
   const cliente = document.getElementById("crear-cliente").value.trim();
   const papellido = document.getElementById("crear-papellido").value.trim();
@@ -257,7 +257,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
               });
 
-              // Llamada a tu función de ubicaciones 
+              // Llamada a tu función de ubicaciones
               const idEstadoDB = data.cliente.estado;
               const idMunicipioDB = data.cliente.municipio;
               const idColoniaDB = data.cliente.colonia;
@@ -435,26 +435,26 @@ async function validarFormularioEdicionCliente(formulario) {
     }
   });
 
-if (errores.length > 0) {
-  // Quitar el cursor por seguridad
-  if (document.activeElement) {
-    document.activeElement.blur();
+  if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      },
+    });
+
+    return;
   }
-
-  Swal.fire({
-    title: "Faltan datos",
-    html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
-    icon: "warning",
-    confirmButtonColor: "#3085d6",
-    confirmButtonText: "Entendido",
-    // Esperamos a que la alerta desaparezca al 100%
-    didClose: () => {
-      if (primerCampoConError) primerCampoConError.focus();
-    },
-  });
-
-  return;
-}
 
   const idInput = document.getElementById("editar-idcliente");
   const clienteInput = document.getElementById("editar-cliente");
@@ -569,5 +569,122 @@ document.addEventListener("click", function (event) {
           });
       }
     });
+  }
+});
+
+// VER EXPEDIENTE 360 DEL CLIENTE
+document.addEventListener("click", function (event) {
+  // Usamos closest() por si el usuario le da clic al ícono <i> dentro del botón
+  const botonExpediente = event.target.closest(".verExpediente");
+
+  if (botonExpediente) {
+    const id = botonExpediente.dataset.id;
+
+    // Abrimos el Modal
+    abrirModalCliente("expediente-modalCliente");
+
+    // Reseteamos los campos a "Cargando..." 
+    document.getElementById("exp-nombre").innerText = "Cargando...";
+    document.getElementById("exp-telefono").innerText = "...";
+    document.getElementById("exp-email").innerText = "...";
+    document.getElementById("exp-direccion").innerText = "...";
+    document.getElementById("exp-total-gastado").innerText = "$0.00";
+    document.getElementById("exp-total-ordenes").innerText = "0";
+    document.getElementById("exp-total-canceladas").innerText = "0";
+    document.getElementById("exp-tabla-ordenes").innerHTML =
+      '<tr><td colspan="6" style="text-align: center;">Buscando historial en la base de datos <i class="fa-solid fa-spinner fa-spin"></i></td></tr>';
+
+    // Hacemos la llamada al "Cerebro" (PHP) que crearemos a continuación
+    fetch(`cruds/obtener_expediente.php?id=${id}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // PINTAR EL PERFIL Y BOTÓN DE WHATSAPP
+          document.getElementById("exp-nombre").innerText = data.cliente.nombre;
+          document.getElementById("exp-telefono").innerText =
+            data.cliente.telefono;
+          document.getElementById("exp-email").innerText = data.cliente.email;
+          document.getElementById("exp-direccion").innerText =
+            data.cliente.direccion;
+
+          // Lógica inteligente para el botón de WhatsApp
+          let btnWa = document.getElementById("exp-btn-whatsapp");
+          let telLimpio = data.cliente.telefono.replace(/\D/g, ""); // Quitamos espacios o guiones
+
+          if (telLimpio.length >= 10) {
+            btnWa.style.display = "block";
+            btnWa.onclick = function () {
+              // Asumimos lada +52 (México). Cambia el 52 si estás en otro país.
+              window.open(`https://wa.me/52${telLimpio}`, "_blank");
+            };
+          } else {
+            btnWa.style.display = "none"; // Ocultar si no hay número válido
+          }
+
+          // PINTAR LAS MATEMÁTICAS (LTV)
+          let gastadoFormateado = parseFloat(
+            data.estadisticas.total_gastado,
+          ).toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+          document.getElementById("exp-total-gastado").innerText =
+            gastadoFormateado;
+          document.getElementById("exp-total-ordenes").innerText =
+            data.estadisticas.total_ordenes;
+          document.getElementById("exp-total-canceladas").innerText =
+            data.estadisticas.total_canceladas;
+
+          // PINTAR LA TABLA DE HISTORIAL
+          let tbody = document.getElementById("exp-tabla-ordenes");
+          tbody.innerHTML = ""; // Limpiamos el mensaje de "Buscando..."
+
+          if (data.ordenes.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="6" style="text-align: center; padding: 15px; color: #666;">Este cliente es nuevo, aún no tiene equipos ni órdenes registradas.</td></tr>';
+          } else {
+            data.ordenes.forEach((ord) => {
+              // Reutilizamos la lógica de las etiquetas de colores del Dashboard
+              let estadoStr = ord.estado.toUpperCase();
+              let badgeHtml = "";
+
+              if (estadoStr.includes("ENTREGADO")) {
+                badgeHtml = `<span style="background: #d1e7dd; color: #0f5132; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">${ord.estado}</span>`;
+              } else if (estadoStr.includes("CANCELADO")) {
+                badgeHtml = `<span style="background: #f8d7da; color: #842029; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">${ord.estado}</span>`;
+              } else {
+                badgeHtml = `<span style="background: #cff4fc; color: #055160; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">${ord.estado}</span>`;
+              }
+
+              // Formatear el costo
+              let costoFormateado = parseFloat(ord.costo).toLocaleString(
+                "es-MX",
+                {
+                  style: "currency",
+                  currency: "MXN",
+                },
+              );
+
+              // Crear la fila
+              let fila = `<tr style="border-bottom: 1px solid #eee;">
+                        <td style="color: #0d6efd; font-weight: bold; padding: 8px;">#${ord.folio}</td>
+                        <td style="padding: 8px;">${ord.fecha}</td>
+                        <td style="padding: 8px; font-weight: 500;">${ord.equipo}</td>
+                        <td style="padding: 8px; color: #555;">${ord.falla}</td>
+                        <td style="padding: 8px;">${badgeHtml}</td>
+                        <td style="padding: 8px; font-weight: bold; text-align: right;">${costoFormateado}</td>
+                    </tr>`;
+
+              tbody.innerHTML += fila;
+            });
+          }
+        } else {
+          Swal.fire(
+            "Error",
+            data.message || "No se pudo cargar el expediente.",
+            "error",
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener expediente:", error);
+      });
   }
 });
