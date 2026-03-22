@@ -159,9 +159,24 @@ try {
   $dbh->commit();
 
   // RESPUESTA
-  $link = "https://localhost/swaos/track.php?t=" . $token_hash;
-  $msg = "Hola *" . $datosCliente['nombre_cliente'] . "*,\nRecibimos tu equipo (Orden #$id_orden).\nVer estado: $link";
-  if ($es_cuenta_nueva) $msg .= "\n\nTu clave de acceso: $pass_generada_texto";
+
+  // OJO: Cambiar "localhost/swaos" por "swaos.rf.gd" cuando lo subas a tu servidor
+  $link_track = "https://swaos.rf.gd/track.php?t=" . $token_hash;
+  $link_portal = "https://swaos.rf.gd/portal_cliente.php";
+
+  $msg = "Hola *" . $datosCliente['nombre_cliente'] . "*,\n";
+  $msg .= "Recibimos tu equipo en taller. Tu número de Orden es la *#" . str_pad($id_orden, 6, "0", STR_PAD_LEFT) . "*.\n\n";
+  $msg .= "Sigue el estado en tiempo real de tu equipo aquí:\n$link_track";
+
+  // Si es la primera vez que viene al taller, le damos la bienvenida al portal
+  if ($es_cuenta_nueva) {
+    $msg .= "\n\n *¡BIENVENIDO(A) A TU PORTAL DE CLIENTE!* \n";
+    $msg .= "Hemos creado un espacio exclusivo para ti donde podrás ver el historial de tus reparaciones y descargar tus notas.\n\n";
+    $msg .= " *Ingresa aquí:* $link_portal\n";
+    $msg .= " *Usuario:* " . $datosCliente['tel_cliente'] . "\n";
+    $msg .= " *Clave provisional:* " . $pass_generada_texto . "\n\n";
+    $msg .= "_(Recuerda guardar este mensaje o anotar tu clave)_";
+  }
 
   $response["success"] = true;
   $response["message"] = "Orden #$id_orden creada correctamente.";
