@@ -55,7 +55,6 @@ try {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi Historial | SWAOS</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <link rel="icon" type="image/x-icon" href="imgs/favicon/favicon.ico">
 
@@ -253,7 +252,7 @@ try {
 
     <div class="tabla-container">
       <h3 style="margin-top:0; color:#333;"><i class="fa-solid fa-list-check"></i> Historial de Servicios</h3>
-      <table id="tabla-historial">
+      <table id="tabla-historial" class="display" style="width:100%">
         <thead>
           <tr>
             <th>Folio</th>
@@ -300,11 +299,21 @@ try {
           "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
         },
         "pageLength": 10, // Mostrar 10 registros por página
-        "ordering": false, // Apagamos el ordenamiento automático para respetar el de tu SQL (los más nuevos primero)
+        "ordering": true, // Apagamos el ordenamiento automático para respetar el de tu SQL (los más nuevos primero)
+        "order": [
+          [0, "desc"]
+        ], // Opcional: Ordena por la primera columna (Folio) de mayor a menor por defecto
+        "columnDefs": [{
+            "orderable": false,
+            "targets": 4
+          } // Apaga los triángulos SOLO en la columna 4 (Acción)
+        ],
         "lengthChange": false // Oculta el selector de "Mostrar X registros" para que se vea más limpio
       });
-    });
+    })
   </script>
+
+  <!--Script para control de inactividad-->
   <script>
     let vigilanteInactividad = function() {
       let tiempo;
