@@ -71,6 +71,11 @@ $_SESSION['last_token'] = $current_token;
 </head>
 
 <body class="<?php echo (isset($_COOKIE['darkmode']) && $_COOKIE['darkmode'] == 'true') ? 'darkmode' : ''; ?>">
+    <!--Preloader-->
+    <div id="swaos-preloader">
+        <div class="loader-spinner"></div>
+        <p style="font-weight: bold; color: #0094fd; margin-top: 15px; font-size: 18px;">Cargando SWAOS...</p>
+    </div>
     <!--Nav-->
     <nav class="navbar">
         <figure class="logo">
@@ -420,6 +425,23 @@ $_SESSION['last_token'] = $current_token;
 
     <!--Scripts Selects anidados estado, ciudad, colonia y cp-->
     <script src="../js/peticionesedosmun.js"></script>
+
+    <!--Scripts Preloader-->
+    <script>
+        // APAGAR EL PRELOADER CUANDO TODO CARGUE
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('swaos-preloader');
+            if (preloader) {
+                // Le agregamos la clase que hace el "fade out" (desvanecimiento)
+                preloader.classList.add('preloader-oculto');
+
+                // Lo borramos del todo después de medio segundo para que no estorbe los clics
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 500);
+            }
+        });
+    </script>
 
 </body>
 
