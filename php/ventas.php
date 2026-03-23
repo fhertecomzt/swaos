@@ -249,7 +249,7 @@
   }
 </style>
 
-<div class="pos-header" style="background: #fff; padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+<div class="pos-header" style="background: #db2424; padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
 
   <div style="display: flex; flex-direction: column;">
     <h2 style="margin: 0; color: #333;"><i class="fa-solid fa-cash-register"></i> Punto de Venta</h2>

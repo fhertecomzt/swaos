@@ -126,7 +126,7 @@ body {
   justify-content: space-between;
   padding: 5px 2rem;
   margin-bottom: 1rem;
-  width: 99%;
+  width: auto;
 }
 .header--wrapper img {
   width: 50px;
@@ -269,12 +269,13 @@ p.darkmode {
   cursor: not-allowed;
 }
 
-/* =========================================================
-    MEDIA QUERIES 
-   ========================================================= */
+/* MEDIA QUERIES */
 
 /* --- MODO TABLET (Solo Iconos) --- */
 @media (max-width: 1024px) {
+  .header--wrapper {
+    width: 99%;
+  }
   .navbar {
     width: 80px;
   }
@@ -364,8 +365,12 @@ p.darkmode {
     text-decoration: none;
   }
 }
+@media (max-width: 450px){
+  .header--wrapper img {
+    display: none;
+  }
+}
 
-/* Correccion de enlaces */
 .menu a {
   display: flex;
   align-items: center;

@@ -12,7 +12,7 @@
   padding: 15px;
   position: absolute;
   transition: 0.4s;
-  width: calc(99% - 30px);
+  width: calc(100% - 30px);
 }
 
 .btn-nueva-orden { background: #007bff; } .btn-nueva-orden:hover { background: #0056b3; }

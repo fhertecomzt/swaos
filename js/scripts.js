@@ -9438,89 +9438,18 @@ window.revisarConversionCita = function() {
     }
 }
 
-// Llamar informes *****************************************************************
+// Llamar reportes *****************************************************************
 document
-  .getElementById("informes-link")
+  .getElementById("reportes-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-    fetch("../php/operaciones/informes.php")
+    fetch("../php/operaciones/reportes.php")
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-        asignarControladorFormularioInforme(); // Asigna el controlador después de cargar el contenido
+
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
-
-// Guardar informe
-function enviarFormularioInforme(event) {
-  event.preventDefault(); // Evita la recarga de la página
-
-  const formData = new FormData(event.target); // Obtiene los datos del formulario
-  fetch("../php/operaciones/informes.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.text())
-    .then((html) => {
-      document.getElementById("content-area").innerHTML = html; // Actualiza el contenido
-      asignarControladorFormularioInformes(); // Vuelve a asignar el controlador para el nuevo contenido
-    })
-    .catch((error) => {
-      console.error("Error al enviar el formulario:", error);
-    });
-}
-//Cargamos datos para editar
-function cargarEditarInforme(id) {
-  fetch("../php/operaciones/informes.php?idinforme=" + id)
-    .then((response) => response.text())
-    .then((html) => {
-      document.getElementById("content-area").innerHTML = html;
-      asignarControladorFormularioInforme();
-    })
-    .catch((error) => {
-      console.error("Error al cargar el contenido:", error);
-    });
-}
-//Eliminamos el informe
-function eliminarAbono(id) {
-  if (confirm("¿Estás seguro de que deseas eliminar este informe?")) {
-    fetch("../php/operaciones/informes.php?action=delete&idinforme=" + id)
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
-        asignarControladorFormularioInforme();
-      })
-      .catch((error) => {
-        console.error("Error al eliminar el Informe:", error);
-      });
-  }
-}
-// Inicializar al cargar la página
-document.addEventListener("DOMContentLoaded", function () {
-  asignarControladorFormularioInforme(); // Asigna el controlador cuando el DOM esté listo
-});
-
-// Asignar controlador al formulario
-function asignarControladorFormularioInforme() {
-  const form = document.querySelector("form"); // Selecciona el formulario dentro del nuevo contenido
-  if (form) {
-    form.addEventListener("submit", enviarFormularioInforme); // Asigna el evento submit
-  }
-}
-// Función para limpiar el formulario Informes
-function limpiarFormularioInformes() {
-  console.log("Limpiando el formulario de Informes..."); // Para depuración
-
-  // Seleccionar todos los elementos input de texto y ocultos
-  const campos = document.querySelectorAll(
-    '#frmInformes input[type="hidden"], #frmInformes[type="text"], #frmInformes input[type="email"], #frmInformes input[type="number"]',
-  );
-  campos.forEach((campo) => (campo.value = ""));
-
-  // Seleccionar todos los elementos select del formulario
-  const selects = document.querySelectorAll("#frmInformes select");
-  selects.forEach((select) => (select.selectedIndex = 0)); // Reinicia el select al primer valor (generalmente un placeholder)
-}

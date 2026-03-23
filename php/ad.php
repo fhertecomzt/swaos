@@ -64,6 +64,9 @@ $_SESSION['last_token'] = $current_token;
     <link rel="stylesheet" href="../css/dashboard.css">
     <!--Estilo Perfil -->
     <link rel="stylesheet" href="../css/perfil.css">
+    <!--Estilo Datatables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 
 </head>
 
@@ -271,11 +274,19 @@ $_SESSION['last_token'] = $current_token;
             </li>
 
             <!--Reportes-->
-            <li>
-                <a href="#" id="informes-link" class="nav-link" onclick="return false;">
-                    <i class=" fa-solid fa-sheet-plastic"></i>
-                    <span class="titles_btns disabled-link">REPORTES</span>
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <span class="titles_btns">REPORTES</span>
                 </a>
+                <ul>
+                    <li>
+                        <a href="#" id="reportes-link" class="nav-link">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>REPORTES</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
             <!--Mi cuenta-->
@@ -359,7 +370,7 @@ $_SESSION['last_token'] = $current_token;
         </div>
     </div>
 
-    <!--Scripts JS ******************************************-->
+    <!--Scripts JS *******************************************************************************>
 
     <!--Libreria para las graficas JS-->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -371,9 +382,24 @@ $_SESSION['last_token'] = $current_token;
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <!--Scripts Para el paginador y buscador -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+    <!--Scripts Para los reportes -->
+    <script>
+        const NOMBRE_TALLER_JS = "<?php echo $_SESSION['nombre_t']; ?>";
+    </script>
+    <script src="../js/reportes.js"></script>
+
 
     <!--Scripts Para el FullCalendar -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
