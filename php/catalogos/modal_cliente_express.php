@@ -17,12 +17,12 @@
 
          <div class="form-group">
            <label>Teléfono (WhatsApp):</label>
-           <input type="text" name="telefono" required pattern="[0-9]+" title="Solo números" maxlength="10">
+           <input type="text" name="telefono" required pattern="[0-9]+" title="Solo números" maxlength="10" autocomplete="off">
          </div>
 
          <div class="form-group">
            <label>Email (Opcional):</label>
-           <input type="email" name="email">
+           <input type="email" name="email" autocomplete="off">
          </div>
 
          <div style="text-align: right; margin-top: 15px;">

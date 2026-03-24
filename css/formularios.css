@@ -14,7 +14,6 @@
   height: 60px;
   margin-bottom: 5px;
   padding: 1px 5px;
-  width: 99%;
 }
 .container_dashboard_tablas {
   background-color: #e7e7e7;
@@ -25,7 +24,7 @@
   position: absolute;
   top: 167px;
   transition: 0.4s;
-  width: 97%;
+  width: calc(100% - 30px);
 }
 .boton,
 .btn_movimientos {
@@ -891,6 +890,7 @@ select {
 
 @media screen and (max-width: 900px) {
   .modal-content-lg {
+    height: 500px;
     width: 95%;
   }
 }

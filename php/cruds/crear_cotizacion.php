@@ -70,7 +70,7 @@ try {
     <div class="pos-panel-izquierdo" style="flex: 6; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
 
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <input type="search" id="buscar-producto-cot" class="buscar--box" placeholder="Buscar refacción en inventario..." style="width: 100%; border: 2px solid #007bff; border-radius: 10px;">
+            <input type="search" id="buscar-producto-cot" class="buscar--box" placeholder="Buscar refacción en inventario..." style="width: 100%; border: 2px solid #007bff; border-radius: 10px;" autocomplete="off">
 
             <button onclick=" agregarConceptoLibre()" class="btn" style="background-color: #ffc107; color: #000; font-weight: bold; white-space: nowrap; border-radius: 9px; padding: 10px">
                 <i class="fa-solid fa-pen-to-square"></i> + Concepto Libre
