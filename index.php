@@ -63,8 +63,13 @@ $_SESSION['captcha_result'] = $num1 + $num2;
 
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-user"></i>
-                                <input type="text" placeholder=" " id="user" name="txtusuario" required>
+                                <input type="text" placeholder=" " id="user" name="txtusuario" autocomplete="off" required>
                                 <label for="user" class="label-flotante">Usuario</label>
+                            </div>
+
+                            <div style="text-align: left; margin-bottom: 15px; margin-left: 65px;">
+                                <input type="checkbox" id="chkRecordarUsuario">
+                                <label for="chkRecordarUsuario" style="color: #666; font-size: 14px; cursor: pointer;">Recordar mi usuario</label>
                             </div>
 
                             <div class="input-wrapper">
@@ -115,6 +120,30 @@ $_SESSION['captcha_result'] = $num1 + $num2;
     <!-- Script de reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script src="js/ojito.js"></script>
+
+    <script>
+        // LÓGICA DE "RECORDAR MI USUARIO" 
+        const inputUsuario = document.getElementById('user');
+        const chkRecordar = document.getElementById('chkRecordarUsuario');
+        const formLogin = document.querySelector('.form');
+
+        // 1. Al cargar la página, revisamos si el usuario guardó su nombre antes
+        if (localStorage.getItem('swaos_usuario_admin')) {
+            inputUsuario.value = localStorage.getItem('swaos_usuario_admin');
+            chkRecordar.checked = true;
+        }
+
+        // 2. Antes de enviar el formulario, guardamos o borramos según el checkbox
+        formLogin.addEventListener('submit', function() {
+            if (chkRecordar.checked) {
+                // Si la casilla está marcada, guardamos el texto del input
+                localStorage.setItem('swaos_usuario_admin', inputUsuario.value);
+            } else {
+                // Si la desmarcó, limpiamos el rastro
+                localStorage.removeItem('swaos_usuario_admin');
+            }
+        });
+    </script>
 </body>
 
 </html>
