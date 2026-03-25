@@ -3691,8 +3691,8 @@ document.addEventListener("click", function (event) {
                 timerProgressBar: true,
               }).then(() => {
                 // Recargamos DataTables limpiamente
-                if (document.getElementById("categorias-link")) {
-                  document.getElementById("categorias-link").click();
+                if (document.getElementById("tiposervicios-link")) {
+                  document.getElementById("tiposervicios-link").click();
                 }
               });
             } else {
@@ -5719,8 +5719,17 @@ document.addEventListener("click", function (e) {
 function abrirModalOrden(id) {
   document.getElementById(id).style.display = "flex";
 }
+// Variable global para detectar si necesitamos refrescar la tabla
+window.huboCambiosEnOrden = false;
+
 function cerrarModalOrden(id) {
   document.getElementById(id).style.display = "none";
+
+  // Si cerramos el modal y se guardó algo, recargamos la pantalla de fondo
+  if (window.huboCambiosEnOrden && document.getElementById("ordenes-link")) {
+      document.getElementById("ordenes-link").click(); // Simula el clic en el menú
+      window.huboCambiosEnOrden = false; // Apagamos el avisador para la próxima vez
+  }
 }
 
 function calcularSaldoOrden() {
@@ -6183,33 +6192,25 @@ document.addEventListener("submit", function (e) {
       });
   }
 
-  // EDITAR ORDEN
+ // EDITAR ORDEN
   if (e.target && e.target.id === "form-editarOrden") {
     e.preventDefault();
 
     const form = e.target;
     const estadoActual = document.getElementById("edit-estado").value;
     const diagActual = document.getElementById("edit-diagnostico").value.trim();
-    const costoActual = parseFloat(
-      document.getElementById("edit-costo").value || 0,
-    ).toFixed(2);
-    const nuevoAbono =
-      parseFloat(document.getElementById("edit-nuevo-abono").value) || 0;
+    const costoActual = parseFloat(document.getElementById("edit-costo").value || 0).toFixed(2);
+    const nuevoAbono = parseFloat(document.getElementById("edit-nuevo-abono").value) || 0;
 
     const costoOriginal = parseFloat(form.dataset.costoOrig) || 0;
-    const anticipoOriginal =
-      parseFloat(document.getElementById("edit-anticipo").value) || 0;
+    const anticipoOriginal = parseFloat(document.getElementById("edit-anticipo").value) || 0;
     const saldoRestanteReal = costoOriginal - anticipoOriginal;
     const metodoPagoEdit = document.getElementById("edit-metodo-pago");
 
-    // Si ingresa un nuevo abono, el método de pago es obligatorio
-    if (
-      nuevoAbono > 0 &&
-      (!metodoPagoEdit.value || metodoPagoEdit.value.trim() === "")
-    ) {
+    // Validar Método de pago si hay abono
+    if (nuevoAbono > 0 && (!metodoPagoEdit.value || metodoPagoEdit.value.trim() === "")) {
       metodoPagoEdit.classList.add("input-error");
       metodoPagoEdit.style.border = "1px solid #d33";
-
       Swal.fire({
         title: "Falta Método de Pago",
         text: "Si estás registrando un abono, debes seleccionar con qué método te pagó el cliente.",
@@ -6217,20 +6218,14 @@ document.addEventListener("submit", function (e) {
         returnFocus: false,
         confirmButtonColor: "#3085d6",
       });
-
-      // Quitamos el rojo cuando seleccione algo
-      metodoPagoEdit.addEventListener(
-        "change",
-        function () {
+      metodoPagoEdit.addEventListener("change", function () {
           this.classList.remove("input-error");
-          this.style.border = "1px solid green"; // Regresa al verde original
-        },
-        { once: true },
-      );
-
-      return; // Detenemos la actualización para que no pase
+          this.style.border = "1px solid green";
+        }, { once: true });
+      return; 
     }
 
+    // Validar que no abone de más
     if (nuevoAbono > saldoRestanteReal && saldoRestanteReal > 0) {
       Swal.fire({
         title: "Abono excedido",
@@ -6241,68 +6236,71 @@ document.addEventListener("submit", function (e) {
       return;
     }
 
-    if (
-      estadoActual === form.dataset.estadoOrig &&
-      diagActual === form.dataset.diagOrig &&
-      costoActual === form.dataset.costoOrig &&
-      nuevoAbono === 0
-    ) {
-      Swal.fire({
-        icon: "info",
-        title: "Sin cambios",
-        text: "No has modificado ningún dato ni ingresado un nuevo abono.",
-        returnFocus: false,
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
-      });
-      return;
-    }
-
+    // Preparamos los datos
     const formData = new FormData(form);
 
-    Swal.fire({
-      title: "Guardando cambios...",
-      allowOutsideClick: false,
-      returnFocus: false,
-      didOpen: () => Swal.showLoading(),
-    });
+    // UX: Cambiamos el botón visualmente
+    const btnGuardar = form.querySelector('.boton-guardar');
+    const textoOriginal = btnGuardar.innerHTML;
+    btnGuardar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    btnGuardar.disabled = true;
 
     fetch("cruds/procesar_editar_orden.php", { method: "POST", body: formData })
       .then((res) => res.json())
       .then((data) => {
+        // Restauramos el botón
+        btnGuardar.innerHTML = textoOriginal;
+        btnGuardar.disabled = false;
+
         if (data.success) {
-          cerrarModalOrden("editar-modalOrden");
+          // Le avisamos al sistema que la tabla ya no está actualizada
+          window.huboCambiosEnOrden = true;
+          // Mostramos alerta pero NO CERRAMOS EL MODAL
           Swal.fire({
             icon: "success",
-            title: "¡Actualizado!",
-            text: data.message,
+            title: "¡Orden Actualizada!",
+            text: "Los costos, estatus y refacciones se han guardado.",
             returnFocus: false,
             showConfirmButton: false,
             timer: 2000,
-            timerProgressBar: true,
-          }).then(() => {
-            if (document.getElementById("ordenes-link")) {
-              document.getElementById("ordenes-link").click();
-            }
           });
+
+          // TRUCO UX: Sumar el abono nuevo al anticipo acumulado visualmente
+          const inputAnticipo = document.getElementById("edit-anticipo");
+          const inputNuevoAbono = document.getElementById("edit-nuevo-abono");
+
+          if (parseFloat(inputNuevoAbono.value) > 0) {
+            let suma =
+              parseFloat(inputAnticipo.value) +
+              parseFloat(inputNuevoAbono.value);
+            inputAnticipo.value = suma.toFixed(2);
+            inputNuevoAbono.value = "0.00"; // Lo reseteamos para no cobrar doble
+          }
+
+          // Refrescamos los saldos visuales
+          calcularSaldoEdit();
+
+          // Actualizamos los "datasets" para evitar la alerta de "Sin cambios" si le da guardar 2 veces seguidas
+          form.dataset.estadoOrig = estadoActual;
+          form.dataset.diagOrig = diagActual;
+          form.dataset.costoOrig = costoActual;
+
+          // NOTA: Ya no hacemos document.getElementById("ordenes-link").click();
+          // porque eso recargaba toda la página y cerraba tu modal a la fuerza.
         } else {
           Swal.fire({
             title: "Error",
-            text: data.message,
+            text: data.message, // Aquí salta la validación de no entregar sin liquidar
             icon: "error",
             returnFocus: false,
           });
         }
       })
       .catch((err) => {
+        btnGuardar.innerHTML = textoOriginal;
+        btnGuardar.disabled = false;
         console.error(err);
-        Swal.fire({
-          title: "Error",
-          text: "Ocurrió un problema en la red.",
-          icon: "error",
-          returnFocus: false,
-        });
+        Swal.fire("Error", "Ocurrió un problema de conexión.", "error");
       });
   }
 });

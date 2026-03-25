@@ -17,15 +17,23 @@ try {
   $sqlFinanzas = "
       SELECT 
           LOWER(metodo_pago) as metodo, 
-          SUM(CASE WHEN tipo_movimiento LIKE '%Venta%' 
-                     OR tipo_movimiento LIKE '%Abono%' 
-                     OR tipo_movimiento LIKE '%Anticipo%' 
-                     OR tipo_movimiento LIKE '%Ingreso%' 
-                     OR tipo_movimiento LIKE '%Liquidacion%' THEN total ELSE 0 END) as ingresos,
+          
+          -- A. Entradas de dinero físicas
+          SUM(CASE WHEN tipo_movimiento NOT LIKE '%Retiro%' 
+                    AND tipo_movimiento NOT LIKE '%Corte%' 
+                    AND tipo_movimiento NOT LIKE '%Salida%' THEN total ELSE 0 END) as ingresos_brutos,
                      
+          -- B. Ventas netas (Ignoramos canceladas para el KPI de Ventas Totales)
+          SUM(CASE WHEN tipo_movimiento NOT LIKE '%Retiro%' 
+                    AND tipo_movimiento NOT LIKE '%Corte%' 
+                    AND tipo_movimiento NOT LIKE '%Salida%' 
+                    AND (estatus IS NULL OR estatus != 'Cancelada') THEN total ELSE 0 END) as ventas_netas,
+                     
+          -- C. Salidas de dinero físicas (Todo lo que diga Retiro, Salida o Corte)
           SUM(CASE WHEN tipo_movimiento LIKE '%Retiro%' 
                      OR tipo_movimiento LIKE '%Corte%' 
                      OR tipo_movimiento LIKE '%Salida%' THEN total ELSE 0 END) as egresos
+          
       FROM ventas 
       WHERE id_corte IS NULL AND id_usuario = ?
       GROUP BY LOWER(metodo_pago)
@@ -41,19 +49,20 @@ try {
 
   foreach ($finanzas as $row) {
     $metodo = trim($row['metodo']);
-    $in = floatval($row['ingresos']);
+    $in_bruto = floatval($row['ingresos_brutos']);
+    $ventas_netas = floatval($row['ventas_netas']);
     $out = floatval($row['egresos']);
 
-    // Todo lo que entra es "Venta Total del Día"
-    $ventas_totales += $in;
+    // 🎯 Tarjeta Azul (Ventas Totales): Matemáticamente exacta
+    $ventas_totales += $ventas_netas;
 
-    // Filtramos por métodos de pago
+    // 🎯 Flujo de dinero real (Entradas físicas - Salidas físicas)
     if ($metodo === 'efectivo' || $metodo === '1' || $metodo === '') {
-      $efectivo_caja += ($in - $out); // Al efectivo sí le restamos los gastos/retiros físicos
+      $efectivo_caja += ($in_bruto - $out);
     } elseif ($metodo === 'tarjeta' || $metodo === '2') {
-      $ingresos_banco += $in;
+      $ingresos_banco += ($in_bruto - $out);
     } elseif ($metodo === 'transferencia' || $metodo === '3') {
-      $ingresos_banco += $in;
+      $ingresos_banco += ($in_bruto - $out);
     }
   }
 
