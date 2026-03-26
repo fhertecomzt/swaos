@@ -182,8 +182,7 @@ $usuarios = obtenerUsuariosSup($dbh);
           </div>
 
           <button type="submit">Guardar</button>
-          <span class="cancelarModal" onclick="cerrarModalSup('crear-modalUserSup')" type=" submit">Cancelar</span>
-
+          <span class="cancelarModal" onclick="cerrarModalUserSup('crear-modalUserSup')" type=" submit">Cancelar</span>
         </form>
       </div>
     </div>
@@ -239,12 +238,12 @@ $usuarios = obtenerUsuariosSup($dbh);
 
           <div class="form-group">
             <label for="editar-password1">Contraseña:</label>
-            <input type="text" id="editar-password1" name="password1" autocomplete="off">
+            <input type="password" id="editar-password1" name="password1" autocomplete="off">
           </div>
 
           <div class="form-group">
             <label for="editar-password2">Confirma Contraseña:</label>
-            <input type="text" id="editar-password2" name="password2" autocomplete="off">
+            <input type="password" id="editar-password2" name="password2" autocomplete="off">
           </div>
 
           <!-- Selección del taller -->

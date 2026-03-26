@@ -67,13 +67,13 @@ $_SESSION['captcha_result'] = $num1 + $num2;
                                 <label for="user" class="label-flotante">Usuario</label>
                             </div>
 
-                            
+
                             <div class="input-wrapper">
                                 <i class="bx fa-solid fa-eye"></i>
                                 <input type="password" placeholder=" " id="pass" name="txtpassword1" autocomplete="off" required>
                                 <label for="pass" class="label-flotante">Contraseña</label>
                             </div>
-                            
+
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-calculator"></i>
                                 <input type="number" placeholder=" " name="captcha" id="captcha" required>

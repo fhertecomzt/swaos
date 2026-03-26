@@ -13,7 +13,7 @@ $buscar = !empty($_GET['buscar']) ? $_GET['buscar'] : '';
 try {
   // Agregamos tipo_movimiento y quitamos el bloqueo de Abonos/Anticipos
   $sql = "SELECT v.id_venta, DATE_FORMAT(v.fecha_venta, '%d/%m/%Y %H:%i') AS fecha_venta, v.total, v.estatus, 
-                   IFNULL(c.nombre_cliente, 'Público en General') AS nombre_cliente,
+                   IFNULL(c.nombre_cliente, 'Público en General') AS nombre_cliente, c.papellido_cliente,
                    v.tipo_movimiento
             FROM ventas v
             LEFT JOIN clientes c ON v.id_cliente = c.id_cliente

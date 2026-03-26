@@ -5550,7 +5550,7 @@ document
           "#cantidad-registros",
         );
 
-        //  Filtros del Dashboard 
+        //  Filtros del Dashboard
         let filtroGuardado = sessionStorage.getItem("filtroDashboard");
 
         if (filtroGuardado) {
@@ -5599,13 +5599,12 @@ document
           }, 200);
         }
 
-        // Conversión de Cita a Orden 
+        // Conversión de Cita a Orden
         setTimeout(() => {
           if (typeof revisarConversionCita === "function") {
             revisarConversionCita();
           }
         }, 150);
-
       })
       .catch((error) => console.error("Error al cargar contenido:", error));
   });
@@ -5727,8 +5726,8 @@ function cerrarModalOrden(id) {
 
   // Si cerramos el modal y se guardó algo, recargamos la pantalla de fondo
   if (window.huboCambiosEnOrden && document.getElementById("ordenes-link")) {
-      document.getElementById("ordenes-link").click(); // Simula el clic en el menú
-      window.huboCambiosEnOrden = false; // Apagamos el avisador para la próxima vez
+    document.getElementById("ordenes-link").click(); // Simula el clic en el menú
+    window.huboCambiosEnOrden = false; // Apagamos el avisador para la próxima vez
   }
 }
 
@@ -6192,23 +6191,30 @@ document.addEventListener("submit", function (e) {
       });
   }
 
- // EDITAR ORDEN
+  // EDITAR ORDEN
   if (e.target && e.target.id === "form-editarOrden") {
     e.preventDefault();
 
     const form = e.target;
     const estadoActual = document.getElementById("edit-estado").value;
     const diagActual = document.getElementById("edit-diagnostico").value.trim();
-    const costoActual = parseFloat(document.getElementById("edit-costo").value || 0).toFixed(2);
-    const nuevoAbono = parseFloat(document.getElementById("edit-nuevo-abono").value) || 0;
+    const costoActual = parseFloat(
+      document.getElementById("edit-costo").value || 0,
+    ).toFixed(2);
+    const nuevoAbono =
+      parseFloat(document.getElementById("edit-nuevo-abono").value) || 0;
 
     const costoOriginal = parseFloat(form.dataset.costoOrig) || 0;
-    const anticipoOriginal = parseFloat(document.getElementById("edit-anticipo").value) || 0;
+    const anticipoOriginal =
+      parseFloat(document.getElementById("edit-anticipo").value) || 0;
     const saldoRestanteReal = costoOriginal - anticipoOriginal;
     const metodoPagoEdit = document.getElementById("edit-metodo-pago");
 
     // Validar Método de pago si hay abono
-    if (nuevoAbono > 0 && (!metodoPagoEdit.value || metodoPagoEdit.value.trim() === "")) {
+    if (
+      nuevoAbono > 0 &&
+      (!metodoPagoEdit.value || metodoPagoEdit.value.trim() === "")
+    ) {
       metodoPagoEdit.classList.add("input-error");
       metodoPagoEdit.style.border = "1px solid #d33";
       Swal.fire({
@@ -6218,11 +6224,15 @@ document.addEventListener("submit", function (e) {
         returnFocus: false,
         confirmButtonColor: "#3085d6",
       });
-      metodoPagoEdit.addEventListener("change", function () {
+      metodoPagoEdit.addEventListener(
+        "change",
+        function () {
           this.classList.remove("input-error");
           this.style.border = "1px solid green";
-        }, { once: true });
-      return; 
+        },
+        { once: true },
+      );
+      return;
     }
 
     // Validar que no abone de más
@@ -6240,9 +6250,10 @@ document.addEventListener("submit", function (e) {
     const formData = new FormData(form);
 
     // UX: Cambiamos el botón visualmente
-    const btnGuardar = form.querySelector('.boton-guardar');
+    const btnGuardar = form.querySelector(".boton-guardar");
     const textoOriginal = btnGuardar.innerHTML;
-    btnGuardar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    btnGuardar.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
     btnGuardar.disabled = true;
 
     fetch("cruds/procesar_editar_orden.php", { method: "POST", body: formData })
@@ -6679,10 +6690,10 @@ document.addEventListener("input", function (e) {
 });
 
 // IMPRIMIR NOTA DE ENTREGA FINAL (58mm)
-window.imprimirNotaEntrega = function(id_orden) {
-    // Abrimos el ticket en una ventanita pequeña flotante ideal para miniprinters
-    let url = "../php/cruds/imprimir_nota_entrega.php?id=" + id_orden;
-    window.open(url, "NotaEntrega", "width=400,height=600,scrollbars=yes");
+window.imprimirNotaEntrega = function (id_orden) {
+  // Abrimos el ticket en una ventanita pequeña flotante ideal para miniprinters
+  let url = "../php/cruds/imprimir_nota_entrega.php?id=" + id_orden;
+  window.open(url, "NotaEntrega", "width=400,height=600,scrollbars=yes");
 };
 
 // Llamar Ventas ********************************************
@@ -7412,7 +7423,15 @@ function inicializarCorteCaja() {
         window.transferenciaEsperada = data.transferencia;
         window.retirosCorte = data.retiros;
 
-        if (data.efectivo > 0 || data.tarjeta > 0 || data.transferencia > 0) {
+        // NUEVO CANDADO INTELIGENTE:
+        // Si hay dinero positivo, negativo (faltantes por devoluciones puras)
+        // o si simplemente hubo retiros en el día, DEJAMOS HACER EL CORTE.
+        if (
+          data.efectivo !== 0 ||
+          data.tarjeta !== 0 ||
+          data.transferencia !== 0 ||
+          data.retiros > 0
+        ) {
           activarCuadreFisicoCiego();
         } else {
           document.getElementById("corte-mensaje-resultado").style.display =
@@ -7591,31 +7610,35 @@ function cargarHistorial() {
       // LIMPIAMOS LA TABLA
       tbody.innerHTML = "";
 
-    // SI HAY DATOS, DIBUJAMOS LAS FILAS (Si no, DataTables pondrá su propio mensaje)
+      // SI HAY DATOS, DIBUJAMOS LAS FILAS (Si no, DataTables pondrá su propio mensaje)
       if (data.length > 0) {
         data.forEach((venta) => {
           let badgeClass = "est-listo";
           let estatusTexto = venta.estatus || "Completada";
 
           if (estatusTexto === "Cancelada") badgeClass = "est-cancelado";
-          if (estatusTexto === "Devolución Parcial") badgeClass = "est-revisión";
+          if (estatusTexto === "Devolución Parcial")
+            badgeClass = "est-revisión";
 
-          let disableBotones = estatusTexto === "Cancelada"
+          let disableBotones =
+            estatusTexto === "Cancelada"
               ? 'disabled style="opacity: 0.5; cursor: not-allowed;"'
               : "";
 
           // ETIQUETA VISUAL
-          let tipo = venta.tipo_movimiento ? venta.tipo_movimiento.toUpperCase() : 'VENTA';
-          let badgeTipo = '';
+          let tipo = venta.tipo_movimiento
+            ? venta.tipo_movimiento.toUpperCase()
+            : "VENTA";
+          let badgeTipo = "";
 
-          if (tipo.includes('VENTA')) {
-              badgeTipo = `<span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-cart-shopping"></i> POS</span>`;
-          } else if (tipo.includes('ANTICIPO')) {
-              badgeTipo = `<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-hourglass-half"></i> ANTICIPO</span>`;
-          } else if (tipo.includes('ABONO') || tipo.includes('LIQUIDACION')) {
-              badgeTipo = `<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-money-bill-wave"></i> ${tipo}</span>`;
+          if (tipo.includes("VENTA")) {
+            badgeTipo = `<span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-cart-shopping"></i> POS</span>`;
+          } else if (tipo.includes("ANTICIPO")) {
+            badgeTipo = `<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-hourglass-half"></i> ANTICIPO</span>`;
+          } else if (tipo.includes("ABONO") || tipo.includes("LIQUIDACION")) {
+            badgeTipo = `<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;"><i class="fa-solid fa-money-bill-wave"></i> ${tipo}</span>`;
           } else {
-              badgeTipo = `<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;">${tipo}</span>`;
+            badgeTipo = `<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 3px;">${tipo}</span>`;
           }
 
           // Color en el primer <td> del Folio según el tipo de movimiento
@@ -7624,6 +7647,7 @@ function cargarHistorial() {
                         <td style="vertical-align: middle;"><strong>#${venta.id_venta}</strong> <br> ${badgeTipo}</td>
                         <td style="vertical-align: middle;">${venta.fecha_venta}</td>
                         <td style="vertical-align: middle;">${venta.nombre_cliente}</td>
+                        <td style="vertical-align: middle;">${venta.papellido_cliente}</td>
                         <td style="vertical-align: middle;"><strong>$${parseFloat(venta.total).toFixed(2)}</strong></td>
                         <td style="vertical-align: middle;"><span class="badge-estado ${badgeClass}">${estatusTexto}</span></td>
                         <td style="text-align: center; vertical-align: middle;" class="tbl">
@@ -7642,7 +7666,6 @@ function cargarHistorial() {
           tbody.innerHTML += fila;
         });
       }
-      
 
       // VOLVEMOS A ENCENDER DATATABLES
       let cantidadRegistros = parseInt(
@@ -9149,7 +9172,7 @@ window.inicializarCalendarioSWAOS = function () {
 
   let btnLista = document.getElementById("btn-lista-cita");
   if (btnLista) btnLista.onclick = () => calendar.changeView("listWeek");
-};;;
+};
 
 // FUNCIONES DEL MÓDULO DE CITAS
 
@@ -9392,49 +9415,49 @@ window.enviarWhatsCita = function (idCita) {
     `https://wa.me/${celLimpio}?text=${encodeURIComponent(mensaje)}`,
     "_blank",
   );
-};;;
+};
 
 // CONVERSIÓN DE CITA A ORDEN DE SERVICIO
-window.revisarConversionCita = function() {
-    //  Revisamos si hay un paquete esperando en la memoria
-    let paqueteDatos = sessionStorage.getItem("citaParaOrden");
-    
-    if (paqueteDatos) {
-      //  Desempacamos los datos
-      let cita = JSON.parse(paqueteDatos);
+window.revisarConversionCita = function () {
+  //  Revisamos si hay un paquete esperando en la memoria
+  let paqueteDatos = sessionStorage.getItem("citaParaOrden");
 
-      //  Abrimos la ventana modal de Nueva Orden automáticamente
-      if (typeof abrirModalOrden === "function") {
-        abrirModalOrden("crear-modalOrden");
-      } else {
-        document.getElementById("crear-modalOrden").style.display = "flex";
-      }
+  if (paqueteDatos) {
+    //  Desempacamos los datos
+    let cita = JSON.parse(paqueteDatos);
 
-      // Auto-llenamos los campos con la información de la cita
-      setTimeout(() => {
-        // Cliente visible
-        let inputBusqueda = document.getElementById("busqueda-cliente");
-        if (inputBusqueda) inputBusqueda.value = cita.nombre_cliente;
-
-        // ID Cliente oculto
-        let inputId = document.getElementById("id_cliente_seleccionado");
-        if (inputId) inputId.value = cita.id_cliente;
-
-        // Falla reportada
-        let textareaFalla = document.querySelector(
-          '#form-crearOrden textarea[name="falla"]',
-        );
-        if (textareaFalla) textareaFalla.value = cita.falla;
-
-        // Guardamos el ID de la cita de donde venimos
-        let inputIdCita = document.getElementById("id_cita_origen");
-        if (inputIdCita) inputIdCita.value = cita.id_cita;
-      }, 200); // Le damos 200 milisegundos a la ventana para que termine de abrirse
-
-      //  Destruimos el paquete para que no se vuelva a abrir la próxima vez que entres a Órdenes
-      sessionStorage.removeItem("citaParaOrden");
+    //  Abrimos la ventana modal de Nueva Orden automáticamente
+    if (typeof abrirModalOrden === "function") {
+      abrirModalOrden("crear-modalOrden");
+    } else {
+      document.getElementById("crear-modalOrden").style.display = "flex";
     }
-}
+
+    // Auto-llenamos los campos con la información de la cita
+    setTimeout(() => {
+      // Cliente visible
+      let inputBusqueda = document.getElementById("busqueda-cliente");
+      if (inputBusqueda) inputBusqueda.value = cita.nombre_cliente;
+
+      // ID Cliente oculto
+      let inputId = document.getElementById("id_cliente_seleccionado");
+      if (inputId) inputId.value = cita.id_cliente;
+
+      // Falla reportada
+      let textareaFalla = document.querySelector(
+        '#form-crearOrden textarea[name="falla"]',
+      );
+      if (textareaFalla) textareaFalla.value = cita.falla;
+
+      // Guardamos el ID de la cita de donde venimos
+      let inputIdCita = document.getElementById("id_cita_origen");
+      if (inputIdCita) inputIdCita.value = cita.id_cita;
+    }, 200); // Le damos 200 milisegundos a la ventana para que termine de abrirse
+
+    //  Destruimos el paquete para que no se vuelva a abrir la próxima vez que entres a Órdenes
+    sessionStorage.removeItem("citaParaOrden");
+  }
+};
 
 // Llamar reportes *****************************************************************
 document
@@ -9445,9 +9468,89 @@ document
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
-
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
       });
   });
+
+// BÚSQUEDA EN LENGUAJE NATURAL (POPUP IA) ****************************************************************
+function abrirPopupIA() {
+  Swal.fire({
+    title: "Asistente de IA",
+    text: "¿Qué reporte necesitas? (Ej. Ventas de febrero)",
+    input: "text",
+    inputAttributes: {
+      autocapitalize: "off",
+      autocomplete: "off",
+      placeholder: "Escribe aquí tu petición...",
+    },
+    showCancelButton: true,
+    confirmButtonText: '<i class="fa-solid fa-wand-magic-sparkles"></i> Buscar',
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#6366f1",
+    showLoaderOnConfirm: true,
+    // preConfirm se ejecuta justo cuando le das a "Buscar"
+    preConfirm: (texto) => {
+      if (!texto || texto.trim() === "") {
+        Swal.showValidationMessage("Por favor escribe algo para buscar");
+        return false;
+      }
+
+      const formData = new FormData();
+      formData.append("texto_ia", texto.trim());
+
+      // Hacemos la petición a tu PHP de la IA
+      return fetch("../php/funciones/api_ia_reportes.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error(response.statusText);
+          return response.json();
+        })
+        .catch((error) => {
+          Swal.showValidationMessage(`Falló la conexión con la IA`);
+        });
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  }).then((result) => {
+    // Cuando la IA responde con éxito, hacemos la magia en la tabla
+    if (result.isConfirmed) {
+      const data = result.value;
+
+      if (data.error) {
+        Swal.fire("Mmm...", data.error, "error");
+        return;
+      }
+
+      // Buscamos los inputs de tu pantalla de Historial de Ventas
+      const inputInicio = document.getElementById("filtro-fecha-inicio");
+      const inputFin = document.getElementById("filtro-fecha-fin");
+      const inputTexto = document.getElementById("filtro-texto");
+
+      // Llenamos las fechas y el texto si existen
+      if (data.fecha_inicio && inputInicio)
+        inputInicio.value = data.fecha_inicio;
+      if (data.fecha_fin && inputFin) inputFin.value = data.fecha_fin;
+      if (data.buscar && inputTexto) inputTexto.value = data.buscar;
+
+      // Recargamos la tabla automáticamente
+      if (typeof cargarHistorial === "function") {
+        cargarHistorial();
+
+      }
+
+      // Alerta de éxito pequeña (Toast)
+      Swal.fire({
+        icon: "success",
+        title: "¡Filtros Aplicados!",
+        text: "Tu tabla se actualizó mágicamente.",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+      });
+    }
+  });
+}
