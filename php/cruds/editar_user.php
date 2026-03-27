@@ -1,5 +1,8 @@
 <?php
-
+// INICIAR SESIÓN (Obligatorio para poder actualizar $_SESSION)
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
 include "../conexion.php";
 
 // Inicializamos la respuesta
@@ -80,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Manejo de la imagen
     $rutaImagen = "";
     if (!empty($_FILES['imagen']['name'])) {
-      $directorioImagen = __DIR__ . "../../../imgs/users/";
+      $directorioImagen = __DIR__ . "/../../imgs/users/"; // Ruta física en el servidor poner /../../imgs/users/ en el hosting	 
       $rutaDestino = $directorioImagen . basename($_FILES['imagen']['name']);
 
       if (!is_writable($directorioImagen)) {
@@ -101,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       $nombreImagen = uniqid() . '-' . basename($_FILES['imagen']['name']);
       $rutaCompleta = $directorioImagen . $nombreImagen;
-      $rutaImagen = "../imgs/users/" . $nombreImagen;
+      $rutaImagen = "../imgs/users/" . $nombreImagen; // Ruta relativa para la BD
 
       // Mover el archivo subido
       if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaCompleta)) {
@@ -142,10 +145,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       ":idusuario" => $idusuario
     ]);
 
+    // 7. Borrar la imagen ANTIGUA (si existía y es diferente de la default)
+    if ($rutaCompleta && $rutaCompleta !== $rutaImagen) {
+      $rutaFisicaAntigua = __DIR__ . "/../" . ltrim($rutaCompleta, './');
+      if (file_exists($rutaFisicaAntigua) && strpos($rutaCompleta, 'default.png') === false) {
+        unlink($rutaFisicaAntigua); // Borrar archivo antiguo
+      }
+    }
+
     // Verificamos si hubo una actualización
     if ($stmt->rowCount() > 0) {
       $response["success"] = true;
-      $response["message"] = "Usuario actualizado correctamente.";
+      $response["message"] = "Actualizado correctamente.";
+
+      // Solo actualizamos la sesión Y le avisamos al JS 
+      // si el superusuario está editando su PROPIO perfil.
+      $id_usuario_logueado = $_SESSION['id_usuario'] ?? $_SESSION['idusuario'] ?? 0;
+
+      if ($id_usuario_logueado == $idusuario) {
+        $_SESSION['imagen'] = $rutaImagen;
+
+        // Al enviarlo dentro de este 'if', el JS solo cambiará la foto en vivo 
+        // si eres tú mismo. Si es otro usuario, el JS ignorará el cambio visual.
+        $response["nueva_imagen"] = $rutaImagen;
+      }
     } else {
       $response["message"] = "No se realizaron cambios en el Usuario.";
     }

@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$roles_permitidos = ["superusuario"];
+$roles_permitidos = ["ventas"];
 include "verificar_sesion.php";
 
 
@@ -47,8 +47,7 @@ $_SESSION['last_token'] = $current_token;
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Administrador SWAOS</title>
-    <meta name="description" content="Sistema Web De Administración Para Ordenes De Servicio">
+    <title>Ventas SWAOS</title>
     <link rel="icon" type="image/x-icon" href="../imgs/favicon/favicon.ico">
 
     <!-- CDn Font Awesome link fuente iconos-->
@@ -411,7 +410,6 @@ $_SESSION['last_token'] = $current_token;
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.global.min.js"></script>
 
     <script src="../js/dashboard.js"></script>
-    <script src="../js/scripts.js"></script>
     <script src="../js/scriptssup.js"></script>
     <script src="../js/clientes.js"></script>
     <script src="../js/perfil.js"></script>

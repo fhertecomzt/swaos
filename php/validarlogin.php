@@ -150,10 +150,10 @@ if (empty($errores)) {
                         case 'superusuario':
                             header("Location: ad.php");
                             break;
-                        case 'VENTAS':
+                        case 'ventas':
                             header("Location: vta.php");
                             break;
-                        case 'GERENCIA':
+                        case 'gerencia':
                             header("Location: gm.php");
                             break;
                         default:

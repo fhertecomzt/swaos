@@ -134,9 +134,20 @@ function procesarFormularioUserSup(formulario, tipo) {
         cerrarModalUserSup(`${tipo}-modalUserSup`);
         if (tipo === "crear") formulario.reset();
 
+        // Actualizar la foto en vivo en el menú superior
+        if (tipo === "editar" && data.nueva_imagen) {
+          // Cambia "img-perfil-menu" por el ID real de la etiqueta <img> que tienes en tu menú superior
+          const imgMenuSuperior = document.getElementById("img-perfil-menu");
+          if (imgMenuSuperior) {
+            imgMenuSuperior.src = data.nueva_imagen;
+          }
+        }
+
         Swal.fire({
           title: "¡Éxito!",
-          text: data.message || `SuperUsuario ${tipo === "crear" ? "registrado" : "actualizado"}.`,
+          text:
+            data.message ||
+            `SuperUsuario ${tipo === "crear" ? "registrado" : "actualizado"}.`,
           icon: "success",
           returnFocus: false,
           showConfirmButton: false,
