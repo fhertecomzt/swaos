@@ -75,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Manejo de la imagen
     $rutaImagen = "";
     if (!empty($_FILES['imagen']['name'])) {
-      $directorioImagen = __DIR__ . "../../../imgs/productos/";
+      $directorioImagen = __DIR__ . "/../../imgs/productos/";
       $rutaDestino = $directorioImagen . basename($_FILES['imagen']['name']);
 
       if (!is_writable($directorioImagen)) {

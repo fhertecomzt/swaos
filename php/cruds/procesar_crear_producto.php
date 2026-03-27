@@ -53,7 +53,7 @@ try {
   // Procesar imagen
   $rutaImagen = "";
   if (!empty($_FILES['imagen']['name'])) {
-    $directorioImagen = __DIR__ . "../../../imgs/productos/";
+    $directorioImagen = __DIR__ . "/../../imgs/productos/";
 
     // Verificar permisos de la carpeta
     if (!is_writable($directorioImagen)) {

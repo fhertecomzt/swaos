@@ -18,7 +18,7 @@ $marcas = obtenerRegistros($dbh, "marcas", "id_marca, nom_marca", "ASC", "id_mar
 $proveedores = obtenerRegistros($dbh, "proveedores", "id_prov, nombre_prov, contacto_prov", "ASC", "id_prov", 1000, 1, true);
 $impuestos = obtenerRegistros($dbh, "impuestos", "idimpuesto, nomimpuesto, tasa", "ASC", "idimpuesto", 1000, 1, true);
 $umedidas = obtenerRegistros($dbh, "unidades_med", "id_unidad, nom_unidad", "ASC", "id_unidad", 1000, 1, true);
-$productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod, p.nombre_prod, p.costo_prod, p.precio, p.stock_minimo, invsuc.stock, p.estatus", "ASC", "p.id_prod", $estatusFiltroInicial);
+$productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod, p.nombre_prod, p.costo_prod, p.precio, p.stock_minimo, invsuc.stock, p.imagen, p.estatus", "ASC", "p.id_prod", $estatusFiltroInicial);
 
 ?>
 
@@ -73,7 +73,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
           <tr class="producto <?php echo $clase_alerta; ?>" data-estatus="<?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>">
 
             <td data-lable="Imagen"><?php if (!empty($u['imagen'])): ?>
-                <img src="<?= htmlspecialchars($u['imagen']) ?>" alt="Imagen de producto" width="50" height="50" onerror="this.src='../imgs/default.png'">
+                <img src="<?= htmlspecialchars($u['imagen']) ?>" alt="Imagen de producto" width="40px" height="40px" onerror="this.src='../imgs/default.png'">
               <?php else: ?>
                 Sin imagen
               <?php endif; ?>
@@ -90,7 +90,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
               </button>
             </td>
 
-            <td data-lable="Acciones" style="display: flex; gap: 10px; justify-content: center;">
+            <td data-lable="Acciones" style=" gap: 10px; justify-content: center;">
               <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="<?php echo $u['id_prod']; ?>"></button>
 
               <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="<?php echo $u['id_prod']; ?>"></button>
