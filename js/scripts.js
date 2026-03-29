@@ -5847,34 +5847,98 @@ function calcularSaldoEdit() {
   }
 }
 
-// ALTA EXPRÉS DE CLIENTES
+// ALTA EXPRÉS DE CLIENTES (VERSIÓN PREMIUM CON ETIQUETAS FLOTANTES)
 window.abrirModalClienteExpress = function () {
   Swal.fire({
     title: "Alta Exprés de Cliente",
     html: `
-            <p style="font-size:13px; color:#666; margin-bottom:15px;">Captura los datos básicos para enviarle su comprobante.</p>
-            <input id="swal-cli-nombre" class="swal2-input" placeholder="Nombre(s) *" style="width: 85%;">
-            <input id="swal-cli-papellido" class="swal2-input" placeholder="Primer Apellido *" style="width: 85%;">
-            <input id="swal-cli-sapellido" class="swal2-input" placeholder="Segundo Apellido" style="width: 85%;">
+        <style>
+            /* Contenedor relativo para que la etiqueta "flote" dentro de él */
+            .floating-group {
+                position: relative;
+                margin-bottom: 22px;
+                width: 85%;
+                margin-left: auto;
+                margin-right: auto;
+            }
             
-            <input id="swal-cli-telefono" type="tel" class="swal2-input" placeholder="Teléfono a 10 dígitos *" style="width: 85%;" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
+            /* El input estilizado */
+            .floating-input {
+                width: 100%;
+                padding: 16px 12px 6px 12px; /* Espacio arriba para que no choque con la etiqueta */
+                font-size: 15px;
+                border: 1px solid #d9d9d9;
+                border-radius: 6px;
+                outline: none;
+                background: transparent;
+                box-sizing: border-box;
+                transition: border-color 0.2s;
+            }
             
-            <input id="swal-cli-correo" type="email" class="swal2-input" placeholder="Correo (Opcional)" style="width: 85%;">
-        `,
+            .floating-input:focus {
+                border-color: #28a745; /* Verde cuando el usuario hace clic */
+            }
+            
+            /* La etiqueta original (Centrada como placeholder) */
+            .floating-label {
+                position: absolute;
+                top: 14px;
+                left: 12px;
+                font-size: 15px;
+                color: #999;
+                transition: 0.2s ease all;
+                pointer-events: none;
+                background: white; /* Fondo blanco para tapar el borde de la caja cuando sube */
+                padding: 0 4px;
+            }
+            
+            /* LA MAGIA: Cuando haces clic (focus) o cuando ya hay texto escrito (not(:placeholder-shown)) */
+            .floating-input:focus ~ .floating-label,
+            .floating-input:not(:placeholder-shown) ~ .floating-label {
+                top: -9px;
+                left: 10px;
+                font-size: 12px;
+                color: #28a745;
+                font-weight: 600;
+            }
+        </style>
+        
+        <p style="font-size:13px; color:#666; margin-bottom:25px;">Captura los datos básicos para enviarle su comprobante.</p>
+        
+        <div class="floating-group">
+            <input id="swal-cli-nombre" class="floating-input" placeholder=" " autocomplete="off">
+            <label class="floating-label">Nombre(s) *</label>
+        </div>
+        
+        <div class="floating-group">
+            <input id="swal-cli-papellido" class="floating-input" placeholder=" " autocomplete="off">
+            <label class="floating-label">Primer Apellido *</label>
+        </div>
+        
+        <div class="floating-group">
+            <input id="swal-cli-sapellido" class="floating-input" placeholder=" " autocomplete="off">
+            <label class="floating-label">Segundo Apellido</label>
+        </div>
+        
+        <div class="floating-group">
+            <input id="swal-cli-telefono" type="tel" class="floating-input" placeholder=" " maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" autocomplete="off">
+            <label class="floating-label">Teléfono a 10 dígitos *</label>
+        </div>
+        
+        <div class="floating-group">
+            <input id="swal-cli-correo" type="email" class="floating-input" placeholder=" " autocomplete="off">
+            <label class="floating-label">Correo (Opcional)</label>
+        </div>
+    `,
     showCancelButton: true,
-    confirmButtonText:
-      '<i class="fa-solid fa-floppy-disk"></i> Guardar y Asignar',
+    confirmButtonText: '<i class="fa-solid fa-floppy-disk"></i> Guardar y Asignar',
     confirmButtonColor: "#28a745",
     cancelButtonText: "Cancelar",
     preConfirm: () => {
       // Obtenemos los valores
       let nombre = document.getElementById("swal-cli-nombre").value.trim();
-      let papellido = document
-        .getElementById("swal-cli-papellido")
-        .value.trim();
-      let sapellido = document
-        .getElementById("swal-cli-sapellido")
-        .value.trim();
+      let papellido = document.getElementById("swal-cli-papellido").value.trim();
+      let sapellido = document.getElementById("swal-cli-sapellido").value.trim();
       let telefono = document.getElementById("swal-cli-telefono").value.trim();
       let correo = document.getElementById("swal-cli-correo").value.trim();
 
@@ -5883,9 +5947,7 @@ window.abrirModalClienteExpress = function () {
 
       // VALIDACIONES ESTRICTAS DE NOMBRES
       if (nombre.length < 3) {
-        Swal.showValidationMessage(
-          "El nombre debe tener al menos 3 caracteres.",
-        );
+        Swal.showValidationMessage("El nombre debe tener al menos 3 caracteres.");
         return false;
       }
       if (!regexLetras.test(nombre)) {
@@ -5894,46 +5956,34 @@ window.abrirModalClienteExpress = function () {
       }
 
       if (papellido.length < 3) {
-        Swal.showValidationMessage(
-          "El primer apellido debe tener al menos 3 caracteres.",
-        );
+        Swal.showValidationMessage("El primer apellido debe tener al menos 3 caracteres.");
         return false;
       }
       if (!regexLetras.test(papellido)) {
-        Swal.showValidationMessage(
-          "El primer apellido solo debe contener letras.",
-        );
+        Swal.showValidationMessage("El primer apellido solo debe contener letras.");
         return false;
       }
 
       if (sapellido !== "") {
         if (sapellido.length < 3) {
-          Swal.showValidationMessage(
-            "Si escribes segundo apellido, debe ser de 3 caracteres mínimo.",
-          );
+          Swal.showValidationMessage("Si escribes segundo apellido, debe ser de 3 caracteres mínimo.");
           return false;
         }
         if (!regexLetras.test(sapellido)) {
-          Swal.showValidationMessage(
-            "El segundo apellido solo debe contener letras.",
-          );
+          Swal.showValidationMessage("El segundo apellido solo debe contener letras.");
           return false;
         }
       }
 
-      // Teléfono (ya está limitado a 10 por el HTML, pero aseguramos que escriban los 10)
+      // Teléfono
       if (telefono.length !== 10) {
-        Swal.showValidationMessage(
-          "El teléfono debe tener exactamente 10 números.",
-        );
+        Swal.showValidationMessage("El teléfono debe tener exactamente 10 números.");
         return false;
       }
 
       // Correo
       if (correo !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-        Swal.showValidationMessage(
-          "Debes ingresar un formato de correo electrónico válido.",
-        );
+        Swal.showValidationMessage("Debes ingresar un formato de correo electrónico válido.");
         return false;
       }
 
@@ -5965,13 +6015,9 @@ window.abrirModalClienteExpress = function () {
           if (data.success) {
             // ÓRDENES DE SERVICIO
             const inputBusqueda = document.getElementById("busqueda-cliente");
-            const inputHidden = document.getElementById(
-              "id_cliente_seleccionado",
-            );
+            const inputHidden = document.getElementById("id_cliente_seleccionado");
             const btnLimpiar = document.getElementById("limpiar-cliente");
-            const listaResultados = document.getElementById(
-              "lista-resultados-clientes",
-            );
+            const listaResultados = document.getElementById("lista-resultados-clientes");
 
             if (inputBusqueda && inputHidden) {
               inputBusqueda.value = `${data.nombre_completo} (${data.telefono})`;
@@ -5983,23 +6029,17 @@ window.abrirModalClienteExpress = function () {
 
             // COTIZACIONES
             const inputHiddenCot = document.getElementById("cot-id-cliente");
-            const inputNombreCot =
-              document.getElementById("cot-nombre-cliente");
-            const btnQuitarCot = document.getElementById(
-              "btn-quitar-cliente-cot",
-            );
+            const inputNombreCot = document.getElementById("cot-nombre-cliente");
+            const btnQuitarCot = document.getElementById("btn-quitar-cliente-cot");
 
             //  PUNTO DE VENTA (POS)
             const inputHiddenPOS = document.getElementById("pos-id-cliente");
-            const inputNombrePOS =
-              document.getElementById("pos-nombre-cliente");
-            const btnQuitarPOS = document.getElementById(
-              "btn-quitar-cliente-pos",
-            );
+            const inputNombrePOS = document.getElementById("pos-nombre-cliente");
+            const btnQuitarPOS = document.getElementById("btn-quitar-cliente-pos");
 
             if (inputHiddenPOS && inputNombrePOS) {
               inputHiddenPOS.value = data.id;
-              inputNombrePOS.value = data.nombre_completo.split(" ")[0]; // Solo ponemos el primer nombre
+              inputNombrePOS.value = data.nombre_completo.split(" ")[0]; 
               if (btnQuitarPOS) btnQuitarPOS.style.display = "inline-block";
             }
 
@@ -6012,11 +6052,7 @@ window.abrirModalClienteExpress = function () {
               timer: 3000,
             });
           } else {
-            Swal.fire(
-              "Error",
-              data.message || "No se pudo guardar el cliente.",
-              "error",
-            );
+            Swal.fire("Error", data.message || "No se pudo guardar el cliente.", "error");
           }
         })
         .catch((err) => {

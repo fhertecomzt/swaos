@@ -161,7 +161,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
               <span id="limpiar-cliente" style="display:none; cursor:pointer; color:red; font-size: 12px;">[x] Cambiar cliente</span>
               <p></p>
 
-              <button type="button" onclick="abrirModalClienteExpress()" class="btn" style="background-color: #28a745; padding: 0 15px;" title="Nuevo Cliente Exprés"><i class="fa-solid fa-user-plus"></i></button>
+              <button type="button" onclick="abrirModalClienteExpress()" class="btn" style="background-color: #28a745; height:30px; padding: 0 15px;" title="Nuevo Cliente Exprés"><i class="fa-solid fa-user-plus"></i></button>
             </div>
           </div>
         </div>
@@ -207,7 +207,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </div>
           <div class="form-group">
             <label>Accesorios (Cargador, funda...):</label>
-            <input type="text" name="accesorios" placeholder="Detallar todo lo recibido" >
+            <input type="text" name="accesorios" placeholder="Detallar todo lo recibido">
           </div>
           <div class="form-group">
             <label>Fecha Estimada Entrega:</label>

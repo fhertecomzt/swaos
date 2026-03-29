@@ -48,7 +48,7 @@ $_SESSION['last_token'] = $current_token;
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Administrador SWAOS</title>
-    <meta name="description" content="Sistema Web De Administración Para Ordenes De Servicio">
+    <meta name="description" content="Sistema Web De Administración para órdenes de Servicio">
     <link rel="icon" type="image/x-icon" href="../imgs/favicon/favicon.ico">
 
     <!-- CDn Font Awesome link fuente iconos-->
@@ -196,7 +196,7 @@ $_SESSION['last_token'] = $current_token;
                     <li>
                         <a href="#" id="ordenes-link" class="nav-link">
                             <i class="fa-solid fa-list-check"></i>
-                            <span>ORDENES</span>
+                            <span>ÓRDENES</span>
                         </a>
                     </li>
 
