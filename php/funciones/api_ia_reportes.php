@@ -1,8 +1,9 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
+require_once '../config_keys.php';
 
 // 1. TU LLAVE MAESTRA DE GEMINI (Cámbiala por tu API Key real)
-$api_key = 'AIzaSyBwSNAhQ2OKDtRTMv5i_Oy-p1UxLhPG3nc';
+$api_key = api_key;
 
 // 2. RECIBIR EL TEXTO DEL USUARIO
 $texto_usuario = $_POST['texto_ia'] ?? '';
@@ -54,5 +55,7 @@ if (isset($json_respuesta['candidates'][0]['content']['parts'][0]['text'])) {
     // El texto_limpio ya es un JSON gracias a la instrucción que le dimos a Gemini
     echo $texto_limpio;
 } else {
-    echo json_encode(['error' => 'No se pudo interpretar la petición.']);
+    // Si Google falla, le pedimos a PHP que nos muestre exactamente qué dijo Google
+    $error_google = $json_respuesta['error']['message'] ?? 'Respuesta inesperada de la IA.';
+    echo json_encode(['error' => 'Rechazado por Google: ' . $error_google]);
 }
