@@ -131,7 +131,7 @@ try {
 
     // SUBIR FOTOS
   if (!empty($_FILES['evidencias']['name'][0])) {
-    $dir = "../../imgs/ordenes/";
+    $dir = "/../../imgs/ordenes/";
     if (!is_dir($dir)) mkdir($dir, 0777, true);
 
     $stmtImg = $dbh->prepare("INSERT INTO ordenes_imagenes (id_orden, ruta_imagen, tipo_evidencia, descripcion) VALUES (?, ?, 'recepcion', ?)");
@@ -180,7 +180,7 @@ try {
 
   $response["success"] = true;
   $response["message"] = "Orden #$id_orden creada correctamente.";
-  $response["token_qr"] = $link;
+  $response["token_qr"] = $token_hash;
   $response["datos_whatsapp"] = ["telefono" => $datosCliente['tel_cliente'], "mensaje" => $msg];
 } catch (Exception $e) {
   if ($dbh->inTransaction()) $dbh->rollBack();

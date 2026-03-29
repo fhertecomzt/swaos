@@ -6151,26 +6151,25 @@ document.addEventListener("submit", function (e) {
           if (document.getElementById("limpiar-cliente"))
             document.getElementById("limpiar-cliente").style.display = "none";
 
+          // 1. Armamos la URL del QR exactamente igual que en tu otra función
+          const urlRastreo = `https://swaos.rf.gd/track.php?t=${data.token_qr}`;
+          const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlRastreo)}`;
+
+          // 2. Usamos el método nativo de SweetAlert (imageUrl)
           Swal.fire({
             title: "¡Orden Creada!",
             html: `<p>${data.message}</p>
-                           <div style="display: flex; justify-content: center; margin: 15px 0;">
-                               <div id="qrcode-container"></div>
-                           </div>
-                           <p style="font-size: 12px; color: #666;">Escanea para ver el rastreo</p>`,
+                   <p style="font-size: 13px; color: #666; margin-top: 10px; font-weight: bold;">Escanea para ver el rastreo</p>`,
+            imageUrl: urlImagenQR,
+            imageWidth: 150,
+            imageHeight: 150,
+            imageAlt: "QR de Rastreo",
             icon: "success",
             returnFocus: false,
             confirmButtonText:
               '<i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp',
             showCancelButton: true,
             cancelButtonText: "Cerrar",
-            didOpen: () => {
-              new QRCode(document.getElementById("qrcode-container"), {
-                text: data.token_qr,
-                width: 128,
-                height: 128,
-              });
-            },
           }).then((result) => {
             if (result.isConfirmed) {
               const tel = data.datos_whatsapp.telefono.replace(/\D/g, "");

@@ -36,7 +36,7 @@ include "verificar_sesion.php";
     <div class="card card-minimal" data-id="4" data-menu-link="clientes-link">
       <div>
         <span class="card-numeros" id="dash-clientes">0</span>
-        <p><span class="card-nombre">Clientes / Prov.</span></p>
+        <p><span class="card-nombre">Clientes</span></p>
       </div>
       <div class="card-icono text-primary"><i class="fa-solid fa-users"></i></div>
     </div>

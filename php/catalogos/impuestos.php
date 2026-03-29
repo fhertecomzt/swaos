@@ -78,7 +78,7 @@ $impuestos = obtenerRegistros($dbh, "impuestos", "idimpuesto, nomimpuesto, tasa,
 
                     <div class="form-group">
                         <label for="crear-tasa">Tasa:</label>
-                        <input type="number" id="crear-tasa" name="tasa" autocomplete="off" required>
+                        <input type="number" id="crear-tasa" name="tasa" autocomplete="off" placeholder="Ej, 0.00" required>
                     </div>
                     <!-- Selección de Estatus -->
                     <div class="form-group">
@@ -111,7 +111,7 @@ $impuestos = obtenerRegistros($dbh, "impuestos", "idimpuesto, nomimpuesto, tasa,
                     </div>
                     <div class="form-group">
                         <label for="editar-tasa">Tasa:</label>
-                        <input type="number" id="editar-tasa" name="tasa" autocomplete="off" required>
+                        <input type="number" id="editar-tasa" name="tasa" autocomplete="off" placeholder="Ej, 0.00" required>
                     </div>
                     <!-- Selección de Estatus -->
                     <div class="form-group">
