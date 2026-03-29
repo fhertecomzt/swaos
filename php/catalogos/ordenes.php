@@ -188,14 +188,14 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </div>
           <div class="form-group">
             <label>Modelo:</label>
-            <input type="text" name="modelo" placeholder="Ej. equipo generico" required>
+            <input type="text" name="modelo" placeholder="Ej. equipo generico" autocomplete="off" required>
           </div>
           <div class="form-group">
             <label>No. Serie / IMEI:</label>
             <input type="text" name="numero_serie" placeholder="Obligatorio para garantía"
               pattern="[a-zA-ZÀ-ÿ0-9\s]+"
               title="Solo se permiten letras, números y espacios."
-              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required>
           </div>
         </div>
 
@@ -203,11 +203,11 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           <h4>3. Recepción</h4>
           <div class="form-group">
             <label>Contraseña / Patrón:</label>
-            <input type="text" name="contrasena_dispositivo" placeholder="Ej. 1234 o Patrón 'Z'">
+            <input type="text" name="contrasena_dispositivo" placeholder="Ej. 1234 o Patrón 'Z'" autocomplete="off">
           </div>
           <div class="form-group">
             <label>Accesorios (Cargador, funda...):</label>
-            <input type="text" name="accesorios" placeholder="Detallar todo lo recibido">
+            <input type="text" name="accesorios" placeholder="Detallar todo lo recibido" >
           </div>
           <div class="form-group">
             <label>Fecha Estimada Entrega:</label>

@@ -3,6 +3,13 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 include "../verificar_sesion.php";
+include "../funciones/funciones.php";
+
+
+$servicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servicio", "ASC", "nom_servicio", 100, 1, true);
+$profesionales = obtenerUsuarioscitas($dbh, "usuarios", "id_usuario, nombre, p_appellido", "ASC", "nombre", 100, 1, true);
+
+
 ?>
 <div class="containerr" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 2px 20px;">
 
@@ -59,23 +66,23 @@ include "../verificar_sesion.php";
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" style="width: 100%;">
         <label>Tipo de Servicio: <span style="color:red;">*</span></label>
         <select name="tipo_cita" id="cita-tipo" required onchange="toggleDireccionCita()" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-          <option value="">Seleccionar...</option>
-          <option value="Taller"> Recepción en Taller</option>
-          <option value="Domicilio"> Servicio a Domicilio / Empresa</option>
-          <option value="Remoto"> Soporte Remoto (AnyDesk/TeamViewer)</option>
+          <option value="">Selecciona tipo de servicio...</option>
+          <?php foreach ($servicios as $s): ?>
+            <option value="<?php echo htmlspecialchars($s['id_servicio']); ?>"><?php echo $s['nom_servicio']; ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
 
-      <div class="form-group">
-        <label>Asignar a Técnico: <span style="color:red;">*</span></label>
+      <div class="form-group" style="width: 100%;">
+        <label>Asignar a un profesional: <span style="color:red;">*</span></label>
         <select name="id_tecnico" id="cita-tecnico" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-          <option value="">Seleccionar técnico...</option>
-          <option value="1">Administrador (Yo)</option>
-          <option value="2">Técnico Auxiliar (Juan)</option>
-          <option value="3">Soporte Remoto (Ana)</option>
+          <option value="">Selecciona a un profesional...</option>
+          <?php foreach ($profesionales as $s): ?>
+            <option value="<?php echo htmlspecialchars($s['id_usuario']); ?>"><?php echo $s['nombre']; ?> <?php echo $s['p_appellido']; ?></option>
+            <?php endforeach; ?>
         </select>
       </div>
 

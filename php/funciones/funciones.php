@@ -58,6 +58,17 @@ function obtenerColonias($dbh)
   return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function obtenerUsuarioscitas($dbh)
+{
+  $stmt = $dbh->prepare("SELECT u.id_usuario, u.usuario, u.nombre, u.p_appellido, u.s_appellido, u.imagen, u.estatus, r.nom_rol, t.nombre_t
+        FROM usuarios u
+        JOIN roles r ON u.id_rol = r.id_rol
+        JOIN talleres t ON u.taller_id = t.id_taller
+        WHERE r.nom_rol != 'superusuario' AND estatus = 0 ORDER BY u.id_usuario ASC");
+  $stmt->execute();
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function obtenerUsuarios($dbh)
 {
   $stmt = $dbh->prepare("SELECT u.id_usuario, u.usuario, u.nombre, u.p_appellido, u.s_appellido, u.imagen, u.estatus, r.nom_rol, t.nombre_t

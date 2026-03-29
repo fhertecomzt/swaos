@@ -82,6 +82,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Manejo de la imagen
     $rutaImagen = "";
+    $rutaCompleta = null; // Inicializamos la variable vacía para evitar el Warning
+
     if (!empty($_FILES['imagen']['name'])) {
       $directorioImagen = __DIR__ . "/../../imgs/users/";
       $rutaDestino = $directorioImagen . basename($_FILES['imagen']['name']);
@@ -145,8 +147,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       ":idusuario" => $idusuario
     ]);
 
-    // 7. Borrar la imagen ANTIGUA (si existía y es diferente de la default)
-    if ($rutaCompleta && $rutaCompleta !== $rutaImagen) {
+    // Borrar la imagen ANTIGUA (si existía y es diferente de la default)
+    if (!empty($rutaCompleta) && $rutaCompleta !== $rutaImagen) {
       $rutaFisicaAntigua = __DIR__ . "/../" . ltrim($rutaCompleta, './');
       if (file_exists($rutaFisicaAntigua) && strpos($rutaCompleta, 'default.png') === false) {
         unlink($rutaFisicaAntigua); // Borrar archivo antiguo
