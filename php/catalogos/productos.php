@@ -22,120 +22,278 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
 
 ?>
 
-<div class="containerr">
-  <!-- Abrir Modal crear productos -->
-  <button class="boton" onclick="abrirModalProducto('crear-modalProducto')">Nuevo</button>
+  <div class="containerr">
+    <!-- Abrir Modal crear productos -->
+    <button class="boton" onclick="abrirModalProducto('crear-modalProducto')">Nuevo</button>
 
-  <!-- Filtro cantidaD -->
-  <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
-  <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
-    <option value="8">8</option>
-    <option value="25">25</option>
-    <option value="50">50</option>
-    <option value="-1">Todos</option>
-  </select>
+    <!-- Filtro cantidaD -->
+    <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
+    <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
+      <option value="8">8</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+      <option value="-1">Todos</option>
+    </select>
 
-  <!-- Input buscar productos -->
-  <label class="buscarlabel" for="buscarboxproducto">Buscar:</label>
-  <input class="buscar--box" id="buscarboxproducto" type="search" placeholder="¿Qué estas buscando?" autocomplete="off">
-</div>
-
-<div class="container_dashboard_tablas" id="productos">
-  <h3>Lista de productos</h3>
-  <div id="scroll-container">
-    <table class="tbl" id="tabla-productos">
-      <thead>
-        <tr>
-          <th>Imagen</th>
-          <th>Código de barras</th>
-          <th>Nombre</th>
-          <th>Costo</th>
-          <th>Precio</th>
-          <th>Stock Mínimo</th>
-          <th>Stock</th>
-          <th>Estatus</th>
-          <th style="text-align: left;">Acciones</th>
-        </tr>
-      </thead>
-
-      <tbody id="productos-lista">
-        <?php foreach ($productos as $u): ?>
-          <?php
-          // Nos aseguramos de que sean números reales (floats o enteros)
-          $stock_actual = floatval($u['stock'] ?? 0);
-          $stock_minimo = floatval($u['stock_minimo'] ?? 0);
-
-          // REGLA ESTRICTA: 
-          // - El producto debe tener un stock mínimo configurado mayor a 0
-          // - Y sus existencias actuales deben ser MENORES a ese mínimo
-          $clase_alerta = ($stock_minimo > 0 && $stock_actual < $stock_minimo) ? 'bajo-stock' : '';
-          ?>
-          <tr class="producto <?php echo $clase_alerta; ?>" data-estatus="<?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>">
-
-            <td data-lable="Imagen"><?php if (!empty($u['imagen'])): ?>
-                <img src="<?= htmlspecialchars($u['imagen']) ?>" alt="Imagen de producto" width="40px" height="40px" onerror="this.src='../imgs/default.png'">
-              <?php else: ?>
-                Sin imagen
-              <?php endif; ?>
-            </td>
-            <td data-lable="Código de barras:"><?php echo htmlspecialchars($u['codebar_prod']); ?>
-            <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre_prod']); ?></td>
-            <td data-lable="Costo:"><?php echo htmlspecialchars($u['costo_prod']); ?></td>
-            <td data-lable="Precio:"><?php echo htmlspecialchars($u['precio']); ?></td>
-            <td data-lable="Stock Mínimo:"><?php echo htmlspecialchars($u['stock_minimo']); ?></td>
-            <td data-lable="Stock:"><?php echo ($u['stock'] !== null) ? htmlspecialchars($u['stock']) : '0'; ?></td>
-            <td data-lable="Estatus:">
-              <button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
-                <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
-              </button>
-            </td>
-
-            <td data-lable="Acciones" style=" gap: 10px; justify-content: center;">
-              <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="<?php echo $u['id_prod']; ?>"></button>
-
-              <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="<?php echo $u['id_prod']; ?>"></button>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+    <!-- Input buscar productos -->
+    <label class="buscarlabel" for="buscarboxproducto">Buscar:</label>
+    <input class="buscar--box" id="buscarboxproducto" type="search" placeholder="¿Qué estas buscando?" autocomplete="off">
   </div>
 
-  <!-- Modal para crear Producto ******************************* -->
-  <div id="crear-modalProducto" class="modal" style="display: none;">
+  <div class="container_dashboard_tablas" id="productos">
+    <h3>Lista de productos</h3>
+    <div id="scroll-container">
+      <table class="tbl" id="tabla-productos">
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Código de barras</th>
+            <th>Nombre</th>
+            <th>Costo</th>
+            <th>Precio</th>
+            <th>Stock Mínimo</th>
+            <th>Stock</th>
+            <th>Estatus</th>
+            <th style="text-align: left;">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody id="productos-lista">
+          <?php foreach ($productos as $u): ?>
+            <?php
+            // Nos aseguramos de que sean números reales (floats o enteros)
+            $stock_actual = floatval($u['stock'] ?? 0);
+            $stock_minimo = floatval($u['stock_minimo'] ?? 0);
+
+            // REGLA ESTRICTA: 
+            // - El producto debe tener un stock mínimo configurado mayor a 0
+            // - Y sus existencias actuales deben ser MENORES a ese mínimo
+            $clase_alerta = ($stock_minimo > 0 && $stock_actual < $stock_minimo) ? 'bajo-stock' : '';
+            ?>
+            <tr class="producto <?php echo $clase_alerta; ?>" data-estatus="<?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>">
+
+              <td data-lable="Imagen"><?php if (!empty($u['imagen'])): ?>
+                  <img src="<?= htmlspecialchars($u['imagen']) ?>" alt="Imagen de producto" width="40px" height="40px" onerror="this.src='../imgs/default.png'">
+                <?php else: ?>
+                  Sin imagen
+                <?php endif; ?>
+              </td>
+              <td data-lable="Código de barras:"><?php echo htmlspecialchars($u['codebar_prod']); ?>
+              <td data-lable="Nombre:"><?php echo htmlspecialchars($u['nombre_prod']); ?></td>
+              <td data-lable="Costo:"><?php echo htmlspecialchars($u['costo_prod']); ?></td>
+              <td data-lable="Precio:"><?php echo htmlspecialchars($u['precio']); ?></td>
+              <td data-lable="Stock Mínimo:"><?php echo htmlspecialchars($u['stock_minimo']); ?></td>
+              <td data-lable="Stock:"><?php echo ($u['stock'] !== null) ? htmlspecialchars($u['stock']) : '0'; ?></td>
+              <td data-lable="Estatus:">
+                <button class="btn <?php echo ($u['estatus'] == 0) ? 'btn-success' : 'btn-danger'; ?>">
+                  <?php echo ($u['estatus'] == 0) ? 'Activo' : 'Inactivo'; ?>
+                </button>
+              </td>
+
+              <td data-lable="Acciones" style=" gap: 10px; justify-content: center;">
+                <button title="Editar" class="editarProducto fa-solid fa-pen-to-square" data-id="<?php echo $u['id_prod']; ?>"></button>
+
+                <button title="Eliminar" class="eliminarProducto fa-solid fa-trash" data-id="<?php echo $u['id_prod']; ?>"></button>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal para crear Producto ******************************* -->
+    <div id="crear-modalProducto" class="modal" style="display: none;">
+      <div class="modal-contentProductos">
+        <span title="Cerrar" class="close" onclick="cerrarModalProducto('crear-modalProducto')">&times;</span>
+        <h2 class="tittle">Crear Producto</h2>
+        <form id="form-crearProducto" onsubmit="validarFormularioProducto(event, 'crear');" enctype="multipart/form-data" novalidate>
+
+          <div class="form-group">
+            <label for="crear-codebar">Código de barras:</label>
+            <input type="text" id="crear-codebar" name="codebar" autocomplete="off"
+              pattern="[a-zA-Z0-9]+"
+              title="Solo se permiten letras y números."
+              oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" maxlength="25" required>
+          </div>
+
+          <div class="form-group">
+            <label for="crear-producto">Nombre:</label>
+            <input type="text" id="crear-producto" name="producto" autocomplete="off"
+              pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚ\/. ]+"
+              title="Solo se permiten letras, números, espacios, tildes y la barra /"
+              oninput="this.value = this.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚ\/ ]/g, '')" required>
+          </div>
+
+          <div class="form-group">
+            <label for="crear-descprod">Descripción:</label>
+            <input type="text" id="crear-descprod" name="descprod" autocomplete="off"
+              pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚ\/. ]+"
+              title="Solo se permiten letras, números, espacios, tildes y la barra /"
+              oninput="this.value = this.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚ\/ ]/g, '')" required>
+          </div>
+
+          <!-- Selección de la Categoría -->
+          <div class="form-group" id="campo-categoria">
+            <label for="crear-categoria">Categoría:</label>
+            <select id="crear-categoria" name="categoria" required>
+              <option value="">[Selecciona una categoría]</option>
+              <?php foreach ($categorias as $categoria): ?>
+                <option value="<?php echo htmlspecialchars($categoria['id_categoria']); ?>">
+                  <?php echo htmlspecialchars($categoria['nombre_cat']); ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <!-- Selección de la Marca -->
+          <div class="form-group" id="campo-marca">
+            <label for="crear-marca">Marca:</label>
+            <select id="crear-marca" name="marca" required>
+              <option value="">[Selecciona una marca]</option>
+              <?php foreach ($marcas as $marca): ?>
+                <option value="<?php echo htmlspecialchars($marca['id_marca']); ?>">
+                  <?php echo htmlspecialchars($marca['nom_marca']); ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <!-- Selección de Proveedor -->
+          <div class="form-group">
+            <label for="crear-proveedor">Proveedor:</label>
+            <select id="crear-proveedor" name="proveedor" required>
+              <option value="">[Selecciona un proveedor]</option>
+              <?php foreach ($proveedores as $proveedor): ?>
+                <option value="<?php echo htmlspecialchars($proveedor['id_prov']); ?>" <?php echo $proveedor['id_prov'] == 0 ? 'selected' : ''; ?>>
+                  <?php echo htmlspecialchars($proveedor['contacto_prov']); ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <!-- Selección de U. Medida -->
+          <div class="form-group">
+            <label for="crear-umedida">Unidad de Medida:</label>
+            <select id="crear-umedida" name="umedida" required>
+              <option value="">[Selecciona una medida]</option>
+              <?php foreach ($umedidas as $umedid): ?>
+                <option value="<?php echo htmlspecialchars($umedid['id_unidad']); ?>" <?php echo $umedid['id_unidad'] == 0 ? 'selected' : ''; ?>>
+                  <?php echo htmlspecialchars($umedid['nom_unidad']); ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <!-- Selección de Impuesto -->
+          <div class="form-group">
+            <label for="crear-impuesto">Impuesto:</label>
+            <select id="crear-impuesto" name="idimpuesto" required>
+              <option value="">[Selecciona un impuesto]</option>
+              <?php foreach ($impuestos as $impuesto): ?>
+                <?php
+                $valorImpuestoDecimal = $impuesto['tasa'] / 100;
+                ?>
+                <option
+                  value="<?php echo htmlspecialchars($impuesto['idimpuesto']); ?>"
+                  data-tasa="<?php echo htmlspecialchars($valorImpuestoDecimal); ?>">
+                  <?php echo htmlspecialchars($impuesto['nomimpuesto']); ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <label style="margin-top: 7px;">Precios:</label>
+          <div class="form-containernum" style="gap: 15px; margin-left: 10px;">
+            <div class="form-group laquinta">
+              <label for="crear-costo_compra">Costo:</label>
+              <input type="number" id="crear-costo_compra" name="costo_compra" autocomplete="off"
+                pattern="^\d+(\.\d{1,2})?$"
+                title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" required>
+            </div>
+
+            <div class="form-group laquinta">
+              <label for="crear-ganancia">Ganancia en %:</label>
+              <input type="text" id="crear-ganancia" name="ganancia" autocomplete="off"
+                pattern="^\d+(\.\d{1,2})?$"
+                title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" size="10" min="0" maxlength="10" required>
+            </div>
+
+            <div class="form-group laquinta">
+              <label for="crear-precio1">Precio:</label>
+              <input type="number" step="0.01" id="crear-precio1" name="precio1" autocomplete="off"
+                pattern="^\d+(\.\d{1,2})?$"
+                title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" readonly required>
+            </div>
+
+
+            <div class="form-group laquinta">
+              <label for="crear-stock_minimo">Stock mínimo:</label>
+              <input type="text" id="crear-stock_minimo" name="stock_minimo" autocomplete="off"
+                pattern="^[0-9]"
+                title="Solo se permiten números."
+                oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size="10" min="0" value="0" required>
+            </div>
+
+            <div class="form-group">
+              <span>Imagen:</span>
+              <input type="file" id="imagen" name="imagen" accept="image/*">
+            </div>
+
+            <!-- Selección de Estatus -->
+            <div class="form-group">
+              <label for="estatus">Estatus:</label>
+              <select id="estatus" name="estatus">
+                <?php foreach ($options as $key => $text) { ?>
+                  <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
+                <?php } ?>
+              </select>
+            </div>
+
+            <button type="submit">Guardar</button>
+            <span class="cancelarModal" onclick="cerrarModalProducto('crear-modalProducto')" type=" submit">Cancelar</span>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para editar Producto ******************************** -->
+  <div id="editar-modalProducto" class="modal" style="display: none;">
     <div class="modal-contentProductos">
-      <span title="Cerrar" class="close" onclick="cerrarModalProducto('crear-modalProducto')">&times;</span>
-      <h2 class="tittle">Crear Producto</h2>
-      <form id="form-crearProducto" onsubmit="validarFormularioProducto(event, 'crear');" enctype="multipart/form-data" novalidate>
+      <span title="Cerrar" class="close" onclick="cerrarModalProducto('editar-modalProducto')">&times;</span>
+      <h2 class="tittle">Editar Producto</h2>
+
+      <form id="form-editarProducto" enctype="multipart/form-data" novalidate>
+        <input type="hidden" id="editar-idproducto" name="editar-idproducto" value="" />
 
         <div class="form-group">
-          <label for="crear-codebar">Código de barras:</label>
-          <input type="text" id="crear-codebar" name="codebar" autocomplete="off"
+          <label for="editar-codebar">Código de barras:</label>
+          <input type="text" id="editar-codebar" name="codebar" autocomplete="off"
             pattern="[a-zA-Z0-9]+"
             title="Solo se permiten letras y números."
             oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" maxlength="25" required>
         </div>
 
         <div class="form-group">
-          <label for="crear-producto">Nombre:</label>
-          <input type="text" id="crear-producto" name="producto" autocomplete="off"
-            pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚ\/. ]+"
-            title="Solo se permiten letras, números, espacios, tildes y la barra /"
-            oninput="this.value = this.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚ\/ ]/g, '')" required>
+          <label for="editar-producto">Nombre:</label>
+          <input type="text" id="editar-producto" name="producto" autocomplete="off"
+            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+            title="Solo se permiten letras, números y espacios."
+            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
         </div>
 
+
         <div class="form-group">
-          <label for="crear-descprod">Descripción:</label>
-          <input type="text" id="crear-descprod" name="descprod" autocomplete="off"
-            pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚ\/. ]+"
-            title="Solo se permiten letras, números, espacios, tildes y la barra /"
-            oninput="this.value = this.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚ\/ ]/g, '')" required>
+          <label for="editar-descprod">Descripción:</label>
+          <input type="text" id="editar-descprod" name="descprod" autocomplete="off"
+            pattern="[a-zA-Z0-9\s]+"
+            title="Solo se permiten letras, espacios y números."
+            oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s]/g, '')" required>
         </div>
 
         <!-- Selección de la Categoría -->
         <div class="form-group" id="campo-categoria">
-          <label for="crear-categoria">Categoría:</label>
-          <select id="crear-categoria" name="categoria" required>
+          <label for="editar-categoria">Categoría:</label>
+          <select id="editar-categoria" name="categoria">
             <option value="">[Selecciona una categoría]</option>
             <?php foreach ($categorias as $categoria): ?>
               <option value="<?php echo htmlspecialchars($categoria['id_categoria']); ?>">
@@ -147,8 +305,8 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
 
         <!-- Selección de la Marca -->
         <div class="form-group" id="campo-marca">
-          <label for="crear-marca">Marca:</label>
-          <select id="crear-marca" name="marca" required>
+          <label for="editar-marca">Marca:</label>
+          <select id="editar-marca" name="marca">
             <option value="">[Selecciona una marca]</option>
             <?php foreach ($marcas as $marca): ?>
               <option value="<?php echo htmlspecialchars($marca['id_marca']); ?>">
@@ -160,11 +318,11 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
 
         <!-- Selección de Proveedor -->
         <div class="form-group">
-          <label for="crear-proveedor">Proveedor:</label>
-          <select id="crear-proveedor" name="proveedor" required>
+          <label for="editar-proveedor">Proveedor:</label>
+          <select id="editar-proveedor" name="proveedor">
             <option value="">[Selecciona un proveedor]</option>
             <?php foreach ($proveedores as $proveedor): ?>
-              <option value="<?php echo htmlspecialchars($proveedor['id_prov']); ?>" <?php echo $proveedor['id_prov'] == 0 ? 'selected' : ''; ?>>
+              <option value="<?php echo htmlspecialchars($proveedor['id_prov']); ?>">
                 <?php echo htmlspecialchars($proveedor['contacto_prov']); ?>
               </option>
             <?php endforeach; ?>
@@ -173,21 +331,21 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
 
         <!-- Selección de U. Medida -->
         <div class="form-group">
-          <label for="crear-umedida">Unidad de Medida:</label>
-          <select id="crear-umedida" name="umedida" required>
-            <option value="">[Selecciona una medida]</option>
-            <?php foreach ($umedidas as $umedid): ?>
-              <option value="<?php echo htmlspecialchars($umedid['id_unidad']); ?>" <?php echo $umedid['id_unidad'] == 0 ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($umedid['nom_unidad']); ?>
+          <label for="editar-umedida">Unidad de Medida:</label>
+          <select id="editar-umedida" name="umedida">
+            <option value="">[Selecciona una umedida]</option>
+            <?php foreach ($umedidas as $umedida): ?>
+              <option value="<?php echo htmlspecialchars($umedida['id_unidad']); ?>">
+                <?php echo htmlspecialchars($umedida['nom_unidad']); ?>
               </option>
             <?php endforeach; ?>
           </select>
         </div>
 
         <!-- Selección de Impuesto -->
-        <div class="form-group">
-          <label for="crear-impuesto">Impuesto:</label>
-          <select id="crear-impuesto" name="idimpuesto" required>
+        <div class="form-group" style="margin-top: 7px;">
+          <label for="editar-impuesto">Impuesto:</label>
+          <select id="editar-impuesto" name="idimpuesto" required>
             <option value="">[Selecciona un impuesto]</option>
             <?php foreach ($impuestos as $impuesto): ?>
               <?php
@@ -195,226 +353,68 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
               ?>
               <option
                 value="<?php echo htmlspecialchars($impuesto['idimpuesto']); ?>"
-                data-tasa="<?php echo htmlspecialchars($valorImpuestoDecimal); ?>">
+                data-tasa="<?php echo htmlspecialchars($valorImpuestoDecimal); ?>"
+                <?php echo $impuesto['idimpuesto'] == 2 ? 'selected' : ''; ?>>
                 <?php echo htmlspecialchars($impuesto['nomimpuesto']); ?>
               </option>
             <?php endforeach; ?>
           </select>
         </div>
 
-        <label style="margin-top: 7px;">Precios:</label>
+        <label>Precios:</label>
         <div class="form-containernum" style="gap: 15px; margin-left: 10px;">
           <div class="form-group laquinta">
-            <label for="crear-costo_compra">Costo:</label>
-            <input type="number" id="crear-costo_compra" name="costo_compra" autocomplete="off"
+            <label for="editar-costo_compra">Costo:</label>
+            <input type="number" id="editar-costo_compra" name="costo_compra" autocomplete="off"
               pattern="^\d+(\.\d{1,2})?$"
-              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" required>
+              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')" step="0.01" size="10" min="0" maxlength="10" required>
           </div>
 
           <div class="form-group laquinta">
-            <label for="crear-ganancia">Ganancia en %:</label>
-            <input type="text" id="crear-ganancia" name="ganancia" autocomplete="off"
+            <label for="editar-ganancia">Ganancia en %:</label>
+            <input type="text" id="editar-ganancia" name="ganancia" autocomplete="off"
               pattern="^\d+(\.\d{1,2})?$"
-              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" size="10" min="0" maxlength="10" required>
+              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')" size="10" min="0" maxlength="10" required>
           </div>
 
           <div class="form-group laquinta">
-            <label for="crear-precio1">Precio:</label>
-            <input type="number" step="0.01" id="crear-precio1" name="precio1" autocomplete="off"
-              pattern="^\d+(\.\d{1,2})?$"
-              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)" step="0.01" size="10" min="0" maxlength="10" readonly required>
+            <label for="editar-precio1">Precio:</label>
+            <input type="number" step="0.01" id="editar-precio1" name="precio1" autocomplete="off"
+              pattern="^\d+(\.\d{1,3})?$"
+              title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')" min="0" maxlength="10" readonly required>
           </div>
+        </div>
+
+        <div class="form-group laquinta">
+          <label for="editar-stock_minimo">Stock mínimo:</label>
+          <input type="text" id="editar-stock_minimo" name="stock_minimo" autocomplete="off"
+            pattern="^[0-9]"
+            title="Solo se permiten números."
+            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size="10" min="0" required>
+        </div>
 
 
-          <div class="form-group laquinta">
-            <label for="crear-stock_minimo">Stock mínimo:</label>
-            <input type="text" id="crear-stock_minimo" name="stock_minimo" autocomplete="off"
-              pattern="^[0-9]"
-              title="Solo se permiten números."
-              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size="10" min="0" value="0" required>
-          </div>
+        <div class="form-group">
+          <span>Imagen:</span>
+          <input type="file" id="imagen" name="imagen" accept="image/*">
+        </div>
 
-          <div class="form-group">
-            <span>Imagen:</span>
-            <input type="file" id="imagen" name="imagen" accept="image/*">
-          </div>
+        <!-- Selección de Estatus -->
+        <div class="form-group">
+          <label for="editar-estatus">Estatus:</label>
+          <select id="editar-estatus" name="estatus">
+            <?php foreach ($options as $key => $text) { ?>
+              <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
+            <?php } ?>
+          </select>
+        </div>
 
-          <!-- Selección de Estatus -->
-          <div class="form-group">
-            <label for="estatus">Estatus:</label>
-            <select id="estatus" name="estatus">
-              <?php foreach ($options as $key => $text) { ?>
-                <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
-              <?php } ?>
-            </select>
-          </div>
-
-          <button type="submit">Guardar</button>
-          <span class="cancelarModal" onclick="cerrarModalProducto('crear-modalProducto')" type=" submit">Cancelar</span>
+        <button type="submit">Actualizar</button>
+        <span class="cancelarModal" onclick="cerrarModalProducto('editar-modalProducto')" type=" submit">Cancelar</span>
       </form>
     </div>
   </div>
-</div>
-
-<!-- Modal para editar Producto ******************************** -->
-<div id="editar-modalProducto" class="modal" style="display: none;">
-  <div class="modal-contentProductos">
-    <span title="Cerrar" class="close" onclick="cerrarModalProducto('editar-modalProducto')">&times;</span>
-    <h2 class="tittle">Editar Producto</h2>
-
-    <form id="form-editarProducto" enctype="multipart/form-data" novalidate>
-      <input type="hidden" id="editar-idproducto" name="editar-idproducto" value="" />
-
-      <div class="form-group">
-        <label for="editar-codebar">Código de barras:</label>
-        <input type="text" id="editar-codebar" name="codebar" autocomplete="off"
-          pattern="[a-zA-Z0-9]+"
-          title="Solo se permiten letras y números."
-          oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" maxlength="25" required>
-      </div>
-
-      <div class="form-group">
-        <label for="editar-producto">Nombre:</label>
-        <input type="text" id="editar-producto" name="producto" autocomplete="off"
-          pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-          title="Solo se permiten letras, números y espacios."
-          oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
-      </div>
-
-
-      <div class="form-group">
-        <label for="editar-descprod">Descripción:</label>
-        <input type="text" id="editar-descprod" name="descprod" autocomplete="off"
-          pattern="[a-zA-Z0-9\s]+"
-          title="Solo se permiten letras, espacios y números."
-          oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s]/g, '')" required>
-      </div>
-
-      <!-- Selección de la Categoría -->
-      <div class="form-group" id="campo-categoria">
-        <label for="editar-categoria">Categoría:</label>
-        <select id="editar-categoria" name="categoria">
-          <option value="">[Selecciona una categoría]</option>
-          <?php foreach ($categorias as $categoria): ?>
-            <option value="<?php echo htmlspecialchars($categoria['id_categoria']); ?>">
-              <?php echo htmlspecialchars($categoria['nombre_cat']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Selección de la Marca -->
-      <div class="form-group" id="campo-marca">
-        <label for="editar-marca">Marca:</label>
-        <select id="editar-marca" name="marca">
-          <option value="">[Selecciona una marca]</option>
-          <?php foreach ($marcas as $marca): ?>
-            <option value="<?php echo htmlspecialchars($marca['id_marca']); ?>">
-              <?php echo htmlspecialchars($marca['nom_marca']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Selección de Proveedor -->
-      <div class="form-group">
-        <label for="editar-proveedor">Proveedor:</label>
-        <select id="editar-proveedor" name="proveedor">
-          <option value="">[Selecciona un proveedor]</option>
-          <?php foreach ($proveedores as $proveedor): ?>
-            <option value="<?php echo htmlspecialchars($proveedor['id_prov']); ?>">
-              <?php echo htmlspecialchars($proveedor['contacto_prov']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Selección de U. Medida -->
-      <div class="form-group">
-        <label for="editar-umedida">Unidad de Medida:</label>
-        <select id="editar-umedida" name="umedida">
-          <option value="">[Selecciona una umedida]</option>
-          <?php foreach ($umedidas as $umedida): ?>
-            <option value="<?php echo htmlspecialchars($umedida['id_unidad']); ?>">
-              <?php echo htmlspecialchars($umedida['nom_unidad']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Selección de Impuesto -->
-      <div class="form-group" style="margin-top: 7px;">
-        <label for="editar-impuesto">Impuesto:</label>
-        <select id="editar-impuesto" name="idimpuesto" required>
-          <option value="">[Selecciona un impuesto]</option>
-          <?php foreach ($impuestos as $impuesto): ?>
-            <?php
-            $valorImpuestoDecimal = $impuesto['tasa'] / 100;
-            ?>
-            <option
-              value="<?php echo htmlspecialchars($impuesto['idimpuesto']); ?>"
-              data-tasa="<?php echo htmlspecialchars($valorImpuestoDecimal); ?>"
-              <?php echo $impuesto['idimpuesto'] == 2 ? 'selected' : ''; ?>>
-              <?php echo htmlspecialchars($impuesto['nomimpuesto']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <label>Precios:</label>
-      <div class="form-containernum" style="gap: 15px; margin-left: 10px;">
-        <div class="form-group laquinta">
-          <label for="editar-costo_compra">Costo:</label>
-          <input type="number" id="editar-costo_compra" name="costo_compra" autocomplete="off"
-            pattern="^\d+(\.\d{1,2})?$"
-            title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')" step="0.01" size="10" min="0" maxlength="10" required>
-        </div>
-
-        <div class="form-group laquinta">
-          <label for="editar-ganancia">Ganancia en %:</label>
-          <input type="text" id="editar-ganancia" name="ganancia" autocomplete="off"
-            pattern="^\d+(\.\d{1,2})?$"
-            title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')" size="10" min="0" maxlength="10" required>
-        </div>
-
-        <div class="form-group laquinta">
-          <label for="editar-precio1">Precio:</label>
-          <input type="number" step="0.01" id="editar-precio1" name="precio1" autocomplete="off"
-            pattern="^\d+(\.\d{1,3})?$"
-            title="Ingrese un número válido con hasta 2 decimales (ej. 100.50)"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')" min="0" maxlength="10" readonly required>
-        </div>
-      </div>
-
-      <div class="form-group laquinta">
-        <label for="editar-stock_minimo">Stock mínimo:</label>
-        <input type="text" id="editar-stock_minimo" name="stock_minimo" autocomplete="off"
-          pattern="^[0-9]"
-          title="Solo se permiten números."
-          oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9]/g, '')" size="10" min="0" required>
-      </div>
-
-
-      <div class="form-group">
-        <span>Imagen:</span>
-        <input type="file" id="imagen" name="imagen" accept="image/*">
-      </div>
-
-      <!-- Selección de Estatus -->
-      <div class="form-group">
-        <label for="editar-estatus">Estatus:</label>
-        <select id="editar-estatus" name="estatus">
-          <?php foreach ($options as $key => $text) { ?>
-            <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
-          <?php } ?>
-        </select>
-      </div>
-
-      <button type="submit">Actualizar</button>
-      <span class="cancelarModal" onclick="cerrarModalProducto('editar-modalProducto')" type=" submit">Cancelar</span>
-    </form>
   </div>
-</div>
-</div>

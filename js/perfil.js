@@ -3,10 +3,17 @@ document
   .getElementById("perfil-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("perfil.php")
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);

@@ -3,6 +3,9 @@ document
   .getElementById("clientes-link")
   .addEventListener("click", function (event) {
     event.preventDefault();
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
     fetch("catalogos/clientes.php")
       .then((response) => response.text())
       .then((html) => {
@@ -13,6 +16,11 @@ document
           "#buscarboxcliente",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);

@@ -118,6 +118,9 @@ function inicializarTablaGenerica(idTabla, idBuscador, idSelectorCantidad) {
 document.addEventListener("DOMContentLoaded", function () {
   let contentArea = document.getElementById("content-area");
 
+  // 1. ENCENDEMOS EL PRELOADER
+  mostrarPreloader();
+
   if (contentArea) {
     fetch("../php/dashboard.php")
       .then((response) => response.text())
@@ -126,6 +129,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Llamar función de los cards movibles
         iniciarDashboardSortable();
+
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => console.error("Error al cargar el dashboard:", error));
   }
@@ -193,6 +202,8 @@ if (document.getElementById("tiendas-link")) {
     .getElementById("tiendas-link")
     .addEventListener("click", function (event) {
       event.preventDefault();
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
       fetch("tiendas.php")
         .then((response) => response.text())
         .then((html) => {
@@ -203,6 +214,11 @@ if (document.getElementById("tiendas-link")) {
             "#buscarbox",
             "#cantidad-registros",
           );
+          // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+          // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+          setTimeout(() => {
+            ocultarPreloader();
+          }, 150);
         })
         .catch((error) =>
           console.error("Error al cargar el contenido:", error),
@@ -904,6 +920,9 @@ document
   .getElementById("roles-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
+
     fetch("roles.php")
       .then((response) => response.text())
       .then((html) => {
@@ -914,6 +933,11 @@ document
           "#buscarboxrol",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -1315,16 +1339,25 @@ if (document.getElementById("usuarios-link")) {
     .getElementById("usuarios-link")
     .addEventListener("click", function (event) {
       event.preventDefault();
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
       fetch("usuarios.php")
         .then((response) => response.text())
         .then((html) => {
           document.getElementById("content-area").innerHTML = html;
+
           // DATATABLES TOMA EL CONTROL DEL BUSCADOR Y EL PAGINADOR
           inicializarTablaGenerica(
             "#tabla-usuarios",
             "#buscarboxusuario",
             "#estatusFiltroU",
           );
+          // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+          // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+          setTimeout(() => {
+            ocultarPreloader();
+          }, 150);
         })
         .catch((error) =>
           console.error("Error al cargar el contenido:", error),
@@ -1499,7 +1532,7 @@ function procesarFormularioUser(formulario, tipo) {
       if (data.success) {
         cerrarModalUser(`${tipo}-modalUser`);
         if (tipo === "crear") formulario.reset();
-        
+
         // Actualizar la foto en vivo en el menú superior
         if (tipo === "editar" && data.nueva_imagen) {
           // Cambia "img-perfil-menu" por el ID real de la etiqueta <img> que tienes en tu menú superior
@@ -1621,6 +1654,8 @@ document
   .getElementById("productos-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("catalogos/productos.php")
       .then((response) => response.text())
       .then((html) => {
@@ -1630,6 +1665,11 @@ document
           "#buscarboxproducto",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -2440,6 +2480,8 @@ document
   .getElementById("categorias-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("catalogos/categorias.php")
       .then((response) => response.text())
       .then((html) => {
@@ -2450,6 +2492,11 @@ document
           "#buscarboxcat",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -2867,6 +2914,8 @@ document
   .getElementById("marcas-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("catalogos/marcas.php")
       .then((response) => response.text())
       .then((html) => {
@@ -2876,6 +2925,11 @@ document
           "#buscarboxmarca",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -3292,6 +3346,8 @@ document
   .getElementById("tiposervicios-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("catalogos/tiposervicios.php")
       .then((response) => response.text())
       .then((html) => {
@@ -3302,6 +3358,11 @@ document
           "#buscarboxTiposervicios",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -3730,6 +3791,9 @@ document
   .getElementById("estatusservicios-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
     fetch("catalogos/estatusservicios.php")
       .then((response) => response.text())
       .then((html) => {
@@ -3740,6 +3804,11 @@ document
           "#buscarboxEstadoservicios",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -4165,6 +4234,9 @@ document
   .getElementById("mpagos-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
     fetch("catalogos/mpagos.php")
       .then((response) => response.text())
       .then((html) => {
@@ -4175,6 +4247,11 @@ document
           "#buscarboxmpago",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -4592,6 +4669,9 @@ document
   .getElementById("impuestos-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
     fetch("catalogos/impuestos.php")
       .then((response) => response.text())
       .then((html) => {
@@ -4601,6 +4681,11 @@ document
           "#buscarboximpuesto",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -5034,6 +5119,8 @@ document
   .getElementById("proveedores-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("catalogos/proveedores.php")
       .then((response) => response.text())
       .then((html) => {
@@ -5044,6 +5131,11 @@ document
           "#buscarboxproveedor",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -5547,6 +5639,8 @@ document
   .getElementById("ordenes-link")
   .addEventListener("click", function (event) {
     event.preventDefault();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/ordenes.php")
       .then((response) => response.text())
       .then((html) => {
@@ -5613,6 +5707,11 @@ document
           if (typeof revisarConversionCita === "function") {
             revisarConversionCita();
           }
+        }, 150);
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
         }, 150);
       })
       .catch((error) => console.error("Error al cargar contenido:", error));
@@ -5931,14 +6030,19 @@ window.abrirModalClienteExpress = function () {
         </div>
     `,
     showCancelButton: true,
-    confirmButtonText: '<i class="fa-solid fa-floppy-disk"></i> Guardar y Asignar',
+    confirmButtonText:
+      '<i class="fa-solid fa-floppy-disk"></i> Guardar y Asignar',
     confirmButtonColor: "#28a745",
     cancelButtonText: "Cancelar",
     preConfirm: () => {
       // Obtenemos los valores
       let nombre = document.getElementById("swal-cli-nombre").value.trim();
-      let papellido = document.getElementById("swal-cli-papellido").value.trim();
-      let sapellido = document.getElementById("swal-cli-sapellido").value.trim();
+      let papellido = document
+        .getElementById("swal-cli-papellido")
+        .value.trim();
+      let sapellido = document
+        .getElementById("swal-cli-sapellido")
+        .value.trim();
       let telefono = document.getElementById("swal-cli-telefono").value.trim();
       let correo = document.getElementById("swal-cli-correo").value.trim();
 
@@ -5947,7 +6051,9 @@ window.abrirModalClienteExpress = function () {
 
       // VALIDACIONES ESTRICTAS DE NOMBRES
       if (nombre.length < 3) {
-        Swal.showValidationMessage("El nombre debe tener al menos 3 caracteres.");
+        Swal.showValidationMessage(
+          "El nombre debe tener al menos 3 caracteres.",
+        );
         return false;
       }
       if (!regexLetras.test(nombre)) {
@@ -5956,34 +6062,46 @@ window.abrirModalClienteExpress = function () {
       }
 
       if (papellido.length < 3) {
-        Swal.showValidationMessage("El primer apellido debe tener al menos 3 caracteres.");
+        Swal.showValidationMessage(
+          "El primer apellido debe tener al menos 3 caracteres.",
+        );
         return false;
       }
       if (!regexLetras.test(papellido)) {
-        Swal.showValidationMessage("El primer apellido solo debe contener letras.");
+        Swal.showValidationMessage(
+          "El primer apellido solo debe contener letras.",
+        );
         return false;
       }
 
       if (sapellido !== "") {
         if (sapellido.length < 3) {
-          Swal.showValidationMessage("Si escribes segundo apellido, debe ser de 3 caracteres mínimo.");
+          Swal.showValidationMessage(
+            "Si escribes segundo apellido, debe ser de 3 caracteres mínimo.",
+          );
           return false;
         }
         if (!regexLetras.test(sapellido)) {
-          Swal.showValidationMessage("El segundo apellido solo debe contener letras.");
+          Swal.showValidationMessage(
+            "El segundo apellido solo debe contener letras.",
+          );
           return false;
         }
       }
 
       // Teléfono
       if (telefono.length !== 10) {
-        Swal.showValidationMessage("El teléfono debe tener exactamente 10 números.");
+        Swal.showValidationMessage(
+          "El teléfono debe tener exactamente 10 números.",
+        );
         return false;
       }
 
       // Correo
       if (correo !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-        Swal.showValidationMessage("Debes ingresar un formato de correo electrónico válido.");
+        Swal.showValidationMessage(
+          "Debes ingresar un formato de correo electrónico válido.",
+        );
         return false;
       }
 
@@ -6015,9 +6133,13 @@ window.abrirModalClienteExpress = function () {
           if (data.success) {
             // ÓRDENES DE SERVICIO
             const inputBusqueda = document.getElementById("busqueda-cliente");
-            const inputHidden = document.getElementById("id_cliente_seleccionado");
+            const inputHidden = document.getElementById(
+              "id_cliente_seleccionado",
+            );
             const btnLimpiar = document.getElementById("limpiar-cliente");
-            const listaResultados = document.getElementById("lista-resultados-clientes");
+            const listaResultados = document.getElementById(
+              "lista-resultados-clientes",
+            );
 
             if (inputBusqueda && inputHidden) {
               inputBusqueda.value = `${data.nombre_completo} (${data.telefono})`;
@@ -6029,17 +6151,23 @@ window.abrirModalClienteExpress = function () {
 
             // COTIZACIONES
             const inputHiddenCot = document.getElementById("cot-id-cliente");
-            const inputNombreCot = document.getElementById("cot-nombre-cliente");
-            const btnQuitarCot = document.getElementById("btn-quitar-cliente-cot");
+            const inputNombreCot =
+              document.getElementById("cot-nombre-cliente");
+            const btnQuitarCot = document.getElementById(
+              "btn-quitar-cliente-cot",
+            );
 
             //  PUNTO DE VENTA (POS)
             const inputHiddenPOS = document.getElementById("pos-id-cliente");
-            const inputNombrePOS = document.getElementById("pos-nombre-cliente");
-            const btnQuitarPOS = document.getElementById("btn-quitar-cliente-pos");
+            const inputNombrePOS =
+              document.getElementById("pos-nombre-cliente");
+            const btnQuitarPOS = document.getElementById(
+              "btn-quitar-cliente-pos",
+            );
 
             if (inputHiddenPOS && inputNombrePOS) {
               inputHiddenPOS.value = data.id;
-              inputNombrePOS.value = data.nombre_completo.split(" ")[0]; 
+              inputNombrePOS.value = data.nombre_completo.split(" ")[0];
               if (btnQuitarPOS) btnQuitarPOS.style.display = "inline-block";
             }
 
@@ -6052,7 +6180,11 @@ window.abrirModalClienteExpress = function () {
               timer: 3000,
             });
           } else {
-            Swal.fire("Error", data.message || "No se pudo guardar el cliente.", "error");
+            Swal.fire(
+              "Error",
+              data.message || "No se pudo guardar el cliente.",
+              "error",
+            );
           }
         })
         .catch((err) => {
@@ -6745,11 +6877,18 @@ document
   .getElementById("ventas-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("catalogos/ventas.php")
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
         inicializarPOS();
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -7436,11 +7575,18 @@ document
   .getElementById("corte-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("catalogos/corte_caja.php")
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
         inicializarCorteCaja();
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -7603,6 +7749,8 @@ document
   .getElementById("historialventas-link")
   .addEventListener("click", function (event) {
     event.preventDefault();
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("../php/operaciones/historial_ventas.php")
       .then((response) => response.text())
       .then((html) => {
@@ -7621,6 +7769,11 @@ document
           });
 
         cargarHistorial();
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => console.error("Error al cargar el contenido:", error));
   });
@@ -8171,6 +8324,8 @@ document
   .getElementById("cotizaciones-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
     fetch("catalogos/cotizaciones.php")
       .then((response) => response.text())
       .then((html) => {
@@ -8180,6 +8335,11 @@ document
           "#buscarboxcot",
           "#cantidad-registros",
         );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido de cotizaciones:", error);
@@ -8940,6 +9100,9 @@ let botonCitasMenu = document.getElementById("citas-link");
 if (botonCitasMenu) {
   botonCitasMenu.addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
     fetch("catalogos/citas.php")
       .then((response) => response.text())
       .then((html) => {
@@ -8950,6 +9113,11 @@ if (botonCitasMenu) {
             inicializarCalendarioSWAOS();
           }
         }, 100);
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -9508,10 +9676,18 @@ document
   .getElementById("reportes-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
     fetch("../php/operaciones/reportes.php")
       .then((response) => response.text())
       .then((html) => {
         document.getElementById("content-area").innerHTML = html;
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
       })
       .catch((error) => {
         console.error("Error al cargar el contenido:", error);
@@ -9582,7 +9758,6 @@ function abrirPopupIA() {
       // Recargamos la tabla automáticamente
       if (typeof cargarHistorial === "function") {
         cargarHistorial();
-
       }
 
       // Alerta de éxito pequeña (Toast)

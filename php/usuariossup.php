@@ -18,11 +18,12 @@ $usuarios = obtenerUsuariosSup($dbh);
 ?>
 
 <div class="containerr">
+  
   <button class="boton" onclick="abrirModalUserSup('crear-modalUserSup')">Nuevo</button>
-
+  
   <!-- Filtro de estatus -->
   <label class="buscarlabel" for="cantidad-registros" style="margin-left: auto;">Mostrar:</label>
-
+  
   <select class="buscar--box" id="cantidad-registros" style="width: auto; margin-right: 15px; padding-right: 10px;">
     <option value="8">8</option>
     <option value="25">25</option>
@@ -273,9 +274,9 @@ $usuarios = obtenerUsuariosSup($dbh);
               <?php } ?>
             </select>
           </div>
-
           <button type="submit">Actualizar</button>
           <span class="cancelarModal" onclick="cerrarModalUserSup('editar-modalUserSup')" type=" submit">Cancelar</span>
         </form>
       </div>
+
     </div>

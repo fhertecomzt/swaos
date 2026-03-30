@@ -4,19 +4,30 @@ if (document.getElementById("usuariossup-link")) {
     .getElementById("usuariossup-link")
     .addEventListener("click", function (event) {
       event.preventDefault();
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
       fetch("usuariossup.php")
         .then((response) => response.text())
         .then((html) => {
           document.getElementById("content-area").innerHTML = html;
+    
+          // DATATABLES TOMA EL CONTROL DEL BUSCADOR Y EL PAGINADOR
           inicializarTablaGenerica(
             "#tabla-usuariosSup",
             "#buscarboxusuarioSup",
             "#estatusFiltroUSup",
-          );
+          );            
+          // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+          // Le damos 1500ms de gracia para que el navegador dibuje bien la tabla
+          setTimeout(() => {
+            ocultarPreloader();
+          }, 150);
         })
-        .catch((error) =>
-          console.error("Error al cargar el contenido:", error),
-        );
+        .catch((error) => {
+          console.error("Error al cargar:", error);
+          ocultarPreloader(); // Lo apagamos también si hay error para no trabar la pantalla
+        });
     });
 }
 
