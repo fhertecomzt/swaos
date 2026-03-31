@@ -89,10 +89,10 @@ function inicializarTablaGenerica(idTabla, idBuscador, idSelectorCantidad) {
     // Inicializamos la tabla
     let tabla = $(idTabla).DataTable({
       language: {
-        url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
       },
       pageLength: 8,
-      order: [[0, "desc"]], // Ordena por la primera columna de mayor a menor
+      order: [[0, "asc"]], // Ordena por la primera columna de mayor a menor
       dom: "rtip", // Oculta los controles feos por defecto
       scrollY: "60vh", // Encabezados fijos nativos
       scrollCollapse: true,
@@ -5634,6 +5634,831 @@ document.addEventListener("click", function (event) {
   }
 });
 
+// Llamar Inventarios *************************************************
+document
+  .getElementById("inventarios-link")
+  .addEventListener("click", function (event) {
+    event.preventDefault(); // Evita la acción por defecto del enlace
+    // 1. ENCENDEMOS EL PRELOADER
+    if (typeof mostrarPreloader === "function") mostrarPreloader();
+
+    fetch("catalogos/inventarios.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+
+        if (typeof cargarTablaKardex === "function") {
+          cargarTablaKardex();
+        }
+
+        inicializarTablaGenerica(
+          "#tabla-roles",
+          "#buscarboxrol",
+          "#cantidad-registros",
+        );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+        // 3. Apagamos el preloader del menú (el cargarTablaKardex tiene el suyo propio)
+        if (typeof ocultarPreloader === "function")
+          setTimeout(ocultarPreloader, 300);
+      })
+      .catch((error) => {
+        console.error("Error al cargar inventario:", error);
+        if (typeof ocultarPreloader === "function") ocultarPreloader();
+      });
+  });
+
+// MÓDULO DE INVENTARIO Y KARDEX
+
+// 1. Cambiar de Pestaña
+function cambiarPestanaInventario(evt, idTab) {
+  // 1. Quitar la clase active de todos los botones y contenidos
+  const tabs = document.querySelectorAll(".kardex-tab");
+  const panes = document.querySelectorAll(".kardex-pane");
+
+  tabs.forEach((t) => t.classList.remove("active"));
+  panes.forEach((p) => p.classList.remove("active"));
+
+  // 2. Activar el botón clicado y su contenido
+  evt.currentTarget.classList.add("active");
+  document.getElementById(idTab).classList.add("active");
+
+  // 3. Si abren la pestaña de Historial Kardex, cargamos la tabla automáticamente
+  if (idTab === "tab-historial") {
+    if (typeof cargarTablaKardex === "function") cargarTablaKardex();
+  }
+
+  // 4. Enfoque seguro y rápido para las pestañas de Entradas y Salidas
+  if (idTab === "tab-entradas") enfocarSeguro("buscador-producto-compra");
+  if (idTab === "tab-salidas") enfocarSeguro("buscador-producto-salida");
+  if (idTab === "tab-traspasos") enfocarSeguro("buscador-producto-traspaso");
+
+  // 5. Mostrar u ocultar los controles superiores (Buscador y Selector de DataTables)
+  const controlesK = document.getElementById("controles-kardex");
+  if (controlesK) {
+    controlesK.style.display = idTab === "tab-historial" ? "flex" : "none";
+  }
+}
+
+// 2. Procesar Formularios (Entrada y Salida usan la misma función inteligente)
+document.addEventListener("submit", function(e) {
+    if (e.target && (e.target.id === "form-entrada-inventario" || e.target.id === "form-salida-inventario")) {
+        e.preventDefault();
+        const form = e.target;
+        const tipo = form.querySelector('[name="tipo_movimiento"]').value;
+
+        // Validaciones básicas
+        const idProd = form.querySelector('[name="id_prod"]').value;
+        const cant = form.querySelector('[name="cantidad"]').value;
+        
+        if (!idProd || cant <= 0) {
+            Swal.fire("Faltan datos", "Debes seleccionar un producto y una cantidad válida.", "warning");
+            return;
+        }
+
+        // Usamos tu Preloader Elegante
+        if (typeof mostrarPreloader === 'function') mostrarPreloader();
+
+        const formData = new FormData(form);
+
+        fetch("cruds/procesar_movimiento_kardex.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (typeof ocultarPreloader === 'function') setTimeout(ocultarPreloader, 300);
+
+            if (data.success) {
+              Swal.fire({
+                title: `¡${tipo} Registrada!`,
+                text: `El inventario se ha actualizado correctamente. Nuevo Stock: ${data.nuevo_stock}`,
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+              form.reset(); // Limpiamos el formulario
+
+              // Actualizamos el Kardex en el fondo silenciosamente
+              if (typeof cargarTablaKardex === "function") {
+                cargarTablaKardex();
+              }
+
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (typeof ocultarPreloader === 'function') ocultarPreloader();
+            Swal.fire("Error", "Fallo de conexión.", "error");
+        });
+    }
+});
+
+// 3. Cargar la Tabla de Historial (Kardex)
+window.cargarTablaKardex = function () {
+  const tbody = document.getElementById("cuerpo-tabla-kardex");
+  if (!tbody) return;
+
+  if (typeof mostrarPreloader === "function") mostrarPreloader();
+
+  const urlFresca = "cruds/obtener_kardex.php?t=" + new Date().getTime();
+
+  fetch(urlFresca)
+    .then((res) => res.json())
+    .then((data) => {
+      if (typeof ocultarPreloader === "function") setTimeout(ocultarPreloader, 300);
+
+      // Si PHP arrojó un error de Base de Datos, lo atrapamos
+      if (data.error) throw new Error(data.error);
+
+      // 1. DESTRUIMOS DATATABLES ANTES DE TOCAR EL HTML
+      if ($.fn.DataTable.isDataTable("#tabla-kardex")) {
+        $("#tabla-kardex").DataTable().destroy();
+      }
+
+      // 2. ARMAMOS EL HTML NUEVO (Solo si hay datos)
+      let htmlFilas = "";
+
+      if (data.length > 0) {
+        data.forEach((mov) => {
+          let colorTipo = mov.tipo_movimiento === "Entrada" ? "color: green; font-weight: bold;" : "color: red; font-weight: bold;";
+          let signo = mov.tipo_movimiento === "Entrada" ? "+" : "-";
+
+          htmlFilas += `
+            <tr>
+                <td>#${mov.id_movimiento}</td>
+                <td>${mov.fecha}</td>
+                <td><strong>[${mov.codebar_prod}]</strong> ${mov.nombre_prod}</td>
+                <td style="${colorTipo}">${mov.tipo_movimiento}</td>
+                <td style="${colorTipo}">${signo}${mov.cantidad}</td>
+                <td style="color: #666;">${mov.stock_anterior}</td>
+                <td style="font-weight: bold;">${mov.stock_nuevo}</td>
+                <td>${mov.motivo || "N/A"}</td>
+                <td><i class="fa-solid fa-user-pen" style="color: #999;"></i> ${mov.usuario}</td>
+                <td style="text-align: center;"> 
+                    <button title="Imprimir Comprobante" onclick="imprimirMovimientoKardex(${mov.id_movimiento})" style="background: #17a2b8; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer;"><i class="fa-solid fa-print"></i></button>
+                </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Inyectamos el HTML (si no hay datos, inyectará "", lo cual es perfecto)
+      tbody.innerHTML = htmlFilas;
+
+      // 3. RECONSTRUIMOS DATATABLES DESDE CERO
+      const tablaK = $("#tabla-kardex").DataTable({
+        destroy: true,
+        dom: 'rt<"bottom"ip>',
+        pageLength: parseInt($("#kardex-length").val()) || 8,
+        scrollY: "40vh",
+        scrollCollapse: true,
+        order: [[1, "asc"]], // ⚠️ Se asegura de ordenar por ID
+        language: {
+          url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
+          // Dejamos que DataTables ponga el mensaje elegante cuando esté vacío
+          emptyTable: "No hay movimientos registrados aún en esta sucursal." 
+        },
+      });
+
+      // 4. RECONECTAMOS TUS CONTROLES PERSONALIZADOS
+      $("#kardex-search").off("keyup").on("keyup", function () {
+          tablaK.search(this.value).draw();
+      });
+
+      $("#kardex-length").off("change").on("change", function () {
+          tablaK.page.len(this.value).draw();
+      });
+
+      // Mostramos los controles en la barra superior
+      document.getElementById("controles-kardex").style.display = "flex";
+
+      // 5. EL TOQUE PREMIUM: Si el usuario tenía algo escrito en buscar, lo volvemos a filtrar
+      const textoBuscado = $("#kardex-search").val();
+      if (textoBuscado) {
+        tablaK.search(textoBuscado).draw();
+      }
+    })
+    .catch((err) => {
+      console.error("Error al cargar Kardex:", err);
+      if (typeof ocultarPreloader === "function") ocultarPreloader();
+      
+      // 🚨 BLINDAJE 3: Si de verdad explota el servidor o no hay internet, mostramos las 10 columnas del error.
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: red; font-weight: bold;"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con el servidor.</td></tr>';
+    });
+};
+
+// IMPRIMIR COMPROBANTE DE KARDEX
+window.imprimirMovimientoKardex = function(id_movimiento) {
+    // Aquí le decimos que abra una ventanita nueva (como un ticket)
+    // llamando a un archivo PHP que diseñaremos para el PDF/Ticket
+    const urlTicket = `cruds/ticket_movimiento.php?id=${id_movimiento}`;
+    
+    // La abrimos en tamaño carta (800x900
+   window.open(urlTicket, 'ComprobanteKardex', 'width=850,height=900,scrollbars=yes');
+};
+
+// LÓGICA DEL CARRITO DE COMPRAS (ENTRADAS MÚLTIPLES)
+
+// 1. Buscador en Vivo (Tipo Google)
+document.addEventListener("input", function(e) {
+    if (e.target.id === "buscador-producto-compra") {
+      const divSugerencias = document.getElementById("sugerencias-compra");
+      let texto = e.target.value;
+
+      if (texto.length < 2) {
+        divSugerencias.style.display = "none";
+        return;
+      }
+
+      // Antes decía: fetch("cruds/buscar_producto_compra.php?q="...
+      fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+        .then((res) => res.json())
+        .then((data) => {
+          divSugerencias.innerHTML = "";
+          if (data.length > 0) {
+            data.forEach((prod) => {
+              let div = document.createElement("div");
+              div.style.padding = "10px";
+              div.style.cursor = "pointer";
+              div.style.borderBottom = "1px solid #eee";
+              // Efecto hover simple con JS
+              div.onmouseover = () => (div.style.backgroundColor = "#f0f8ff");
+              div.onmouseout = () => (div.style.backgroundColor = "white");
+
+              div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod}`;
+
+              // Al hacer clic, agregamos al carrito
+              div.onclick = () => {
+                // Antes decía: let costo = parseFloat(prod.precio_compra) || 0;
+                let costo = parseFloat(prod.costo_prod) || 0;
+                agregarFilaCompra(
+                  prod.id_prod,
+                  prod.nombre_prod,
+                  prod.codebar_prod,
+                  costo,
+                );
+                e.target.value = ""; // Limpiamos buscador
+                divSugerencias.style.display = "none";
+              };;
+              divSugerencias.appendChild(div);
+            });
+            divSugerencias.style.display = "block";
+          } else {
+            divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No se encontraron productos</div>`;
+            divSugerencias.style.display = "block";
+          }
+        });
+    }
+});
+
+// Ocultar buscador si das clic afuera
+document.addEventListener("click", function(e) {
+    const inputBuscar = document.getElementById("buscador-producto-compra");
+    const divSugerencias = document.getElementById("sugerencias-compra");
+    if (inputBuscar && !inputBuscar.contains(e.target) && divSugerencias && !divSugerencias.contains(e.target)) {
+        divSugerencias.style.display = "none";
+    }
+});
+
+// 2. Agregar Producto a la Tabla
+window.agregarFilaCompra = function(id, nombre, codebar, costo) {
+    const tbody = document.getElementById("cuerpo-carrito-compra");
+    const filaVacia = document.getElementById("fila-vacia-compra");
+    
+    // Si el producto ya está en el carrito, le sumamos 1 a la cantidad
+    let filaExistente = document.querySelector(`#cuerpo-carrito-compra tr[data-id="${id}"]`);
+    if (filaExistente) {
+        let inputCant = filaExistente.querySelector('.input-cant-compra');
+        inputCant.value = parseFloat(inputCant.value) + 1;
+        recalcularTotalCompra();
+        return;
+    }
+
+    // Quitamos el mensaje de "Tabla vacía"
+    if (filaVacia) filaVacia.style.display = "none";
+
+    const tr = document.createElement("tr");
+    tr.dataset.id = id;
+    tr.innerHTML = `
+        <td style="padding: 5px;">
+            [${codebar}] ${nombre} 
+            <input type="hidden" name="prod_id[]" value="${id}">
+        </td>
+        <td style="padding: 5px; text-align: center;">
+            <input type="number" name="prod_cant[]" class="input-cant-compra" value="1" min="1" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" onchange="validarInputVacio(this); recalcularTotalCompra()" oninput="recalcularTotalCompra()" style="width: 70px; text-align: center; padding: 3px;">
+        </td>
+        <td style="padding: 5px; text-align: center;">
+            <input type="number" name="prod_costo[]" class="input-costo-compra" value="${costo}" min="0" step="0.01" oninput="recalcularTotalCompra()" style="width: 90px; text-align: center; padding: 3px;">
+        </td>
+        <td style="padding: 5px; text-align: center; font-weight: bold; color: #333;" class="td-subtotal-compra">
+            $${parseFloat(costo).toFixed(2)}
+        </td>
+        <td style="padding: 5px; text-align: center;">
+            <button type="button" onclick="eliminarFilaCompra(this)" style="background: red; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+    recalcularTotalCompra();
+};
+
+// 3. Eliminar Producto de la Tabla
+window.eliminarFilaCompra = function(btn) {
+    btn.closest("tr").remove();
+    const tbody = document.getElementById("cuerpo-carrito-compra");
+    
+    // Si borramos el último, volvemos a mostrar el mensaje de vacío
+    if (tbody.querySelectorAll('tr:not(#fila-vacia-compra)').length === 0) {
+        document.getElementById("fila-vacia-compra").style.display = "table-row";
+    }
+    recalcularTotalCompra();
+};
+
+// 4. Calculadora Matemática del Carrito
+window.recalcularTotalCompra = function() {
+    let total = 0;
+    const filas = document.querySelectorAll("#cuerpo-carrito-compra tr:not(#fila-vacia-compra)");
+    
+    filas.forEach(fila => {
+        let cant = parseFloat(fila.querySelector('.input-cant-compra').value) || 0;
+        let costo = parseFloat(fila.querySelector('.input-costo-compra').value) || 0;
+        let subtotal = cant * costo;
+        
+        fila.querySelector('.td-subtotal-compra').textContent = '$' + subtotal.toFixed(2);
+        total += subtotal;
+    });
+    
+    document.getElementById("total-compra-texto").textContent = '$' + total.toFixed(2);
+};
+
+// 5. Enviar el Carrito al Servidor (Guardar la Compra)
+document.addEventListener("submit", function(e) {
+    if (e.target.id === "form-compra-multiple") {
+        e.preventDefault();
+
+        // 1. Validamos que el carrito no esté vacío
+        const filas = document.querySelectorAll("#cuerpo-carrito-compra tr:not(#fila-vacia-compra)");
+        if (filas.length === 0) {
+            Swal.fire("Atención", "Debes agregar al menos un producto a la factura.", "warning");
+            return;
+        }
+
+        // 2. Empaquetamos todo el formulario
+        const formData = new FormData(e.target);
+        
+        // Atrapamos manualmente el Proveedor y el Folio para asegurar que viajen
+        formData.append("proveedor", document.getElementById("compra-proveedor").value);
+        formData.append("folio", document.getElementById("compra-folio").value);
+
+        if (typeof mostrarPreloader === 'function') mostrarPreloader();
+
+        // 3. Lo enviamos al nuevo procesador PHP
+        fetch("cruds/procesar_compra_multiple.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (typeof ocultarPreloader === 'function') setTimeout(ocultarPreloader, 300);
+
+            if (data.success) {
+                Swal.fire({
+                    title: "¡Compra Registrada Exitosamente!",
+                    text: "El inventario y el Kardex han sido actualizados.",
+                    icon: "success",
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+                
+                // Limpiamos la pantalla para la siguiente compra
+                e.target.reset();
+                document.getElementById("cuerpo-carrito-compra").innerHTML = '<tr id="fila-vacia-compra"><td colspan="5" style="text-align: center; color: #888; padding: 15px;">No hay productos en la factura. Busca y agrega uno.</td></tr>';
+                document.getElementById("total-compra-texto").textContent = "$0.00";
+
+                // Actualizamos la tabla del Kardex en el fondo
+                if (typeof cargarTablaKardex === 'function') cargarTablaKardex();
+
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (typeof ocultarPreloader === 'function') ocultarPreloader();
+            Swal.fire("Error", "Problema al conectar con el servidor.", "error");
+        });
+    }
+});
+
+// Función para el botón "Agregar" o para Lectores de Código de Barras
+window.agregarProductoCompra = function() {
+    const input = document.getElementById("buscador-producto-compra");
+    let texto = input.value.trim();
+
+    if (texto === "") return;
+
+    // Buscamos exactamente ese código o nombre
+    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+    .then(res => res.json())
+    .then(data => {
+        if (data.length > 0) {
+            // Tomamos el primer resultado exacto
+            let prod = data[0];
+            let costo = parseFloat(prod.costo_prod) || 0;
+            agregarFilaCompra(prod.id_prod, prod.nombre_prod, prod.codebar_prod, costo);
+            document.getElementById("sugerencias-compra").style.display = "none";
+
+            // Limpiamos la caja para el siguiente producto
+            input.value = ""; 
+
+            // Regresamos el cursor a la caja instantáneamente
+            enfocarSeguro("buscador-producto-compra");
+            
+        } else {
+          Swal.fire("No encontrado", "No existe un producto con ese código.", "warning");
+          input.value = "";
+          enfocarSeguro("buscador-producto-compra"); // También regresamos el cursor si hay error
+        }
+    });
+};
+
+//  BLINDAJE PARA LECTORES DE CÓDIGO DE BARRAS (TECLA ENTER)
+document.addEventListener("keydown", function(e) {
+    // Si estamos parados en el buscador de compras y la tecla es "Enter"
+    if (e.target.id === "buscador-producto-compra" && e.key === "Enter") {
+        e.preventDefault(); //  Detiene el envío del formulario completo
+        
+        // Disparamos la función como si hubieran presionado el botón azul
+        if (typeof agregarProductoCompra === 'function') {
+            agregarProductoCompra();
+        }
+    }
+});
+
+// LÓGICA DEL CARRITO DE SALIDAS (MERMAS/AJUSTES)
+
+// 1. Buscador en Vivo (Lista desplegable)
+document.addEventListener("input", function(e) {
+    if (e.target.id === "buscador-producto-salida") {
+        const divSugerencias = document.getElementById("sugerencias-salida");
+        let texto = e.target.value;
+
+        if (texto.length < 2) { divSugerencias.style.display = "none"; return; }
+
+        fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+        .then(res => res.json())
+        .then(data => {
+            divSugerencias.innerHTML = "";
+            if (data.length > 0) {
+                data.forEach(prod => {
+                    let div = document.createElement("div");
+                    div.style.padding = "10px"; div.style.cursor = "pointer"; div.style.borderBottom = "1px solid #eee";
+                    div.onmouseover = () => div.style.backgroundColor = "#f0f8ff";
+                    div.onmouseout = () => div.style.backgroundColor = "white";
+                    
+                    // Le mostramos cuánto stock tiene actualmente
+                    let stockReal = parseFloat(prod.stock) || 0;
+                    div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod} <span style="color: ${stockReal > 0 ? 'green' : 'red'}; float: right;">Stock: ${stockReal}</span>`;
+                    
+                    div.onclick = () => {
+                        agregarFilaSalida(prod.id_prod, prod.nombre_prod, prod.codebar_prod, stockReal);
+                        e.target.value = ""; divSugerencias.style.display = "none";
+                        e.target.focus(); // Regresamos el cursor
+                    };
+                    divSugerencias.appendChild(div);
+                });
+                divSugerencias.style.display = "block";
+            } else {
+                divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No se encontraron productos</div>`;
+                divSugerencias.style.display = "block";
+            }
+        });
+    }
+});
+
+// 2. Blindaje para Lector de Códigos (Tecla Enter)
+document.addEventListener("keydown", function(e) {
+    if (e.target.id === "buscador-producto-salida" && e.key === "Enter") {
+        e.preventDefault();
+        if (typeof agregarProductoSalida === 'function') agregarProductoSalida();
+    }
+});
+
+// 3. Función del botón o Lector (Agrega directo)
+window.agregarProductoSalida = function() {
+    const input = document.getElementById("buscador-producto-salida");
+    let texto = input.value.trim();
+    if (texto === "") return;
+
+    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+    .then(res => res.json())
+    .then(data => {
+        if (data.length > 0) {
+            let prod = data[0];
+            let stockReal = parseFloat(prod.stock) || 0;
+            agregarFilaSalida(prod.id_prod, prod.nombre_prod, prod.codebar_prod, stockReal);
+            
+            input.value = ""; 
+            document.getElementById("sugerencias-salida").style.display = "none";
+            enfocarSeguro("buscador-producto-salida"); 
+        } else {
+            Swal.fire("No encontrado", "No existe producto con ese código.", "warning");
+            input.value = ""; 
+            enfocarSeguro("buscador-producto-salida");
+        }
+    });
+};
+
+// 4. Agregar a la Tabla (Con reglas estrictas de Stock)
+window.agregarFilaSalida = function(id, nombre, codebar, stock) {
+    const tbody = document.getElementById("cuerpo-carrito-salida");
+    const filaVacia = document.getElementById("fila-vacia-salida");
+    
+    // Regla 1: Prohibido sacar si no hay
+    if (stock <= 0) {
+        Swal.fire("Sin Stock", "No puedes dar salida a un producto que tiene 0 piezas en inventario.", "error");
+        return;
+    }
+
+    let filaExistente = document.querySelector(`#cuerpo-carrito-salida tr[data-id="${id}"]`);
+    if (filaExistente) {
+        let inputCant = filaExistente.querySelector('.input-cant-salida');
+        let nuevaCant = parseFloat(inputCant.value) + 1;
+        
+        // Regla 2: Prohibido sumar en la tabla más de lo que hay
+        if (nuevaCant > stock) {
+            Swal.fire("Límite Alcanzado", `Solo tienes ${stock} piezas en el sistema.`, "warning");
+            return;
+        }
+        inputCant.value = nuevaCant;
+        return;
+    }
+
+    if (filaVacia) filaVacia.style.display = "none";
+
+    const tr = document.createElement("tr");
+    tr.dataset.id = id;
+    tr.innerHTML = `
+        <td style="padding: 5px;">
+            [${codebar}] ${nombre} 
+            <input type="hidden" name="prod_id[]" value="${id}">
+        </td>
+        <td style="padding: 5px; text-align: center; font-weight: bold; color: #555;">
+            ${stock}
+        </td>
+        <td style="padding: 5px; text-align: center;">
+            <input type="number" name="prod_cant[]" class="input-cant-salida" value="1" min="1" max="${stock}" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" onchange="validarStockSalida(this, ${stock})" oninput="validarStockSalida(this, ${stock})" style="width: 70px; text-align: center; padding: 3px;">
+        </td>
+        <td style="padding: 5px; text-align: center;">
+            <button type="button" onclick="eliminarFilaSalida(this)" style="background: red; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+};
+
+// 5. Validación al escribir manualmente la cantidad (Para Salidas y Traspasos)
+window.validarStockSalida = function(input, stockMax) {
+    let cant = parseInt(input.value);
+    
+    // Si borran el número o ponen cero, lo regresamos a 1
+    if (isNaN(cant) || cant <= 0) {
+        input.value = 1;
+        cant = 1;
+    }
+    
+    // Si intentan sacar más de lo que hay
+    if (cant > stockMax) {
+        Swal.fire("Límite superado", `Solo tienes ${stockMax} piezas en inventario.`, "error");
+        input.value = stockMax;
+    }
+};
+
+// Nueva función para proteger los vacíos en Entradas (Compras)
+window.validarInputVacio = function(input) {
+    let cant = parseInt(input.value);
+    
+    // Si borran el número, ponen cero, o algo inválido, lo regresamos a 1
+    if (isNaN(cant) || cant <= 0) {
+        input.value = 1;
+    }
+};
+
+// 6. Eliminar Fila
+window.eliminarFilaSalida = function(btn) {
+    btn.closest("tr").remove();
+    const tbody = document.getElementById("cuerpo-carrito-salida");
+    if (tbody.querySelectorAll('tr:not(#fila-vacia-salida)').length === 0) {
+        document.getElementById("fila-vacia-salida").style.display = "table-row";
+    }
+};
+
+// 7. Enviar la Salida al Servidor
+document.addEventListener("submit", function(e) {
+    if (e.target.id === "form-salida-multiple") {
+        e.preventDefault();
+
+        const filas = document.querySelectorAll("#cuerpo-carrito-salida tr:not(#fila-vacia-salida)");
+        if (filas.length === 0) {
+            Swal.fire("Atención", "Agrega al menos un producto a la salida.", "warning");
+            return;
+        }
+
+        const formData = new FormData(e.target);
+        if (typeof mostrarPreloader === 'function') mostrarPreloader();
+
+        fetch("cruds/procesar_salida_multiple.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (typeof ocultarPreloader === 'function') setTimeout(ocultarPreloader, 300);
+
+            if (data.success) {
+                Swal.fire({title: "¡Salida Procesada!", text: "El inventario ha sido descontado correctamente.", icon: "success", timer: 2000, showConfirmButton: false});
+                e.target.reset();
+                document.getElementById("cuerpo-carrito-salida").innerHTML = '<tr id="fila-vacia-salida"><td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay productos en la lista. Busca y agrega uno.</td></tr>';
+                if (typeof cargarTablaKardex === 'function') cargarTablaKardex(); // Actualiza historial
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (typeof ocultarPreloader === 'function') ocultarPreloader();
+            Swal.fire("Error", "Problema al conectar con el servidor.", "error");
+        });
+    }
+});
+
+// FUNCIÓN DE ENFOQUE SEGURO (ANTI ARIA-HIDDEN)
+window.enfocarSeguro = function(id_elemento) {
+    setTimeout(() => {
+        // 1. Le quitamos la capa de invisibilidad al contenedor si se quedó pegada
+        const mainContent = document.getElementById("main-content");
+        if (mainContent) mainContent.removeAttribute("aria-hidden");
+        
+        // 2. Ahora sí, ponemos el cursor de forma segura
+        const elemento = document.getElementById(id_elemento);
+        if (elemento) elemento.focus();
+    }, 200); // Esperamos 200ms para que las animaciones terminen
+};
+
+// LÓGICA DEL CARRITO DE TRASPASOS (ENTRE SUCURSALES)
+document.addEventListener("input", function(e) {
+    if (e.target.id === "buscador-producto-traspaso") {
+        const divSugerencias = document.getElementById("sugerencias-traspaso");
+        let texto = e.target.value;
+
+        if (texto.length < 2) { divSugerencias.style.display = "none"; return; }
+
+        fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+        .then(res => res.json())
+        .then(data => {
+            divSugerencias.innerHTML = "";
+            if (data.length > 0) {
+                data.forEach(prod => {
+                    let div = document.createElement("div");
+                    div.style.padding = "10px"; div.style.cursor = "pointer"; div.style.borderBottom = "1px solid #eee";
+                    div.onmouseover = () => div.style.backgroundColor = "#f0f8ff";
+                    div.onmouseout = () => div.style.backgroundColor = "white";
+                    
+                    let stockReal = parseFloat(prod.stock) || 0;
+                    div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod} <span style="color: ${stockReal > 0 ? 'green' : 'red'}; float: right;">Stock: ${stockReal}</span>`;
+                    
+                    div.onclick = () => {
+                        agregarFilaTraspaso(prod.id_prod, prod.nombre_prod, prod.codebar_prod, stockReal);
+                        e.target.value = ""; divSugerencias.style.display = "none";
+                        if(typeof enfocarSeguro === 'function') enfocarSeguro("buscador-producto-traspaso");
+                    };
+                    divSugerencias.appendChild(div);
+                });
+                divSugerencias.style.display = "block";
+            } else {
+                divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No encontrado</div>`;
+                divSugerencias.style.display = "block";
+            }
+        });
+    }
+});
+
+// Blindaje de Enter para Lector de Código de Barras
+document.addEventListener("keydown", function(e) {
+    if (e.target.id === "buscador-producto-traspaso" && e.key === "Enter") {
+        e.preventDefault();
+        if (typeof agregarProductoTraspaso === 'function') agregarProductoTraspaso();
+    }
+});
+
+window.agregarProductoTraspaso = function() {
+    const input = document.getElementById("buscador-producto-traspaso");
+    let texto = input.value.trim();
+    if (texto === "") return;
+
+    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+    .then(res => res.json())
+    .then(data => {
+        if (data.length > 0) {
+            let prod = data[0];
+            let stockReal = parseFloat(prod.stock) || 0;
+            agregarFilaTraspaso(prod.id_prod, prod.nombre_prod, prod.codebar_prod, stockReal);
+            input.value = ""; document.getElementById("sugerencias-traspaso").style.display = "none";
+            if(typeof enfocarSeguro === 'function') enfocarSeguro("buscador-producto-traspaso");
+        } else {
+            Swal.fire("No encontrado", "No existe producto con ese código.", "warning");
+            input.value = "";
+            if(typeof enfocarSeguro === 'function') enfocarSeguro("buscador-producto-traspaso");
+        }
+    });
+};
+
+window.agregarFilaTraspaso = function(id, nombre, codebar, stock) {
+    const tbody = document.getElementById("cuerpo-carrito-traspaso");
+    const filaVacia = document.getElementById("fila-vacia-traspaso");
+    
+    if (stock <= 0) {
+        Swal.fire("Sin Stock", "No puedes enviar un producto que no tienes.", "error");
+        return;
+    }
+
+    let filaExistente = document.querySelector(`#cuerpo-carrito-traspaso tr[data-id="${id}"]`);
+    if (filaExistente) {
+        let inputCant = filaExistente.querySelector('.input-cant-traspaso');
+        let nuevaCant = parseFloat(inputCant.value) + 1;
+        if (nuevaCant > stock) {
+            Swal.fire("Límite", `Solo tienes ${stock} piezas disponibles para enviar.`, "warning");
+            return;
+        }
+        inputCant.value = nuevaCant;
+        return;
+    }
+
+    if (filaVacia) filaVacia.style.display = "none";
+
+    const tr = document.createElement("tr");
+    tr.dataset.id = id;
+    tr.innerHTML = `
+        <td style="padding: 5px;">[${codebar}] ${nombre} <input type="hidden" name="prod_id[]" value="${id}"></td>
+        <td style="padding: 5px; text-align: center; font-weight: bold;">${stock}</td>
+        <td style="padding: 5px; text-align: center;">
+           <input type="number" name="prod_cant[]" class="input-cant-traspaso" value="1" min="1" max="${stock}" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" onchange="validarStockSalida(this, ${stock})" oninput="validarStockSalida(this, ${stock})" style="width: 70px; text-align: center; padding: 3px;"></td>
+        <td style="padding: 5px; text-align: center;">
+            <button type="button" onclick="eliminarFilaTraspaso(this)" style="background: red; color: white; border: none; padding: 4px 8px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+};
+
+window.eliminarFilaTraspaso = function(btn) {
+    btn.closest("tr").remove();
+    if (document.querySelectorAll('#cuerpo-carrito-traspaso tr:not(#fila-vacia-traspaso)').length === 0) {
+        document.getElementById("fila-vacia-traspaso").style.display = "table-row";
+    }
+};
+
+// Enviar Traspaso al Servidor
+document.addEventListener("submit", function(e) {
+    if (e.target.id === "form-traspaso-multiple") {
+        e.preventDefault();
+
+        const filas = document.querySelectorAll("#cuerpo-carrito-traspaso tr:not(#fila-vacia-traspaso)");
+        if (filas.length === 0) {
+            Swal.fire("Atención", "Agrega productos para traspasar.", "warning");
+            return;
+        }
+
+        const formData = new FormData(e.target);
+        if (typeof mostrarPreloader === 'function') mostrarPreloader();
+
+        fetch("cruds/procesar_traspaso_multiple.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (typeof ocultarPreloader === 'function') setTimeout(ocultarPreloader, 300);
+
+            if (data.success) {
+                Swal.fire({title: "¡Traspaso Exitoso!", text: "Inventarios actualizados en ambas sucursales.", icon: "success", timer: 2500, showConfirmButton: false});
+                e.target.reset();
+                document.getElementById("cuerpo-carrito-traspaso").innerHTML = '<tr id="fila-vacia-traspaso"><td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay productos a transferir. Busca y agrega uno.</td></tr>';
+                if (typeof cargarTablaKardex === 'function') cargarTablaKardex();
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (typeof ocultarPreloader === 'function') ocultarPreloader();
+            Swal.fire("Error", "Problema al conectar con el servidor.", "error");
+        });
+    }
+});
+
 /// Llamar Ordenes de servicio *************************************************
 document
   .getElementById("ordenes-link")
@@ -5991,7 +6816,7 @@ window.abrirModalClienteExpress = function () {
                 padding: 0 4px;
             }
             
-            /* LA MAGIA: Cuando haces clic (focus) o cuando ya hay texto escrito (not(:placeholder-shown)) */
+            /* Cuando haces clic (focus) o cuando ya hay texto escrito (not(:placeholder-shown)) */
             .floating-input:focus ~ .floating-label,
             .floating-input:not(:placeholder-shown) ~ .floating-label {
                 top: -9px;
@@ -6565,14 +7390,59 @@ document.addEventListener("click", function (e) {
             data.orden.costo_servicio,
           ).toFixed(2);
 
-          // Limpiar refacciones visualmente por ahora
-          document.getElementById("tabla-refacciones-orden").innerHTML = `
-                    <tr id="fila-vacia-refacciones">
-                        <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No se han agregado refacciones a esta orden.</td>
-                    </tr>`;
-          document.getElementById("total-refacciones-input").value = 0;
-          document.getElementById("total-refacciones-text").textContent =
-            "0.00";
+          // PINTAR LAS REFACCIONES GUARDADAS EN LA BASE DE DATOS
+          const tbodyRefacciones = document.getElementById(
+            "tabla-refacciones-orden",
+          );
+
+          // En lugar de borrar todo, dejamos la fila vacía pero "oculta".
+          // Así la función matemática no explota al intentar buscarla.
+          tbodyRefacciones.innerHTML = `
+                <tr id="fila-vacia-refacciones" style="display: none;">
+                    <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No se han agregado refacciones a esta orden.</td>
+                </tr>`;
+
+          // Verificamos si PHP nos mandó refacciones
+          if (data.refacciones && data.refacciones.length > 0) {
+            data.refacciones.forEach((ref) => {
+              const tr = document.createElement("tr");
+              tr.className = "fila-refaccion";
+              tr.dataset.id = ref.id_prod;
+
+              const precioNum = parseFloat(ref.precio_unitario);
+              const cantNum = parseFloat(ref.cantidad);
+              const subtotal = precioNum * cantNum;
+
+              // Usamos las variables exactas de tu JSON (codebar_prod y nombre_prod)
+              tr.innerHTML = `
+                <td style="padding: 5px;">
+                    [${ref.codebar_prod}] ${ref.nombre}
+                    <input type="hidden" name="refacciones_id[]" value="${ref.id_prod}">
+                </td>
+                <td style="padding: 5px; text-align: center;">
+                    <input type="number" name="refacciones_cant[]" class="input-cant" value="${cantNum}" min="1" oninput="recalcularTablaRefacciones()" style="width: 60px; text-align: center; padding: 2px;">
+                </td>
+                <td style="padding: 5px; text-align: center;">
+                    <input type="number" name="refacciones_precio[]" class="input-precio" value="${precioNum}" step="0.01" min="0" oninput="recalcularTablaRefacciones()" style="width: 80px; text-align: center; padding: 2px;">
+                </td>
+                <td style="padding: 5px; text-align: center; font-weight: bold;" class="td-subtotal">$${subtotal.toFixed(2)}</td>
+                <td style="padding: 5px; text-align: center;">
+                    <button type="button" onclick="eliminarRefaccion(this)" style="background: red; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              `;
+              tbodyRefacciones.appendChild(tr);
+            });
+
+            // Disparamos la función para que el total sume los precios de las piezas dibujadas
+            recalcularTablaRefacciones();
+          } else {
+            // Si no hay refacciones, simplemente hacemos visible la fila que creamos arriba
+            document.getElementById("fila-vacia-refacciones").style.display =
+              "table-row";
+            document.getElementById("total-refacciones-input").value = 0;
+            document.getElementById("total-refacciones-text").textContent =
+              "0.00";
+          }
 
           abrirModalOrden("editar-modalOrden");
         } else {

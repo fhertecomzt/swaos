@@ -1,7 +1,7 @@
 <?php
 include "../conexion.php";
 
-$response = ["success" => false, "message" => "", "orden" => null, "abonos" => []];
+$response = ["success" => false, "message" => "", "orden" => null, "abonos" => [], "refacciones" => []];
 
 if (isset($_GET['id'])) {
     $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
@@ -24,9 +24,16 @@ if (isset($_GET['id'])) {
                           ORDER BY a.fecha_abono ASC";
             $stmtAbonos = $dbh->prepare($sqlAbonos);
             $stmtAbonos->execute([':id' => $id]);
-
-            // Metemos los abonos encontrados dentro de la respuesta JSON
             $response["abonos"] = $stmtAbonos->fetchAll(PDO::FETCH_ASSOC);
+
+            // 3. Traemos las refacciones de esta orden
+            // Si en tu base de datos la columna de productos se llama distinto (ej. 'descripcion'), cámbialo en la línea de abajo.
+            $stmtRef = $dbh->prepare("SELECT r.id_prod, r.cantidad, r.precio_unitario, p.nombre_prod AS nombre, p.codebar_prod
+                                      FROM orden_refacciones r 
+                                      INNER JOIN productos p ON r.id_prod = p.id_prod 
+                                      WHERE r.id_orden = :id");
+            $stmtRef->execute([':id' => $id]);
+            $response["refacciones"] = $stmtRef->fetchAll(PDO::FETCH_ASSOC);
         } else {
             $response["message"] = "No se encontró la orden especificada.";
         }

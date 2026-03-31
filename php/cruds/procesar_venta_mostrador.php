@@ -55,9 +55,38 @@ try {
     // Guardamos el detalle usando nuestra variable blindada
     $stmtDetalle->execute([$id_venta, $id_producto_final, $item['nombre'], $item['cantidad'], $item['precio'], $subtotal]);
 
-    // Solo descontamos del inventario si es un producto real (ID mayor a 0)
+    // ======================================================================
+    // 🌟 INYECCIÓN DEL KARDEX: Solo si es un producto físico (ID > 0)
+    // ======================================================================
     if ($id_producto_final > 0) {
-      $stmtInventario->execute([$item['cantidad'], $id_producto_final, $id_taller]);
+
+      // 1. Tomamos la "Fotografía" del stock ANTES de descontar (FOR UPDATE bloquea la fila por milisegundos para evitar choques)
+      $stmtStockAnt = $dbh->prepare("SELECT stock FROM inventario_sucursal WHERE id_prod = ? AND idtaller = ? FOR UPDATE");
+      $stmtStockAnt->execute([$id_producto_final, $id_taller]);
+      $stock_anterior = floatval($stmtStockAnt->fetchColumn());
+
+      // 2. Descontamos el inventario (Tu lógica original)
+      $cantidad_vendida = floatval($item['cantidad']);
+      $stmtInventario->execute([$cantidad_vendida, $id_producto_final, $id_taller]);
+
+      // 3. Calculamos matemáticamente cómo quedó para el Kardex
+      $stock_nuevo = $stock_anterior - $cantidad_vendida;
+      $motivo_kardex = "Venta en Mostrador (Ticket #" . $id_venta . ")";
+
+      // 4. Guardamos el comprobante intocable en el Kardex
+      $stmtKardex = $dbh->prepare("INSERT INTO kardex_inventario 
+          (id_prod, id_taller, id_usuario, tipo_movimiento, cantidad, stock_anterior, stock_nuevo, motivo) 
+          VALUES (?, ?, ?, 'Salida', ?, ?, ?, ?)");
+
+      $stmtKardex->execute([
+        $id_producto_final,
+        $id_taller,
+        $id_usuario,
+        $cantidad_vendida,
+        $stock_anterior,
+        $stock_nuevo,
+        $motivo_kardex
+      ]);
     }
   }
 
@@ -78,6 +107,7 @@ try {
       $email_cliente = $cli['email_cliente'] ?? '';
     }
   }
+
 
   // Si todo es correcto, guardamos los cambios y cerramos la bóveda
   $dbh->commit();

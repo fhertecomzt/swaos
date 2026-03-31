@@ -188,6 +188,21 @@ $_SESSION['last_token'] = $current_token;
                 </li>
             </ul>
 
+            <!--Inventarios-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-address-card"></i>
+                    <span class="titles_btns">MOVIMIENTOS</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="inventarios-link" class="nav-link">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>MOVIMIENTOS</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
             <!--Órdenes de servicio-->
             <li class="nav-item has-submenu">
                 <a href="#" class="nav-link">
@@ -201,7 +216,6 @@ $_SESSION['last_token'] = $current_token;
                             <span>ÓRDENES</span>
                         </a>
                     </li>
-
                 </ul>
             </li>
 
@@ -215,19 +229,19 @@ $_SESSION['last_token'] = $current_token;
                     <li>
                         <a href="#" id="ventas-link" class="nav-link">
                             <i class="fa-solid fa-cash-register"></i>
-                            <span class="titles_btns">Punto de venta</span>
+                            <span class="titles_btns">PUNTO VENTA</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" id="corte-link" class="nav-link">
                             <i class="fa-solid fa-calculator"></i>
-                            <span class="titles_btns">Corte de caja</span>
+                            <span class="titles_btns">CORTE DE CAJA</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" id="historialventas-link" class="nav-link">
                             <i class="fa-solid fa-book"></i>
-                            <span class="titles_btns">Historial ventas</span>
+                            <span class="titles_btns">HISTORIAL</span>
                         </a>
                     </li>
                 </ul>

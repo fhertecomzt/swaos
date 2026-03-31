@@ -34,53 +34,96 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $dbh->prepare($sql);
         $stmt->execute([$id_estado_servicio, $diagnostico, $costo_servicio, $anticipo_total, $saldo_servicio, $id_orden]);
 
-        //ACTUALIZAR REFACCIONES Y STOCK
+        // ======================================================================
+        // 🌟 ACTUALIZAR REFACCIONES Y KARDEX (ALGORITMO INTELIGENTE)
+        // ======================================================================
         $id_taller = $_SESSION['taller_id'] ?? 1;
+        $id_usuario = $_SESSION['id_usuario'] ?? $_SESSION['idusuario'] ?? 1;
 
-        // Devolver al inventario las piezas que tenía antes esta orden (para evitar descuadres)
+        // 1. Obtener las piezas que ya estaban en la orden (FOTOGRAFÍA VIEJA)
         $stmtViejas = $dbh->prepare("SELECT id_prod, cantidad FROM orden_refacciones WHERE id_orden = :id_orden");
         $stmtViejas->execute([':id_orden' => $id_orden]);
         $piezasViejas = $stmtViejas->fetchAll(PDO::FETCH_ASSOC);
 
+        $stock_viejo = [];
         foreach ($piezasViejas as $pieza) {
-            $stmtReturn = $dbh->prepare("UPDATE inventario_sucursal SET stock = stock + :cant WHERE id_prod = :id_prod AND idtaller = :idtaller");
-            $stmtReturn->execute([
-                ':cant' => $pieza['cantidad'],
-                ':id_prod' => $pieza['id_prod'],
-                ':idtaller' => $id_taller
-            ]);
+            $id_p = $pieza['id_prod'];
+            $stock_viejo[$id_p] = isset($stock_viejo[$id_p]) ? $stock_viejo[$id_p] + $pieza['cantidad'] : $pieza['cantidad'];
         }
 
-        // Limpiar la tabla intermedia de esta orden para reconstruirla
-        $dbh->prepare("DELETE FROM orden_refacciones WHERE id_orden = :id_orden")->execute([':id_orden' => $id_orden]);
-
-        // Insertar las nuevas piezas y descontar el stock actualizado
+        // 2. Leer las piezas que vienen del formulario (FOTOGRAFÍA NUEVA)
+        $stock_nuevo_req = [];
         if (isset($_POST['refacciones_id']) && is_array($_POST['refacciones_id'])) {
             for ($i = 0; $i < count($_POST['refacciones_id']); $i++) {
                 $id_p = $_POST['refacciones_id'][$i];
-                $cant = $_POST['refacciones_cant'][$i];
-                $precio = $_POST['refacciones_precio'][$i];
-                $subtotal = $cant * $precio;
-
-                // Insertar en orden_refacciones
-                $stmtInsertRef = $dbh->prepare("INSERT INTO orden_refacciones (id_orden, id_prod, cantidad, precio_unitario, subtotal) VALUES (:id_orden, :id_prod, :cantidad, :precio, :subtotal)");
-                $stmtInsertRef->execute([
-                    ':id_orden' => $id_orden,
-                    ':id_prod' => $id_p,
-                    ':cantidad' => $cant,
-                    ':precio' => $precio,
-                    ':subtotal' => $subtotal
-                ]);
-
-                // Descontar del inventario real de la sucursal
-                $stmtDeduct = $dbh->prepare("UPDATE inventario_sucursal SET stock = stock - :cant WHERE id_prod = :id_prod AND idtaller = :idtaller");
-                $stmtDeduct->execute([
-                    ':cant' => $cant,
-                    ':id_prod' => $id_p,
-                    ':idtaller' => $id_taller
-                ]);
+                $cant = floatval($_POST['refacciones_cant'][$i]);
+                if ($id_p > 0) {
+                    $stock_nuevo_req[$id_p] = isset($stock_nuevo_req[$id_p]) ? $stock_nuevo_req[$id_p] + $cant : $cant;
+                }
             }
         }
+
+        // 3. Unir todos los IDs de productos involucrados para compararlos
+        $todos_productos = array_unique(array_merge(array_keys($stock_viejo), array_keys($stock_nuevo_req)));
+
+        // Preparamos las herramientas de la base de datos
+        $stmtStockAnt = $dbh->prepare("SELECT stock FROM inventario_sucursal WHERE id_prod = ? AND idtaller = ? FOR UPDATE");
+        $stmtUpdateInv = $dbh->prepare("UPDATE inventario_sucursal SET stock = ? WHERE id_prod = ? AND idtaller = ?");
+        $stmtKardex = $dbh->prepare("INSERT INTO kardex_inventario (id_prod, id_taller, id_usuario, tipo_movimiento, cantidad, stock_anterior, stock_nuevo, motivo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
+        // 4. Calcular DIFERENCIAS y afectar el Kardex
+        foreach ($todos_productos as $id_p) {
+            $cant_vieja = $stock_viejo[$id_p] ?? 0;
+            $cant_nueva = $stock_nuevo_req[$id_p] ?? 0;
+
+            // Ej: Había 1 pieza, ahora pides 2. Diferencia = +1 (Tenemos que sacar 1 pieza del inventario)
+            // Ej: Había 2 piezas, ahora pides 0. Diferencia = -2 (Tenemos que regresar 2 piezas al inventario)
+            $diferencia = $cant_nueva - $cant_vieja;
+
+            if ($diferencia != 0) {
+                // Hay un cambio real. Bloqueamos la fila y vemos el stock actual
+                $stmtStockAnt->execute([$id_p, $id_taller]);
+                $stock_actual_inv = floatval($stmtStockAnt->fetchColumn());
+
+                // Calculamos cómo quedará el almacén real
+                $stock_final_inv = $stock_actual_inv - $diferencia;
+
+                // Actualizamos Inventario físico
+                $stmtUpdateInv->execute([$stock_final_inv, $id_p, $id_taller]);
+
+                // Guardamos el comprobante en el Kardex
+                $tipo_mov = ($diferencia > 0) ? 'Salida' : 'Entrada';
+                $cant_kardex = abs($diferencia);
+                $motivo = ($diferencia > 0) ? "Uso de refacción en Orden #$id_orden" : "Devolución de pieza retirada en Orden #$id_orden";
+
+                $stmtKardex->execute([$id_p, $id_taller, $id_usuario, $tipo_mov, $cant_kardex, $stock_actual_inv, $stock_final_inv, $motivo]);
+            }
+        }
+
+        // 5. Reconstruir la tabla visual de la orden (orden_refacciones)
+        $dbh->prepare("DELETE FROM orden_refacciones WHERE id_orden = :id_orden")->execute([':id_orden' => $id_orden]);
+
+        if (isset($_POST['refacciones_id']) && is_array($_POST['refacciones_id'])) {
+            $stmtInsertRef = $dbh->prepare("INSERT INTO orden_refacciones (id_orden, id_prod, cantidad, precio_unitario, subtotal) VALUES (:id_orden, :id_prod, :cantidad, :precio, :subtotal)");
+
+            for ($i = 0; $i < count($_POST['refacciones_id']); $i++) {
+                $id_p = $_POST['refacciones_id'][$i];
+                $cant = floatval($_POST['refacciones_cant'][$i]);
+                $precio = floatval($_POST['refacciones_precio'][$i]);
+                $subtotal = $cant * $precio;
+
+                if ($id_p > 0) {
+                    $stmtInsertRef->execute([
+                        ':id_orden' => $id_orden,
+                        ':id_prod' => $id_p,
+                        ':cantidad' => $cant,
+                        ':precio' => $precio,
+                        ':subtotal' => $subtotal
+                    ]);
+                }
+            }
+        }
+        // ======================================================================
 
         // Si hay dinero de por medio, registramos el abono para el corte de caja
         // REGISTRO DE PAGO (NUEVO ABONO)
