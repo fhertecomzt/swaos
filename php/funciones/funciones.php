@@ -151,20 +151,22 @@ function existeInventario($dbh, $id_producto, $id_tienda)
   return (bool) $stmt->fetchColumn();
 }
 
-// Obtener Órdenes con detalles (JOINs)
-function obtenerOrdenesDashboard($dbh, $limit = 50)
+// Obtener Órdenes con detalles (JOINs) - BLINDADO POR SUCURSAL
+function obtenerOrdenesDashboard($dbh, $id_taller, $limit = 50)
 {
   try {
-    $sql = "SELECT o.id_orden, c.nombre_cliente, c.papellido_cliente, c.tel_cliente, 
+    $sql = "SELECT o.id_orden, o.folio_sucursal, c.nombre_cliente, c.papellido_cliente, c.tel_cliente, 
                    e.nombre_equipo, o.modelo, o.falla, o.costo_servicio, o.saldo_servicio,
                    es.estado_servicio, o.token_hash, o.creado_servicio
             FROM ordenesservicio o
             JOIN clientes c ON o.id_cliente = c.id_cliente
             JOIN equipos e ON o.id_equipo = e.id_equipo
             JOIN estadosservicios es ON o.id_estado_servicio = es.id_estado_servicio
+            WHERE o.id_taller = :id_taller 
             ORDER BY o.id_orden DESC LIMIT :limit";
 
     $stmt = $dbh->prepare($sql);
+    $stmt->bindParam(':id_taller', $id_taller, PDO::PARAM_INT);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -174,24 +176,25 @@ function obtenerOrdenesDashboard($dbh, $limit = 50)
   }
 }
 
-// Obtener Cotizaciones con detalles (JOIN con clientes)
-function obtenerCotizacionesDashboard($dbh, $limit = 100)
+// Obtener Cotizaciones con detalles - BLINDADO POR SUCURSAL
+function obtenerCotizacionesDashboard($dbh, $id_taller, $limit = 100)
 {
   try {
-    $sql = "SELECT c.id_cotizacion, c.fecha_creacion, c.total, c.estatus, 
+    $sql = "SELECT c.id_cotizacion, c.folio_sucursal, c.fecha_creacion, c.total, c.estatus, 
                    cl.nombre_cliente, cl.papellido_cliente, cl.sapellido_cliente 
             FROM cotizaciones c
             LEFT JOIN clientes cl ON c.id_cliente = cl.id_cliente
+            WHERE c.id_taller = :id_taller
             ORDER BY c.id_cotizacion DESC
             LIMIT :limit";
 
     $stmt = $dbh->prepare($sql);
+    $stmt->bindParam(':id_taller', $id_taller, PDO::PARAM_INT);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->execute();
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   } catch (Exception $e) {
-    // Si hay error, regresamos un arreglo vacío para no romper la pantalla
     error_log("Error en obtenerCotizacionesDashboard: " . $e->getMessage());
     return [];
   }

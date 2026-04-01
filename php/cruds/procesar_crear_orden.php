@@ -1,12 +1,12 @@
 <?php
-// Solo se mostrarán errores graves en el log del servidor, no en la pantalla
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(E_ALL);
 
-require "../conexion.php";
+session_start(); 
+// Iniciamos sesión para saber en qué taller estamos
+$id_taller_sesion = $_SESSION['taller_id'] ?? 1;
 
 header('Content-Type: application/json; charset=utf-8');
+require "../conexion.php";
+
 $response = ["success" => false, "message" => "Error desconocido"];
 
 // Funciones
@@ -71,18 +71,26 @@ try {
   $anticipo = !empty($_POST['anticipo']) ? floatval($_POST['anticipo']) : 0;
   $saldo = $costo - $anticipo;
 
+  // GENERADOR DE FOLIOS INDEPENDIENTES PARA ÓRDENES
+  $stmtFolioOrd = $dbh->prepare("SELECT MAX(folio_sucursal) FROM ordenesservicio WHERE id_taller = ?");
+  $stmtFolioOrd->execute([$id_taller_sesion]);
+  $ultimo_folio_ord = $stmtFolioOrd->fetchColumn();
+  $nuevo_folio_orden = ($ultimo_folio_ord) ? $ultimo_folio_ord + 1 : 1;
+  // ======================================================================
+
   $sqlOrden = "INSERT INTO ordenesservicio (
-        id_cliente, id_equipo, modelo, id_marca, numero_serie,
+        id_taller, folio_sucursal, id_cliente, id_equipo, modelo, id_marca, numero_serie,
         falla, id_tiposervicio, diagnostico, observaciones,
         accesorios_recibidos, contrasena_dispositivo, 
         costo_servicio, anticipo_servicio, saldo_servicio,
         id_usuario, id_estado_servicio, fecha_entrega_estimada, token_hash
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
   $stmtOrden = $dbh->prepare($sqlOrden);
 
-  // Usamos el operador ?? '' en TODO para evitar "Undefined array key"
   $stmtOrden->execute([
+    $id_taller_sesion,
+    $nuevo_folio_orden,  // <-- Inyectamos el nuevo folio visual aquí
     $id_cliente,
     $_POST['tipo_equipo'] ?? 1,
     trim($_POST['modelo'] ?? ''),
@@ -91,46 +99,48 @@ try {
     trim($_POST['falla'] ?? ''),
     $_POST['tipo_servicio'] ?? 1,
     trim($_POST['diagnostico'] ?? ''),
-    trim($_POST['observaciones'] ?? ''), 
+    trim($_POST['observaciones'] ?? ''),
     trim($_POST['accesorios'] ?? '') ?: 'Sin accesorios',
     trim($_POST['contrasena_dispositivo'] ?? '') ?: 'Sin clave',
     $costo,
     $anticipo,
     $saldo,
-    $id_usuario, 
+    $id_usuario,
     1,
     $fecha_entrega,
     $token_hash
   ]);
 
-  $id_orden = $dbh->lastInsertId();
+  $id_orden = $dbh->lastInsertId(); // La Llave Primaria (robot) sigue existiendo
 
   // REGISTRAR EL ANTICIPO 
   if ($anticipo > 0) {
-    // Recibimos el método de pago real desde el formulario (1=Efectivo, 2=Tarjeta, 3=Transferencia)
-    $id_metodo_pago = $_POST['id_metodo_pago'] ?? 
-    // Lo traducimos a texto para la tabla de ventas
+    $id_metodo_pago = $_POST['id_metodo_pago'] ?? 1;
+
     $metodo_texto = 'Efectivo';
     if ($id_metodo_pago == 2) $metodo_texto = 'Tarjeta';
     if ($id_metodo_pago == 3) $metodo_texto = 'Transferencia';
 
-    // Creamos el ticket en ventas con el método REAL
-    $stmtVenta = $dbh->prepare("INSERT INTO ventas (id_cliente, id_usuario, id_orden, total, metodo_pago, tipo_movimiento) VALUES (?, ?, ?, ?, ?, 'Anticipo Orden')");
-    $stmtVenta->execute([$id_cliente, $id_usuario, $id_orden, $anticipo, $metodo_texto]);
+    // GENERADOR DE FOLIOS INDEPENDIENTES PARA VENTAS (TICKETS)
+    $stmtFolioVen = $dbh->prepare("SELECT MAX(folio_sucursal) FROM ventas WHERE id_taller = ?");
+    $stmtFolioVen->execute([$id_taller_sesion]);
+    $ultimo_folio_ven = $stmtFolioVen->fetchColumn();
+    $nuevo_folio_venta = ($ultimo_folio_ven) ? $ultimo_folio_ven + 1 : 1;
+
+    // Insertamos la Venta con su Folio Sucursal
+    $stmtVenta = $dbh->prepare("INSERT INTO ventas (id_taller, folio_sucursal, id_cliente, id_usuario, id_orden, total, metodo_pago, tipo_movimiento) VALUES (?, ?, ?, ?, ?, ?, ?, 'Anticipo Orden')");
+    $stmtVenta->execute([$id_taller_sesion, $nuevo_folio_venta, $id_cliente, $id_usuario, $id_orden, $anticipo, $metodo_texto]);
     $id_venta = $dbh->lastInsertId();
 
     // Especificamos el concepto en detalle_ventas
-    $concepto = "Anticipo de Reparación Orden #" . $id_orden;
+    $concepto = "Anticipo de Reparación Orden #" . $nuevo_folio_orden; // <-- Ahora muestra el folio bonito
     $stmtDetalle = $dbh->prepare("INSERT INTO detalle_ventas (id_venta, concepto, cantidad, precio_unitario, subtotal) VALUES (?, ?, 1, ?, ?)");
     $stmtDetalle->execute([$id_venta, $concepto, $anticipo, $anticipo]);
 
-    // Lo guardamos en abonos_ordenes usando el ID del método de pago REAL (no el 1 fijo)
-    $stmtAbonoInicial = $dbh->prepare("INSERT INTO abonos_ordenes (id_orden, monto_abono, id_usuario, id_metpago) VALUES (?, ?, ?, ?)");
-    $stmtAbonoInicial->execute([$id_orden, $anticipo, $id_usuario, $id_metodo_pago]);
-  }
+   }
 
     // SUBIR FOTOS
-  if (!empty($_FILES['evidencias']['name'][0])) {
+    if (!empty($_FILES['evidencias']['name'][0])) {
     $dir = "/../../imgs/ordenes/";
     if (!is_dir($dir)) mkdir($dir, 0777, true);
 
@@ -159,16 +169,15 @@ try {
   $dbh->commit();
 
   // RESPUESTA
-
   // OJO: Cambiar "localhost/swaos" por "swaos.rf.gd" cuando lo subas a tu servidor
   $link_track = "https://swaos.rf.gd/track.php?t=" . $token_hash;
   $link_portal = "https://swaos.rf.gd/portal_cliente.php";
 
   $msg = "Hola *" . $datosCliente['nombre_cliente'] . "*,\n";
-  $msg .= "Recibimos tu equipo en taller. Tu número de Orden es la *#" . str_pad($id_orden, 6, "0", STR_PAD_LEFT) . "*.\n\n";
+  // Cambiamos $id_orden por $nuevo_folio_orden en el WhatsApp
+  $msg .= "Recibimos tu equipo en taller. Tu número de Orden es la *#" . str_pad($nuevo_folio_orden, 6, "0", STR_PAD_LEFT) . "*.\n\n";
   $msg .= "Sigue el estado en tiempo real de tu equipo aquí:\n$link_track";
 
-  // Si es la primera vez que viene al taller, le damos la bienvenida al portal
   if ($es_cuenta_nueva) {
     $msg .= "\n\n *¡BIENVENIDO(A) A TU PORTAL DE CLIENTE!* \n";
     $msg .= "Hemos creado un espacio exclusivo para ti donde podrás ver el historial de tus reparaciones y descargar tus notas.\n\n";
@@ -179,8 +188,14 @@ try {
   }
 
   $response["success"] = true;
-  $response["message"] = "Orden #$id_orden creada correctamente.";
+  //  Cambiamos $id_orden por $nuevo_folio_orden en el mensaje de éxito de la pantalla
+  $response["message"] = "Orden #$nuevo_folio_orden creada correctamente.";
   $response["token_qr"] = $token_hash;
+
+  // Le mandamos ambos IDs al JavaScript por si los necesita para imprimir el ticket
+  $response["id_orden_db"] = $id_orden;
+  $response["folio_sucursal"] = $nuevo_folio_orden;
+
   $response["datos_whatsapp"] = ["telefono" => $datosCliente['tel_cliente'], "mensaje" => $msg];
 } catch (Exception $e) {
   if ($dbh->inTransaction()) $dbh->rollBack();

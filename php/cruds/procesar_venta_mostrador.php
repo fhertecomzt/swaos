@@ -3,6 +3,9 @@ session_start();
 require '../conexion.php';
 header('Content-Type: application/json');
 
+// Iniciamos sesión para saber en qué taller estamos
+$id_taller_sesion = $_SESSION['taller_id'] ?? 1;
+
 // Recibimos el paquete de datos JSON que nos manda el Carrito de JS
 $datos = json_decode(file_get_contents('php://input'), true);
 
@@ -27,13 +30,23 @@ try {
   // Encendemos el motor de transacciones 
   $dbh->beginTransaction();
 
-  //  Guardamos la Venta Maestra
-  // Nota: id_cliente e id_orden van en blanco (NULL) porque es venta pública de mostrador
-  // Insertamos la Venta Maestra (Ahora con soporte para id_cliente)
-  // Insertamos con cuanto pago y cambio
-  $sqlVenta = "INSERT INTO ventas (id_usuario, id_cliente, total, metodo_pago, tipo_movimiento, pago_cliente, cambio_cliente) VALUES (?, ?, ?, ?, 'Venta Mostrador', ?, ?)";
+  // Si no hay cliente, debe ser NULL para la base de datos, no 0
+  $id_cliente_final = ($id_cliente > 0) ? $id_cliente : null;
+
+  $sqlVenta = "INSERT INTO ventas (id_taller, id_usuario, id_cliente, total, metodo_pago, tipo_movimiento, pago_cliente, cambio_cliente) 
+               VALUES (?, ?, ?, ?, ?, 'Venta Mostrador', ?, ?)";
+
   $stmtVenta = $dbh->prepare($sqlVenta);
-  $stmtVenta->execute([$id_usuario, $id_cliente, $total_venta, $metodo_pago, $pago_cliente, $cambio_cliente]);
+
+  $stmtVenta->execute([
+    $id_taller,          // 1. Para id_taller
+    $id_usuario,         // 2. Para id_usuario
+    $id_cliente_final,   // 3. Para id_cliente (NULL o ID real)
+    $total_venta,        // 4. Para total
+    $metodo_pago,        // 5. Para metodo_pago
+    $pago_cliente,       // 6. Para pago_cliente
+    $cambio_cliente      // 7. Para cambio_cliente
+  ]);
 
   // Obtenemos el Folio del Ticket que se acaba de crear
   $id_venta = $dbh->lastInsertId();
@@ -55,9 +68,7 @@ try {
     // Guardamos el detalle usando nuestra variable blindada
     $stmtDetalle->execute([$id_venta, $id_producto_final, $item['nombre'], $item['cantidad'], $item['precio'], $subtotal]);
 
-    // ======================================================================
-    // 🌟 INYECCIÓN DEL KARDEX: Solo si es un producto físico (ID > 0)
-    // ======================================================================
+    //  INYECCIÓN DEL KARDEX: Solo si es un producto físico (ID > 0)
     if ($id_producto_final > 0) {
 
       // 1. Tomamos la "Fotografía" del stock ANTES de descontar (FOR UPDATE bloquea la fila por milisegundos para evitar choques)

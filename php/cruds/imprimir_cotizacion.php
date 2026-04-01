@@ -67,7 +67,7 @@ try {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cotización #<?php echo $id_cotizacion; ?></title>
+  <title>Cotización #<?php echo $cotizacion['folio_sucursal']; ?></title>
   <style>
     /* Diseño elegante para pantalla */
     body {
@@ -234,7 +234,7 @@ try {
       </div>
       <div class="folio-info">
         <h2>COTIZACIÓN</h2>
-        <p>Folio: #<?php echo str_pad($id_cotizacion, 6, "0", STR_PAD_LEFT); ?></p>
+        <p>Folio: #<?php echo str_pad($cotizacion['folio_sucursal'], 6, "0", STR_PAD_LEFT); ?></p>
         <p>Fecha: <?php echo date('d/m/Y', strtotime($cotizacion['fecha_creacion'])); ?></p>
       </div>
     </div>

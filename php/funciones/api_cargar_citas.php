@@ -4,13 +4,18 @@ require '../conexion.php';
 header('Content-Type: application/json');
 
 try {
-  // Buscamos todas las citas y cruzamos con la tabla clientes para obtener el nombre
+  // GUARDIA DE SEGURIDAD
+  $id_taller_sesion = $_SESSION['taller_id'] ?? 1;
+
+  // Buscamos todas las citas filtrando por la sucursal actual
   $sql = "SELECT c.*, cli.nombre_cliente, cli.papellido_cliente, cli.tel_cliente 
             FROM citas c 
             LEFT JOIN clientes cli ON c.id_cliente = cli.id_cliente 
-            WHERE c.estatus != 'Cancelada'";
+            WHERE c.estatus != 'Cancelada' AND c.id_taller = ?"; // <-- EL CANDADO
 
-  $stmt = $dbh->query($sql);
+  // Cambiamos query() por prepare() y execute() por seguridad
+  $stmt = $dbh->prepare($sql);
+  $stmt->execute([$id_taller_sesion]);
   $citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   $eventos = [];

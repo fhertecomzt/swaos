@@ -1,5 +1,8 @@
 <?php
 session_start();
+// Iniciamos sesión para saber en qué taller estamos
+$id_taller_sesion = $_SESSION['taller_id'] ?? 1;
+
 header("Content-Type: application/json");
 require '../conexion.php';
 
@@ -20,10 +23,26 @@ $idUsuario = $_SESSION['idusuario'] ?? 1;
 try {
     $dbh->beginTransaction();
 
+    $folio_respuesta = 0; // Guardaremos el folio para mandarlo al JS
+
     if ($idCotizacion > 0) {
-        // ES UNA EDICIÓN (UPDATE)
-        $stmtCot = $dbh->prepare("UPDATE cotizaciones SET id_cliente = ?, total = ? WHERE id_cotizacion = ?");
-        $stmtCot->execute([$idCliente, $total, $idCotizacion]);
+        // ======================================================================
+        // 🛡️ GUARDIA DE SEGURIDAD (EDICIÓN)
+        // ======================================================================
+        $stmtCheck = $dbh->prepare("SELECT folio_sucursal FROM cotizaciones WHERE id_cotizacion = ? AND id_taller = ?");
+        $stmtCheck->execute([$idCotizacion, $idTaller]);
+        $cot_existente = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+        if (!$cot_existente) {
+            echo json_encode(['success' => false, 'message' => '⛔ Acceso denegado: Esta cotización es de otra sucursal.']);
+            exit;
+        }
+
+        $folio_respuesta = $cot_existente['folio_sucursal'];
+
+        // ES UNA EDICIÓN (UPDATE) BLINDADA
+        $stmtCot = $dbh->prepare("UPDATE cotizaciones SET id_cliente = ?, total = ? WHERE id_cotizacion = ? AND id_taller = ?");
+        $stmtCot->execute([$idCliente, $total, $idCotizacion, $idTaller]);
 
         // Borramos los detalles viejos y metemos los nuevos limpios
         $stmtDel = $dbh->prepare("DELETE FROM detalle_cotizaciones WHERE id_cotizacion = ?");
@@ -31,9 +50,19 @@ try {
 
         $idFinal = $idCotizacion;
     } else {
-        // ES UNA NUEVA (INSERT)
-        $stmtCot = $dbh->prepare("INSERT INTO cotizaciones (id_taller, id_usuario, id_cliente, total, observaciones) VALUES (?, ?, ?, ?, ?)");
-        $stmtCot->execute([$idTaller, $idUsuario, $idCliente, $total, $observaciones]);
+        // ======================================================================
+        // 🌟 GENERADOR DE FOLIOS INDEPENDIENTES (NUEVA)
+        // ======================================================================
+        $stmtFolioCot = $dbh->prepare("SELECT MAX(folio_sucursal) FROM cotizaciones WHERE id_taller = ?");
+        $stmtFolioCot->execute([$idTaller]);
+        $ultimo_folio_cot = $stmtFolioCot->fetchColumn();
+        $nuevo_folio_cot = ($ultimo_folio_cot) ? $ultimo_folio_cot + 1 : 1;
+
+        $folio_respuesta = $nuevo_folio_cot;
+
+        // ES UNA NUEVA (INSERT) CON SU FOLIO INDEPENDIENTE
+        $stmtCot = $dbh->prepare("INSERT INTO cotizaciones (id_taller, folio_sucursal, id_usuario, id_cliente, total, observaciones) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmtCot->execute([$idTaller, $nuevo_folio_cot, $idUsuario, $idCliente, $total, $observaciones]);
         $idFinal = $dbh->lastInsertId();
     }
 
@@ -51,7 +80,7 @@ try {
     }
 
     $dbh->commit();
-    echo json_encode(['success' => true, 'id_cotizacion' => $idFinal]);
+    echo json_encode(['success' => true, 'id_cotizacion' => $idFinal, 'folio_sucursal' => $folio_respuesta]);
 } catch (Exception $e) {
     $dbh->rollBack();
     echo json_encode(['success' => false, 'message' => 'Error en BD: ' . $e->getMessage()]);

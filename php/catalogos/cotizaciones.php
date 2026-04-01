@@ -7,7 +7,7 @@ require "../conexion.php";
 include "../funciones/funciones.php";
 
 // OBTENER COTIZACIONES
-$cotizaciones = obtenerCotizacionesDashboard($dbh, 200);
+$cotizaciones = obtenerCotizacionesDashboard($dbh, $_SESSION['taller_id'], 200);
 ?>
 
 <div class="containerr">
@@ -45,7 +45,7 @@ $cotizaciones = obtenerCotizacionesDashboard($dbh, 200);
 
         <?php if (!empty($cotizaciones)): ?>
           <?php foreach ($cotizaciones as $cot):
-            $folio = str_pad($cot['id_cotizacion'], 6, "0", STR_PAD_LEFT);
+            $folio = str_pad($cot['folio_sucursal'], 6, "0", STR_PAD_LEFT);
             $fecha = date('d/m/Y h:i A', strtotime($cot['fecha_creacion']));
 
             $cliente = trim($cot['nombre_cliente'] . ' ' . $cot['papellido_cliente'] . ' ' . $cot['sapellido_cliente']);

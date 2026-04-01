@@ -24,19 +24,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Iniciamos la Transacción SQL
+    // EL GUARDIA DE SEGURIDAD (Blindaje Multi-Sucursal)
+    $id_taller_sesion = $_SESSION['taller_id'] ?? 1;
+
+    $stmtCheck = $dbh->prepare("SELECT id_orden FROM ordenesservicio WHERE id_orden = ? AND id_taller = ?");
+    $stmtCheck->execute([$id_orden, $id_taller_sesion]);
+    if (!$stmtCheck->fetch()) {
+        echo json_encode(['success' => false, 'message' => '⛔ Acceso denegado: Esta orden pertenece a otra sucursal.']);
+        exit;
+    }
+
+    // Iniciamos la Transacción SQL
     $dbh->beginTransaction();
 
     try {
         // 1. Actualizamos la orden
         $sql = "UPDATE ordenesservicio 
                 SET id_estado_servicio = ?, diagnostico = ?, costo_servicio = ?, anticipo_servicio = ?, saldo_servicio = ?
-                WHERE id_orden = ?";
+                WHERE id_orden = ? AND id_taller = ?";
         $stmt = $dbh->prepare($sql);
-        $stmt->execute([$id_estado_servicio, $diagnostico, $costo_servicio, $anticipo_total, $saldo_servicio, $id_orden]);
+        $stmt->execute([$id_estado_servicio, $diagnostico, $costo_servicio, $anticipo_total, $saldo_servicio, $id_orden, $id_taller_sesion]);
 
-        // ======================================================================
-        // 🌟 ACTUALIZAR REFACCIONES Y KARDEX (ALGORITMO INTELIGENTE)
-        // ======================================================================
+        // ACTUALIZAR REFACCIONES Y KARDEX (ALGORITMO INTELIGENTE)
         $id_taller = $_SESSION['taller_id'] ?? 1;
         $id_usuario = $_SESSION['id_usuario'] ?? $_SESSION['idusuario'] ?? 1;
 

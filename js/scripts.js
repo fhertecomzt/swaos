@@ -6573,7 +6573,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setInterval(revisarNotificacionesTraspasos, 30000); 
 });
 
-/// Llamar Ordenes de servicio *************************************************
+// Llamar Ordenes de servicio *************************************************
 document
   .getElementById("ordenes-link")
   .addEventListener("click", function (event) {
@@ -8825,7 +8825,7 @@ function cargarHistorial() {
           // Color en el primer <td> del Folio según el tipo de movimiento
           let fila = `
                     <tr>
-                        <td style="vertical-align: middle;"><strong>#${venta.id_venta}</strong> <br> ${badgeTipo}</td>
+                        <td style="vertical-align: middle;"><strong>#${venta.folio_sucursal}</strong> <br> ${badgeTipo}</td>
                         <td style="vertical-align: middle;">${venta.fecha_venta}</td>
                         <td style="vertical-align: middle;">${venta.nombre_cliente}</td>
                         <td style="vertical-align: middle;">${venta.papellido_cliente}</td>
@@ -9573,10 +9573,13 @@ function guardarCotizacion() {
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
+        // Rellenamos con ceros a la izquierda para que se vea elegante como #000001
+        let folioElegante = data.folio_sucursal.toString().padStart(6, "0");
+
         Swal.fire({
           title:
             window.idCotizacionEditando > 0 ? "¡Actualizada!" : "¡Guardada!",
-          text: "Se procesó correctamente el Folio #" + data.id_cotizacion,
+          text: "Se procesó correctamente el Folio #" + data.folio_sucursal,
           icon: "success",
           showCancelButton: true,
           confirmButtonText: '<i class="fa-solid fa-print"></i> Imprimir / PDF',
@@ -9880,9 +9883,16 @@ window.editarCotizacion = function (id) {
             // Cambiamos el botón Verde a Amarillo
             let btnGuardar = document.getElementById("btn-guardar-cot");
             if (btnGuardar) {
+              // Usamos data.cotizacion.folio_sucursal (el número del humano)
+              // en lugar de id (el número del robot)
+              let folioVisual = data.cotizacion.folio_sucursal
+                .toString()
+                .padStart(6, "0");
+
               btnGuardar.innerHTML =
                 '<i class="fa-solid fa-pen-to-square"></i> ACTUALIZAR COTIZACIÓN #' +
-                id;
+                folioVisual;
+
               btnGuardar.style.backgroundColor = "#ffc107";
               btnGuardar.style.color = "#000";
             }

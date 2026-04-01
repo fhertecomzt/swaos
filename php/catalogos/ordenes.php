@@ -26,7 +26,8 @@ $servicios = obtenerRegistros($dbh, "tiposervicios", "id_servicio, nom_servicio"
 $metpagos = obtenerRegistros($dbh, "metodosdepago", "id_metpago, nombre_metpago", "ASC", "nombre_metpago", 100, 1, true);
 
 // ordenes de servicio
-$ordenes = obtenerOrdenesDashboard($dbh, 50);
+$ordenes = obtenerOrdenesDashboard($dbh, $_SESSION['taller_id'], 50);
+
 // Estados de servicio (Para el modal de edición)
 $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servicio, estado_servicio", "ASC", "id_estado_servicio", 100, 1, true);
 ?>
@@ -67,7 +68,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
       <tbody id="ordenes-lista">
         <?php foreach ($ordenes as $ord): ?>
           <tr>
-            <td data-lable="Folio">#<?php echo $ord['id_orden']; ?></td>
+            <td data-lable="Folio">#<?php echo $ord['folio_sucursal']; ?></td>
             <td data-lable="Cliente"><?php echo htmlspecialchars($ord['nombre_cliente'] . ' ' . $ord['papellido_cliente']); ?></td>
             <td data-lable="Equipo"><?php echo htmlspecialchars($ord['nombre_equipo'] . ' ' . $ord['modelo']); ?></td>
             <td data-lable="Falla"><?php echo htmlspecialchars(substr($ord['falla'], 0, 30)) . '...'; ?></td>

@@ -115,7 +115,7 @@ try {
 
 <head>
   <meta charset="UTF-8">
-  <title>Ticket POS #<?= $id_venta ?></title>
+  <title>Ticket POS #<?= $venta['folio_sucursal'] ?></title>
   <style>
     /* Diseño Especial para Impresora Térmica 58mm */
     body {
@@ -257,7 +257,7 @@ try {
       </div>
 
       <div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 3px 0; margin-bottom: 5px;">
-        <strong>TICKET DE VENTA: #<?= $id_venta ?></strong><br>
+        <strong>TICKET DE VENTA: #<?= $venta['folio_sucursal'] ?></strong><br>
         Fecha: <?= date('d/m/Y H:i', strtotime($venta['fecha_venta'])) ?>
       </div>
 

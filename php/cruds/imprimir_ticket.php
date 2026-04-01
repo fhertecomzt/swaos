@@ -9,7 +9,7 @@ if (!isset($_GET['id'])) {
 $id_orden = intval($_GET['id']);
 
 // Consultamos todos los datos de esta orden
-$sql = "SELECT o.id_orden, o.creado_servicio, c.nombre_cliente, c.papellido_cliente, c.tel_cliente,
+$sql = "SELECT o.id_orden, o.folio_sucursal, o.creado_servicio, c.nombre_cliente, c.papellido_cliente, c.tel_cliente,
                e.nombre_equipo, o.modelo, o.falla, o.costo_servicio, o.anticipo_servicio, o.saldo_servicio,
                o.token_hash
         FROM ordenesservicio o
@@ -32,7 +32,7 @@ $nombre_taller = $_SESSION['nombre_t'] ?? 'Mi Taller de Reparación';
 
 <head>
     <meta charset="UTF-8">
-    <title>Ticket Orden #<?php echo $orden['id_orden']; ?></title>
+    <title>Ticket Orden #<?php echo $orden['folio_sucursal']; ?></title>
     <style>
         /* CSS ESPECÍFICO PARA IMPRESORA TÉRMICA (80mm) */
         * {
@@ -134,7 +134,7 @@ $nombre_taller = $_SESSION['nombre_t'] ?? 'Mi Taller de Reparación';
         <div class="centrado">
             <h1 class="titulo"><?php echo htmlspecialchars($nombre_taller); ?></h1>
             <p>TICKET DE RECEPCIÓN</p>
-            <p>Folio: <span class="negrita">#<?php echo $orden['id_orden']; ?></span></p>
+            <p>Folio: <span class="negrita">#<?php echo $orden['folio_sucursal']; ?></span></p>
             <p>Fecha: <?php echo date('d/m/Y H:i', strtotime($orden['creado_servicio'])); ?></p>
         </div>
 

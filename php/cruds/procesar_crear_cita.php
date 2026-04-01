@@ -13,13 +13,16 @@ try {
     $direccion = $_POST['direccion_visita'] ?? '';
     $motivo = trim($_POST['motivo'] ?? '');
 
+    // CAPTURAMOS EL TALLER ACTUAL
+    $id_taller_sesion = $_SESSION['taller_id'] ?? 1;
+
     // 2. Validación de seguridad (Solo 1 vez al principio)
     if (empty($id_cliente) || empty($id_tecnico) || empty($fecha_inicio) || empty($fecha_fin) || empty($tipo_cita) || empty($motivo)) {
         echo json_encode(['success' => false, 'message' => 'Faltan datos obligatorios para agendar la cita.']);
         exit;
     }
 
-    // 🛑 3. EL ESCUDO MULTI-TÉCNICO
+    //  3. EL ESCUDO MULTI-TÉCNICO
     $stmt_check = $dbh->prepare("SELECT COUNT(*) FROM citas 
                                  WHERE estatus != 'Cancelada' 
                                  AND id_tecnico = ? 
@@ -36,7 +39,7 @@ try {
         exit;
     }
 
-    // 🎨 4. COLORES CORPORATIVOS
+    //  4. COLORES CORPORATIVOS
     $color = '#0d6efd'; // Azul por defecto (Recepción en Taller)
     if ($tipo_cita == 'Domicilio') {
         $color = '#fd7e14'; // Naranja alerta (El técnico debe salir)
@@ -44,9 +47,11 @@ try {
         $color = '#6f42c1'; // Morado (Soporte Online)
     }
 
-    // 💾 5. GUARDADO DEFINITIVO (Una sola vez, ya con el color asignado)
-    $stmt = $dbh->prepare("INSERT INTO citas (id_cliente, id_tecnico, fecha_inicio, fecha_fin, tipo_cita, motivo, direccion_visita, color_evento, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Agendada')");
-    $stmt->execute([$id_cliente, $id_tecnico, $fecha_inicio, $fecha_fin, $tipo_cita, $motivo, $direccion, $color]);
+    // GUARDADO DEFINITIVO BLINDADO POR SUCURSAL
+    $stmt = $dbh->prepare("INSERT INTO citas (id_taller, id_cliente, id_tecnico, fecha_inicio, fecha_fin, tipo_cita, motivo, direccion_visita, color_evento, estatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Agendada')");
+
+    // Agregamos $id_taller_sesion como primer parámetro en el arreglo
+    $stmt->execute([$id_taller_sesion, $id_cliente, $id_tecnico, $fecha_inicio, $fecha_fin, $tipo_cita, $motivo, $direccion, $color]);
 
     $id_nueva_cita = $dbh->lastInsertId();
 
