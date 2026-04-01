@@ -27,13 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmtNomTaller->execute([$id_destino]);
     $nom_destino = $stmtNomTaller->fetchColumn();
 
-    $motivo_salida = "Traspaso enviado a: " . $nom_destino;
-    $motivo_entrada = "Traspaso recibido de: " . $nom_origen;
+    $motivo_salida = "Traspaso EN TRÁNSITO hacia: " . $nom_destino;
 
     $stmtStock = $dbh->prepare("SELECT stock FROM inventario_sucursal WHERE id_prod = ? AND idtaller = ? FOR UPDATE");
     $stmtUpdate = $dbh->prepare("UPDATE inventario_sucursal SET stock = ? WHERE id_prod = ? AND idtaller = ?");
-    $stmtInsert = $dbh->prepare("INSERT INTO inventario_sucursal (id_prod, idtaller, stock) VALUES (?, ?, ?)");
     $stmtKardex = $dbh->prepare("INSERT INTO kardex_inventario (id_prod, id_taller, id_usuario, tipo_movimiento, cantidad, stock_anterior, stock_nuevo, motivo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
+    // 🌟 LA NUEVA MAGIA: El Limbo
+    $stmtLimbo = $dbh->prepare("INSERT INTO traspasos_pendientes (id_taller_origen, id_taller_destino, id_usuario_envia, id_prod, cantidad) VALUES (?, ?, ?, ?, ?)");
 
     for ($i = 0; $i < count($productos_id); $i++) {
       $id_p = $productos_id[$i];
@@ -51,23 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $stock_nuev_orig = $stock_ant_orig - $cant;
 
       $stmtUpdate->execute([$stock_nuev_orig, $id_p, $id_origen]);
+
+      // Registramos que salió de tu taller, pero aclaramos que va "En Tránsito"
       $stmtKardex->execute([$id_p, $id_origen, $id_usuario, 'Salida', $cant, $stock_ant_orig, $stock_nuev_orig, $motivo_salida]);
 
-      // 2. GESTIÓN DEL TALLER DESTINO (ENTRADA)
-      $stmtStock->execute([$id_p, $id_destino]);
-      $rowDestino = $stmtStock->fetch(PDO::FETCH_ASSOC);
-
-      if ($rowDestino) {
-        $stock_ant_dest = floatval($rowDestino['stock']);
-        $stock_nuev_dest = $stock_ant_dest + $cant;
-        $stmtUpdate->execute([$stock_nuev_dest, $id_p, $id_destino]);
-      } else {
-        $stock_ant_dest = 0;
-        $stock_nuev_dest = $cant;
-        $stmtInsert->execute([$id_p, $id_destino, $stock_nuev_dest]);
-      }
-
-      $stmtKardex->execute([$id_p, $id_destino, $id_usuario, 'Entrada', $cant, $stock_ant_dest, $stock_nuev_dest, $motivo_entrada]);
+      // 2. ENVIAR AL "LIMBO" (En vez de sumar al destino)
+      $stmtLimbo->execute([$id_origen, $id_destino, $id_usuario, $id_p, $cant]);
     }
 
     $dbh->commit();

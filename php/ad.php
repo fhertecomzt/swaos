@@ -356,11 +356,17 @@ $_SESSION['last_token'] = $current_token;
                 <a href="#" id="menu-toggle">☰</a>
             </div>
             <div class="header--title">
-                <!-- <h2>Taller: <?php echo $_SESSION['nombre_t'] . ", Id: " . $_SESSION['taller_id'] ?></h2> -->
                 <h2>Taller: <?php echo $_SESSION['nombre_t'] ?></h2>
                 <span>Usuario: <?php echo $_SESSION['usuario'] ?></span>
             </div>
             <div class="user--info">
+                
+                <!-- Campanita -->
+                <div style="position: relative; margin-left: 15px; cursor: pointer;" onclick="abrirModalTraspasos()" title="Ver mercancía en tránsito">
+                    <i class="fa-solid fa-bell" style="font-size: 24px; color: #c2cdd6; transition: 0.3s;" id="icono-campana-traspasos"></i>
+                    <span id="badge-traspasos" style="display: none; position: absolute; top: -5px; right: -8px; background: #dc3545; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; border: 2px solid white;">0</span>
+                </div>
+
                 <!-- Botón o imagen para abrir el dropdown Perfil -->
                 <div class="perfil-dropdown">
                     <button class="perfil-btn">
@@ -388,6 +394,18 @@ $_SESSION['last_token'] = $current_token;
                 include 'tiendas.php';
             }
             ?>
+        </div>
+    </div>
+
+    <div id="modal-traspasos" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; width: 600px; max-width: 95%; border-radius: 8px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeIn 0.3s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eef2f5; padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #17a2b8;"><i class="fa-solid fa-truck-ramp-box"></i> Mercancía en Camino</h3>
+                <button onclick="cerrarModalTraspasos()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa;">&times;</button>
+            </div>
+
+            <div id="lista-traspasos-pendientes" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+            </div>
         </div>
     </div>
 

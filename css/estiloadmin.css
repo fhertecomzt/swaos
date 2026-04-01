@@ -310,6 +310,11 @@ p.darkmode {
             opacity: 0;
             visibility: hidden;
         }
+        
+/* Fuerza a SweetAlert a estar por encima de nuestro Modal (que tiene z-index 9999) */
+.my-swal-container {
+    z-index: 10000 !important; 
+}
 
 /* MEDIA QUERIES */
 

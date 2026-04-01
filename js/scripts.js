@@ -6459,6 +6459,120 @@ document.addEventListener("submit", function(e) {
     }
 });
 
+// SENSOR DE NOTIFICACIONES Y RECEPCIÓN DE TRASPASOS
+window.revisarNotificacionesTraspasos = function() {
+    // Le ponemos un timestamp falso al final para evitar el caché del navegador
+    fetch("cruds/obtener_traspasos_pendientes.php?t=" + new Date().getTime())
+    .then(res => res.json())
+    .then(data => {
+        const badge = document.getElementById("badge-traspasos");
+        const icono = document.getElementById("icono-campana-traspasos");
+        const lista = document.getElementById("lista-traspasos-pendientes");
+        if(!badge || !icono || !lista) return;
+        
+        if (data.length && data.length > 0) {
+            // ¡Hay paquetes en camino! Encendemos la alarma visual
+            badge.textContent = data.length;
+            badge.style.display = "block";
+            icono.style.color = "#dc3545"; // Se pone roja
+            icono.classList.add("fa-shake"); // Tiembla un poquito
+            
+            // Dibujamos los paquetes en el modal
+            let html = "";
+            data.forEach(t => {
+                html += `
+                    <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;">
+                        <div>
+                            <strong style="color:#007bff; font-size: 16px;">[${t.codebar_prod}] ${t.nombre_prod}</strong><br>
+                            <span style="font-size: 14px;">Viene de: <b style="color: #333;">${t.taller_origen}</b></span><br>
+                            <span style="font-size: 14px;">Cantidad a recibir: <b style="color: #28a745; font-size: 16px;">+${t.cantidad}</b></span><br>
+                            <small style="color: #888;"><i class="fa-regular fa-clock"></i> Enviado por: ${t.usuario_envia} el ${t.fecha}</small>
+                        </div>
+                        <div>
+                            <button onclick="confirmarRecepcionFisica(${t.id_traspaso})" style="background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;">
+                                <i class="fa-solid fa-box-open"></i> Recibir Físico
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html;
+        } else {
+            // No hay paquetes, apagamos la campana
+            badge.style.display = "none";
+            icono.style.color = "#b2b3b4"; // Vuelve a gris
+            icono.classList.remove("fa-shake");
+            lista.innerHTML = "<div style='text-align:center; color:#888; padding: 30px;'><i class='fa-solid fa-box' style='font-size: 40px; color: #ddd; margin-bottom: 10px;'></i><br>No tienes mercancía en tránsito hacia tu sucursal.</div>";
+        }
+    })
+    .catch(err => console.error("Error al buscar notificaciones:", err));
+};
+
+// Controles del Modal
+window.abrirModalTraspasos = () => document.getElementById("modal-traspasos").style.display = "flex";
+window.cerrarModalTraspasos = () => document.getElementById("modal-traspasos").style.display = "none";
+
+// Acción del Botón Verde (Recibir Físico)
+window.confirmarRecepcionFisica = function (id_traspaso) {
+  Swal.fire({
+    title: "¿Recibiste físicamente esta mercancía?",
+    text: "Al confirmar, las piezas se sumarán automáticamente a tu inventario.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#28a745",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Sí, la tengo en mis manos",
+    cancelButtonText: "Aún no llega",
+
+    // Le decimos a SweetAlert que dibuje esto en la capa más alta posible
+    customClass: {
+      container: "my-swal-container",
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      if (typeof mostrarPreloader === "function") mostrarPreloader();
+
+      let formData = new FormData();
+      formData.append("id_traspaso", id_traspaso);
+
+      fetch("cruds/recibir_traspaso_final.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (typeof ocultarPreloader === "function") ocultarPreloader();
+          if (data.success) {
+            Swal.fire({
+              title: "¡Mercancía Ingresada!",
+              text: "El inventario ha sido actualizado.",
+              icon: "success",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: { container: "my-swal-container" },
+            });
+            revisarNotificacionesTraspasos(); // Recarga la campana
+            if (typeof cargarTablaKardex === "function") cargarTablaKardex(); // Actualiza el historial
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: data.message,
+              icon: "error",
+              customClass: { container: "my-swal-container" },
+            });
+          }
+        });
+    }
+  });
+};
+
+// Que el sensor se dispare al cargar la página
+document.addEventListener("DOMContentLoaded", function() {
+    revisarNotificacionesTraspasos();
+    // Opcional: Que revise cada 30 segundos sin recargar la página
+    setInterval(revisarNotificacionesTraspasos, 30000); 
+});
+
 /// Llamar Ordenes de servicio *************************************************
 document
   .getElementById("ordenes-link")

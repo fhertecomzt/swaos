@@ -373,54 +373,54 @@ $talleres = $stmtTalleres->fetchAll(PDO::FETCH_ASSOC);
   <!-- Traspasos -->
   <div id="tab-traspasos" class="kardex-pane">
     <h4 style="margin-bottom: 15px; color: #17a2b8;"><i class="fa-solid fa-truck-fast"></i> Traspaso de Inventario a Otra Sucursal</h4>
-    <form id="form-traspaso-multiple">
-      <div style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
-        <label style="font-weight: bold;">Enviar mercancía a la Sucursal / Taller:</label>
-        <select id="traspaso-destino" name="taller_destino" class="buscar--box" style="width: 95%;" required>
-          <option value="">-- Seleccione la Sucursal Destino --</option>
-          <?php foreach ($talleres as $t): ?>
-            <?php if ($t['id_taller'] != $id_mi_taller): ?>
-              <option value="<?php echo $t['id_taller']; ?>"><?php echo htmlspecialchars($t['nombre_t']); ?></option>
-            <?php endif; ?>
-          <?php endforeach; ?>
-        </select>
-      </div>
+        <form id="form-traspaso-multiple">
+          <div style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+            <label style="font-weight: bold;">Enviar mercancía a la Sucursal / Taller:</label>
+            <select id="traspaso-destino" name="taller_destino" class="buscar--box" style="width: 95%;" required>
+              <option value="">-- Seleccione la Sucursal Destino --</option>
+              <?php foreach ($talleres as $t): ?>
+                <?php if ($t['id_taller'] != $id_mi_taller): ?>
+                  <option value="<?php echo $t['id_taller']; ?>"><?php echo htmlspecialchars($t['nombre_t']); ?></option>
+                <?php endif; ?>
+              <?php endforeach; ?>
+            </select>
+          </div>
 
-      <div style="margin-bottom: 20px;">
-        <label style="font-weight: bold;">Buscar Producto a Transferir:</label>
-        <div style="display: flex; gap: 10px;">
-          <input type="search" id="buscador-producto-traspaso" class="buscar--box" style="flex: 1;" placeholder="Escribe el nombre o escanea el código..." autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.-]/g, '')">
-          <button type="button" class="btn-procesar-erp" onclick="agregarProductoTraspaso()" style="background: #17a2b8;"><i class="fa-solid fa-plus"></i> Agregar</button>
-        </div>
-        <div id="sugerencias-traspaso" style="position: absolute; background: white; border: 1px solid #ccc; width: 40%; max-height: 200px; overflow-y: auto; display: none; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
-      </div>
+          <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold;">Buscar Producto a Transferir:</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="search" id="buscador-producto-traspaso" class="buscar--box" style="flex: 1;" placeholder="Escribe el nombre o escanea el código..." autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.-]/g, '')">
+              <button type="button" class="btn-procesar-erp" onclick="agregarProductoTraspaso()" style="background: #17a2b8;"><i class="fa-solid fa-plus"></i> Agregar</button>
+            </div>
+            <div id="sugerencias-traspaso" style="position: absolute; background: white; border: 1px solid #ccc; width: 40%; max-height: 200px; overflow-y: auto; display: none; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+          </div>
 
-      <div class="tabla-scroll">
-        <table class="tbl" style="width: 100%; margin-bottom: 20px;">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th style="width: 150px; text-align: center;">Stock Mi Taller</th>
-              <th style="width: 150px; text-align: center;">Cant. a Enviar</th>
-              <th style="width: 50px; text-align: center;">X</th>
-            </tr>
-          </thead>
-          <tbody id="cuerpo-carrito-traspaso">
-            <tr id="fila-vacia-traspaso">
-              <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay productos a transferir. Busca y agrega uno.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+            <div class="tabla-scroll">
+              <table class="tbl" style="width: 100%; margin-bottom: 20px;">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th style="width: 150px; text-align: center;">Stock Mi Taller</th>
+                    <th style="width: 150px; text-align: center;">Cant. a Enviar</th>
+                    <th style="width: 50px; text-align: center;">X</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpo-carrito-traspaso">
+                  <tr id="fila-vacia-traspaso">
+                    <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay productos a transferir. Busca y agrega uno.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-      <div class="contenedor-accion-final">
-        <button type="submit" class="btn-procesar-erp" style="background-color: #28a745;">
-          <i class="fa-solid fa-paper-plane"></i> Procesar Traspaso
-        </button>
-      </div>
+            <div class="contenedor-accion-final">
+              <button type="submit" class="btn-procesar-erp" style="background-color: #28a745;">
+                <i class="fa-solid fa-paper-plane"></i> Procesar Traspaso
+              </button>
+            </div>
 
-    </form>
+          </form>
   </div>
 
-</div>
+  </div>
 </div>
