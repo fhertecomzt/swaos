@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (actualizandoDashboard) return;
 
     actualizandoDashboard = true;
-    fetch("../php/funciones/api_dashboard.php")
+    // Le agregamos la hora actual para que la URL siempre sea "nueva" y evite el caché
+    fetch("../php/funciones/api_dashboard.php?t=" + new Date().getTime())
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
@@ -131,8 +132,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 badgeHtml = `<span style="background: #cff4fc; color: #055160; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"><i class="fa-solid fa-spinner"></i> ${orden.estado}</span>`;
               }
 
-              let fila = `<tr class="fila-orden-reciente" data-menu-link="ordenes-link" data-filtro="${orden.id_orden}" style="cursor: pointer; transition: 0.2s;">
-                        <td style="vertical-align: middle;"><strong style="color: #0d6efd;">#${orden.id_orden}</strong></td>
+              // 🌟 FIX: Usamos "orden.folio_sucursal" en el filtro y en el texto visual (Rellenado con ceros)
+              let folioElegante = orden.folio_sucursal
+                .toString()
+                .padStart(6, "0");
+
+              let fila = `<tr class="fila-orden-reciente" data-menu-link="ordenes-link" data-filtro="${orden.folio_sucursal}" style="cursor: pointer; transition: 0.2s;">
+                        <td style="vertical-align: middle;"><strong style="color: #0d6efd;">#${folioElegante}</strong></td>
                         <td style="vertical-align: middle;">${orden.cliente}</td>
                         <td style="vertical-align: middle;">${badgeHtml}</td>
                     </tr>`;

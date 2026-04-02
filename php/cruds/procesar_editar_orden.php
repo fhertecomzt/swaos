@@ -132,9 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
         }
-        // ======================================================================
-
-        // Si hay dinero de por medio, registramos el abono para el corte de caja
         // REGISTRO DE PAGO (NUEVO ABONO)
         if ($nuevo_abono > 0) {
             $id_usuario = $_SESSION['idusuario'] ?? 1;
@@ -145,25 +142,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmtAbono->execute([$id_orden, $nuevo_abono, $id_usuario, $metodo_pago]);
 
             // REGISTRO EN LA CAJA GENERAL (ventas)
-            // Decidimos el tipo de movimiento: Si el saldo quedó en $0 o menos, es liquidación.
             $tipo_movimiento = ($saldo_servicio <= 0) ? 'Liquidacion Orden' : 'Abono Orden';
-
-            // Mapeo básico de método de pago
             $metodo_texto = ($metodo_pago == 1) ? 'Efectivo' : (($metodo_pago == 2) ? 'Tarjeta' : 'Transferencia');
 
-            //  Buscamos de quién es esta orden para que el ticket salga a su nombre
-            $stmtBuscaCliente = $dbh->prepare("SELECT id_cliente FROM ordenesservicio WHERE id_orden = ?");
+            // GENERADOR DE FOLIOS PARA EL TICKET DE VENTA
+            $stmtFolioVen = $dbh->prepare("SELECT MAX(folio_sucursal) FROM ventas WHERE id_taller = ?");
+            $stmtFolioVen->execute([$id_taller_sesion]);
+            $ultimo_folio_ven = $stmtFolioVen->fetchColumn();
+            $nuevo_folio_venta = ($ultimo_folio_ven) ? $ultimo_folio_ven + 1 : 1;
+
+            // Buscamos de quién es esta orden Y SU FOLIO VISUAL para el concepto
+            $stmtBuscaCliente = $dbh->prepare("SELECT id_cliente, folio_sucursal FROM ordenesservicio WHERE id_orden = ?");
             $stmtBuscaCliente->execute([$id_orden]);
             $infoOrden = $stmtBuscaCliente->fetch(PDO::FETCH_ASSOC);
             $id_cliente_real = $infoOrden ? $infoOrden['id_cliente'] : null;
+            $folio_orden_visual = $infoOrden ? $infoOrden['folio_sucursal'] : $id_orden;
 
-            //  Creamos el ticket en ventas id_cliente_real
-            $stmtVenta = $dbh->prepare("INSERT INTO ventas (id_cliente, id_usuario, id_orden, total, metodo_pago, tipo_movimiento) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmtVenta->execute([$id_cliente_real, $id_usuario, $id_orden, $nuevo_abono, $metodo_texto, $tipo_movimiento]);
+            // Creamos el ticket inyectando el id_taller y su nuevo_folio_venta
+            $stmtVenta = $dbh->prepare("INSERT INTO ventas (id_taller, folio_sucursal, id_cliente, id_usuario, id_orden, total, metodo_pago, tipo_movimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmtVenta->execute([$id_taller_sesion, $nuevo_folio_venta, $id_cliente_real, $id_usuario, $id_orden, $nuevo_abono, $metodo_texto, $tipo_movimiento]);
             $id_venta = $dbh->lastInsertId();
 
-            //  Especificamos el concepto en detalle_ventas
-            $concepto = $tipo_movimiento . " #" . $id_orden;
+            // Especificamos el concepto usando el folio bonito (Ej. Abono Orden #000001)
+            $concepto = $tipo_movimiento . " #" . str_pad($folio_orden_visual, 6, "0", STR_PAD_LEFT);
             $stmtDetalle = $dbh->prepare("INSERT INTO detalle_ventas (id_venta, concepto, cantidad, precio_unitario, subtotal) VALUES (?, ?, 1, ?, ?)");
             $stmtDetalle->execute([$id_venta, $concepto, $nuevo_abono, $nuevo_abono]);
         }

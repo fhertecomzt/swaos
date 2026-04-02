@@ -30,25 +30,33 @@ try {
   // Encendemos el motor de transacciones 
   $dbh->beginTransaction();
 
-  // Si no hay cliente, debe ser NULL para la base de datos, no 0
+  // GENERADOR DE FOLIOS INDEPENDIENTES PARA VENTAS
+  $stmtFolio = $dbh->prepare("SELECT MAX(folio_sucursal) FROM ventas WHERE id_taller = ?");
+  $stmtFolio->execute([$id_taller]);
+  $ultimo_folio = $stmtFolio->fetchColumn();
+  $nuevo_folio_venta = ($ultimo_folio) ? $ultimo_folio + 1 : 1;
+
+  // Si no hay cliente, debe ser NULL para la base de datos
   $id_cliente_final = ($id_cliente > 0) ? $id_cliente : null;
 
-  $sqlVenta = "INSERT INTO ventas (id_taller, id_usuario, id_cliente, total, metodo_pago, tipo_movimiento, pago_cliente, cambio_cliente) 
-               VALUES (?, ?, ?, ?, ?, 'Venta Mostrador', ?, ?)";
+  // : Agregamos folio_sucursal (Ahora son 9 columnas y 8 signos de interrogación + 1 texto fijo)
+  $sqlVenta = "INSERT INTO ventas (id_taller, folio_sucursal, id_usuario, id_cliente, total, metodo_pago, tipo_movimiento, pago_cliente, cambio_cliente) 
+               VALUES (?, ?, ?, ?, ?, ?, 'Venta Mostrador', ?, ?)";
 
   $stmtVenta = $dbh->prepare($sqlVenta);
 
   $stmtVenta->execute([
     $id_taller,          // 1. Para id_taller
-    $id_usuario,         // 2. Para id_usuario
-    $id_cliente_final,   // 3. Para id_cliente (NULL o ID real)
-    $total_venta,        // 4. Para total
-    $metodo_pago,        // 5. Para metodo_pago
-    $pago_cliente,       // 6. Para pago_cliente
-    $cambio_cliente      // 7. Para cambio_cliente
+    $nuevo_folio_venta,  // 2. Para el folio que calcula el generador
+    $id_usuario,         // 3. Para id_usuario
+    $id_cliente_final,   // 4. Para id_cliente (NULL o ID real)
+    $total_venta,        // 5. Para total
+    $metodo_pago,        // 6. Para metodo_pago
+    $pago_cliente,       // 7. Para pago_cliente
+    $cambio_cliente      // 8. Para cambio_cliente
   ]);
 
-  // Obtenemos el Folio del Ticket que se acaba de crear
+  // Obtenemos el Folio del Ticket (ID del robot) para amarrar los detalles
   $id_venta = $dbh->lastInsertId();
 
   // Preparamos las herramientas para guardar el detalle y descontar el stock

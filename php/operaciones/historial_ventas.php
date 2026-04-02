@@ -1,3 +1,14 @@
+
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$roles_permitidos = ["superusuario", "gerencia"];
+
+//Includes
+include "../verificar_sesion.php";
+?>
 <div class="containerr" >
 
   <style>
@@ -103,8 +114,6 @@
       </button>
     </div>
   </div>
-
-
 </div>
 
 <div class="container_dashboard_tablas">

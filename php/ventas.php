@@ -1,3 +1,14 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+
+$roles_permitidos = ["superusuario", "gerencia"];
+
+//Includes
+include "verificar_sesion.php";
+?>
+
 <style>
   /* ESTILOS DEL PUNTO DE VENTA (POS)          */
   .pos-container {
