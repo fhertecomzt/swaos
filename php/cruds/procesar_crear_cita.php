@@ -39,12 +39,16 @@ try {
         exit;
     }
 
-    //  4. COLORES CORPORATIVOS
-    $color = '#0d6efd'; // Azul por defecto (Recepción en Taller)
-    if ($tipo_cita == 'Domicilio') {
-        $color = '#fd7e14'; // Naranja alerta (El técnico debe salir)
-    } else if ($tipo_cita == 'Remoto') {
-        $color = '#6f42c1'; // Morado (Soporte Online)
+    //  4. COLORES CORPORATIVOS (Adaptado a IDs de la tabla tiposervicios)
+    //  El color depende del tipo de servicio (Puedes ajustar los IDs según tu BD)
+    //  Ejemplo: 13 = Taller, 20 = Domicilio, 18 = Remoto
+
+    $color = '#0d6efd'; // Azul por defecto (Taller)
+
+    if ($tipo_cita == 20) {
+        $color = '#fd7e14'; // Naranja alerta (El técnico debe salir a Domicilio)
+    } else if ($tipo_cita ==18) {
+        $color = '#6f42c1'; // Morado (Soporte Online / Remoto)
     }
 
     // GUARDADO DEFINITIVO BLINDADO POR SUCURSAL

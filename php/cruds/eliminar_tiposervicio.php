@@ -21,15 +21,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id'])) {
     $tabla_relacionada = "ordenesservicio";     
     $columna_foranea = "id_tiposervicio";  // La columna en la tabla relacionada que guarda este ID
 
-    // 2. BLINDAJE: VERIFICAR SI EL REGISTRO ESTÁ EN USO
-    $queryCheck = "SELECT COUNT(*) as total FROM $tabla_relacionada WHERE $columna_foranea = :id";
-    $stmtCheck = $dbh->prepare($queryCheck);
-    $stmtCheck->bindParam(':id', $id, PDO::PARAM_INT);
-    $stmtCheck->execute();
-    $usoData = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+    // 2. BLINDAJE MULTI-TABLA: VERIFICAR SI EL REGISTRO ESTÁ EN USO
+    $total_usos = 0;
 
-    if ($usoData['total'] > 0) {
-      $response["message"] = "No se puede eliminar. Este registro está siendo utilizado por " . $usoData['total'] . " elemento(s) en el sistema (ej. Órdenes, Equipos). Cámbielo a estado Inactivo.";
+    // A) Revisamos si está en uso en las Órdenes de Servicio
+    $stmtCheck1 = $dbh->prepare("SELECT COUNT(*) FROM ordenesservicio WHERE id_tiposervicio = :id");
+    $stmtCheck1->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmtCheck1->execute();
+    $total_usos += $stmtCheck1->fetchColumn();
+
+    // B) Revisamos si está en uso en las Citas
+    // Nota: en la tabla citas la columna se llama tipo_cita
+    $stmtCheck2 = $dbh->prepare("SELECT COUNT(*) FROM citas WHERE tipo_cita = :id");
+    $stmtCheck2->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmtCheck2->execute();
+    $total_usos += $stmtCheck2->fetchColumn();
+
+    // Si encontró al menos 1 uso sumando ambas tablas, bloqueamos la eliminación
+    if ($total_usos > 0) {
+      $response["message"] = "No se puede eliminar. Este servicio está siendo utilizado en $total_usos registro(s) (Órdenes o Citas). Para no afectar el historial, edítelo y cámbielo a estado Inactivo.";
       echo json_encode($response);
       exit;
     }

@@ -8,10 +8,15 @@ try {
   $id_taller_sesion = $_SESSION['taller_id'] ?? 1;
 
   // Buscamos todas las citas filtrando por la sucursal actual
-  $sql = "SELECT c.*, cli.nombre_cliente, cli.papellido_cliente, cli.tel_cliente 
+  // Buscamos todas las citas cruzando con clientes y AHORA CON TIPOS DE SERVICIO
+  $sql = "SELECT c.*, cli.nombre_cliente, cli.papellido_cliente, cli.tel_cliente,
+                 ts.nom_servicio 
             FROM citas c 
             LEFT JOIN clientes cli ON c.id_cliente = cli.id_cliente 
+            LEFT JOIN tiposervicios ts ON c.tipo_cita = ts.id_servicio
             WHERE c.estatus != 'Cancelada' AND c.id_taller = ?"; // <-- EL CANDADO
+
+  $stmt = $dbh->prepare($sql);
 
   // Cambiamos query() por prepare() y execute() por seguridad
   $stmt = $dbh->prepare($sql);
@@ -41,7 +46,8 @@ try {
         'id_cliente' => $cita['id_cliente'], 
         'cliente' => $nombre,
         'telefono' => $cita['tel_cliente'] ?? '',
-        'tipo' => $cita['tipo_cita'],
+        // Si no encuentra el nombre (por error o porque son citas viejas), usa el número o un valor por defecto
+        'tipo' => !empty($cita['nom_servicio']) ? $cita['nom_servicio'] : (is_numeric($cita['tipo_cita']) ? 'Servicio Especial' : $cita['tipo_cita']),
         'motivo' => $cita['motivo'],
         'direccion' => $cita['direccion_visita'],
         'estatus' => $cita['estatus'],
