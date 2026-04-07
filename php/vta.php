@@ -374,7 +374,7 @@ $_SESSION['last_token'] = $current_token;
         </div>
     </div>
 
-    <!--Scripts JS *******************************************************************************>
+    <!--Scripts JS *******************************************************************************-->
 
     <!--Libreria para las graficas JS-->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
