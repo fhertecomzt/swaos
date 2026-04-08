@@ -464,3 +464,16 @@ p.darkmode {
   background-color: #34495e;
   transform: scale(1.05);
 }
+  /*Pantallas de 13.3 1280x800 */
+  @media only screen and (max-width: 1280px) {
+    .pos-panel {
+      height: 80%;
+    }
+    .pos-container {
+    display: grid;
+    grid-template-columns: 5fr 5fr;
+    gap: 20px;
+    }
+    .resumen-grid {
+      gap: 4px;
+    }
