@@ -270,50 +270,56 @@ p.darkmode {
 }
 
 /* ESTILOS DEL PRELOADER GLOBAL */
-        #swaos-preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #f4f6f9e5; /* Color de fondo claro */
-            z-index: 99999; /* Para que quede por encima de ABSOLUTAMENTE TODO */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
+#swaos-preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f4f6f9e5; /* Color de fondo claro */
+  z-index: 99999; /* Para que quede por encima de ABSOLUTAMENTE TODO */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition:
+    opacity 0.5s ease,
+    visibility 0.5s;
+}
 
-        /* Si el usuario tiene el modo oscuro activado */
-        body.darkmode #swaos-preloader {
-            background-color: #1f2937;
-        }
+/* Si el usuario tiene el modo oscuro activado */
+body.darkmode #swaos-preloader {
+  background-color: #1f2937;
+}
 
-        /* La animación de la rueda dando vueltas */
-        .loader-spinner {
-            border: 5px solid #e5e7eb; /* Gris claro */
-            border-top: 5px solid #0094fd; /* Azul SWAOS */
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
+/* La animación de la rueda dando vueltas */
+.loader-spinner {
+  border: 5px solid #e5e7eb; /* Gris claro */
+  border-top: 5px solid #0094fd; /* Azul SWAOS */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Clase para ocultarlo suavemente */
-        .preloader-oculto {
-            opacity: 0;
-            visibility: hidden;
-        }
-        
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Clase para ocultarlo suavemente */
+.preloader-oculto {
+  opacity: 0;
+  visibility: hidden;
+}
+
 /* Fuerza a SweetAlert a estar por encima de nuestro Modal (que tiene z-index 9999) */
 .my-swal-container {
-    z-index: 10000 !important; 
+  z-index: 10000 !important;
 }
 
 /* MEDIA QUERIES */
@@ -412,7 +418,7 @@ p.darkmode {
     text-decoration: none;
   }
 }
-@media (max-width: 450px){
+@media (max-width: 450px) {
   .header--wrapper img {
     display: none;
   }
@@ -464,16 +470,20 @@ p.darkmode {
   background-color: #34495e;
   transform: scale(1.05);
 }
-  /*Pantallas de 13.3 1280x800 */
-  @media only screen and (max-width: 1280px) {
-    .pos-panel {
-      height: 80%;
-    }
-    .pos-container {
+/*Pantallas de 13.3 1280x800 */
+@media only screen and (max-width: 1280px) {
+  .menu a {
+    padding: 8px 20px;
+  }
+  .pos-panel {
+    height: 80%;
+  }
+  .pos-container {
     display: grid;
     grid-template-columns: 5fr 5fr;
     gap: 20px;
-    }
-    .resumen-grid {
-      gap: 4px;
-    }
+  }
+  .resumen-grid {
+    gap: 4px;
+  }
+}
