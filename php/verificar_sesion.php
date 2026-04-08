@@ -3,12 +3,14 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
+
 // Si la página maestra (ej. ad.php) ya definió quién puede entrar, lo respetamos.
 // Si no, por defecto permitimos a los tres roles básicos.
 if (!isset($roles_permitidos)) {
   $roles_permitidos = ["superusuario", "gerencia", "ventas"];
 }
 $tiempo_inactividad = 3600; // 10 minutos
+
 
 // LA FUNCIÓN MAESTRA DE EXPULSIÓN
 function expulsar_usuario($motivo = "")
@@ -22,9 +24,11 @@ function expulsar_usuario($motivo = "")
   session_unset();
   session_destroy();
 
+
   // EL ESCAPE DE AJAX:
   // Script normal por si recargan la página directamente (F5)
   echo '<script>window.top.location.href="../index.php?' . $motivo . '";</script>';
+
 
   // Imagen rota para forzar la redirección cuando se inyecta vía fetch (innerHTML)
   echo '<img src="x" onerror="window.top.location.href=\'../index.php?' . $motivo . '\';" style="display:none;">';
@@ -32,15 +36,19 @@ function expulsar_usuario($motivo = "")
 }
 
 
+
+
 // Verificar si hay sesión activa
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || !isset($_SESSION['idusuario']) || !isset($_SESSION['session_token'])) {
   expulsar_usuario("error=acceso_denegado");
 }
 
+
 // Verificar inactividad
 if (isset($_SESSION['ultimo_acceso']) && (time() - $_SESSION['ultimo_acceso']) > $tiempo_inactividad) {
   expulsar_usuario("session_expired=1");
 }
+
 
 // Verificar el token de sesión (Para evitar sesiones dobles/robadas)
 try {
@@ -50,6 +58,7 @@ try {
   $stmt->execute();
   $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+
   if (!$result || $result['session_token'] !== $_SESSION['session_token']) {
     expulsar_usuario("error=sesion_duplicada");
   }
@@ -57,8 +66,10 @@ try {
   expulsar_usuario("error=acceso_denegado");
 }
 
+
 // Actualizamos el tiempo en la sesión local
 $_SESSION['ultimo_acceso'] = time();
+
 
 // Actualizamos el "latido" en la base de datos para avisar que seguimos aquí
 try {
@@ -68,6 +79,7 @@ try {
 } catch (PDOException $e) {
   // Ignorar errores de latido
 }
+
 
 // Verificar si el rol del usuario está permitido en esta pantalla
 if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos)) {
