@@ -1,0 +1,8 @@
+# SWAOS Robots.txt  
+# Sistema web de administración para órdenes de servicio.  
+
+User-Agent: *    
+Disallow: /css/*  
+Disallow: /imgs/* 
+Disallow: /js/* 
+Disallow: /php/* 
