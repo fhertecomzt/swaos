@@ -9,7 +9,7 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
 
   try {
     // Consulta segura con consulta preparada
-    $stmt = $dbh->prepare("SELECT * FROM umedidas WHERE idumedida = ?");
+    $stmt = $dbh->prepare("SELECT * FROM unidades_med WHERE id_unidad = ?");
     $stmt->execute([$idumed]);
     $umed = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -17,12 +17,13 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
       // Sanitizar datos antes de enviarlos en la respuesta (Llenar campos)
       $response["success"] = true;
       $response["umed"] = [
-        "idumed" => htmlspecialchars($umed["idumedida"]),
-        "umed" => htmlspecialchars($umed["nomumedida"]),
-        "desc_umed" => htmlspecialchars($umed["descumedida"])
+        "idumed" => htmlspecialchars($umed["id_unidad"]),
+        "umed" => htmlspecialchars($umed["nom_unidad"]),
+        "desc_umed" => htmlspecialchars($umed["desc_unidad"]),
+        "estatus" => htmlspecialchars($umed["estatus"])
       ];
     } else {
-      $response["message"] = "U. medida no encontrado.";
+      $response["message"] = "Unidad de medida no encontrado.";
     }
   } catch (PDOException $e) {
     // Respuesta genérica en caso de error

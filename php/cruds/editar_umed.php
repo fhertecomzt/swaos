@@ -15,10 +15,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   try {
     // Preparar la consulta SQL
     $stmt = $dbh->prepare(
-      "UPDATE umedidas 
-         SET nomumedida = :umed, 
-             descumedida = :descripcion 
-       WHERE idumedida = :id"
+      "UPDATE unidades_med 
+         SET nom_unidad = :umed, 
+             desc_unidad = :descripcion 
+       WHERE id_unidad = :id"
     );
 
     // Ejecutar la consulta con los parámetros
@@ -31,9 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Verificamos si hubo una actualización
     if ($stmt->rowCount() > 0) {
       $response["success"] = true;
-      $response["message"] = "U. medida actualizada correctamente.";
+      $response["message"] = "Registro actualizado correctamente.";
     } else {
-      $response["message"] = "No se realizaron cambios en la U. medida.";
+      $response["message"] = "No se realizaron cambios en el registro";
     }
   } catch (PDOException $e) {
     // Mensaje genérico para evitar exponer detalles técnicos

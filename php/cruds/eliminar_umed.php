@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id'])) {
   }
 
   try {
-    // 1. CONFIGURAR ESTAS 4 VARIABLES 
+    // 1. CONFIGURAR ESTAS 4 VARIABLESs
     $tabla_catalogo = "unidades_med";
     $columna_id = "id_unidad";
 

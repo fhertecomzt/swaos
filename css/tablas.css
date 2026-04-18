@@ -160,6 +160,7 @@ td img {
 .editarEstadoservicio,
 .editarMpago,
 .editarImpuesto,
+.editarUmed,
 .editarCliente,
 .editarProveedor,
 .editarProducto,
@@ -177,6 +178,7 @@ td img {
 .editarEstadoservicio:hover,
 .editarMpago:hover,
 .editarImpuesto:hover,
+.editarUmed:hover,
 .editarCliente:hover,
 .editarProveedor:hover,
 .editarProducto:hover,
@@ -194,6 +196,7 @@ td img {
 .eliminarEstadoservicio,
 .eliminarMpago,
 .eliminarImpuesto,
+.eliminarUmed,
 .eliminarCliente,
 .eliminarProveedor,
 .eliminarProducto {
@@ -210,6 +213,7 @@ td img {
 .eliminarEstadoservicio:hover,
 .eliminarMpago:hover,
 .eliminarImpuesto:hover,
+.eliminarUmed:hover,
 .eliminarCliente:hover,
 .eliminarProveedor:hover,
 .eliminarProducto:hover {

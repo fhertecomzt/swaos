@@ -5114,6 +5114,440 @@ document.addEventListener("click", function (event) {
   }
 });
 
+// Llamar Unidades de medida *****************************************************
+document
+  .getElementById("umedidas-link")
+  .addEventListener("click", function (event) {
+    event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+
+    fetch("catalogos/umedidas.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+
+        inicializarTablaGenerica(
+          "#tabla-umedidas",
+          "#buscarboxmpago",
+          "#cantidad-registros",
+        );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
+      })
+      .catch((error) => {
+        console.error("Error al cargar el contenido:", error);
+      });
+  });
+
+  
+function abrirModalUmed(id) {
+  document.getElementById(id).style.display = "flex";
+}
+
+function cerrarModalUmed(id) {
+  document.getElementById(id).style.display = "none";
+}
+
+//Crear Unidades de medida ****************************
+function validarFormularioUmed(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    {
+      id: "crear-umed",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La unidad de medida debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-desc_umed",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach((regla) => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+      elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      },
+    });
+
+    return;
+  }
+
+  const umed = document.getElementById("crear-umed").value.trim();
+  verificarDuplicadoUmed(umed).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioUmed(event, "crear");
+  });
+}
+
+function procesarFormularioUmed(event, tipo) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+
+  fetch(`cruds/procesar_${tipo}_umed.php`, {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        cerrarModalUmed(tipo + "-modalUmedida");
+        event.target.reset();
+
+        Swal.fire({
+          title: "¡Éxito!",
+          text: data.message || "La acción se realizó correctamente.",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("umedidas-link")) {
+            document.getElementById("umedidas-link").click();
+          }
+        });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
+    });
+}
+
+function verificarDuplicadoUmed(umed) {
+
+  return fetch("cruds/verificar_nombre_umed.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ umed }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      //console.log("Respuesta de verificar_nombre.php:", data);
+      if (data.existe) {
+        //mostrarAlerta("error", "Error", "El nombre del método de pago ya existe.");
+        Swal.fire({
+          title: "!Atención¡",
+          text: "El nombre de la unidad de medida ya existe.",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+      return data.existe;
+    })
+    .catch((error) => {
+      console.error("Error al verificar duplicado:", error);
+      return true; // Asume duplicado en caso de error
+    });
+}
+//Editar Unidad de medida ******************************************************
+document.addEventListener("DOMContentLoaded", function () {
+  // Escuchar clic en el botón de editar
+  document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("editarUmed")) {
+      const id = event.target.dataset.id;
+      //console.log("Botón editar clickeado. ID:", id);
+
+      fetch(`cruds/obtener_umed.php?id=${id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          //console.log("Datos recibidos del servidor:", data);
+          if (data.success) {
+            const formularioUmed = document.getElementById("form-editarUmed");
+            if (formularioUmed) {
+              const campos = ["idumed", "umed", "desc_umed", "estatus"];
+              campos.forEach((campo) => {
+                  //console.log(`Asignando ${campo}:`, data.umed[campo]);
+                formularioUmed[`editar-${campo}`].value =
+                  data.umed[campo] || "";
+              });
+              abrirModalUmed("editar-modalUmed");
+            } else {
+              console.error("Formulario de edición no encontrado.");
+            }
+          } else {
+            mostrarAlerta(
+              "error",
+              "Error",
+              data.message || "No se pudo cargar el campo.",
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Error al obtener el campo:", error);
+          mostrarAlerta(
+            "error",
+            "Error",
+            "Ocurrió un problema al obtener los datos.",
+          );
+        });
+    }
+  });
+
+  // Validar y enviar el formulario de edición
+  document.body.addEventListener("submit", function (event) {
+    if (event.target && event.target.id === "form-editarUmed") {
+      event.preventDefault(); // Esto evita el comportamiento predeterminado de recargar la página.
+      validarFormularioEdicionUmed(event.target);
+    }
+  });
+});
+
+//Validar duplicados en edicion Umed
+function verificarDuplicadoEditarUmed(umed, id = 0) {
+  //console.log("Validando duplicados. ID:", id, "umed:", Umed);
+
+  return fetch("cruds/verificar_nombre_umed.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ umed, id }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      //console.log("Respuesta de verificar_nombre.php:", data);
+      if (data.existe) {
+        Swal.fire({
+          title: "Error",
+          text: data.message || "El nombre de la unidad ya existe.", // Mostrar el mensaje específico si existe
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+      return data.existe;
+    })
+    .catch((error) => {
+      console.error("Error al verificar duplicado:", error);
+      return true; // Asume duplicado en caso de error
+    });
+}
+// Validación del formulario de edición Umed
+async function validarFormularioEdicionUmed(formulario) {
+  const reglasValidacion = [
+    {
+      id: "editar-umed",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La unidad de medida debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-desc_umed",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach((regla) => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+      elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      },
+    });
+
+    return;
+  }
+
+  const umedInput = document.getElementById("editar-umed");
+  const idInput = document.getElementById("editar-idumed");
+  if (!umedInput || !idInput) return;
+
+  try {
+    const esDuplicado = await verificarDuplicadoEditarUmed(
+      umedInput.value.trim(),
+      idInput.value,
+    );
+    if (!esDuplicado) enviarFormularioEdicionUmed(formulario);
+  } catch (error) {
+    console.error("Error al verificar duplicado:", error);
+  }
+}
+
+function enviarFormularioEdicionUmed(formulario) {
+  if (!formulario) return;
+  const formData = new FormData(formulario);
+
+  fetch("cruds/editar_umed.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        Swal.fire({
+          title: "¡Actualizado!",
+          text: data.message || "Registro actualizado correctamente.",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("umedidas-link")) {
+            document.getElementById("umedidas-link").click();
+          }
+        });
+        // Si tu función de cerrar modal se llama cerrarModalUmed, asegúrate de que diga eso:
+        cerrarModalUmed("editar-modalUmed");
+      } else {
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "No hubo cambios.",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error al actualizar:", error);
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
+    });
+}
+
+// Eliminar unidad de medida *****************************
+document.addEventListener("click", function (event) {
+  if (event.target.classList.contains("eliminarUmed")) {
+    const id = event.target.dataset.id;
+
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "No podrás revertir esta acción",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Realizar la solicitud para eliminar
+        fetch(`cruds/eliminar_umed.php?id=${id}`, { method: "POST" })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire({
+                title: "¡Eliminado!",
+                text: data.message,
+                icon: "success",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+              }).then(() => {
+                // Recargamos DataTables limpiamente
+                if (document.getElementById("umedidas-link")) {
+                  document.getElementById("umedidas-link").click();
+                }
+              });
+            } else {
+              Swal.fire(
+                "Error",
+                data.message || "No se pudo eliminar el registro.",
+                "error",
+              );
+            }
+          })
+          .catch((error) => {
+            Swal.fire(
+              "Error",
+              "Hubo un problema al procesar tu solicitud.",
+              "error",
+            );
+            console.error("Error al eliminar la tienda:", error);
+          });
+      }
+    });
+  }
+});
+
 // Llamar Proveedores *************************************************
 document
   .getElementById("proveedores-link")

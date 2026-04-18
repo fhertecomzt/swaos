@@ -19,14 +19,14 @@ try {
     $umed = trim($data['umed']); // Limpiar el nombre
     $id = isset($data['id']) ? intval($data['id']) : 0; // ID (opcional)
 
-    // Si se proporciona un ID (edición), excluir ese registro de la validación
+    // Si se proporciona un ID (edición), excluir ese registro de la validación unidades_med (nom_unidad, desc_unidad, estatus) 
     if ($id > 0) {
-      $query = "SELECT COUNT(*) FROM umedidas WHERE nomumedida = ? AND idumedida != ?";
+      $query = "SELECT COUNT(*) FROM unidades_med WHERE nom_unidad = ? AND id_unidad != ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$umed, $id]);
     } else {
       // Si no hay ID, es un registro nuevo
-      $query = "SELECT COUNT(*) FROM umedidas WHERE nomumedida = ?";
+      $query = "SELECT COUNT(*) FROM unidades_med WHERE nom_unidad = ?";
       $stmt = $dbh->prepare($query);
       $stmt->execute([$umed]);
     }

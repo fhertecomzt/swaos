@@ -52,20 +52,28 @@ $link_pdf = $url_base . "cruds/imprimir_cotizacion.php?id=" . $id_cotizacion . "
 $mail = new PHPMailer(true);
 
 try {
+  // Ajustes del Servidor SMTP
+  // Le pasamos las constantes (PHPMailer no sabe de dónde vienen)
   $mail->isSMTP();
-  $mail->Host       = 'smtp.gmail.com';
+  $mail->Host       = MAIL_HOST;
   $mail->SMTPAuth   = true;
   $mail->Username   = MAIL_USER; // Llama a la bóveda
   $mail->Password   = MAIL_PASS; // Llama a la bóveda
+  $mail->Port       = MAIL_PORT;
+  $mail->SMTPAutoTLS = MAIL_AUTO_TLS;
   $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-  $mail->Port       = 465;
 
-  $mail->setFrom('swaos.mzt@gmail.com', $nombreTallerActivo . ' - Cotizaciones');
+  // Solo aplicamos seguridad si la bóveda nos dio una (ej. 'tls')
+  if (MAIL_SECURE !== '') {
+    $mail->SMTPSecure = MAIL_SECURE;
+  }
+
+  $mail->setFrom(MAIL_USER, $nombreTallerActivo . ' - Cotizaciones');
 
   if (!empty($correoTallerActivo)) {
     $mail->addReplyTo($correoTallerActivo, $nombreTallerActivo);
   } else {
-    $mail->addReplyTo('no-reply@swaos.com', 'No Responder');
+    $mail->addReplyTo('no-reply@swaos.com.mx', 'No Responder');
   }
 
   $mail->addAddress($email, $nombre);

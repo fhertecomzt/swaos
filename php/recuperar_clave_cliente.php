@@ -50,20 +50,27 @@ try {
 
   // CONFIGURACIÓN Y ENVÍO CON PHPMAILER
   $mail = new PHPMailer(true);
+  $mail->CharSet = 'UTF-8'; // El fix para los acentos
 
   try {
     // Ajustes del Servidor SMTP
-  $mail->isSMTP();
-  $mail->Host       = 'smtp.gmail.com';
-  $mail->SMTPAuth   = true;
-  $mail->Username   = MAIL_USER; // Llama a la bóveda
-  $mail->Password   = MAIL_PASS; // Llama a la bóveda
-  $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-  $mail->Port       = 465;
-    $mail->CharSet    = 'UTF-8';
+    // Le pasamos las constantes (PHPMailer no sabe de dónde vienen)
+    $mail->isSMTP();
+    $mail->Host       = MAIL_HOST;
+    $mail->SMTPAuth   = true;
+    $mail->Username   = MAIL_USER;
+    $mail->Password   = MAIL_PASS;
+    $mail->Port       = MAIL_PORT;
+    $mail->SMTPAutoTLS = MAIL_AUTO_TLS;
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+
+    // Solo aplicamos seguridad si la bóveda nos dio una (ej. 'tls')
+    if (MAIL_SECURE !== '') {
+      $mail->SMTPSecure = MAIL_SECURE;
+    }
 
     // Remitente y Destinatario
-    $mail->setFrom('swaos.mzt@gmail.com', 'SWAOS');
+    $mail->setFrom(MAIL_USER, 'Sistema SWAOS');
     $mail->addAddress($cliente['email_cliente'], $cliente['nombre_cliente']);
 
     // Contenido del Correo
@@ -83,7 +90,7 @@ try {
                 </div>
                 <p style='color: #555; font-size: 15px;'>Puedes iniciar sesión haciendo clic en el siguiente enlace:</p>
                 <div style='text-align: center; margin-top: 25px;'>
-                    <a href='https://swaos.rf.gd/portal_cliente.php' style='background: #007bff; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; font-weight: bold;'>Ir a mi Portal</a>
+                    <a href='https://swaos.com.mx/portal_cliente.php' style='background: #007bff; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; font-weight: bold;'>Ir a mi Portal</a>
                 </div>
                 <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0 15px 0;'>
                 <p style='color: #999; font-size: 12px; text-align: center;'>Si no solicitaste este cambio, por favor contacta a nuestro equipo de soporte.</p>
@@ -91,7 +98,7 @@ try {
         </div>";
 
     $mail->Body    = $cuerpoCorreo;
-    $mail->AltBody = "Hola {$cliente['nombre_cliente']},\nTu nueva clave es: { $nueva_clave}\nInicia sesión en: https://swaos.rf.gd/portal_cliente.php"; // Texto plano de respaldo
+    $mail->AltBody = "Hola {$cliente['nombre_cliente']},\nTu nueva clave es: { $nueva_clave}\nInicia sesión en: https://swaos.com.mx/portal_cliente.php"; // Texto plano de respaldo
 
     // Enviar
     $mail->send();

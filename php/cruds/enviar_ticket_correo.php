@@ -45,16 +45,24 @@ if (isset($_SESSION['taller_id'])) {
 $mail = new PHPMailer(true);
 
 try {
+  // Ajustes del Servidor SMTP
+  // Le pasamos las constantes (PHPMailer no sabe de dónde vienen)
   $mail->isSMTP();
-  $mail->Host       = 'smtp.gmail.com';
+  $mail->Host       = MAIL_HOST;
   $mail->SMTPAuth   = true;
   $mail->Username   = MAIL_USER; // Llama a la bóveda
   $mail->Password   = MAIL_PASS; // Llama a la bóveda
+  $mail->Port       = MAIL_PORT;
+  $mail->SMTPAutoTLS = MAIL_AUTO_TLS;
   $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-  $mail->Port       = 465;
+
+  // Solo aplicamos seguridad si la bóveda nos dio una (ej. 'tls')
+  if (MAIL_SECURE !== '') {
+    $mail->SMTPSecure = MAIL_SECURE;
+  }
 
   // El correo real de salida SIEMPRE es el del sistema, pero el nombre es dinámico
-  $mail->setFrom('swaos.mzt@gmail.com', $nombreTallerActivo . ' - Notificaciones');
+  $mail->setFrom(MAIL_USER, $nombreTallerActivo . ' - Notificaciones');
 
   // Si el Taller tiene su propio correo, hacemos que las respuestas le lleguen a él
   if (!empty($correoTallerActivo)) {

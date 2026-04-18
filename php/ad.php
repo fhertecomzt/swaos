@@ -163,7 +163,7 @@ $_SESSION['last_token'] = $current_token;
                         </li>
                         <li>
                             <a href="#" id="estatusservicios-link" class="nav-link">
-                                <i class="fa-solid fa-list-check"></i>
+                                <i class="fa-solid fa-toolbox"></i>
                                 <span>ESTATUS SERVICIOS</span>
                             </a>
                         </li>
@@ -175,8 +175,14 @@ $_SESSION['last_token'] = $current_token;
                         </li>
                         <li>
                             <a href="#" id="impuestos-link" class="nav-link">
-                                <i class="fa-solid fa-file-invoice-dollar"></i>
+                                <i class="fa-solid fa-percent"></i>
                                 <span>IMPUESTOS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="umedidas-link" class="nav-link">
+                                <i class="fa-solid fa-ruler"></i>
+                                <span>UNIDAD MEDIDA</span>
                             </a>
                         </li>
                         <li>
@@ -360,7 +366,7 @@ $_SESSION['last_token'] = $current_token;
                 <span>Usuario: <?php echo $_SESSION['usuario'] ?></span>
             </div>
             <div class="user--info">
-                
+
                 <!-- Campanita -->
                 <div style="position: relative; margin-left: 15px; cursor: pointer;" onclick="abrirModalTraspasos()" title="Ver mercancía en tránsito">
                     <i class="fa-solid fa-bell" style="font-size: 24px; color: #c2cdd6; transition: 0.3s;" id="icono-campana-traspasos"></i>
