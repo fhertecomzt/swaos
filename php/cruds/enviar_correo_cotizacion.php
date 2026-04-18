@@ -48,8 +48,11 @@ $token = hash('sha256', $id_cotizacion . $llave_secreta);
 // Como el url_base ya trae "/php/", solo le pegamos "/cruds/..."
 $link_pdf = $url_base . "cruds/imprimir_cotizacion.php?id=" . $id_cotizacion . "&token=" . $token;
 
-// CONFIGURAMOS PHPMAILER (Tus credenciales exactas)
+// CONFIGURACIÓN Y ENVÍO CON PHPMAILER Instancia de PHPMailer
 $mail = new PHPMailer(true);
+
+// --- Codificación para acentos ---
+$mail->CharSet = 'UTF-8';
 
 try {
   // Ajustes del Servidor SMTP

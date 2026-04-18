@@ -42,7 +42,11 @@ if (isset($_SESSION['taller_id'])) {
   }
 }
 
+// CONFIGURACIÓN Y ENVÍO CON PHPMAILER Instancia de PHPMailer
 $mail = new PHPMailer(true);
+
+// --- Codificación para acentos ---
+$mail->CharSet = 'UTF-8';
 
 try {
   // Ajustes del Servidor SMTP
@@ -69,7 +73,7 @@ try {
     $mail->addReplyTo($correoTallerActivo, $nombreTallerActivo);
   } else {
     // Si no tienen correo, usamos un "No Responder"
-    $mail->addReplyTo('no-reply@swaos.com', 'No Responder');
+    $mail->addReplyTo('no-reply@swaos.com.mx', 'No Responder');
   }
 
   $mail->addAddress($email, $nombre);
