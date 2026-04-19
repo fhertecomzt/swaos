@@ -158,7 +158,13 @@ $_SESSION['last_token'] = $current_token;
                         <li>
                             <a href="#" id="tiposervicios-link" class="nav-link">
                                 <i class="fa-solid fa-list-check"></i>
-                                <span>TIPO DESERVICIOS</span>
+                                <span>TIPO SERVICIOS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="tipoequipos-link" class="nav-link">
+                                <i class="fa-solid fa-display"></i>
+                                <span>TIPO EQUIPOS</span>
                             </a>
                         </li>
                         <li>
@@ -197,7 +203,7 @@ $_SESSION['last_token'] = $current_token;
             <!--Inventarios-->
             <li class="nav-item has-submenu">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-address-card"></i>
+                    <i class="fa-solid fa-boxes-stacked"></i>
                     <span class="titles_btns">MOVIMIENTOS</span>
                 </a>
                 <ul>
@@ -212,13 +218,13 @@ $_SESSION['last_token'] = $current_token;
             <!--Órdenes de servicio-->
             <li class="nav-item has-submenu">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-address-card"></i>
+                    <i class="fa-regular fa-newspaper"></i>
                     <span class="titles_btns">ÓRDENES DE SERVICIO</span>
                 </a>
                 <ul>
                     <li>
                         <a href="#" id="ordenes-link" class="nav-link">
-                            <i class="fa-solid fa-list-check"></i>
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
                             <span>ÓRDENES</span>
                         </a>
                     </li>
@@ -228,7 +234,7 @@ $_SESSION['last_token'] = $current_token;
             <!--Ventas-->
             <li class="nav-item has-submenu">
                 <a href="#" class="nav-link">
-                    <i class="fas fa-wrench"></i>
+                    <i class="fa-solid fa-cart-arrow-down"></i>
                     <span class="titles_btns">VENTAS</span>
                 </a>
                 <ul>
@@ -256,7 +262,7 @@ $_SESSION['last_token'] = $current_token;
             <!--Cotizaciones-->
             <li class="nav-item has-submenu">
                 <a href="#" class="nav-link">
-                    <i class="fa-solid fa-address-card"></i>
+                    <i class="fa-solid fa-tags"></i>
                     <span class="titles_btns">COTIZACIONES</span>
                 </a>
                 <ul>
@@ -415,7 +421,7 @@ $_SESSION['last_token'] = $current_token;
         </div>
     </div>
 
-    <!--Scripts JS *******************************************************************************>
+    <!--Scripts JS *******************************************************************************-->
         <!--Scripts Preloader-->
     <script src="../js/preloads.js"></script>
 

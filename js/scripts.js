@@ -3786,6 +3786,450 @@ document.addEventListener("click", function (event) {
   }
 });
 
+// Llamar Tipo de equipos *******************************************************
+document
+  .getElementById("tipoequipos-link")
+  .addEventListener("click", function (event) {
+    event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
+    fetch("catalogos/tipoequipos.php")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("content-area").innerHTML = html;
+        //Funcion para filtrar y buscar
+        inicializarTablaGenerica(
+          "#tabla-tipoequipos",
+          "#buscarboxTipoequipos",
+          "#cantidad-registros",
+        );
+        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+        // Le damos 300ms de gracia para que el navegador dibuje bien la tabla
+        setTimeout(() => {
+          ocultarPreloader();
+        }, 150);
+      })
+      .catch((error) => {
+        console.error("Error al cargar el contenido:", error);
+      });
+  });
+
+function abrirModalTipoequipos(id) {
+  document.getElementById(id).style.display = "flex";
+}
+
+function cerrarModalTipoequipos(id) {
+  document.getElementById(id).style.display = "none";
+}
+
+// Crear tipo de equipos ******************************************
+function validarFormularioTipoequipos(event) {
+  event.preventDefault();
+
+  const reglasValidacion = [
+    {
+      id: "crear-tipoequipos",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El tipo de equipos debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "crear-desc_tipoequipos",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach((regla) => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+      elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      },
+    });
+
+    return;
+  }
+
+  const tipoequipos = document
+    .getElementById("crear-tipoequipos")
+    .value.trim();
+  verificarDuplicadoTipoequipos(tipoequipos).then((esDuplicado) => {
+    if (!esDuplicado) procesarFormularioTipoequipos(event, "crear");
+  });
+}
+
+function procesarFormularioTipoequipos(event, tipo) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+
+  fetch(`cruds/procesar_${tipo}_tipoequipos.php`, {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        cerrarModalTipoequipos(tipo + "-modalTipoequipos");
+        event.target.reset();
+
+        Swal.fire({
+          title: "¡Éxito!",
+          text: data.message || "La acción se realizó correctamente.",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        }).then(() => {
+          // Recargamos DataTables limpiamente
+          if (document.getElementById("tipoequipos-link")) {
+            document.getElementById("tipoequipos-link").click();
+          }
+        });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Ocurrió un problema.",
+          icon: "error",
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error inesperado.",
+        icon: "error",
+      });
+    });
+}
+
+function verificarDuplicadoTipoequipos(tipoequipos) {
+  //console.log("Nombre verificar duplicado:", nombre_tipoequipos);
+
+  return fetch("cruds/verificar_nombre_tipoequipos.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tipoequipos }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      //console.log("Respuesta de verificar_nombre.php:", data);
+      if (data.existe) {
+        //mostrarAlerta("error", "Error", "El nombre de la tipoequipos ya existe.");
+        Swal.fire({
+          title: "!Atención¡",
+          text: "El nombre del tipo de equipos ya existe.",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+      return data.existe;
+    })
+    .catch((error) => {
+      console.error("Error al verificar duplicado:", error);
+      return true; // Asume duplicado en caso de error
+    });
+}
+
+// Editar tipo de equipos ***********************************
+document.addEventListener("DOMContentLoaded", function () {
+  // Escuchar clic en el botón de editar
+  document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("editarTipoequipo")) {
+      const id = event.target.dataset.id;
+
+      fetch(`cruds/obtener_tipoequipos.php?id=${id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            const formularioTipoequipos = document.getElementById(
+              "form-editarTipoequipo",
+            );
+            if (formularioTipoequipos) {
+              const campos = [
+                "idtipoequipo",
+                "tipoequipo",
+                "desc_equipo",
+                "estatus",
+              ];
+              campos.forEach((campo) => {
+                const input = formularioTipoequipos[`editar-${campo}`];
+                if (input) {
+                  input.value = data.tipoequipos[campo] || "";
+                }
+              });
+              abrirModalTipoequipos("editar-modalTipoequipos");
+            }
+          } else {
+            Swal.fire(
+              "Error",
+              data.message || "No se pudo cargar el tipo de equipo.",
+              "error",
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Error al obtener el Tipo de equipo:", error);
+          Swal.fire(
+            "Error",
+            "Ocurrió un problema al obtener los datos.",
+            "error",
+          );
+        });
+    }
+  });
+
+  // Escuchar el submit del formulario de edición
+  document.body.addEventListener("submit", function (event) {
+    if (event.target && event.target.id === "form-editarTipoequipo") {
+      event.preventDefault();
+      validarFormularioEdicionTipoequipo(event.target);
+    }
+  });
+});
+
+// Verificar duplicado al editar
+function verificarDuplicadoEditarTipoequipo(tipoequipo, id = 0) {
+  return fetch("cruds/verificar_nombre_tipoequipos.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tipoequipo, id }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.existe) {
+        Swal.fire({
+          title: "¡Atención!",
+          text: data.message || "El nombre del tipo de equipo ya existe.",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+      return data.existe;
+    })
+    .catch((error) => {
+      console.error("Error al verificar duplicado:", error);
+      return true;
+    });
+}
+
+// Validación del Motor de Reglas
+async function validarFormularioEdicionTipoequipo(formulario) {
+  // Los IDs aquí ya coinciden exactamente con tu HTML
+  const reglasValidacion = [
+    {
+      id: "editar-tipoequipo",
+      tipo: "texto",
+      min: 3,
+      mensaje: "El tipo de equipo debe tener al menos 3 caracteres.",
+    },
+    {
+      id: "editar-desc_equipo",
+      tipo: "texto",
+      min: 3,
+      mensaje: "La descripción debe tener al menos 3 caracteres.",
+    },
+  ];
+
+  const errores = [];
+  let primerCampoConError = null;
+
+  reglasValidacion.forEach((regla) => {
+    const elemento = document.getElementById(regla.id);
+    if (!elemento) return;
+
+    let valor = elemento.value.trim();
+
+    elemento.addEventListener("input", function () {
+      this.classList.remove("input-error");
+    });
+
+    if (valor.length < regla.min) {
+      errores.push(`<li>${regla.mensaje}</li>`);
+      elemento.classList.add("input-error");
+      if (!primerCampoConError) primerCampoConError = elemento;
+    } else {
+      elemento.classList.remove("input-error");
+    }
+  });
+
+  if (errores.length > 0) {
+    // Quitar el cursor por seguridad
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    Swal.fire({
+      title: "Faltan datos",
+      html: `<ul style="text-align: left; font-size: 14px; color: #d33;">${errores.join("")}</ul>`,
+      icon: "warning",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Entendido",
+      // Esperamos a que la alerta desaparezca al 100%
+      didClose: () => {
+        if (primerCampoConError) primerCampoConError.focus();
+      },
+    });
+
+    return;
+  }
+
+  // IDs corregidos para buscar en el DOM
+  const tipoequiposInput = document.getElementById("editar-tipoequipo");
+  const idInput = document.getElementById("editar-idtipoequipo");
+
+  if (!tipoequiposInput || !idInput) return;
+
+  try {
+    const esDuplicado = await verificarDuplicadoEditarTipoequipo(
+      tipoequiposInput.value.trim(),
+      idInput.value,
+    );
+    // Cambiamos el nombre de la función aquí para que no llame a Categorías
+    if (!esDuplicado) enviarFormularioEdicionTipoequipo(formulario);
+  } catch (error) {
+    console.error("Error al verificar duplicado:", error);
+  }
+}
+
+// Enviar a la Base de Datos
+function enviarFormularioEdicionTipoequipo(formulario) {
+  if (!formulario) return;
+  const formData = new FormData(formulario);
+
+  fetch("cruds/editar_tipoequipos.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        Swal.fire({
+          title: "¡Actualizado!",
+          text: data.message || "Tipo de equipo actualizado correctamente.",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        }).then(() => {
+          // Cambiado a tipoequipos-link
+          if (document.getElementById("tipoequipos-link")) {
+            document.getElementById("tipoequipos-link").click();
+          }
+        });
+
+        // Cerrar el modal con el ID y función correcta
+        cerrarModalTipoequipos("editar-modalTipoequipos");
+      } else {
+        Swal.fire({
+          title: "Atención",
+          text: data.message || "No se realizaron cambios.",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error al actualizar Tipo de equipo:", error);
+      Swal.fire("Error", "Ocurrió un problema al actualizar.", "error");
+    });
+}
+
+// Eliminar Tipo de equipos *********************************************
+document.addEventListener("click", function (event) {
+  if (event.target.classList.contains("eliminarTipoequipo")) {
+    const id = event.target.dataset.id;
+
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "No podrás revertir esta acción",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Realizar la solicitud para eliminar
+        fetch(`cruds/eliminar_tipoequipo.php?id=${id}`, { method: "POST" })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire({
+                title: "¡Eliminada!",
+                text: data.message,
+                icon: "success",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+              }).then(() => {
+                // Recargamos DataTables limpiamente
+                if (document.getElementById("tipoequipos-link")) {
+                  document.getElementById("tipoequipos-link").click();
+                }
+              });
+            } else {
+              Swal.fire(
+                "Error",
+                data.message || "No se pudo eliminar el registro.",
+                "error",
+              );
+            }
+          })
+          .catch((error) => {
+            Swal.fire(
+              "Error",
+              "Hubo un problema al procesar tu solicitud.",
+              "error",
+            );
+            console.error("Error al eliminar la tienda:", error);
+          });
+      }
+    });
+  }
+});
+
 //Llamar estado de servicio *******************************************
 document
   .getElementById("estatusservicios-link")
