@@ -17,7 +17,6 @@ body {
   width: 100%;
   margin: auto;
   /*background: red;  */
-  
 }
 .contenedor-form {
   align-items: center;
@@ -32,16 +31,58 @@ body {
   /*box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);*/
 }
 
+/* =========================================================
+   EFECTO DE BORDE ANIMADO PARA SWAOS LOGIN (CORREGIDO)
+========================================================= */
+
+/* 1. El contenedor maestro */
+.card-login-animated {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 2px; /*  Este es el grosor del rayo de luz */
+  display: flex;
+  height: 65%; /* Hereda el tamaño que tenían tus columnas */
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* Sombra elegante */
+}
+
+/* 2. El haz de luz giratorio (Fondo) */
+.card-login-animated::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  /* Un rayo azul brillante al estilo SWAOS */
+  background: conic-gradient(transparent, transparent, transparent, #00d2ff);
+  animation: rotarBorde 7s linear infinite;
+  z-index: 1; /* Se queda al fondo */
+}
+
+@keyframes rotarBorde {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /*lado izq bienvenido************** */
 .information {
   display: flex;
   align-items: center;
   text-align: center;
   background-color: #0f2f37;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
-  height: 65%;
+  border-top-left-radius: 16px; /* Ligeramente menor a 20px para encajar */
+  border-bottom-left-radius: 16px;
+  height: 100%; /* Ahora llenan la tarjeta */
   width: 300px;
+  position: relative;
+  z-index: 10; /* Las trae al frente, por encima de la luz */
 }
 .info-childs {
   width: 100%;
@@ -78,16 +119,18 @@ body {
   transition: background-color 1s ease;
 }
 
-
 /*lado derecho login***************** */
 .form-information {
-  height: 65%;
+  height: 100%; /* Ahora llenan la tarjeta */
+  width: 63%;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: #6ea7d3;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+  position: relative;
+  z-index: 10; /*  Las trae al frente, por encima de la luz */
 }
 
 .form-information-childs {
@@ -105,7 +148,7 @@ body {
   text-align: center;
 }
 /* ========================================= */
-/* MAGIA DE ETIQUETAS FLOTANTES (FLOATING LABELS) */
+/*  ETIQUETAS FLOTANTES (FLOATING LABELS) */
 /* ========================================= */
 
 .input-wrapper {
@@ -119,10 +162,10 @@ body {
 
 .form-information-childs .input-wrapper input {
   width: 100%; /* Toma todo el ancho de su contenedor */
-  border: 2px solid transparent; 
+  border: 2px solid transparent;
   border-radius: 10px;
   /* Más espacio arriba (20px) para que la etiqueta no choque con el texto */
-  padding: 20px 10px 8px 50px; 
+  padding: 20px 10px 8px 50px;
   font-size: 15px;
   margin: 0;
   outline: none;
@@ -154,7 +197,10 @@ body {
 
 /* LA ANIMACIÓN: Cuando haces focus o cuando NO está vacío el input */
 .form-information-childs .input-wrapper input:focus ~ .label-flotante,
-.form-information-childs .input-wrapper input:not(:placeholder-shown) ~ .label-flotante {
+.form-information-childs
+  .input-wrapper
+  input:not(:placeholder-shown)
+  ~ .label-flotante {
   top: 12px; /* Sube hacia arriba */
   font-size: 11px; /* Se hace pequeñita */
   color: rgb(0, 47, 255); /* Se pinta de tu azul vibrante */
@@ -195,20 +241,17 @@ footer a {
 }
 /*RESPOSIVE FORM**********************************/
 /*Pantallas de 13.3 1280x800 */
-@media only screen and (max-width: 1280px){
-  .information{
-    height: 80%;
+@media only screen and (max-width: 1280px) {
+  .information {
+    height: 100%;
   }
   .form-information {
-    height: 80%;
+    height: 100%;
   }
-  .errror{
+  .errror {
     height: 15%;
   }
-
 }
-
-
 
 @media screen and (max-width: 1920px) {
   html {
@@ -249,6 +292,7 @@ footer a {
     padding: 10px;
     height: 20%;
     width: 100%;
+    border-radius: 16px 16px 0 0; /* Curvas arriba */
     align-items: center;
     justify-content: center;
   }
@@ -273,9 +317,10 @@ footer a {
   .form-information {
     border-bottom-left-radius: 20px;
     border-top-right-radius: 0px;
-    height: 70%;
     padding: 10px;
+    height: 80%;
     width: 100%;
+    border-radius: 0 0 16px 16px; /* Curvas abajo */
   }
   .form-information h2 {
     font-size: 30px;
@@ -289,8 +334,12 @@ footer a {
     height: 100%;
     width: 100%;
   }
-.form-information-childs .input-wrapper {
-    width: 95%; 
+  .form-information-childs .input-wrapper {
+    width: 95%;
+  }
+  .card-login-animated {
+    flex-direction: column;
+    height: 90vh; /* Ocupar casi toda la pantalla en celular */
   }
 }
 
@@ -311,6 +360,7 @@ footer a {
     padding: 10px;
     height: 20%;
     width: 100%;
+    border-radius: 16px 16px 0 0; /* Curvas arriba */
     align-items: center;
     justify-content: center;
   }
@@ -335,15 +385,16 @@ footer a {
   .form-information {
     border-bottom-left-radius: 20px;
     border-top-right-radius: 0px;
-    height: 70%;
     padding: 10px;
+    height: 80%;
     width: 100%;
+    border-radius: 0 0 16px 16px; /* Curvas abajo */
   }
   .form-information h2 {
     font-size: 20px;
   }
   /*Formulario login*/
-/*Formulario login en móvil*/
+  /*Formulario login en móvil*/
   .form-information-childs .input-wrapper {
     width: 80%; /* El wrapper cambia a 80% */
   }

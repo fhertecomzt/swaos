@@ -47,73 +47,75 @@ $_SESSION['captcha_result'] = $num1 + $num2;
     <div class="container_principal">
         <main>
             <div class="contenedor-form">
-
-                <div class="information">
-                    <div class="logomovil"></div>
-                    <div class="info-childs">
-                        <h2>SWAOS</h2>
-                        <p>Sistema web de administración para órdenes de servicio</p>
-                    </div>
-                </div>
-
-                <div class="form-information">
-                    <div class="form-information-childs">
-                        <h2>Inicio de sesión</h2>
-                        <form class="form" action="php/validarlogin.php" method="POST">
-
-                            <div class="input-wrapper">
-                                <i class="fa-solid fa-user"></i>
-                                <input type="text" placeholder=" " id="user" name="txtusuario" autocomplete="off" required>
-                                <label for="user" class="label-flotante">Usuario</label>
-                            </div>
-
-
-                            <div class="input-wrapper">
-                                <i class="bx fa-solid fa-eye"></i>
-                                <input type="password" placeholder=" " id="pass" name="txtpassword1" autocomplete="off" required>
-                                <label for="pass" class="label-flotante">Contraseña</label>
-                            </div>
-
-                            <div class="input-wrapper">
-                                <i class="fa-solid fa-calculator"></i>
-                                <input type="number" placeholder=" " name="captcha" id="captcha" required>
-                                <label for="captcha" class="label-flotante">Suma: <?php echo $num1; ?> + <?php echo $num2; ?> =</label>
-                            </div>
-                            <div style="text-align: left; margin-bottom: 15px; margin-left: 65px;">
-                                <input type="checkbox" id="chkRecordarUsuario">
-                                <label for="chkRecordarUsuario" style="color: #666; font-size: 14px; cursor: pointer;">Recordar mi usuario</label>
-                            </div>
-
-                            <div class="recaptchamx">
-                                <?php if (isset($_SESSION['mostrar_recaptcha']) && $_SESSION['mostrar_recaptcha']): ?>
-                                    <div class="g-recaptcha" data-sitekey="<?php echo RECAPTCHA_SITE_KEY; ?>"></div>
-                                <?php endif; ?>
-                            </div>
-
-                            <button type="submit" name="btn_iniciar" class="btn_iniciar" id="botoniniciar">ENTRAR</button>
-                        </form>
-                        <!-- Mostrar el error si existe -->
-                        <div style="width: 400px;">
-                            <?php
-                            if (session_status() === PHP_SESSION_NONE) {
-                                session_start();
-                            }
-                            if (isset($_SESSION['errores']) && !empty($_SESSION['errores'])) {
-                                echo '<div class="errror">';
-                                foreach ($_SESSION['errores'] as $error) {
-                                    echo "<p>$error</p>"; // Mostrar cada error en un párrafo
-                                }
-                                echo '</div>';
-                                unset($_SESSION['errores']); // Limpiar errores después de mostrarlos
-                            }
-                            ?>
+                
+                <div class="card-login-animated">
+                    <div class="information">
+                        <div class="logomovil"></div>
+                        <div class="info-childs">
+                            <h2>SWAOS</h2>
+                            <p>Sistema web de administración para órdenes de servicio</p>
                         </div>
                     </div>
 
-                </div>
-            </div>
+                    <div class="form-information">
+                        <div class="form-information-childs">
+                            <h2>Inicio de sesión</h2>
+                            <form class="form" action="php/validarlogin.php" method="POST">
+
+                                <div class="input-wrapper">
+                                    <i class="fa-solid fa-user"></i>
+                                    <input type="text" placeholder=" " id="user" name="txtusuario" autocomplete="off" required>
+                                    <label for="user" class="label-flotante">Usuario</label>
+                                </div>
+
+
+                                <div class="input-wrapper">
+                                    <i class="bx fa-solid fa-eye"></i>
+                                    <input type="password" placeholder=" " id="pass" name="txtpassword1" autocomplete="off" required>
+                                    <label for="pass" class="label-flotante">Contraseña</label>
+                                </div>
+
+                                <div class="input-wrapper">
+                                    <i class="fa-solid fa-calculator"></i>
+                                    <input type="number" placeholder=" " name="captcha" id="captcha" required>
+                                    <label for="captcha" class="label-flotante">Suma: <?php echo $num1; ?> + <?php echo $num2; ?> =</label>
+                                </div>
+                                <div style="text-align: left; margin-bottom: 15px; margin-left: 65px;">
+                                    <input type="checkbox" id="chkRecordarUsuario">
+                                    <label for="chkRecordarUsuario" style="color: #666; font-size: 14px; cursor: pointer;">Recordar mi usuario</label>
+                                </div>
+
+                                <div class="recaptchamx">
+                                    <?php if (isset($_SESSION['mostrar_recaptcha']) && $_SESSION['mostrar_recaptcha']): ?>
+                                        <div class="g-recaptcha" data-sitekey="<?php echo RECAPTCHA_SITE_KEY; ?>"></div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <button type="submit" name="btn_iniciar" class="btn_iniciar" id="botoniniciar">ENTRAR</button>
+                            </form>
+                            <!-- Mostrar el error si existe -->
+                            <div style="width: 400px;">
+                                <?php
+                                if (session_status() === PHP_SESSION_NONE) {
+                                    session_start();
+                                }
+                                if (isset($_SESSION['errores']) && !empty($_SESSION['errores'])) {
+                                    echo '<div class="errror">';
+                                    foreach ($_SESSION['errores'] as $error) {
+                                        echo "<p>$error</p>"; // Mostrar cada error en un párrafo
+                                    }
+                                    echo '</div>';
+                                    unset($_SESSION['errores']); // Limpiar errores después de mostrarlos
+                                }
+                                ?>
+                            </div>
+                        </div>
+
+                    </div>
+                </div><!-- Fin de información -->
+            </div><!-- Fin de animación login -->
         </main>
-        <footer>Copyright © 2025. <a href="#">@Creador: Fernando Renteria</a>
+        <footer>Copyright © 2026. <a href="#">@Creador: Fernando Renteria</a>
 
         </footer>
     </div>
