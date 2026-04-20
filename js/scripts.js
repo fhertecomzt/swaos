@@ -7824,17 +7824,23 @@ window.abrirModalClienteExpress = function () {
         <p style="font-size:13px; color:#666; margin-bottom:25px;">Captura los datos básicos para enviarle su comprobante.</p>
         
         <div class="floating-group">
-            <input id="swal-cli-nombre" class="floating-input" placeholder=" " autocomplete="off">
+            <input id="swal-cli-nombre" class="floating-input" placeholder=" " autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')">
             <label class="floating-label">Nombre(s) *</label>
         </div>
         
         <div class="floating-group">
-            <input id="swal-cli-papellido" class="floating-input" placeholder=" " autocomplete="off">
+            <input id="swal-cli-papellido" class="floating-input" placeholder=" " autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')">
             <label class="floating-label">Primer Apellido *</label>
         </div>
         
         <div class="floating-group">
-            <input id="swal-cli-sapellido" class="floating-input" placeholder=" " autocomplete="off">
+            <input id="swal-cli-sapellido" class="floating-input" placeholder=" " autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
+                            title="Solo se permiten letras y espacios."
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')">
             <label class="floating-label">Segundo Apellido</label>
         </div>
         
