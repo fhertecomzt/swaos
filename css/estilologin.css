@@ -92,9 +92,8 @@ body {
   color: #ffffff;
   font-size: 5rem;
   overflow: hidden;
-  font-family: 'Courier New';
+  font-family: "Courier New";
 }
-
 
 .info-childs p {
   color: #ffffff;
@@ -246,6 +245,19 @@ footer a {
 /*RESPOSIVE FORM**********************************/
 /*Pantallas de 13.3 1280x800 */
 @media only screen and (max-width: 1280px) {
+  .information {
+    height: 100%;
+  }
+  .form-information {
+    height: 100%;
+  }
+  .errror {
+    height: 15%;
+  }
+}
+
+/* Estilos para pantallas de 1366px o menos */
+@media screen and (max-width: 1366px) {
   .information {
     height: 100%;
   }
