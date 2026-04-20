@@ -1,0 +1,461 @@
+<?php
+
+//Encabezados para evitar el caché
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$roles_permitidos = ["gerencia"];
+include "verificar_sesion.php";
+
+
+//Verificar si hay una sesión activa y si el rol está permitido
+if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos)) {
+    header("Location: ../index.php?error=acceso_denegado");
+    exit;
+}
+/*
+// Generar un token único en cada acceso
+$current_token = bin2hex(random_bytes(32));
+$_SESSION['current_token'] = $current_token;
+
+// Verificar el token de navegación para detectar inconsistencias
+if (isset($_SESSION['last_token'])) {
+    $page_token = $_POST['page_token'] ?? '';
+    if ($_SESSION['last_token'] !== $page_token) {
+        // Destruir la sesión y redirigir al inicio con un mensaje
+        session_unset();
+        session_destroy();
+        header("Location: ../index.php?session_expired=1&error=navegacion_inconsistente");
+        exit;
+    }
+}
+
+// Actualizar el último token utilizado
+$_SESSION['last_token'] = $current_token;
+*/
+?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SWAOS: Gerencia</title>
+    <meta name="description" content="Sistema Web De Administración para órdenes de Servicio">
+    <link rel="icon" type="image/x-icon" href="../imgs/favicon/favicon.ico">
+
+    <!-- CDn Font Awesome link fuente iconos-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!--Estilo Css admin -->
+    <link rel="stylesheet" href="../css/estilogm.css">
+    <!--Estilo Css formulario -->
+    <link rel="stylesheet" href="../css/formularios.css">
+    <!--Estilo Css tablas -->
+    <link rel="stylesheet" href="../css/tablas.css">
+    <!--Estilo Css errores -->
+    <link rel="stylesheet" href="../css/mensajesdeestado.css">
+    <!--Estilo dashboard -->
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <!--Estilo Perfil -->
+    <link rel="stylesheet" href="../css/perfil.css">
+    <!--Estilo Datatables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+
+</head>
+
+<body class="<?php echo (isset($_COOKIE['darkmode']) && $_COOKIE['darkmode'] == 'true') ? 'darkmode' : ''; ?>">
+
+    <!--Preloader-->
+    <div id="swaos-preloader">
+        <div class="loader-spinner"></div>
+        <p style="font-weight: bold; color: #0094fd; margin-top: 15px; font-size: 18px;">Cargando SWAOS...</p>
+    </div>
+
+    <!--Nav-->
+    <nav class="navbar">
+        <figure class="logo">
+
+            <img class="nav__logo" src="../imgs/logo.png" alt="Mascomputación">
+        </figure>
+
+
+        <div class="nav__links" id="menu">
+            <ul class="menu nav_target">
+                <li class="nav-item">
+                    <a href="#" id="dashboard-link" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="titles_btns">INICIO</span>
+                    </a>
+                </li>
+
+                <!--Matenimiento-->
+                <li class="nav-item has-submenu">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-wrench"></i>
+                        <span class="titles_btns">MANTENIMIENTO</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="#" id="usuarios-link" class="nav-link">
+                                <i class="fas fa-user"></i>
+                                <span>USUARIOS</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!--Catálogos-->
+                <li class="nav-item has-submenu">
+                    <a href="#" class="nav-link">
+                        <i class="fa-solid fa-folder-tree"></i>
+                        <span class="titles_btns">CATÁLOGOS</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="#" id="productos-link" class="nav-link">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                                <span>PRODUCTOS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="categorias-link" class="nav-link">
+                                <i class="fa-solid fa-layer-group"></i>
+                                <span>CATEGORIAS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="marcas-link" class="nav-link">
+                                <i class="fa-regular fa-copyright"></i>
+                                <span>MARCAS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="tiposervicios-link" class="nav-link">
+                                <i class="fa-solid fa-list-check"></i>
+                                <span>TIPO SERVICIOS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="tipoequipos-link" class="nav-link">
+                                <i class="fa-solid fa-display"></i>
+                                <span>TIPO EQUIPOS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="estatusservicios-link" class="nav-link">
+                                <i class="fa-solid fa-toolbox"></i>
+                                <span>ESTATUS SERVICIOS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="mpagos-link" class="nav-link">
+                                <i class="fa-solid fa-file-invoice-dollar"></i>
+                                <span>MÉTODOS DE PAGO</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="impuestos-link" class="nav-link">
+                                <i class="fa-solid fa-percent"></i>
+                                <span>IMPUESTOS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="umedidas-link" class="nav-link">
+                                <i class="fa-solid fa-ruler"></i>
+                                <span>UNIDAD MEDIDA</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="proveedores-link" class="nav-link">
+                                <i class="fa-solid fa-person-half-dress"></i>
+                                <span>PROVEEDORES</span>
+                            </a>
+                        </li>
+                </li>
+            </ul>
+
+            <!--Inventarios-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span class="titles_btns">MOVIMIENTOS</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="inventarios-link" class="nav-link">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>MOVIMIENTOS</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!--Órdenes de servicio-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-regular fa-newspaper"></i>
+                    <span class="titles_btns">ÓRDENES DE SERVICIO</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="ordenes-link" class="nav-link">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                            <span>ÓRDENES</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!--Ventas-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-cart-arrow-down"></i>
+                    <span class="titles_btns">VENTAS</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="ventas-link" class="nav-link">
+                            <i class="fa-solid fa-cash-register"></i>
+                            <span class="titles_btns">PUNTO VENTA</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="corte-link" class="nav-link">
+                            <i class="fa-solid fa-calculator"></i>
+                            <span class="titles_btns">CORTE DE CAJA</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="historialventas-link" class="nav-link">
+                            <i class="fa-solid fa-book"></i>
+                            <span class="titles_btns">HISTORIAL</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!--Cotizaciones-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-tags"></i>
+                    <span class="titles_btns">COTIZACIONES</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="cotizaciones-link" class="nav-link">
+                            <i class="fa-solid fa-magnifying-glass-dollar"></i>
+                            <span class="titles_btns">Cotizaciones</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!--Citas-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span class="titles_btns">CITAS</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="citas-link" class="nav-link">
+                            <i class="fa-regular fa-calendar"></i>
+                            <span class="titles_btns">Citas</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!--Cliente-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-people-line"></i>
+                    <span class="titles_btns">CLIENTES</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="clientes-link" class="nav-link">
+                            <i class="fa-solid fa-people-group"></i>
+                            <span>CLIENTES</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!--Reportes-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <span class="titles_btns">REPORTES</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="reportes-link" class="nav-link">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>REPORTES</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!--Mi cuenta-->
+            <li class="nav-item has-submenu">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-address-card"></i>
+                    <span class="titles_btns">MI CUENTA</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="#" id="perfil-link" class="nav-link">
+                            <i class=" fa-solid fa-user-pen"></i>
+                            <span>PERFIL</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="logout.php" id="" class="nav-link">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>CAMBIAR DE USUARIO</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="logout.php" id="" class="nav-link">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>SALIR</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            </ul>
+        </div><!--Fin del nav__links-->
+    </nav><!--Fin Nav-->
+
+    <div class="darkmodebtn">
+        <button id="btndarkmode">
+            <i title="Modo oscuro" class="fa-solid fa-sun"></i>
+            <p class="darkmode_title"></p>
+        </button>
+    </div><!--Fin Darmode btn-->
+
+    <div class="main--content" id="main-content">
+        <div class="header--wrapper">
+            <div class="nav__icon">
+                <a href="#" id="menu-toggle">☰</a>
+            </div>
+            <div class="header--title">
+                <h2>Taller: <?php echo $_SESSION['nombre_t'] ?></h2>
+                <span>Usuario: <?php echo $_SESSION['usuario'] ?></span>
+            </div>
+            <div class="user--info">
+
+                <!-- Campanita -->
+                <div style="position: relative; margin-left: 15px; cursor: pointer;" onclick="abrirModalTraspasos()" title="Ver mercancía en tránsito">
+                    <i class="fa-solid fa-bell" style="font-size: 24px; color: #c2cdd6; transition: 0.3s;" id="icono-campana-traspasos"></i>
+                    <span id="badge-traspasos" style="display: none; position: absolute; top: -5px; right: -8px; background: #dc3545; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; border: 2px solid white;">0</span>
+                </div>
+
+                <!-- Botón o imagen para abrir el dropdown Perfil -->
+                <div class="perfil-dropdown">
+                    <button class="perfil-btn">
+                        <img id="img-perfil-menu" src="<?php echo $_SESSION['imagen']; ?>" alt="Perfil" class="perfil-img">
+                    </button>
+
+                    <!-- Contenido del Dropdown Perfil -->
+                    <div id="perfilDropdown" class="dropdown-content">
+                        <div class="perfil-info">
+                            <p><strong>Usuario: </strong><?php echo $_SESSION['usuario']; ?></p>
+                            <p><strong>Nombre: </strong><?php echo $_SESSION['nombre'] . " " . $_SESSION['appaterno'] . " " . $_SESSION['apmaterno']; ?></p>
+                            <p><strong>Rol:</strong> <?php echo $_SESSION['rol']; ?></p>
+                            <p><strong>Taller:</strong> <?php echo $_SESSION['nombre_t']; ?></p>
+                        </div>
+                        <a href="../php/logout.php" class="logout-btn">Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div><!--Fin header--wrapper-->
+
+        <div class="content-area" id="content-area">
+            <!-- Contenido dinámico se cargará aquí -->
+            <?php
+            if (isset($_GET['page']) && $_GET['page'] === 'tiendas') {
+                include 'tiendas.php';
+            }
+            ?>
+        </div>
+    </div>
+
+    <div id="modal-traspasos" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; width: 600px; max-width: 95%; border-radius: 8px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeIn 0.3s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eef2f5; padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #17a2b8;"><i class="fa-solid fa-truck-ramp-box"></i> Mercancía en Camino</h3>
+                <button onclick="cerrarModalTraspasos()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa;">&times;</button>
+            </div>
+
+            <div id="lista-traspasos-pendientes" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+            </div>
+        </div>
+    </div>
+
+    <!--Scripts JS *******************************************************************************-->
+    <!--Scripts Preloader-->
+    <script src="../js/preloads.js"></script>
+
+    <!-- Libreria para las graficas JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!--Sortable libreria para mover los cards del dashboard-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <!--Libreria para Qrcode-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!--Scripts Para el paginador y buscador -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+    <!--Scripts Para los reportes -->
+    <script>
+        const NOMBRE_TALLER_JS = "<?php echo $_SESSION['nombre_t']; ?>";
+    </script>
+    <script src="../js/reportes.js"></script>
+
+
+    <!--Scripts Para el FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.global.min.js"></script>
+
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/scripts.js"></script>
+    <script src="../js/scriptssup.js"></script>
+    <script src="../js/clientes.js"></script>
+    <script src="../js/perfil.js"></script>
+
+
+    <script src="../js/modooscuro.js"></script>
+    <script src="../js/tiempo_sessiones.js"></script>
+
+    <!--Alertas SweetAlert2-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!--Scripts Selects anidados estado, ciudad, colonia y cp-->
+    <script src="../js/peticionesedosmun.js"></script>
+
+</body>
+
+</html>

@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['id'])) {
 
     if ($rolData) {
       // Pon aquí los nombres exactos de los roles que NO se pueden borrar
-      $rolesIntocables = ['superusuario', 'gerencia', 'ventas', 'sistemas', 'cliente'];
+      $rolesIntocables = ['superusuario', 'gerencia', 'ventas'];
 
       // Convertimos a minúsculas para comparar sin errores de mayúsculas
       if (in_array(strtolower(trim($rolData['nom_rol'])), $rolesIntocables)) {

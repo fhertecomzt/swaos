@@ -32,10 +32,10 @@ $_SESSION['captcha_result'] = $num1 + $num2;
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sistema Web De Administración Para Ordenes De Servicio">
+    <meta name="description" content="Sistema Web de Administración para Órdenes de Servicio">
     <link rel="icon" type="image/x-icon" href="imgs/favicon/favicon.ico">
     <meta name="robots" content="noindex" />
-    <title>SWAOS LOGIN</title>
+    <title>SWAOS: Sistema Web de Administración para Órdenes de Servicio </title>
 
     <link rel="stylesheet" type="text/css" href="css/estilologin.css">
 
@@ -47,7 +47,7 @@ $_SESSION['captcha_result'] = $num1 + $num2;
     <div class="container_principal">
         <main>
             <div class="contenedor-form">
-                
+
                 <div class="card-login-animated">
                     <div class="information">
                         <div class="logomovil"></div>

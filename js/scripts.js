@@ -916,33 +916,35 @@ async function cargarYSeleccionarUbicacionEditar(
 }
 
 // Llamar Roles *************************************************
-document
-  .getElementById("roles-link")
-  .addEventListener("click", function (event) {
-    event.preventDefault(); // Evita la acción por defecto del enlace
-    // 1. ENCENDEMOS EL PRELOADER
-    mostrarPreloader();
+if (document.getElementById("roles-link")){
+  document
+    .getElementById("roles-link")
+    .addEventListener("click", function (event) {
+      event.preventDefault(); // Evita la acción por defecto del enlace
+      // 1. ENCENDEMOS EL PRELOADER
+      mostrarPreloader();
 
-    fetch("roles.php")
-      .then((response) => response.text())
-      .then((html) => {
-        document.getElementById("content-area").innerHTML = html;
+      fetch("roles.php")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("content-area").innerHTML = html;
 
-        inicializarTablaGenerica(
-          "#tabla-roles",
-          "#buscarboxrol",
-          "#cantidad-registros",
-        );
-        // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
-        // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
-        setTimeout(() => {
-          ocultarPreloader();
-        }, 150);
-      })
-      .catch((error) => {
-        console.error("Error al cargar el contenido:", error);
-      });
-  });
+          inicializarTablaGenerica(
+            "#tabla-roles",
+            "#buscarboxrol",
+            "#cantidad-registros",
+          );
+          // 2. APAGAMOS EL PRELOADER CUANDO TODO ESTÁ LISTO
+          // Le damos 150ms de gracia para que el navegador dibuje bien la tabla
+          setTimeout(() => {
+            ocultarPreloader();
+          }, 150);
+        })
+        .catch((error) => {
+          console.error("Error al cargar el contenido:", error);
+        });
+    });
+}
 
 function abrirModalRol(id) {
   document.getElementById(id).style.display = "flex";

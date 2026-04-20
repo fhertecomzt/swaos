@@ -89,9 +89,13 @@ body {
   padding: 0 30px;
 }
 .info-childs h2 {
-  font-size: 4rem;
   color: #ffffff;
+  font-size: 5rem;
+  overflow: hidden;
+  font-family: 'Courier New';
 }
+
+
 .info-childs p {
   color: #ffffff;
   margin: 10px 0;

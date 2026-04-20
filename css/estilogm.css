@@ -1,0 +1,489 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  font-family: "Arial";
+}
+
+body {
+  background-color: #0f5867;
+  overflow-x: hidden;
+}
+
+/*  MENU PRINCIPAL (ESTADO PC)*/
+.navbar {
+  background-color: #21242b;
+  position: fixed; /* Cambiado de sticky a fixed para mejor control */
+  bottom: 0;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  transition: all 0.4s ease;
+  width: 240px;
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.logo {
+  height: 90px;
+  padding: 10px;
+  text-align: center;
+}
+
+.nav__logo {
+  border-radius: 11%;
+  height: 50px;
+  width: 50px;
+}
+
+.nav__icon {
+  display: none; /* Oculto en PC */
+}
+
+/* Enlaces del menú */
+.menu {
+  list-style: none;
+  padding: 0;
+}
+
+.menu > li {
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+/* Botones externos */
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.nav-link:hover {
+  background-color: rgba(128, 43, 255, 0.52);
+}
+
+.menu li i {
+  font-size: 18px;
+  min-width: 35px; /* Ancho fijo para centrar iconos */
+  text-align: center;
+}
+
+.titles_btns {
+  font-size: 14px;
+  margin-left: 10px;
+  white-space: nowrap; /* Evita que el texto se parta */
+}
+
+/* Submenús */
+.has-submenu ul {
+  background-color: #1a252f;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.has-submenu ul.show {
+  max-height: 500px; /* Se abre con JS */
+}
+
+.has-submenu ul li a {
+  display: block;
+  padding: 10px 20px 10px 65px; /* Sangría interna */
+  color: #bdc3c7;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.has-submenu ul li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* CONTENIDO PRINCIPAL  */
+.main--content {
+  position: relative;
+  margin-left: 240px; /* Empujado por el menú */
+  width: calc(100% - 240px);
+  padding: 0.9rem;
+  transition: all 0.4s ease;
+  min-height: 100vh;
+}
+
+/* Header, Perfil, Darkmode */
+.header--wrapper {
+  align-items: center;
+  background-color: #e1e1e1;
+  border-radius: 10px;
+  box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 5px 2rem;
+  margin-bottom: 1rem;
+  width: auto;
+}
+.header--wrapper img {
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.header--title h2,
+.header--title span {
+  color: #2c3e50;
+}
+.user--info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.user--info img:hover {
+  border: 2px solid rgba(128, 43, 255, 0.52);
+}
+
+.Perfilmodal {
+  display: none;
+  position: absolute;
+  top: 9%;
+  left: 70%;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  width: 395px;
+  padding: 15px;
+  z-index: 1000;
+}
+
+.modal-contentPerfil {
+  text-align: left;
+}
+.closePerfil {
+  background-color: #ebedf0;
+  border-radius: 100%;
+  color: #aaaaaaf0;
+  cursor: pointer;
+  float: right;
+  font-weight: bold;
+  height: 24px;
+  text-align: center;
+  width: 24px;
+  margin-right: 10px;
+}
+.closePerfil:hover {
+  background-color: #ff0000;
+  color: #ffffff;
+  text-decoration: none;
+}
+.perfil-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.perfil-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.perfil-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: white;
+  min-width: 250px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  z-index: 1;
+  border-radius: 10px;
+}
+.dropdown-content .perfil-info {
+  text-align: left;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.dropdown-content img {
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+.logout-btn {
+  display: block;
+  text-align: center;
+  background-color: #e74c3c;
+  color: white;
+  padding: 8px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+.darkmodebtn {
+  bottom: 20px;
+  margin-left: 65px;
+  position: absolute;
+  width: 180px;
+}
+.darkmodebtn button {
+  background: none;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.darkmode {
+  background-color: #444446 !important;
+}
+.content-area.darkmode {
+  background: #353839 !important;
+}
+i.darkmode,
+p.darkmode {
+  color: rgb(0, 0, 0);
+}
+.main--content.darkmode {
+  background-color: #353839 !important;
+}
+.header--title.darkmode h2,
+.header--title.darkmode span {
+  color: #ffffff !important;
+}
+.darkmode .nav-link:hover {
+  background-color: #626268;
+}
+
+.disabled-link {
+  pointer-events: none;
+  color: gray !important;
+  cursor: not-allowed;
+}
+
+/* ESTILOS DEL PRELOADER GLOBAL */
+#swaos-preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f4f6f9e5; /* Color de fondo claro */
+  z-index: 99999; /* Para que quede por encima de ABSOLUTAMENTE TODO */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition:
+    opacity 0.5s ease,
+    visibility 0.5s;
+}
+
+/* Si el usuario tiene el modo oscuro activado */
+body.darkmode #swaos-preloader {
+  background-color: #1f2937;
+}
+
+/* La animación de la rueda dando vueltas */
+.loader-spinner {
+  border: 5px solid #e5e7eb; /* Gris claro */
+  border-top: 5px solid #0094fd; /* Azul SWAOS */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Clase para ocultarlo suavemente */
+.preloader-oculto {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Fuerza a SweetAlert a estar por encima de nuestro Modal (que tiene z-index 9999) */
+.my-swal-container {
+  z-index: 10000 !important;
+}
+
+/* MEDIA QUERIES */
+
+/* --- MODO TABLET (Solo Iconos) --- */
+@media (max-width: 1024px) {
+  .header--wrapper {
+    width: 99%;
+  }
+  .navbar {
+    width: 80px;
+  }
+  .main--content {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+  }
+
+  .titles_btns,
+  .logo {
+    display: none;
+  } /* Ocultar textos */
+  .nav-link {
+    padding: 15px 0;
+    justify-content: center;
+  }
+  .menu li i {
+    margin: 0;
+    font-size: 22px;
+  }
+
+  /* Hover expansivo */
+  .navbar:hover {
+    width: 240px;
+  }
+  .navbar:hover .titles_btns,
+  .navbar:hover .logo {
+    display: inline-block;
+  }
+  .navbar:hover .nav-link {
+    justify-content: flex-start;
+    padding: 15px 20px;
+  }
+  .navbar:hover .menu li i {
+    margin-right: 10px;
+  }
+}
+
+/* --- MODO CELULAR (Menú Oculto y Botón Hamburguesa) --- */
+@media (max-width: 768px) {
+  /* El contenido ocupa toda la pantalla */
+  .main--content {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 60px;
+  }
+
+  /* Menú a la izquierda fuera de pantalla */
+  .navbar {
+    width: 250px;
+    left: -250px;
+    background-color: rgba(44, 62, 80, 0.98);
+  }
+
+  /* Clase que activa el JS para que entre el menú */
+  .navbar.open {
+    left: 0;
+  }
+
+  /* Textos visibles siempre en celular */
+  .titles_btns,
+  .logo {
+    display: inline-block;
+  }
+  .nav-link {
+    justify-content: flex-start;
+    padding: 15px 20px;
+  }
+
+  /* El botón de Hamburguesa */
+  .nav__icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    background-color: #2c3e50;
+    padding: 10px;
+    border-radius: 5px;
+    position: fixed; /* Siempre flotando */
+    top: 10px;
+    right: 20px;
+    z-index: 9999; /* Por encima de todo */
+  }
+
+  .nav__icon a {
+    color: #fff;
+    text-decoration: none;
+  }
+}
+@media (max-width: 450px) {
+  .header--wrapper img {
+    display: none;
+  }
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #bdc3c7 !important;
+  text-decoration: none !important;
+  transition: 0.3s;
+}
+
+.menu a:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  border-left: 4px solid #3498db;
+}
+
+/* sangría de los submenús */
+.has-submenu ul li a {
+  padding-left: 55px !important;
+  font-size: 13px !important;
+}
+
+/* BOTÓN DE MODO OSCURO */
+.darkmodebtn {
+  position: fixed !important; /* Lo ancla a la pantalla */
+  bottom: 20px;
+  left: 20px;
+  z-index: 2000; /* Encima de absolutamente todo */
+  width: auto !important;
+}
+
+.darkmodebtn button {
+  background-color: #1a252f;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  color: #f1c40f;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: 0.3s ease;
+}
+
+.darkmodebtn button:hover {
+  background-color: #34495e;
+  transform: scale(1.05);
+}
+/*Pantallas de 13.3 1280x800 */
+@media only screen and (max-width: 1280px) {
+  .menu a {
+    padding: 8px 20px;
+  }
+  .pos-panel {
+    height: 80%;
+  }
+  .pos-container {
+    display: grid;
+    grid-template-columns: 5fr 5fr;
+    gap: 20px;
+  }
+  .resumen-grid {
+    gap: 4px;
+  }
+}
