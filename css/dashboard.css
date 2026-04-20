@@ -15,6 +15,10 @@
   width: calc(100% - 30px);
 }
 
+.darkmode .container_dashboard{
+    background: #444446;
+}
+
 .btn-nueva-orden { background: #007bff; } .btn-nueva-orden:hover { background: #0056b3; }
 .btn-nuevo-cliente { background: #28a745; } .btn-nuevo-cliente:hover { background: #1e7e34; }
 .btn-cobrar { background: #6f42c1; } .btn-cobrar:hover { background: #5a32a3; }
