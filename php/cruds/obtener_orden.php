@@ -27,13 +27,20 @@ if (isset($_GET['id'])) {
             $response["abonos"] = $stmtAbonos->fetchAll(PDO::FETCH_ASSOC);
 
             // 3. Traemos las refacciones de esta orden
-            // Si en tu base de datos la columna de productos se llama distinto (ej. 'descripcion'), cámbialo en la línea de abajo.
             $stmtRef = $dbh->prepare("SELECT r.id_prod, r.cantidad, r.precio_unitario, p.nombre_prod AS nombre, p.codebar_prod
                                       FROM orden_refacciones r 
                                       INNER JOIN productos p ON r.id_prod = p.id_prod 
                                       WHERE r.id_orden = :id");
             $stmtRef->execute([':id' => $id]);
             $response["refacciones"] = $stmtRef->fetchAll(PDO::FETCH_ASSOC);
+
+            // 4. Sumamos el total de refacciones aquí adentro 
+            $stmtSum = $dbh->prepare("SELECT SUM(subtotal) FROM orden_refacciones WHERE id_orden = :id");
+            $stmtSum->execute([':id' => $id]); // Usamos :id, no $id_orden
+            $totalRefacciones = $stmtSum->fetchColumn() ?: 0;
+
+            // Inyectamos el total calculado al JSON de la orden
+            $response["orden"]["total_refacciones_calculadas"] = $totalRefacciones;
         } else {
             $response["message"] = "No se encontró la orden especificada.";
         }

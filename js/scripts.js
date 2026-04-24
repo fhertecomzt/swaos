@@ -916,7 +916,7 @@ async function cargarYSeleccionarUbicacionEditar(
 }
 
 // Llamar Roles *************************************************
-if (document.getElementById("roles-link")){
+if (document.getElementById("roles-link")) {
   document
     .getElementById("roles-link")
     .addEventListener("click", function (event) {
@@ -1656,8 +1656,8 @@ document
   .getElementById("productos-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/productos.php")
       .then((response) => response.text())
       .then((html) => {
@@ -2482,8 +2482,8 @@ document
   .getElementById("categorias-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/categorias.php")
       .then((response) => response.text())
       .then((html) => {
@@ -2916,8 +2916,8 @@ document
   .getElementById("marcas-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/marcas.php")
       .then((response) => response.text())
       .then((html) => {
@@ -3348,8 +3348,8 @@ document
   .getElementById("tiposervicios-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/tiposervicios.php")
       .then((response) => response.text())
       .then((html) => {
@@ -3793,8 +3793,8 @@ document
   .getElementById("tipoequipos-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/tipoequipos.php")
       .then((response) => response.text())
       .then((html) => {
@@ -3886,9 +3886,7 @@ function validarFormularioTipoequipos(event) {
     return;
   }
 
-  const tipoequipos = document
-    .getElementById("crear-tipoequipos")
-    .value.trim();
+  const tipoequipos = document.getElementById("crear-tipoequipos").value.trim();
   verificarDuplicadoTipoequipos(tipoequipos).then((esDuplicado) => {
     if (!esDuplicado) procesarFormularioTipoequipos(event, "crear");
   });
@@ -4237,8 +4235,8 @@ document
   .getElementById("estatusservicios-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
 
     fetch("catalogos/estatusservicios.php")
       .then((response) => response.text())
@@ -4680,8 +4678,8 @@ document
   .getElementById("mpagos-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
 
     fetch("catalogos/mpagos.php")
       .then((response) => response.text())
@@ -5115,8 +5113,8 @@ document
   .getElementById("impuestos-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
 
     fetch("catalogos/impuestos.php")
       .then((response) => response.text())
@@ -5565,8 +5563,8 @@ document
   .getElementById("umedidas-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
 
     fetch("catalogos/umedidas.php")
       .then((response) => response.text())
@@ -5589,7 +5587,6 @@ document
       });
   });
 
-  
 function abrirModalUmed(id) {
   document.getElementById(id).style.display = "flex";
 }
@@ -5712,7 +5709,6 @@ function procesarFormularioUmed(event, tipo) {
 }
 
 function verificarDuplicadoUmed(umed) {
-
   return fetch("cruds/verificar_nombre_umed.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -5756,7 +5752,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (formularioUmed) {
               const campos = ["idumed", "umed", "desc_umed", "estatus"];
               campos.forEach((campo) => {
-                  //console.log(`Asignando ${campo}:`, data.umed[campo]);
+                //console.log(`Asignando ${campo}:`, data.umed[campo]);
                 formularioUmed[`editar-${campo}`].value =
                   data.umed[campo] || "";
               });
@@ -5999,8 +5995,8 @@ document
   .getElementById("proveedores-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/proveedores.php")
       .then((response) => response.text())
       .then((html) => {
@@ -6581,59 +6577,67 @@ function cambiarPestanaInventario(evt, idTab) {
 }
 
 // 2. Procesar Formularios (Entrada y Salida usan la misma función inteligente)
-document.addEventListener("submit", function(e) {
-    if (e.target && (e.target.id === "form-entrada-inventario" || e.target.id === "form-salida-inventario")) {
-        e.preventDefault();
-        const form = e.target;
-        const tipo = form.querySelector('[name="tipo_movimiento"]').value;
+document.addEventListener("submit", function (e) {
+  if (
+    e.target &&
+    (e.target.id === "form-entrada-inventario" ||
+      e.target.id === "form-salida-inventario")
+  ) {
+    e.preventDefault();
+    const form = e.target;
+    const tipo = form.querySelector('[name="tipo_movimiento"]').value;
 
-        // Validaciones básicas
-        const idProd = form.querySelector('[name="id_prod"]').value;
-        const cant = form.querySelector('[name="cantidad"]').value;
-        
-        if (!idProd || cant <= 0) {
-            Swal.fire("Faltan datos", "Debes seleccionar un producto y una cantidad válida.", "warning");
-            return;
-        }
+    // Validaciones básicas
+    const idProd = form.querySelector('[name="id_prod"]').value;
+    const cant = form.querySelector('[name="cantidad"]').value;
 
-        // Usamos tu Preloader Elegante
-        if (typeof mostrarPreloader === 'function') mostrarPreloader();
-
-        const formData = new FormData(form);
-
-        fetch("cruds/procesar_movimiento_kardex.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (typeof ocultarPreloader === 'function') setTimeout(ocultarPreloader, 300);
-
-            if (data.success) {
-              Swal.fire({
-                title: `¡${tipo} Registrada!`,
-                text: `El inventario se ha actualizado correctamente. Nuevo Stock: ${data.nuevo_stock}`,
-                icon: "success",
-                timer: 1500,
-                showConfirmButton: false,
-              });
-              form.reset(); // Limpiamos el formulario
-
-              // Actualizamos el Kardex en el fondo silenciosamente
-              if (typeof cargarTablaKardex === "function") {
-                cargarTablaKardex();
-              }
-
-            } else {
-                Swal.fire("Error", data.message, "error");
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            if (typeof ocultarPreloader === 'function') ocultarPreloader();
-            Swal.fire("Error", "Fallo de conexión.", "error");
-        });
+    if (!idProd || cant <= 0) {
+      Swal.fire(
+        "Faltan datos",
+        "Debes seleccionar un producto y una cantidad válida.",
+        "warning",
+      );
+      return;
     }
+
+    // Usamos tu Preloader Elegante
+    if (typeof mostrarPreloader === "function") mostrarPreloader();
+
+    const formData = new FormData(form);
+
+    fetch("cruds/procesar_movimiento_kardex.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof ocultarPreloader === "function")
+          setTimeout(ocultarPreloader, 300);
+
+        if (data.success) {
+          Swal.fire({
+            title: `¡${tipo} Registrada!`,
+            text: `El inventario se ha actualizado correctamente. Nuevo Stock: ${data.nuevo_stock}`,
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+          form.reset(); // Limpiamos el formulario
+
+          // Actualizamos el Kardex en el fondo silenciosamente
+          if (typeof cargarTablaKardex === "function") {
+            cargarTablaKardex();
+          }
+        } else {
+          Swal.fire("Error", data.message, "error");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (typeof ocultarPreloader === "function") ocultarPreloader();
+        Swal.fire("Error", "Fallo de conexión.", "error");
+      });
+  }
 });
 
 // 3. Cargar la Tabla de Historial (Kardex)
@@ -6648,7 +6652,8 @@ window.cargarTablaKardex = function () {
   fetch(urlFresca)
     .then((res) => res.json())
     .then((data) => {
-      if (typeof ocultarPreloader === "function") setTimeout(ocultarPreloader, 300);
+      if (typeof ocultarPreloader === "function")
+        setTimeout(ocultarPreloader, 300);
 
       // Si PHP arrojó un error de Base de Datos, lo atrapamos
       if (data.error) throw new Error(data.error);
@@ -6663,7 +6668,10 @@ window.cargarTablaKardex = function () {
 
       if (data.length > 0) {
         data.forEach((mov) => {
-          let colorTipo = mov.tipo_movimiento === "Entrada" ? "color: green; font-weight: bold;" : "color: red; font-weight: bold;";
+          let colorTipo =
+            mov.tipo_movimiento === "Entrada"
+              ? "color: green; font-weight: bold;"
+              : "color: red; font-weight: bold;";
           let signo = mov.tipo_movimiento === "Entrada" ? "+" : "-";
 
           htmlFilas += `
@@ -6699,18 +6707,22 @@ window.cargarTablaKardex = function () {
         language: {
           url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
           // Dejamos que DataTables ponga el mensaje elegante cuando esté vacío
-          emptyTable: "No hay movimientos registrados aún en esta sucursal." 
+          emptyTable: "No hay movimientos registrados aún en esta sucursal.",
         },
       });
 
       // 4. RECONECTAMOS TUS CONTROLES PERSONALIZADOS
-      $("#kardex-search").off("keyup").on("keyup", function () {
+      $("#kardex-search")
+        .off("keyup")
+        .on("keyup", function () {
           tablaK.search(this.value).draw();
-      });
+        });
 
-      $("#kardex-length").off("change").on("change", function () {
+      $("#kardex-length")
+        .off("change")
+        .on("change", function () {
           tablaK.page.len(this.value).draw();
-      });
+        });
 
       // Mostramos los controles en la barra superior
       document.getElementById("controles-kardex").style.display = "flex";
@@ -6724,105 +6736,117 @@ window.cargarTablaKardex = function () {
     .catch((err) => {
       console.error("Error al cargar Kardex:", err);
       if (typeof ocultarPreloader === "function") ocultarPreloader();
-      
+
       // 🚨 BLINDAJE 3: Si de verdad explota el servidor o no hay internet, mostramos las 10 columnas del error.
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: red; font-weight: bold;"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con el servidor.</td></tr>';
+      tbody.innerHTML =
+        '<tr><td colspan="10" style="text-align: center; color: red; font-weight: bold;"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con el servidor.</td></tr>';
     });
 };
 
 // IMPRIMIR COMPROBANTE DE KARDEX
-window.imprimirMovimientoKardex = function(id_movimiento) {
-    // Aquí le decimos que abra una ventanita nueva (como un ticket)
-    // llamando a un archivo PHP que diseñaremos para el PDF/Ticket
-    const urlTicket = `cruds/ticket_movimiento.php?id=${id_movimiento}`;
-    
-    // La abrimos en tamaño carta (800x900
-   window.open(urlTicket, 'ComprobanteKardex', 'width=850,height=900,scrollbars=yes');
+window.imprimirMovimientoKardex = function (id_movimiento) {
+  // Aquí le decimos que abra una ventanita nueva (como un ticket)
+  // llamando a un archivo PHP que diseñaremos para el PDF/Ticket
+  const urlTicket = `cruds/ticket_movimiento.php?id=${id_movimiento}`;
+
+  // La abrimos en tamaño carta (800x900
+  window.open(
+    urlTicket,
+    "ComprobanteKardex",
+    "width=850,height=900,scrollbars=yes",
+  );
 };
 
 // LÓGICA DEL CARRITO DE COMPRAS (ENTRADAS MÚLTIPLES)
 
 // 1. Buscador en Vivo (Tipo Google)
-document.addEventListener("input", function(e) {
-    if (e.target.id === "buscador-producto-compra") {
-      const divSugerencias = document.getElementById("sugerencias-compra");
-      let texto = e.target.value;
+document.addEventListener("input", function (e) {
+  if (e.target.id === "buscador-producto-compra") {
+    const divSugerencias = document.getElementById("sugerencias-compra");
+    let texto = e.target.value;
 
-      if (texto.length < 2) {
-        divSugerencias.style.display = "none";
-        return;
-      }
-
-      // Antes decía: fetch("cruds/buscar_producto_compra.php?q="...
-      fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
-        .then((res) => res.json())
-        .then((data) => {
-          divSugerencias.innerHTML = "";
-          if (data.length > 0) {
-            data.forEach((prod) => {
-              let div = document.createElement("div");
-              div.style.padding = "10px";
-              div.style.cursor = "pointer";
-              div.style.borderBottom = "1px solid #eee";
-              // Efecto hover simple con JS
-              div.onmouseover = () => (div.style.backgroundColor = "#f0f8ff");
-              div.onmouseout = () => (div.style.backgroundColor = "white");
-
-              div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod}`;
-
-              // Al hacer clic, agregamos al carrito
-              div.onclick = () => {
-                // Antes decía: let costo = parseFloat(prod.precio_compra) || 0;
-                let costo = parseFloat(prod.costo_prod) || 0;
-                agregarFilaCompra(
-                  prod.id_prod,
-                  prod.nombre_prod,
-                  prod.codebar_prod,
-                  costo,
-                );
-                e.target.value = ""; // Limpiamos buscador
-                divSugerencias.style.display = "none";
-              };;
-              divSugerencias.appendChild(div);
-            });
-            divSugerencias.style.display = "block";
-          } else {
-            divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No se encontraron productos</div>`;
-            divSugerencias.style.display = "block";
-          }
-        });
+    if (texto.length < 2) {
+      divSugerencias.style.display = "none";
+      return;
     }
+
+    // Antes decía: fetch("cruds/buscar_producto_compra.php?q="...
+    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+      .then((res) => res.json())
+      .then((data) => {
+        divSugerencias.innerHTML = "";
+        if (data.length > 0) {
+          data.forEach((prod) => {
+            let div = document.createElement("div");
+            div.style.padding = "10px";
+            div.style.cursor = "pointer";
+            div.style.borderBottom = "1px solid #eee";
+            // Efecto hover simple con JS
+            div.onmouseover = () => (div.style.backgroundColor = "#f0f8ff");
+            div.onmouseout = () => (div.style.backgroundColor = "white");
+
+            div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod}`;
+
+            // Al hacer clic, agregamos al carrito
+            div.onclick = () => {
+              // Antes decía: let costo = parseFloat(prod.precio_compra) || 0;
+              let costo = parseFloat(prod.costo_prod) || 0;
+              agregarFilaCompra(
+                prod.id_prod,
+                prod.nombre_prod,
+                prod.codebar_prod,
+                costo,
+              );
+              e.target.value = ""; // Limpiamos buscador
+              divSugerencias.style.display = "none";
+            };
+            divSugerencias.appendChild(div);
+          });
+          divSugerencias.style.display = "block";
+        } else {
+          divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No se encontraron productos</div>`;
+          divSugerencias.style.display = "block";
+        }
+      });
+  }
 });
 
 // Ocultar buscador si das clic afuera
-document.addEventListener("click", function(e) {
-    const inputBuscar = document.getElementById("buscador-producto-compra");
-    const divSugerencias = document.getElementById("sugerencias-compra");
-    if (inputBuscar && !inputBuscar.contains(e.target) && divSugerencias && !divSugerencias.contains(e.target)) {
-        divSugerencias.style.display = "none";
-    }
+document.addEventListener("click", function (e) {
+  const inputBuscar = document.getElementById("buscador-producto-compra");
+  const divSugerencias = document.getElementById("sugerencias-compra");
+  if (
+    inputBuscar &&
+    !inputBuscar.contains(e.target) &&
+    divSugerencias &&
+    !divSugerencias.contains(e.target)
+  ) {
+    divSugerencias.style.display = "none";
+  }
 });
 
 // 2. Agregar Producto a la Tabla
-window.agregarFilaCompra = function(id, nombre, codebar, costo) {
-    const tbody = document.getElementById("cuerpo-carrito-compra");
-    const filaVacia = document.getElementById("fila-vacia-compra");
-    
-    // Si el producto ya está en el carrito, le sumamos 1 a la cantidad
-    let filaExistente = document.querySelector(`#cuerpo-carrito-compra tr[data-id="${id}"]`);
-    if (filaExistente) {
-        let inputCant = filaExistente.querySelector('.input-cant-compra');
-        inputCant.value = parseFloat(inputCant.value) + 1;
-        recalcularTotalCompra();
-        return;
-    }
+window.agregarFilaCompra = function (id, nombre, codebar, costo) {
+  const tbody = document.getElementById("cuerpo-carrito-compra");
+  const filaVacia = document.getElementById("fila-vacia-compra");
 
-    // Quitamos el mensaje de "Tabla vacía"
-    if (filaVacia) filaVacia.style.display = "none";
+  // Si el producto ya está en el carrito, le sumamos 1 a la cantidad
+  let filaExistente = document.querySelector(
+    `#cuerpo-carrito-compra tr[data-id="${id}"]`,
+  );
+  if (filaExistente) {
+    let inputCant = filaExistente.querySelector(".input-cant-compra");
+    inputCant.value = parseFloat(inputCant.value) + 1;
+    recalcularTotalCompra();
+    return;
+  }
 
-    const tr = document.createElement("tr");
-    tr.dataset.id = id;
-    tr.innerHTML = `
+  // Quitamos el mensaje de "Tabla vacía"
+  if (filaVacia) filaVacia.style.display = "none";
+
+  const tr = document.createElement("tr");
+  tr.dataset.id = id;
+  tr.innerHTML = `
         <td style="padding: 5px;">
             [${codebar}] ${nombre} 
             <input type="hidden" name="prod_id[]" value="${id}">
@@ -6842,247 +6866,300 @@ window.agregarFilaCompra = function(id, nombre, codebar, costo) {
             </button>
         </td>
     `;
-    tbody.appendChild(tr);
-    recalcularTotalCompra();
+  tbody.appendChild(tr);
+  recalcularTotalCompra();
 };
 
 // 3. Eliminar Producto de la Tabla
-window.eliminarFilaCompra = function(btn) {
-    btn.closest("tr").remove();
-    const tbody = document.getElementById("cuerpo-carrito-compra");
-    
-    // Si borramos el último, volvemos a mostrar el mensaje de vacío
-    if (tbody.querySelectorAll('tr:not(#fila-vacia-compra)').length === 0) {
-        document.getElementById("fila-vacia-compra").style.display = "table-row";
-    }
-    recalcularTotalCompra();
+window.eliminarFilaCompra = function (btn) {
+  btn.closest("tr").remove();
+  const tbody = document.getElementById("cuerpo-carrito-compra");
+
+  // Si borramos el último, volvemos a mostrar el mensaje de vacío
+  if (tbody.querySelectorAll("tr:not(#fila-vacia-compra)").length === 0) {
+    document.getElementById("fila-vacia-compra").style.display = "table-row";
+  }
+  recalcularTotalCompra();
 };
 
 // 4. Calculadora Matemática del Carrito
-window.recalcularTotalCompra = function() {
-    let total = 0;
-    const filas = document.querySelectorAll("#cuerpo-carrito-compra tr:not(#fila-vacia-compra)");
-    
-    filas.forEach(fila => {
-        let cant = parseFloat(fila.querySelector('.input-cant-compra').value) || 0;
-        let costo = parseFloat(fila.querySelector('.input-costo-compra').value) || 0;
-        let subtotal = cant * costo;
-        
-        fila.querySelector('.td-subtotal-compra').textContent = '$' + subtotal.toFixed(2);
-        total += subtotal;
-    });
-    
-    document.getElementById("total-compra-texto").textContent = '$' + total.toFixed(2);
+window.recalcularTotalCompra = function () {
+  let total = 0;
+  const filas = document.querySelectorAll(
+    "#cuerpo-carrito-compra tr:not(#fila-vacia-compra)",
+  );
+
+  filas.forEach((fila) => {
+    let cant = parseFloat(fila.querySelector(".input-cant-compra").value) || 0;
+    let costo =
+      parseFloat(fila.querySelector(".input-costo-compra").value) || 0;
+    let subtotal = cant * costo;
+
+    fila.querySelector(".td-subtotal-compra").textContent =
+      "$" + subtotal.toFixed(2);
+    total += subtotal;
+  });
+
+  document.getElementById("total-compra-texto").textContent =
+    "$" + total.toFixed(2);
 };
 
 // 5. Enviar el Carrito al Servidor (Guardar la Compra)
-document.addEventListener("submit", function(e) {
-    if (e.target.id === "form-compra-multiple") {
-        e.preventDefault();
+document.addEventListener("submit", function (e) {
+  if (e.target.id === "form-compra-multiple") {
+    e.preventDefault();
 
-        // 1. Validamos que el carrito no esté vacío
-        const filas = document.querySelectorAll("#cuerpo-carrito-compra tr:not(#fila-vacia-compra)");
-        if (filas.length === 0) {
-            Swal.fire("Atención", "Debes agregar al menos un producto a la factura.", "warning");
-            return;
-        }
-
-        // 2. Empaquetamos todo el formulario
-        const formData = new FormData(e.target);
-        
-        // Atrapamos manualmente el Proveedor y el Folio para asegurar que viajen
-        formData.append("proveedor", document.getElementById("compra-proveedor").value);
-        formData.append("folio", document.getElementById("compra-folio").value);
-
-        if (typeof mostrarPreloader === 'function') mostrarPreloader();
-
-        // 3. Lo enviamos al nuevo procesador PHP
-        fetch("cruds/procesar_compra_multiple.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (typeof ocultarPreloader === 'function') setTimeout(ocultarPreloader, 300);
-
-            if (data.success) {
-                Swal.fire({
-                    title: "¡Compra Registrada Exitosamente!",
-                    text: "El inventario y el Kardex han sido actualizados.",
-                    icon: "success",
-                    timer: 2500,
-                    showConfirmButton: false
-                });
-                
-                // Limpiamos la pantalla para la siguiente compra
-                e.target.reset();
-                document.getElementById("cuerpo-carrito-compra").innerHTML = '<tr id="fila-vacia-compra"><td colspan="5" style="text-align: center; color: #888; padding: 15px;">No hay productos en la factura. Busca y agrega uno.</td></tr>';
-                document.getElementById("total-compra-texto").textContent = "$0.00";
-
-                // Actualizamos la tabla del Kardex en el fondo
-                if (typeof cargarTablaKardex === 'function') cargarTablaKardex();
-
-            } else {
-                Swal.fire("Error", data.message, "error");
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            if (typeof ocultarPreloader === 'function') ocultarPreloader();
-            Swal.fire("Error", "Problema al conectar con el servidor.", "error");
-        });
+    // 1. Validamos que el carrito no esté vacío
+    const filas = document.querySelectorAll(
+      "#cuerpo-carrito-compra tr:not(#fila-vacia-compra)",
+    );
+    if (filas.length === 0) {
+      Swal.fire(
+        "Atención",
+        "Debes agregar al menos un producto a la factura.",
+        "warning",
+      );
+      return;
     }
+
+    // 2. Empaquetamos todo el formulario
+    const formData = new FormData(e.target);
+
+    // Atrapamos manualmente el Proveedor y el Folio para asegurar que viajen
+    formData.append(
+      "proveedor",
+      document.getElementById("compra-proveedor").value,
+    );
+    formData.append("folio", document.getElementById("compra-folio").value);
+
+    if (typeof mostrarPreloader === "function") mostrarPreloader();
+
+    // 3. Lo enviamos al nuevo procesador PHP
+    fetch("cruds/procesar_compra_multiple.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof ocultarPreloader === "function")
+          setTimeout(ocultarPreloader, 300);
+
+        if (data.success) {
+          Swal.fire({
+            title: "¡Compra Registrada Exitosamente!",
+            text: "El inventario y el Kardex han sido actualizados.",
+            icon: "success",
+            timer: 2500,
+            showConfirmButton: false,
+          });
+
+          // Limpiamos la pantalla para la siguiente compra
+          e.target.reset();
+          document.getElementById("cuerpo-carrito-compra").innerHTML =
+            '<tr id="fila-vacia-compra"><td colspan="5" style="text-align: center; color: #888; padding: 15px;">No hay productos en la factura. Busca y agrega uno.</td></tr>';
+          document.getElementById("total-compra-texto").textContent = "$0.00";
+
+          // Actualizamos la tabla del Kardex en el fondo
+          if (typeof cargarTablaKardex === "function") cargarTablaKardex();
+        } else {
+          Swal.fire("Error", data.message, "error");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (typeof ocultarPreloader === "function") ocultarPreloader();
+        Swal.fire("Error", "Problema al conectar con el servidor.", "error");
+      });
+  }
 });
 
 // Función para el botón "Agregar" o para Lectores de Código de Barras
-window.agregarProductoCompra = function() {
-    const input = document.getElementById("buscador-producto-compra");
-    let texto = input.value.trim();
+window.agregarProductoCompra = function () {
+  const input = document.getElementById("buscador-producto-compra");
+  let texto = input.value.trim();
 
-    if (texto === "") return;
+  if (texto === "") return;
 
-    // Buscamos exactamente ese código o nombre
-    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
-    .then(res => res.json())
-    .then(data => {
-        if (data.length > 0) {
-            // Tomamos el primer resultado exacto
-            let prod = data[0];
-            let costo = parseFloat(prod.costo_prod) || 0;
-            agregarFilaCompra(prod.id_prod, prod.nombre_prod, prod.codebar_prod, costo);
-            document.getElementById("sugerencias-compra").style.display = "none";
+  // Buscamos exactamente ese código o nombre
+  fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.length > 0) {
+        // Tomamos el primer resultado exacto
+        let prod = data[0];
+        let costo = parseFloat(prod.costo_prod) || 0;
+        agregarFilaCompra(
+          prod.id_prod,
+          prod.nombre_prod,
+          prod.codebar_prod,
+          costo,
+        );
+        document.getElementById("sugerencias-compra").style.display = "none";
 
-            // Limpiamos la caja para el siguiente producto
-            input.value = ""; 
+        // Limpiamos la caja para el siguiente producto
+        input.value = "";
 
-            // Regresamos el cursor a la caja instantáneamente
-            enfocarSeguro("buscador-producto-compra");
-            
-        } else {
-          Swal.fire("No encontrado", "No existe un producto con ese código.", "warning");
-          input.value = "";
-          enfocarSeguro("buscador-producto-compra"); // También regresamos el cursor si hay error
-        }
+        // Regresamos el cursor a la caja instantáneamente
+        enfocarSeguro("buscador-producto-compra");
+      } else {
+        Swal.fire(
+          "No encontrado",
+          "No existe un producto con ese código.",
+          "warning",
+        );
+        input.value = "";
+        enfocarSeguro("buscador-producto-compra"); // También regresamos el cursor si hay error
+      }
     });
 };
 
 //  BLINDAJE PARA LECTORES DE CÓDIGO DE BARRAS (TECLA ENTER)
-document.addEventListener("keydown", function(e) {
-    // Si estamos parados en el buscador de compras y la tecla es "Enter"
-    if (e.target.id === "buscador-producto-compra" && e.key === "Enter") {
-        e.preventDefault(); //  Detiene el envío del formulario completo
-        
-        // Disparamos la función como si hubieran presionado el botón azul
-        if (typeof agregarProductoCompra === 'function') {
-            agregarProductoCompra();
-        }
+document.addEventListener("keydown", function (e) {
+  // Si estamos parados en el buscador de compras y la tecla es "Enter"
+  if (e.target.id === "buscador-producto-compra" && e.key === "Enter") {
+    e.preventDefault(); //  Detiene el envío del formulario completo
+
+    // Disparamos la función como si hubieran presionado el botón azul
+    if (typeof agregarProductoCompra === "function") {
+      agregarProductoCompra();
     }
+  }
 });
 
 // LÓGICA DEL CARRITO DE SALIDAS (MERMAS/AJUSTES)
 
 // 1. Buscador en Vivo (Lista desplegable)
-document.addEventListener("input", function(e) {
-    if (e.target.id === "buscador-producto-salida") {
-        const divSugerencias = document.getElementById("sugerencias-salida");
-        let texto = e.target.value;
+document.addEventListener("input", function (e) {
+  if (e.target.id === "buscador-producto-salida") {
+    const divSugerencias = document.getElementById("sugerencias-salida");
+    let texto = e.target.value;
 
-        if (texto.length < 2) { divSugerencias.style.display = "none"; return; }
-
-        fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
-        .then(res => res.json())
-        .then(data => {
-            divSugerencias.innerHTML = "";
-            if (data.length > 0) {
-                data.forEach(prod => {
-                    let div = document.createElement("div");
-                    div.style.padding = "10px"; div.style.cursor = "pointer"; div.style.borderBottom = "1px solid #eee";
-                    div.onmouseover = () => div.style.backgroundColor = "#f0f8ff";
-                    div.onmouseout = () => div.style.backgroundColor = "white";
-                    
-                    // Le mostramos cuánto stock tiene actualmente
-                    let stockReal = parseFloat(prod.stock) || 0;
-                    div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod} <span style="color: ${stockReal > 0 ? 'green' : 'red'}; float: right;">Stock: ${stockReal}</span>`;
-                    
-                    div.onclick = () => {
-                        agregarFilaSalida(prod.id_prod, prod.nombre_prod, prod.codebar_prod, stockReal);
-                        e.target.value = ""; divSugerencias.style.display = "none";
-                        e.target.focus(); // Regresamos el cursor
-                    };
-                    divSugerencias.appendChild(div);
-                });
-                divSugerencias.style.display = "block";
-            } else {
-                divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No se encontraron productos</div>`;
-                divSugerencias.style.display = "block";
-            }
-        });
+    if (texto.length < 2) {
+      divSugerencias.style.display = "none";
+      return;
     }
+
+    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+      .then((res) => res.json())
+      .then((data) => {
+        divSugerencias.innerHTML = "";
+        if (data.length > 0) {
+          data.forEach((prod) => {
+            let div = document.createElement("div");
+            div.style.padding = "10px";
+            div.style.cursor = "pointer";
+            div.style.borderBottom = "1px solid #eee";
+            div.onmouseover = () => (div.style.backgroundColor = "#f0f8ff");
+            div.onmouseout = () => (div.style.backgroundColor = "white");
+
+            // Le mostramos cuánto stock tiene actualmente
+            let stockReal = parseFloat(prod.stock) || 0;
+            div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod} <span style="color: ${stockReal > 0 ? "green" : "red"}; float: right;">Stock: ${stockReal}</span>`;
+
+            div.onclick = () => {
+              agregarFilaSalida(
+                prod.id_prod,
+                prod.nombre_prod,
+                prod.codebar_prod,
+                stockReal,
+              );
+              e.target.value = "";
+              divSugerencias.style.display = "none";
+              e.target.focus(); // Regresamos el cursor
+            };
+            divSugerencias.appendChild(div);
+          });
+          divSugerencias.style.display = "block";
+        } else {
+          divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No se encontraron productos</div>`;
+          divSugerencias.style.display = "block";
+        }
+      });
+  }
 });
 
 // 2. Blindaje para Lector de Códigos (Tecla Enter)
-document.addEventListener("keydown", function(e) {
-    if (e.target.id === "buscador-producto-salida" && e.key === "Enter") {
-        e.preventDefault();
-        if (typeof agregarProductoSalida === 'function') agregarProductoSalida();
-    }
+document.addEventListener("keydown", function (e) {
+  if (e.target.id === "buscador-producto-salida" && e.key === "Enter") {
+    e.preventDefault();
+    if (typeof agregarProductoSalida === "function") agregarProductoSalida();
+  }
 });
 
 // 3. Función del botón o Lector (Agrega directo)
-window.agregarProductoSalida = function() {
-    const input = document.getElementById("buscador-producto-salida");
-    let texto = input.value.trim();
-    if (texto === "") return;
+window.agregarProductoSalida = function () {
+  const input = document.getElementById("buscador-producto-salida");
+  let texto = input.value.trim();
+  if (texto === "") return;
 
-    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
-    .then(res => res.json())
-    .then(data => {
-        if (data.length > 0) {
-            let prod = data[0];
-            let stockReal = parseFloat(prod.stock) || 0;
-            agregarFilaSalida(prod.id_prod, prod.nombre_prod, prod.codebar_prod, stockReal);
-            
-            input.value = ""; 
-            document.getElementById("sugerencias-salida").style.display = "none";
-            enfocarSeguro("buscador-producto-salida"); 
-        } else {
-            Swal.fire("No encontrado", "No existe producto con ese código.", "warning");
-            input.value = ""; 
-            enfocarSeguro("buscador-producto-salida");
-        }
+  fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.length > 0) {
+        let prod = data[0];
+        let stockReal = parseFloat(prod.stock) || 0;
+        agregarFilaSalida(
+          prod.id_prod,
+          prod.nombre_prod,
+          prod.codebar_prod,
+          stockReal,
+        );
+
+        input.value = "";
+        document.getElementById("sugerencias-salida").style.display = "none";
+        enfocarSeguro("buscador-producto-salida");
+      } else {
+        Swal.fire(
+          "No encontrado",
+          "No existe producto con ese código.",
+          "warning",
+        );
+        input.value = "";
+        enfocarSeguro("buscador-producto-salida");
+      }
     });
 };
 
 // 4. Agregar a la Tabla (Con reglas estrictas de Stock)
-window.agregarFilaSalida = function(id, nombre, codebar, stock) {
-    const tbody = document.getElementById("cuerpo-carrito-salida");
-    const filaVacia = document.getElementById("fila-vacia-salida");
-    
-    // Regla 1: Prohibido sacar si no hay
-    if (stock <= 0) {
-        Swal.fire("Sin Stock", "No puedes dar salida a un producto que tiene 0 piezas en inventario.", "error");
-        return;
+window.agregarFilaSalida = function (id, nombre, codebar, stock) {
+  const tbody = document.getElementById("cuerpo-carrito-salida");
+  const filaVacia = document.getElementById("fila-vacia-salida");
+
+  // Regla 1: Prohibido sacar si no hay
+  if (stock <= 0) {
+    Swal.fire(
+      "Sin Stock",
+      "No puedes dar salida a un producto que tiene 0 piezas en inventario.",
+      "error",
+    );
+    return;
+  }
+
+  let filaExistente = document.querySelector(
+    `#cuerpo-carrito-salida tr[data-id="${id}"]`,
+  );
+  if (filaExistente) {
+    let inputCant = filaExistente.querySelector(".input-cant-salida");
+    let nuevaCant = parseFloat(inputCant.value) + 1;
+
+    // Regla 2: Prohibido sumar en la tabla más de lo que hay
+    if (nuevaCant > stock) {
+      Swal.fire(
+        "Límite Alcanzado",
+        `Solo tienes ${stock} piezas en el sistema.`,
+        "warning",
+      );
+      return;
     }
+    inputCant.value = nuevaCant;
+    return;
+  }
 
-    let filaExistente = document.querySelector(`#cuerpo-carrito-salida tr[data-id="${id}"]`);
-    if (filaExistente) {
-        let inputCant = filaExistente.querySelector('.input-cant-salida');
-        let nuevaCant = parseFloat(inputCant.value) + 1;
-        
-        // Regla 2: Prohibido sumar en la tabla más de lo que hay
-        if (nuevaCant > stock) {
-            Swal.fire("Límite Alcanzado", `Solo tienes ${stock} piezas en el sistema.`, "warning");
-            return;
-        }
-        inputCant.value = nuevaCant;
-        return;
-    }
+  if (filaVacia) filaVacia.style.display = "none";
 
-    if (filaVacia) filaVacia.style.display = "none";
-
-    const tr = document.createElement("tr");
-    tr.dataset.id = id;
-    tr.innerHTML = `
+  const tr = document.createElement("tr");
+  tr.dataset.id = id;
+  tr.innerHTML = `
         <td style="padding: 5px;">
             [${codebar}] ${nombre} 
             <input type="hidden" name="prod_id[]" value="${id}">
@@ -7097,191 +7174,244 @@ window.agregarFilaSalida = function(id, nombre, codebar, stock) {
             <button type="button" onclick="eliminarFilaSalida(this)" style="background: red; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
         </td>
     `;
-    tbody.appendChild(tr);
+  tbody.appendChild(tr);
 };
 
 // 5. Validación al escribir manualmente la cantidad (Para Salidas y Traspasos)
-window.validarStockSalida = function(input, stockMax) {
-    let cant = parseInt(input.value);
-    
-    // Si borran el número o ponen cero, lo regresamos a 1
-    if (isNaN(cant) || cant <= 0) {
-        input.value = 1;
-        cant = 1;
-    }
-    
-    // Si intentan sacar más de lo que hay
-    if (cant > stockMax) {
-        Swal.fire("Límite superado", `Solo tienes ${stockMax} piezas en inventario.`, "error");
-        input.value = stockMax;
-    }
+window.validarStockSalida = function (input, stockMax) {
+  let cant = parseInt(input.value);
+
+  // Si borran el número o ponen cero, lo regresamos a 1
+  if (isNaN(cant) || cant <= 0) {
+    input.value = 1;
+    cant = 1;
+  }
+
+  // Si intentan sacar más de lo que hay
+  if (cant > stockMax) {
+    Swal.fire(
+      "Límite superado",
+      `Solo tienes ${stockMax} piezas en inventario.`,
+      "error",
+    );
+    input.value = stockMax;
+  }
 };
 
 // Nueva función para proteger los vacíos en Entradas (Compras)
-window.validarInputVacio = function(input) {
-    let cant = parseInt(input.value);
-    
-    // Si borran el número, ponen cero, o algo inválido, lo regresamos a 1
-    if (isNaN(cant) || cant <= 0) {
-        input.value = 1;
-    }
+window.validarInputVacio = function (input) {
+  let cant = parseInt(input.value);
+
+  // Si borran el número, ponen cero, o algo inválido, lo regresamos a 1
+  if (isNaN(cant) || cant <= 0) {
+    input.value = 1;
+  }
 };
 
 // 6. Eliminar Fila
-window.eliminarFilaSalida = function(btn) {
-    btn.closest("tr").remove();
-    const tbody = document.getElementById("cuerpo-carrito-salida");
-    if (tbody.querySelectorAll('tr:not(#fila-vacia-salida)').length === 0) {
-        document.getElementById("fila-vacia-salida").style.display = "table-row";
-    }
+window.eliminarFilaSalida = function (btn) {
+  btn.closest("tr").remove();
+  const tbody = document.getElementById("cuerpo-carrito-salida");
+  if (tbody.querySelectorAll("tr:not(#fila-vacia-salida)").length === 0) {
+    document.getElementById("fila-vacia-salida").style.display = "table-row";
+  }
 };
 
 // 7. Enviar la Salida al Servidor
-document.addEventListener("submit", function(e) {
-    if (e.target.id === "form-salida-multiple") {
-        e.preventDefault();
+document.addEventListener("submit", function (e) {
+  if (e.target.id === "form-salida-multiple") {
+    e.preventDefault();
 
-        const filas = document.querySelectorAll("#cuerpo-carrito-salida tr:not(#fila-vacia-salida)");
-        if (filas.length === 0) {
-            Swal.fire("Atención", "Agrega al menos un producto a la salida.", "warning");
-            return;
-        }
-
-        const formData = new FormData(e.target);
-        if (typeof mostrarPreloader === 'function') mostrarPreloader();
-
-        fetch("cruds/procesar_salida_multiple.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (typeof ocultarPreloader === 'function') setTimeout(ocultarPreloader, 300);
-
-            if (data.success) {
-                Swal.fire({title: "¡Salida Procesada!", text: "El inventario ha sido descontado correctamente.", icon: "success", timer: 2000, showConfirmButton: false});
-                e.target.reset();
-                document.getElementById("cuerpo-carrito-salida").innerHTML = '<tr id="fila-vacia-salida"><td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay productos en la lista. Busca y agrega uno.</td></tr>';
-                if (typeof cargarTablaKardex === 'function') cargarTablaKardex(); // Actualiza historial
-            } else {
-                Swal.fire("Error", data.message, "error");
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            if (typeof ocultarPreloader === 'function') ocultarPreloader();
-            Swal.fire("Error", "Problema al conectar con el servidor.", "error");
-        });
+    const filas = document.querySelectorAll(
+      "#cuerpo-carrito-salida tr:not(#fila-vacia-salida)",
+    );
+    if (filas.length === 0) {
+      Swal.fire(
+        "Atención",
+        "Agrega al menos un producto a la salida.",
+        "warning",
+      );
+      return;
     }
+
+    const formData = new FormData(e.target);
+    if (typeof mostrarPreloader === "function") mostrarPreloader();
+
+    fetch("cruds/procesar_salida_multiple.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof ocultarPreloader === "function")
+          setTimeout(ocultarPreloader, 300);
+
+        if (data.success) {
+          Swal.fire({
+            title: "¡Salida Procesada!",
+            text: "El inventario ha sido descontado correctamente.",
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+          e.target.reset();
+          document.getElementById("cuerpo-carrito-salida").innerHTML =
+            '<tr id="fila-vacia-salida"><td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay productos en la lista. Busca y agrega uno.</td></tr>';
+          if (typeof cargarTablaKardex === "function") cargarTablaKardex(); // Actualiza historial
+        } else {
+          Swal.fire("Error", data.message, "error");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (typeof ocultarPreloader === "function") ocultarPreloader();
+        Swal.fire("Error", "Problema al conectar con el servidor.", "error");
+      });
+  }
 });
 
 // FUNCIÓN DE ENFOQUE SEGURO (ANTI ARIA-HIDDEN)
-window.enfocarSeguro = function(id_elemento) {
-    setTimeout(() => {
-        // 1. Le quitamos la capa de invisibilidad al contenedor si se quedó pegada
-        const mainContent = document.getElementById("main-content");
-        if (mainContent) mainContent.removeAttribute("aria-hidden");
-        
-        // 2. Ahora sí, ponemos el cursor de forma segura
-        const elemento = document.getElementById(id_elemento);
-        if (elemento) elemento.focus();
-    }, 200); // Esperamos 200ms para que las animaciones terminen
+window.enfocarSeguro = function (id_elemento) {
+  setTimeout(() => {
+    // 1. Le quitamos la capa de invisibilidad al contenedor si se quedó pegada
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) mainContent.removeAttribute("aria-hidden");
+
+    // 2. Ahora sí, ponemos el cursor de forma segura
+    const elemento = document.getElementById(id_elemento);
+    if (elemento) elemento.focus();
+  }, 200); // Esperamos 200ms para que las animaciones terminen
 };
 
 // LÓGICA DEL CARRITO DE TRASPASOS (ENTRE SUCURSALES)
-document.addEventListener("input", function(e) {
-    if (e.target.id === "buscador-producto-traspaso") {
-        const divSugerencias = document.getElementById("sugerencias-traspaso");
-        let texto = e.target.value;
+document.addEventListener("input", function (e) {
+  if (e.target.id === "buscador-producto-traspaso") {
+    const divSugerencias = document.getElementById("sugerencias-traspaso");
+    let texto = e.target.value;
 
-        if (texto.length < 2) { divSugerencias.style.display = "none"; return; }
-
-        fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
-        .then(res => res.json())
-        .then(data => {
-            divSugerencias.innerHTML = "";
-            if (data.length > 0) {
-                data.forEach(prod => {
-                    let div = document.createElement("div");
-                    div.style.padding = "10px"; div.style.cursor = "pointer"; div.style.borderBottom = "1px solid #eee";
-                    div.onmouseover = () => div.style.backgroundColor = "#f0f8ff";
-                    div.onmouseout = () => div.style.backgroundColor = "white";
-                    
-                    let stockReal = parseFloat(prod.stock) || 0;
-                    div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod} <span style="color: ${stockReal > 0 ? 'green' : 'red'}; float: right;">Stock: ${stockReal}</span>`;
-                    
-                    div.onclick = () => {
-                        agregarFilaTraspaso(prod.id_prod, prod.nombre_prod, prod.codebar_prod, stockReal);
-                        e.target.value = ""; divSugerencias.style.display = "none";
-                        if(typeof enfocarSeguro === 'function') enfocarSeguro("buscador-producto-traspaso");
-                    };
-                    divSugerencias.appendChild(div);
-                });
-                divSugerencias.style.display = "block";
-            } else {
-                divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No encontrado</div>`;
-                divSugerencias.style.display = "block";
-            }
-        });
+    if (texto.length < 2) {
+      divSugerencias.style.display = "none";
+      return;
     }
+
+    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+      .then((res) => res.json())
+      .then((data) => {
+        divSugerencias.innerHTML = "";
+        if (data.length > 0) {
+          data.forEach((prod) => {
+            let div = document.createElement("div");
+            div.style.padding = "10px";
+            div.style.cursor = "pointer";
+            div.style.borderBottom = "1px solid #eee";
+            div.onmouseover = () => (div.style.backgroundColor = "#f0f8ff");
+            div.onmouseout = () => (div.style.backgroundColor = "white");
+
+            let stockReal = parseFloat(prod.stock) || 0;
+            div.innerHTML = `<strong>[${prod.codebar_prod}]</strong> ${prod.nombre_prod} <span style="color: ${stockReal > 0 ? "green" : "red"}; float: right;">Stock: ${stockReal}</span>`;
+
+            div.onclick = () => {
+              agregarFilaTraspaso(
+                prod.id_prod,
+                prod.nombre_prod,
+                prod.codebar_prod,
+                stockReal,
+              );
+              e.target.value = "";
+              divSugerencias.style.display = "none";
+              if (typeof enfocarSeguro === "function")
+                enfocarSeguro("buscador-producto-traspaso");
+            };
+            divSugerencias.appendChild(div);
+          });
+          divSugerencias.style.display = "block";
+        } else {
+          divSugerencias.innerHTML = `<div style="padding: 10px; color: red;">No encontrado</div>`;
+          divSugerencias.style.display = "block";
+        }
+      });
+  }
 });
 
 // Blindaje de Enter para Lector de Código de Barras
-document.addEventListener("keydown", function(e) {
-    if (e.target.id === "buscador-producto-traspaso" && e.key === "Enter") {
-        e.preventDefault();
-        if (typeof agregarProductoTraspaso === 'function') agregarProductoTraspaso();
-    }
+document.addEventListener("keydown", function (e) {
+  if (e.target.id === "buscador-producto-traspaso" && e.key === "Enter") {
+    e.preventDefault();
+    if (typeof agregarProductoTraspaso === "function")
+      agregarProductoTraspaso();
+  }
 });
 
-window.agregarProductoTraspaso = function() {
-    const input = document.getElementById("buscador-producto-traspaso");
-    let texto = input.value.trim();
-    if (texto === "") return;
+window.agregarProductoTraspaso = function () {
+  const input = document.getElementById("buscador-producto-traspaso");
+  let texto = input.value.trim();
+  if (texto === "") return;
 
-    fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
-    .then(res => res.json())
-    .then(data => {
-        if (data.length > 0) {
-            let prod = data[0];
-            let stockReal = parseFloat(prod.stock) || 0;
-            agregarFilaTraspaso(prod.id_prod, prod.nombre_prod, prod.codebar_prod, stockReal);
-            input.value = ""; document.getElementById("sugerencias-traspaso").style.display = "none";
-            if(typeof enfocarSeguro === 'function') enfocarSeguro("buscador-producto-traspaso");
-        } else {
-            Swal.fire("No encontrado", "No existe producto con ese código.", "warning");
-            input.value = "";
-            if(typeof enfocarSeguro === 'function') enfocarSeguro("buscador-producto-traspaso");
-        }
+  fetch("cruds/buscar_productos.php?q=" + encodeURIComponent(texto))
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.length > 0) {
+        let prod = data[0];
+        let stockReal = parseFloat(prod.stock) || 0;
+        agregarFilaTraspaso(
+          prod.id_prod,
+          prod.nombre_prod,
+          prod.codebar_prod,
+          stockReal,
+        );
+        input.value = "";
+        document.getElementById("sugerencias-traspaso").style.display = "none";
+        if (typeof enfocarSeguro === "function")
+          enfocarSeguro("buscador-producto-traspaso");
+      } else {
+        Swal.fire(
+          "No encontrado",
+          "No existe producto con ese código.",
+          "warning",
+        );
+        input.value = "";
+        if (typeof enfocarSeguro === "function")
+          enfocarSeguro("buscador-producto-traspaso");
+      }
     });
 };
 
-window.agregarFilaTraspaso = function(id, nombre, codebar, stock) {
-    const tbody = document.getElementById("cuerpo-carrito-traspaso");
-    const filaVacia = document.getElementById("fila-vacia-traspaso");
-    
-    if (stock <= 0) {
-        Swal.fire("Sin Stock", "No puedes enviar un producto que no tienes.", "error");
-        return;
+window.agregarFilaTraspaso = function (id, nombre, codebar, stock) {
+  const tbody = document.getElementById("cuerpo-carrito-traspaso");
+  const filaVacia = document.getElementById("fila-vacia-traspaso");
+
+  if (stock <= 0) {
+    Swal.fire(
+      "Sin Stock",
+      "No puedes enviar un producto que no tienes.",
+      "error",
+    );
+    return;
+  }
+
+  let filaExistente = document.querySelector(
+    `#cuerpo-carrito-traspaso tr[data-id="${id}"]`,
+  );
+  if (filaExistente) {
+    let inputCant = filaExistente.querySelector(".input-cant-traspaso");
+    let nuevaCant = parseFloat(inputCant.value) + 1;
+    if (nuevaCant > stock) {
+      Swal.fire(
+        "Límite",
+        `Solo tienes ${stock} piezas disponibles para enviar.`,
+        "warning",
+      );
+      return;
     }
+    inputCant.value = nuevaCant;
+    return;
+  }
 
-    let filaExistente = document.querySelector(`#cuerpo-carrito-traspaso tr[data-id="${id}"]`);
-    if (filaExistente) {
-        let inputCant = filaExistente.querySelector('.input-cant-traspaso');
-        let nuevaCant = parseFloat(inputCant.value) + 1;
-        if (nuevaCant > stock) {
-            Swal.fire("Límite", `Solo tienes ${stock} piezas disponibles para enviar.`, "warning");
-            return;
-        }
-        inputCant.value = nuevaCant;
-        return;
-    }
+  if (filaVacia) filaVacia.style.display = "none";
 
-    if (filaVacia) filaVacia.style.display = "none";
-
-    const tr = document.createElement("tr");
-    tr.dataset.id = id;
-    tr.innerHTML = `
+  const tr = document.createElement("tr");
+  tr.dataset.id = id;
+  tr.innerHTML = `
         <td style="padding: 5px;">[${codebar}] ${nombre} <input type="hidden" name="prod_id[]" value="${id}"></td>
         <td style="padding: 5px; text-align: center; font-weight: bold;">${stock}</td>
         <td style="padding: 5px; text-align: center;">
@@ -7290,77 +7420,91 @@ window.agregarFilaTraspaso = function(id, nombre, codebar, stock) {
             <button type="button" onclick="eliminarFilaTraspaso(this)" style="background: red; color: white; border: none; padding: 4px 8px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
         </td>
     `;
-    tbody.appendChild(tr);
+  tbody.appendChild(tr);
 };
 
-window.eliminarFilaTraspaso = function(btn) {
-    btn.closest("tr").remove();
-    if (document.querySelectorAll('#cuerpo-carrito-traspaso tr:not(#fila-vacia-traspaso)').length === 0) {
-        document.getElementById("fila-vacia-traspaso").style.display = "table-row";
-    }
+window.eliminarFilaTraspaso = function (btn) {
+  btn.closest("tr").remove();
+  if (
+    document.querySelectorAll(
+      "#cuerpo-carrito-traspaso tr:not(#fila-vacia-traspaso)",
+    ).length === 0
+  ) {
+    document.getElementById("fila-vacia-traspaso").style.display = "table-row";
+  }
 };
 
 // Enviar Traspaso al Servidor
-document.addEventListener("submit", function(e) {
-    if (e.target.id === "form-traspaso-multiple") {
-        e.preventDefault();
+document.addEventListener("submit", function (e) {
+  if (e.target.id === "form-traspaso-multiple") {
+    e.preventDefault();
 
-        const filas = document.querySelectorAll("#cuerpo-carrito-traspaso tr:not(#fila-vacia-traspaso)");
-        if (filas.length === 0) {
-            Swal.fire("Atención", "Agrega productos para traspasar.", "warning");
-            return;
-        }
-
-        const formData = new FormData(e.target);
-        if (typeof mostrarPreloader === 'function') mostrarPreloader();
-
-        fetch("cruds/procesar_traspaso_multiple.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (typeof ocultarPreloader === 'function') setTimeout(ocultarPreloader, 300);
-
-            if (data.success) {
-                Swal.fire({title: "¡Traspaso Exitoso!", text: "Inventarios actualizados en ambas sucursales.", icon: "success", timer: 2500, showConfirmButton: false});
-                e.target.reset();
-                document.getElementById("cuerpo-carrito-traspaso").innerHTML = '<tr id="fila-vacia-traspaso"><td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay productos a transferir. Busca y agrega uno.</td></tr>';
-                if (typeof cargarTablaKardex === 'function') cargarTablaKardex();
-            } else {
-                Swal.fire("Error", data.message, "error");
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            if (typeof ocultarPreloader === 'function') ocultarPreloader();
-            Swal.fire("Error", "Problema al conectar con el servidor.", "error");
-        });
+    const filas = document.querySelectorAll(
+      "#cuerpo-carrito-traspaso tr:not(#fila-vacia-traspaso)",
+    );
+    if (filas.length === 0) {
+      Swal.fire("Atención", "Agrega productos para traspasar.", "warning");
+      return;
     }
+
+    const formData = new FormData(e.target);
+    if (typeof mostrarPreloader === "function") mostrarPreloader();
+
+    fetch("cruds/procesar_traspaso_multiple.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof ocultarPreloader === "function")
+          setTimeout(ocultarPreloader, 300);
+
+        if (data.success) {
+          Swal.fire({
+            title: "¡Traspaso Exitoso!",
+            text: "Inventarios actualizados en ambas sucursales.",
+            icon: "success",
+            timer: 2500,
+            showConfirmButton: false,
+          });
+          e.target.reset();
+          document.getElementById("cuerpo-carrito-traspaso").innerHTML =
+            '<tr id="fila-vacia-traspaso"><td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay productos a transferir. Busca y agrega uno.</td></tr>';
+          if (typeof cargarTablaKardex === "function") cargarTablaKardex();
+        } else {
+          Swal.fire("Error", data.message, "error");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (typeof ocultarPreloader === "function") ocultarPreloader();
+        Swal.fire("Error", "Problema al conectar con el servidor.", "error");
+      });
+  }
 });
 
 // SENSOR DE NOTIFICACIONES Y RECEPCIÓN DE TRASPASOS
-window.revisarNotificacionesTraspasos = function() {
-    // Le ponemos un timestamp falso al final para evitar el caché del navegador
-    fetch("cruds/obtener_traspasos_pendientes.php?t=" + new Date().getTime())
-    .then(res => res.json())
-    .then(data => {
-        const badge = document.getElementById("badge-traspasos");
-        const icono = document.getElementById("icono-campana-traspasos");
-        const lista = document.getElementById("lista-traspasos-pendientes");
-        if(!badge || !icono || !lista) return;
-        
-        if (data.length && data.length > 0) {
-            // ¡Hay paquetes en camino! Encendemos la alarma visual
-            badge.textContent = data.length;
-            badge.style.display = "block";
-            icono.style.color = "#dc3545"; // Se pone roja
-            icono.classList.add("fa-shake"); // Tiembla un poquito
-            
-            // Dibujamos los paquetes en el modal
-            let html = "";
-            data.forEach(t => {
-                html += `
+window.revisarNotificacionesTraspasos = function () {
+  // Le ponemos un timestamp falso al final para evitar el caché del navegador
+  fetch("cruds/obtener_traspasos_pendientes.php?t=" + new Date().getTime())
+    .then((res) => res.json())
+    .then((data) => {
+      const badge = document.getElementById("badge-traspasos");
+      const icono = document.getElementById("icono-campana-traspasos");
+      const lista = document.getElementById("lista-traspasos-pendientes");
+      if (!badge || !icono || !lista) return;
+
+      if (data.length && data.length > 0) {
+        // ¡Hay paquetes en camino! Encendemos la alarma visual
+        badge.textContent = data.length;
+        badge.style.display = "block";
+        icono.style.color = "#dc3545"; // Se pone roja
+        icono.classList.add("fa-shake"); // Tiembla un poquito
+
+        // Dibujamos los paquetes en el modal
+        let html = "";
+        data.forEach((t) => {
+          html += `
                     <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;">
                         <div>
                             <strong style="color:#007bff; font-size: 16px;">[${t.codebar_prod}] ${t.nombre_prod}</strong><br>
@@ -7375,22 +7519,25 @@ window.revisarNotificacionesTraspasos = function() {
                         </div>
                     </div>
                 `;
-            });
-            lista.innerHTML = html;
-        } else {
-            // No hay paquetes, apagamos la campana
-            badge.style.display = "none";
-            icono.style.color = "#b2b3b4"; // Vuelve a gris
-            icono.classList.remove("fa-shake");
-            lista.innerHTML = "<div style='text-align:center; color:#888; padding: 30px;'><i class='fa-solid fa-box' style='font-size: 40px; color: #ddd; margin-bottom: 10px;'></i><br>No tienes mercancía en tránsito hacia tu sucursal.</div>";
-        }
+        });
+        lista.innerHTML = html;
+      } else {
+        // No hay paquetes, apagamos la campana
+        badge.style.display = "none";
+        icono.style.color = "#b2b3b4"; // Vuelve a gris
+        icono.classList.remove("fa-shake");
+        lista.innerHTML =
+          "<div style='text-align:center; color:#888; padding: 30px;'><i class='fa-solid fa-box' style='font-size: 40px; color: #ddd; margin-bottom: 10px;'></i><br>No tienes mercancía en tránsito hacia tu sucursal.</div>";
+      }
     })
-    .catch(err => console.error("Error al buscar notificaciones:", err));
+    .catch((err) => console.error("Error al buscar notificaciones:", err));
 };
 
 // Controles del Modal
-window.abrirModalTraspasos = () => document.getElementById("modal-traspasos").style.display = "flex";
-window.cerrarModalTraspasos = () => document.getElementById("modal-traspasos").style.display = "none";
+window.abrirModalTraspasos = () =>
+  (document.getElementById("modal-traspasos").style.display = "flex");
+window.cerrarModalTraspasos = () =>
+  (document.getElementById("modal-traspasos").style.display = "none");
 
 // Acción del Botón Verde (Recibir Físico)
 window.confirmarRecepcionFisica = function (id_traspaso) {
@@ -7447,10 +7594,10 @@ window.confirmarRecepcionFisica = function (id_traspaso) {
 };
 
 // Que el sensor se dispare al cargar la página
-document.addEventListener("DOMContentLoaded", function() {
-    revisarNotificacionesTraspasos();
-    // Opcional: Que revise cada 30 segundos sin recargar la página
-    setInterval(revisarNotificacionesTraspasos, 30000); 
+document.addEventListener("DOMContentLoaded", function () {
+  revisarNotificacionesTraspasos();
+  // Opcional: Que revise cada 30 segundos sin recargar la página
+  setInterval(revisarNotificacionesTraspasos, 30000);
 });
 
 // Llamar Ordenes de servicio *************************************************
@@ -7771,7 +7918,7 @@ window.abrirModalClienteExpress = function () {
     title: "Alta Exprés de Cliente",
     html: `
         <style>
-            /* Contenedor relativo para que la etiqueta "flote" dentro de él */
+            /* Contenedor relativo */
             .floating-group {
                 position: relative;
                 margin-bottom: 22px;
@@ -7783,21 +7930,38 @@ window.abrirModalClienteExpress = function () {
             /* El input estilizado */
             .floating-input {
                 width: 100%;
-                padding: 16px 12px 6px 12px; /* Espacio arriba para que no choque con la etiqueta */
+                padding: 16px 12px 6px 12px;
                 font-size: 15px;
                 border: 1px solid #d9d9d9;
                 border-radius: 6px;
                 outline: none;
                 background: transparent;
                 box-sizing: border-box;
-                transition: border-color 0.2s;
+                transition: border-color 0.2s, box-shadow 0.2s;
             }
             
             .floating-input:focus {
-                border-color: #28a745; /* Verde cuando el usuario hace clic */
+                border-color: #28a745;
             }
             
-            /* La etiqueta original (Centrada como placeholder) */
+            /* 🔴 ESTILOS DE ERROR EN TIEMPO REAL 🔴 */
+            .floating-input.input-error {
+                border-color: #dc3545 !important;
+            }
+            .floating-input.input-error:focus {
+                box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+            }
+            .error-message {
+                color: #dc3545;
+                font-size: 11px;
+                text-align: left;
+                margin-top: 4px;
+                margin-left: 4px;
+                display: none; /* Oculto por defecto */
+                font-weight: 500;
+            }
+
+            /* La etiqueta original */
             .floating-label {
                 position: absolute;
                 top: 14px;
@@ -7806,11 +7970,11 @@ window.abrirModalClienteExpress = function () {
                 color: #999;
                 transition: 0.2s ease all;
                 pointer-events: none;
-                background: white; /* Fondo blanco para tapar el borde de la caja cuando sube */
+                background: white;
                 padding: 0 4px;
             }
             
-            /* Cuando haces clic (focus) o cuando ya hay texto escrito (not(:placeholder-shown)) */
+            /* Animación de la etiqueta */
             .floating-input:focus ~ .floating-label,
             .floating-input:not(:placeholder-shown) ~ .floating-label {
                 top: -9px;
@@ -7819,39 +7983,42 @@ window.abrirModalClienteExpress = function () {
                 color: #28a745;
                 font-weight: 600;
             }
+            /* Etiqueta roja si hay error */
+            .floating-input.input-error ~ .floating-label {
+                color: #dc3545 !important;
+            }
         </style>
         
         <p style="font-size:13px; color:#666; margin-bottom:25px;">Captura los datos básicos para enviarle su comprobante.</p>
         
         <div class="floating-group">
-            <input id="swal-cli-nombre" class="floating-input" placeholder=" " autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
-                            title="Solo se permiten letras y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')">
+            <input id="swal-cli-nombre" class="floating-input" placeholder=" " autocomplete="off" type="text" >
             <label class="floating-label">Nombre(s) *</label>
+            <div id="err-nombre" class="error-message">Mínimo 3 letras.</div>
         </div>
         
         <div class="floating-group">
-            <input id="swal-cli-papellido" class="floating-input" placeholder=" " autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
-                            title="Solo se permiten letras y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')">
+            <input id="swal-cli-papellido" class="floating-input" placeholder=" " autocomplete="off" type="text" >
             <label class="floating-label">Primer Apellido *</label>
+            <div id="err-papel" class="error-message">Mínimo 3 letras.</div>
         </div>
         
         <div class="floating-group">
-            <input id="swal-cli-sapellido" class="floating-input" placeholder=" " autocomplete="off" pattern="[a-zA-ZÀ-ÿ\s]+"
-                            title="Solo se permiten letras y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '')">
+            <input id="swal-cli-sapellido" class="floating-input" placeholder=" " autocomplete="off" type="text" >
             <label class="floating-label">Segundo Apellido</label>
+            <div id="err-sapel" class="error-message">Mínimo 3 letras.</div>
         </div>
         
         <div class="floating-group">
-            <input id="swal-cli-telefono" type="tel" class="floating-input" placeholder=" " maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" autocomplete="off">
+            <input id="swal-cli-telefono" type="tel" class="floating-input" placeholder=" " maxlength="10" autocomplete="off">
             <label class="floating-label">Teléfono a 10 dígitos *</label>
+            <div id="err-tel" class="error-message">Debe tener exactamente 10 números.</div>
         </div>
         
         <div class="floating-group">
             <input id="swal-cli-correo" type="email" class="floating-input" placeholder=" " autocomplete="off">
             <label class="floating-label">Correo (Opcional)</label>
+            <div id="err-correo" class="error-message">Formato de correo inválido.</div>
         </div>
     `,
     showCancelButton: true,
@@ -7859,78 +8026,125 @@ window.abrirModalClienteExpress = function () {
       '<i class="fa-solid fa-floppy-disk"></i> Guardar y Asignar',
     confirmButtonColor: "#28a745",
     cancelButtonText: "Cancelar",
+
+    // 🔥 MAGIA FRONTEND: EVENTOS EN TIEMPO REAL 🔥
+    didOpen: () => {
+      const nombre = document.getElementById("swal-cli-nombre");
+      const papellido = document.getElementById("swal-cli-papellido");
+      const sapellido = document.getElementById("swal-cli-sapellido");
+      const telefono = document.getElementById("swal-cli-telefono");
+      const correo = document.getElementById("swal-cli-correo");
+
+      // Función para validar letras y pintar bordes
+      const validarLetrasVivo = (input, errId, requerido = true) => {
+        // 1. Reemplazo inmediato (Prohíbe números y símbolos)
+        input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "");
+
+        // 2. Pintar de rojo si es menor a 3 caracteres
+        const errDiv = document.getElementById(errId);
+        if (input.value.length > 0 && input.value.length < 3) {
+          input.classList.add("input-error");
+          errDiv.innerText = "Mínimo 3 letras.";
+          errDiv.style.display = "block";
+        } else if (
+          requerido &&
+          input.value.length === 0 &&
+          document.activeElement !== input
+        ) {
+          // Si es requerido y lo dejaron vacío al salir
+          input.classList.add("input-error");
+          errDiv.innerText = "Campo obligatorio.";
+          errDiv.style.display = "block";
+        } else {
+          input.classList.remove("input-error");
+          errDiv.style.display = "none";
+        }
+      };
+
+      // Asignar los eventos (se disparan en cada tecla que presiona el usuario)
+      nombre.addEventListener("input", () =>
+        validarLetrasVivo(nombre, "err-nombre", true),
+      );
+      papellido.addEventListener("input", () =>
+        validarLetrasVivo(papellido, "err-papel", true),
+      );
+      sapellido.addEventListener("input", () =>
+        validarLetrasVivo(sapellido, "err-sapel", false),
+      );
+
+      // Evento para teléfono en vivo
+      telefono.addEventListener("input", () => {
+        telefono.value = telefono.value.replace(/[^0-9]/g, "").slice(0, 10);
+        const errDiv = document.getElementById("err-tel");
+        if (telefono.value.length > 0 && telefono.value.length !== 10) {
+          telefono.classList.add("input-error");
+          errDiv.style.display = "block";
+        } else {
+          telefono.classList.remove("input-error");
+          errDiv.style.display = "none";
+        }
+      });
+
+      // Evento para correo en vivo
+      correo.addEventListener("input", () => {
+        const errDiv = document.getElementById("err-correo");
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (correo.value.length > 0 && !regex.test(correo.value)) {
+          correo.classList.add("input-error");
+          errDiv.style.display = "block";
+        } else {
+          correo.classList.remove("input-error");
+          errDiv.style.display = "none";
+        }
+      });
+    },
+
+    // 🛡️ VALIDACIÓN FINAL AL DAR CLIC EN GUARDAR 🛡️
     preConfirm: () => {
-      // Obtenemos los valores
-      let nombre = document.getElementById("swal-cli-nombre").value.trim();
-      let papellido = document
-        .getElementById("swal-cli-papellido")
-        .value.trim();
-      let sapellido = document
-        .getElementById("swal-cli-sapellido")
-        .value.trim();
-      let telefono = document.getElementById("swal-cli-telefono").value.trim();
-      let correo = document.getElementById("swal-cli-correo").value.trim();
+      let formValido = true;
 
-      // EXPRESIÓN REGULAR: Solo letras, acentos, ñ y espacios
-      const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-
-      // VALIDACIONES ESTRICTAS DE NOMBRES
-      if (nombre.length < 3) {
-        Swal.showValidationMessage(
-          "El nombre debe tener al menos 3 caracteres.",
-        );
-        return false;
-      }
-      if (!regexLetras.test(nombre)) {
-        Swal.showValidationMessage("El nombre solo debe contener letras.");
-        return false;
-      }
-
-      if (papellido.length < 3) {
-        Swal.showValidationMessage(
-          "El primer apellido debe tener al menos 3 caracteres.",
-        );
-        return false;
-      }
-      if (!regexLetras.test(papellido)) {
-        Swal.showValidationMessage(
-          "El primer apellido solo debe contener letras.",
-        );
-        return false;
-      }
-
-      if (sapellido !== "") {
-        if (sapellido.length < 3) {
-          Swal.showValidationMessage(
-            "Si escribes segundo apellido, debe ser de 3 caracteres mínimo.",
-          );
-          return false;
+      // Función auxiliar para revisar si los requeridos están vacíos al guardar
+      const validarVacio = (id, errId) => {
+        const input = document.getElementById(id);
+        if (input.value.trim() === "") {
+          input.classList.add("input-error");
+          const errDiv = document.getElementById(errId);
+          errDiv.innerText = "Este campo es obligatorio.";
+          errDiv.style.display = "block";
+          formValido = false;
         }
-        if (!regexLetras.test(sapellido)) {
-          Swal.showValidationMessage(
-            "El segundo apellido solo debe contener letras.",
-          );
-          return false;
-        }
+      };
+
+      validarVacio("swal-cli-nombre", "err-nombre");
+      validarVacio("swal-cli-papellido", "err-papel");
+
+      const tel = document.getElementById("swal-cli-telefono");
+      if (tel.value.length !== 10) {
+        tel.classList.add("input-error");
+        document.getElementById("err-tel").style.display = "block";
+        formValido = false;
       }
 
-      // Teléfono
-      if (telefono.length !== 10) {
+      // Revisa si en pantalla quedó algún campo con la clase "input-error"
+      const hayErroresRojos =
+        document.querySelectorAll(".input-error").length > 0;
+
+      if (!formValido || hayErroresRojos) {
+        // En lugar de un mensaje largo, solo indicamos que revise lo rojo
         Swal.showValidationMessage(
-          "El teléfono debe tener exactamente 10 números.",
+          "Por favor, corrige los campos en rojo antes de continuar.",
         );
         return false;
       }
 
-      // Correo
-      if (correo !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-        Swal.showValidationMessage(
-          "Debes ingresar un formato de correo electrónico válido.",
-        );
-        return false;
-      }
-
-      return { nombre, papellido, sapellido, telefono, correo };
+      // Si todo está perfecto, retornamos la data
+      return {
+        nombre: document.getElementById("swal-cli-nombre").value.trim(),
+        papellido: document.getElementById("swal-cli-papellido").value.trim(),
+        sapellido: document.getElementById("swal-cli-sapellido").value.trim(),
+        telefono: document.getElementById("swal-cli-telefono").value.trim(),
+        correo: document.getElementById("swal-cli-correo").value.trim(),
+      };
     },
   }).then((result) => {
     if (result.isConfirmed) {
@@ -8145,7 +8359,7 @@ document.addEventListener("submit", function (e) {
             document.getElementById("limpiar-cliente").style.display = "none";
 
           // 1. Armamos la URL del QR exactamente igual que en tu otra función
-          const urlRastreo = `https://swaos.rf.gd/track.php?t=${data.token_qr}`;
+          const urlRastreo = `https://swaos.com.mx/track.php?t=${data.token_qr}`;
           const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlRastreo)}`;
 
           // 2. Usamos el método nativo de SweetAlert (imageUrl)
@@ -8346,10 +8560,27 @@ document.addEventListener("click", function (e) {
             data.orden.diagnostico || "";
 
           // Costos y anticipos
+          // === BLOQUE CORREGIDO: MATEMÁTICA INVERSA PARA EVITAR DUPLICIDAD ===
+
+          // 1. Extraemos los valores que vienen de la Base de Datos
+          // data.orden.costo_servicio trae el TOTAL ($1050) porque así se guardó por el bug anterior
+          let costoTotalBD = parseFloat(data.orden.costo_servicio) || 0;
+
+          // 2. Extraemos el total de refacciones (Asegúrate de que obtener_orden.php mande este valor)
+          let costoRefaccionesBD =
+            parseFloat(data.orden.total_refacciones_calculadas) || 0;
+
+          // 3. Aplicamos la resta: Mano de Obra ($600) = Total ($1050) - Refacciones ($450)
+          let manoObraPura = costoTotalBD - costoRefaccionesBD;
+
+          // 4. Pintamos los inputs con los valores correctos
           document.getElementById("edit-mano-obra").value =
-            data.orden.costo_servicio || 0;
+            manoObraPura.toFixed(2);
+          document.getElementById("edit-costo").value = costoTotalBD.toFixed(2);
           document.getElementById("edit-anticipo").value =
             data.orden.anticipo_servicio || 0;
+
+          // =================================================================
 
           // Limpiamos los campos de nuevos pagos
           document.getElementById("edit-nuevo-abono").value = "0";
@@ -8565,7 +8796,7 @@ function imprimirTicket(idOrden) {
 }
 
 function verQrOrden(token) {
-  const urlRastreo = `https://swaos.rf.gd/track.php?t=${token}`;
+  const urlRastreo = `https://swaos.com.mx/track.php?t=${token}`;
   const urlImagenQR = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(urlRastreo)}`;
 
   Swal.fire({
@@ -8747,8 +8978,8 @@ document
   .getElementById("ventas-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/ventas.php")
       .then((response) => response.text())
       .then((html) => {
@@ -9445,8 +9676,8 @@ document
   .getElementById("corte-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/corte_caja.php")
       .then((response) => response.text())
       .then((html) => {
@@ -9619,8 +9850,8 @@ document
   .getElementById("historialventas-link")
   .addEventListener("click", function (event) {
     event.preventDefault();
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("../php/operaciones/historial_ventas.php")
       .then((response) => response.text())
       .then((html) => {
@@ -10194,8 +10425,8 @@ document
   .getElementById("cotizaciones-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
     fetch("catalogos/cotizaciones.php")
       .then((response) => response.text())
       .then((html) => {
@@ -10980,8 +11211,8 @@ let botonCitasMenu = document.getElementById("citas-link");
 if (botonCitasMenu) {
   botonCitasMenu.addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
 
     fetch("catalogos/citas.php")
       .then((response) => response.text())
@@ -11556,8 +11787,8 @@ document
   .getElementById("reportes-link")
   .addEventListener("click", function (event) {
     event.preventDefault(); // Evita la acción por defecto del enlace
-      // 1. ENCENDEMOS EL PRELOADER
-      mostrarPreloader();
+    // 1. ENCENDEMOS EL PRELOADER
+    mostrarPreloader();
 
     fetch("../php/operaciones/reportes.php")
       .then((response) => response.text())

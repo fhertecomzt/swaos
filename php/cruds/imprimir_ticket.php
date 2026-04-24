@@ -174,7 +174,7 @@ $nombre_taller = $_SESSION['nombre_t'] ?? 'Mi Taller de Reparación';
             <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<http://localhost/swaos/track.php?t=<?php echo $orden['token_hash']; ?>" alt="Código QR" style="width: 80px; height: 80px;"> -->
 
             <!-- Para impresoras de 58mm -->
-            <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://swaos.rf.gd/track.php?t=<?php echo $orden['token_hash']; ?>" alt="Código QR" style="width: 80px; height: 80px;">
+            <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://swaos.com.mx/track.php?t=<?php echo $orden['token_hash']; ?>" alt="Código QR" style="width: 80px; height: 80px;">
         </div>
 
         <div class="condiciones">

@@ -1,6 +1,6 @@
 <?php
 
-session_start(); 
+session_start();
 // Iniciamos sesión para saber en qué taller estamos
 $id_taller_sesion = $_SESSION['taller_id'] ?? 1;
 
@@ -136,11 +136,10 @@ try {
     $concepto = "Anticipo de Reparación Orden #" . $nuevo_folio_orden; // <-- Ahora muestra el folio bonito
     $stmtDetalle = $dbh->prepare("INSERT INTO detalle_ventas (id_venta, concepto, cantidad, precio_unitario, subtotal) VALUES (?, ?, 1, ?, ?)");
     $stmtDetalle->execute([$id_venta, $concepto, $anticipo, $anticipo]);
+  }
 
-   }
-
-    // SUBIR FOTOS
-    if (!empty($_FILES['evidencias']['name'][0])) {
+  // SUBIR FOTOS
+  if (!empty($_FILES['evidencias']['name'][0])) {
     $dir = "/../../imgs/ordenes/";
     if (!is_dir($dir)) mkdir($dir, 0777, true);
 
@@ -170,8 +169,8 @@ try {
 
   // RESPUESTA
   // OJO: Cambiar "localhost/swaos" por "swaos.rf.gd" cuando lo subas a tu servidor
-  $link_track = "https://swaos.rf.gd/track.php?t=" . $token_hash;
-  $link_portal = "https://swaos.rf.gd/portal_cliente.php";
+  $link_track = "https://swaos.com.mx/track.php?t=" . $token_hash;
+  $link_portal = "https://swaos.com.mx/portal_cliente.php";
 
   $msg = "Hola *" . $datosCliente['nombre_cliente'] . "*,\n";
   // Cambiamos $id_orden por $nuevo_folio_orden en el WhatsApp

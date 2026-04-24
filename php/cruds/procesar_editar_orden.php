@@ -9,6 +9,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $costo_servicio = $_POST['costo_servicio'] ?? 0;
     $anticipo_servicio = $_POST['anticipo_servicio'] ?? 0;
 
+    // ---  RECALCULAR EL TOTAL REAL ---
+    $mano_de_obra = floatval($costo_servicio);
+    $total_refacciones = 0;
+
+    // Sumar todas las piezas que vienen en el formulario
+    if (isset($_POST['refacciones_id']) && is_array($_POST['refacciones_id'])) {
+        for ($i = 0; $i < count($_POST['refacciones_id']); $i++) {
+            $cant = floatval($_POST['refacciones_cant'][$i]);
+            $precio = floatval($_POST['refacciones_precio'][$i]);
+            $total_refacciones += ($cant * $precio);
+        }
+    }
+
+    // El verdadero Costo Total que se va a guardar ($1050)
+    $costo_total_real = $mano_de_obra + $total_refacciones;
+
     $nuevo_abono = floatval($_POST['nuevo_abono'] ?? 0);
     $anticipo_actual = floatval($_POST['anticipo_servicio'] ?? 0);
 
@@ -37,13 +53,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Iniciamos la Transacción SQL
     $dbh->beginTransaction();
 
+    // Usamos el Total Real para el Saldo
+    $saldo_servicio = $costo_total_real - $anticipo_total;
+
     try {
         // 1. Actualizamos la orden
         $sql = "UPDATE ordenesservicio 
-                SET id_estado_servicio = ?, diagnostico = ?, costo_servicio = ?, anticipo_servicio = ?, saldo_servicio = ?
-                WHERE id_orden = ? AND id_taller = ?";
+            SET id_estado_servicio = ?, diagnostico = ?, costo_servicio = ?, anticipo_servicio = ?, saldo_servicio = ?
+            WHERE id_orden = ? AND id_taller = ?";
         $stmt = $dbh->prepare($sql);
-        $stmt->execute([$id_estado_servicio, $diagnostico, $costo_servicio, $anticipo_total, $saldo_servicio, $id_orden, $id_taller_sesion]);
+        // ATENCIÓN AQUÍ: Pasamos $costo_total_real
+        $stmt->execute([$id_estado_servicio, $diagnostico, $costo_total_real, $anticipo_total, $saldo_servicio, $id_orden, $id_taller_sesion]);
 
         // ACTUALIZAR REFACCIONES Y KARDEX (ALGORITMO INTELIGENTE)
         $id_taller = $_SESSION['taller_id'] ?? 1;

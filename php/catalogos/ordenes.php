@@ -153,7 +153,9 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
             <div class="autocomplete-container" style="position: relative;">
               <label>Cliente:</label>
 
-              <input type="search" id="busqueda-cliente" placeholder="Escribe nombre o teléfono..." autocomplete="off">
+              <input type="search" id="busqueda-cliente" placeholder="Escribe nombre o teléfono..." pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+                title="Solo se permiten letras, números y espacios."
+                oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required>
 
               <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" required>
 
@@ -189,7 +191,9 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </div>
           <div class="form-group">
             <label>Modelo:</label>
-            <input type="text" name="modelo" placeholder="Ej. equipo generico" autocomplete="off" required>
+            <input type="text" name="modelo" placeholder="Ej. equipo generico" pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+              title="Solo se permiten letras, números y espacios."
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required>
           </div>
           <div class="form-group">
             <label>No. Serie / IMEI:</label>
@@ -208,7 +212,9 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </div>
           <div class="form-group">
             <label>Accesorios (Cargador, funda...):</label>
-            <input type="text" name="accesorios" placeholder="Detallar todo lo recibido">
+            <input type="text" name="accesorios" placeholder="Detallar todo lo recibido" pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+              title="Solo se permiten letras, números y espacios."
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required>
           </div>
           <div class="form-group">
             <label>Fecha Estimada Entrega:</label>
@@ -223,7 +229,7 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
       <div class="form-grid-2">
         <div>
           <h4>4. Diagnóstico Inicial</h4>
-          <div class="form-group" style="width: 100%;">
+          <div class="form-group" style="width: 100%; ">
             <label>Tipo Servicio:</label>
             <select name="tipo_servicio" required>
               <option value="">Selecciona tipo de servicio...</option>
@@ -234,15 +240,24 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Falla Reportada (Cliente):</label>
-            <textarea name="falla" rows="3" style="width: 80%;" placeholder="¿Qué dice el cliente que falla?" required></textarea>
+            <textarea name="falla" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px;
+    border-radius: 5px; padding: 3px;" placeholder="¿Qué dice el cliente que falla?" pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+              title="Solo se permiten letras, números y espacios."
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required></textarea>
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Diagnóstico Técnico (Opcional):</label>
-            <textarea name="diagnostico" rows="3" style="width: 80%;" placeholder="Observaciones técnicas iniciales"></textarea>
+            <textarea name="diagnostico" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px;
+    border-radius: 5px; padding: 3px;" placeholder="Observaciones técnicas iniciales" pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+              title="Solo se permiten letras, números y espacios."
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required></textarea>
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Observaciones Generales:</label>
-            <textarea name="observaciones" rows="3" style="width: 80%;" placeholder="Detalles estéticos, condiciones, etc."></textarea>
+            <textarea name="observaciones" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px;
+    border-radius: 5px; padding: 3px;" placeholder="Detalles estéticos, condiciones, etc." pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+              title="Solo se permiten letras, números y espacios."
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required></textarea>
           </div>
         </div>
 
@@ -336,7 +351,9 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 
           <div class="form-group" style="width: 100%;">
             <label>Diagnóstico Técnico / Solución:</label>
-            <textarea id="edit-diagnostico" name="diagnostico" rows="2" placeholder="Describe el trabajo realizado..."></textarea>
+            <textarea id="edit-diagnostico" name="diagnostico" rows="2" placeholder="Describe el trabajo realizado..." pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+              title="Solo se permiten letras, números y espacios."
+              oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required></textarea>
           </div>
         </div>
 
@@ -346,11 +363,11 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
 
             <div class="form-group ladoble">
               <label style="color: var(--color_sky); font-weight: bold;">Mano de Obra ($):</label>
-              <input type="number" id="edit-mano-obra" name="mano_obra" step="0.01" min="0" value="0" oninput="calcularSaldoEdit()">
+              <input type="number" id="edit-mano-obra" name="costo_servicio" step="0.01" min="0" value="0" oninput="calcularSaldoEdit()">
             </div>
             <div class="form-group ladoble">
               <label>Costo Total (Auto):</label>
-              <input type="number" id="edit-costo" name="costo_servicio" step="0.01" min="0" readonly style="background: #eef2f5; font-weight: bold;">
+              <input type="number" id="edit-costo" step="0.01" min="0" readonly style="background: #eef2f5; font-weight: bold;">
             </div>
 
             <div class="form-group ladoble">
@@ -413,7 +430,9 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
             <div style="padding: 15px; border-top: 1px solid #ddd;">
               <div class="form-group" style="position: relative; margin-bottom: 10px;">
                 <label>Buscar Producto (Escribe nombre, código o número de parte):</label>
-                <input type="search" id="busqueda-producto-orden" placeholder="Ej. Pantalla, Batería, Memoria RAM..." autocomplete="off">
+                <input type="search" id="busqueda-producto-orden" placeholder="Ej. Pantalla, Batería, Memoria RAM..." pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+                  title="Solo se permiten letras, números y espacios."
+                  oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off">
                 <ul id="lista-resultados-productos" class="lista-autocomplete" style="display: none; max-height: 200px; overflow-y: auto;"></ul>
               </div>
 
