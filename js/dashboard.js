@@ -84,6 +84,9 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             if (window.miGraficaInstancia) window.miGraficaInstancia.destroy();
 
+            // Registramos el plugin de forma global para esta gráfica
+            Chart.register(ChartDataLabels);
+
             window.miGraficaInstancia = new Chart(
               canvasElement.getContext("2d"),
               {
@@ -102,9 +105,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 options: {
                   responsive: true,
                   maintainAspectRatio: false,
-                  cutout: "70%",
-                  plugins: { legend: { position: "right" } },
+                  cutout: "70%", // Grosor de la dona
+                  plugins: {
+                    legend: {
+                      position: "right",
+                    },
+                    //  AQUÍ CONFIGURAMOS LOS NÚMEROS FIJOS 
+                    datalabels: {
+                      color: "#ffffff", // Color de los números (Blanco para resaltar sobre los colores)
+                      font: {
+                        weight: "bold", // Letra negrita
+                        size: 9, // Tamaño del número
+                      },
+                      formatter: (value, context) => {
+                        // Si el valor es 0, no mostramos el número para que no se amontone
+                        return value > 0 ? value : "";
+                      },
+                    },
+                  },
                 },
+                // INYECTAMOS EL PLUGIN AQUÍ DE NÚMEROS SOBRE LA GRAFICA
+                plugins: [ChartDataLabels],
               },
             );
           }

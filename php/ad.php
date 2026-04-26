@@ -422,11 +422,13 @@ $_SESSION['last_token'] = $current_token;
     </div>
 
     <!--Scripts JS *******************************************************************************-->
-        <!--Scripts Preloader-->
+    <!--Scripts Preloader-->
     <script src="../js/preloads.js"></script>
 
     <!-- Libreria para las graficas JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- complemento para los poner los datos en la grafica -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
     <!--Sortable libreria para mover los cards del dashboard-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
