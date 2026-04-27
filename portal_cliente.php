@@ -311,64 +311,107 @@ $mostrar_captcha_inicio = isset($_SESSION['intentos_portal']) && $_SESSION['inte
         });
     });
 
-    // LÓGICA DE RECUPERACIÓN DE CLAVE POR EMAIL
+    // LÓGICA DE RECUPERACIÓN DE CLAVE POR EMAIL (VERSIÓN PREMIUM UI CON FETCH INTEGRADO)
     function recuperarClaveAutomatica(e) {
       e.preventDefault();
 
       Swal.fire({
         title: 'Recuperar Clave',
-        text: 'Ingresa tu número de teléfono registrado (10 dígitos):',
-        input: 'text',
-        inputAttributes: {
-          maxlength: 10,
-          inputmode: 'numeric' // Llama al teclado numérico en celulares
-        },
+        html: `
+      <style>
+        .floating-group { position: relative; margin: 20px auto 10px auto; width: 90%; }
+        .floating-input {
+            width: 100%; padding: 16px 12px 6px 12px; font-size: 16px;
+            border: 1px solid #d9d9d9; border-radius: 6px; outline: none;
+            background: transparent; box-sizing: border-box; transition: border-color 0.2s;
+        }
+        .floating-input:focus { border-color: #0866ff; }
+        .floating-label {
+            position: absolute; top: 15px; left: 12px; font-size: 15px;
+            color: #999; transition: 0.2s ease all; pointer-events: none;
+            background: white; padding: 0 4px;
+        }
+        .floating-input:focus ~ .floating-label,
+        .floating-input:not(:placeholder-shown) ~ .floating-label {
+            top: -9px; left: 10px; font-size: 12px; color: #0866ff; font-weight: 600;
+        }
+        .floating-input.input-error { border-color: #dc3545 !important; }
+        .floating-input.input-error ~ .floating-label { color: #dc3545 !important; }
+      </style>
+      
+      <p style="font-size:14px; color:#666; margin-bottom:15px;">Ingresa tu número de teléfono registrado a 10 dígitos:</p>
+      
+      <div class="floating-group">
+          <input id="swal-recuperar-tel" class="floating-input" type="tel" placeholder=" " maxlength="10" autocomplete="off" inputmode="numeric">
+          <label class="floating-label">Teléfono</label>
+      </div>
+    `,
         showCancelButton: true,
         confirmButtonText: 'Enviar nueva clave',
         cancelButtonText: 'Cancelar',
         showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading(), // Evita que se cierre si da clic afuera mientras carga
 
-        // Revisar que no escriba nada que no sea telefono
         didOpen: () => {
-          const input = Swal.getInput();
+          const input = document.getElementById('swal-recuperar-tel');
           input.addEventListener('input', () => {
-            // Si escribes una letra, la borra instantáneamente
-            input.value = input.value.replace(/[^0-9]/g, '');
+            input.value = input.value.replace(/[^0-9]/g, '').slice(0, 10);
+            if (input.value.length > 0 && input.value.length < 10) {
+              input.classList.add('input-error');
+            } else {
+              input.classList.remove('input-error');
+            }
           });
         },
 
-        preConfirm: (telefonoLogin) => {
-          // Validar que sean exactamente 10 números
-          if (!telefonoLogin || telefonoLogin.length !== 10) {
-            Swal.showValidationMessage('Por favor, ingresa los 10 dígitos exactos de tu teléfono.');
+        // 🔥 MAGIA UX: Validación y Petición en el mismo paso 🔥
+        preConfirm: () => {
+          const input = document.getElementById('swal-recuperar-tel');
+          const telefono = input.value.trim();
+
+          // 1. Validación Local
+          if (telefono.length !== 10) {
+            input.classList.add('input-error');
+            Swal.showValidationMessage('El teléfono debe tener exactamente 10 números.');
             return false;
           }
 
+          // 2. Retornamos el FETCH (SweetAlert esperará a que termine)
           return fetch('php/recuperar_clave_cliente.php', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
               },
-              body: 'telefono=' + encodeURIComponent(telefonoLogin)
+              body: 'telefono=' + encodeURIComponent(telefono)
             })
-            .then(response => response.json())
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Error en la conexión con el servidor.');
+              }
+              return response.json();
+            })
             .then(data => {
+              // Si el PHP dice que falló (ej. teléfono no existe), lanzamos el error al modal
               if (!data.success) {
                 throw new Error(data.message);
               }
+              // Si todo sale bien, pasamos los datos a la siguiente etapa
               return data;
             })
             .catch(error => {
-              Swal.showValidationMessage(error.message);
+              // Atrapamos cualquier error y lo pintamos en el modal original sin cerrarlo
+              Swal.showValidationMessage(`Error: ${error.message}`);
             });
-        },
-        allowOutsideClick: () => !Swal.isLoading()
+        }
+
       }).then((result) => {
-        if (result.isConfirmed) {
+        // 3. Etapa Final: Solo llegamos aquí si el PHP respondió exitosamente
+        if (result.isConfirmed && result.value) {
           Swal.fire({
             icon: 'success',
             title: '¡Enviado!',
-            text: result.value.message
+            text: result.value.message || 'Se ha enviado un correo/mensaje con tus nuevas credenciales.',
+            confirmButtonColor: '#28a745'
           });
         }
       });
