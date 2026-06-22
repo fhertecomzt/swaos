@@ -227,7 +227,8 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
       <hr>
 
       <div class="form-grid-2">
-        <div>
+
+        <div class="seccion-form">
           <h4>4. Diagnóstico Inicial</h4>
           <div class="form-group" style="width: 100%; ">
             <label>Tipo Servicio:</label>
@@ -240,28 +241,25 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Falla Reportada (Cliente):</label>
-            <textarea name="falla" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px;
-    border-radius: 5px; padding: 3px;" placeholder="¿Qué dice el cliente que falla?" pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+            <textarea name="falla" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px; border-radius: 5px; padding: 3px;" placeholder="¿Qué dice el cliente que falla?" pattern="[a-zA-ZÀ-ÿ0-9\s]+"
               title="Solo se permiten letras, números y espacios."
               oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required></textarea>
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Diagnóstico Técnico (Opcional):</label>
-            <textarea name="diagnostico" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px;
-    border-radius: 5px; padding: 3px;" placeholder="Observaciones técnicas iniciales" pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+            <textarea name="diagnostico" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px; border-radius: 5px; padding: 3px;" placeholder="Observaciones técnicas iniciales" pattern="[a-zA-ZÀ-ÿ0-9\s]+"
               title="Solo se permiten letras, números y espacios."
               oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required></textarea>
           </div>
           <div class="form-group" style="width: 100%;">
             <label>Observaciones Generales:</label>
-            <textarea name="observaciones" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px;
-    border-radius: 5px; padding: 3px;" placeholder="Detalles estéticos, condiciones, etc." pattern="[a-zA-ZÀ-ÿ0-9\s]+"
+            <textarea name="observaciones" rows="3" style="width: 94%; border: solid 1px #e2e2e2; border-bottom-width: 2px; border-radius: 5px; padding: 3px;" placeholder="Detalles estéticos, condiciones, etc." pattern="[a-zA-ZÀ-ÿ0-9\s]+"
               title="Solo se permiten letras, números y espacios."
               oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" autocomplete="off" required></textarea>
           </div>
         </div>
 
-        <div>
+        <div class="seccion-form">
           <h4>5. Costos y Evidencia</h4>
           <div class="form-containernum">
             <div class="form-group ladoble">
@@ -304,12 +302,11 @@ $estados_servicio = obtenerRegistros($dbh, "estadosservicios", "id_estado_servic
               </button>
             </div>
 
-            <label for="evidencias-upload" ...>
-              <label for="evidencias-upload" style="cursor: pointer; color: #007bff;">
-                <i class="fa-solid fa-camera"></i> Subir Fotos de Evidencia
-              </label>
-              <input type="file" id="evidencias-upload" name="evidencias[]" multiple accept="image/*" style="display: none;" onchange="previewEvidencia(this)">
-              <div id="preview-container" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;"></div>
+            <label for="evidencias-upload" style="cursor: pointer; color: #007bff;">
+              <i class="fa-solid fa-camera"></i> Subir Fotos de Evidencia
+            </label>
+            <input type="file" id="evidencias-upload" name="evidencias[]" multiple accept="image/*" style="display: none;" onchange="previewEvidencia(this)">
+            <div id="preview-container" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;"></div>
           </div>
         </div>
       </div>

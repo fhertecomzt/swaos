@@ -77,7 +77,7 @@ $colonias = obtenerColonias($dbh);
 
     <!-- Modal para crear taller -->
     <div id="crear-modal" class="modal" style="display: none;">
-        <div class="modal-content-lg">
+        <div class="modal-content" style="width: 90%; max-width: 1000px; padding: 25px;">
             <span title="Cerrar" class="close" onclick="cerrarModal('crear-modal')">&times;</span>
             <h2 class="tittle">Crear Taller</h2>
 
@@ -123,7 +123,10 @@ $colonias = obtenerColonias($dbh);
                             <div class="form-group ladoble">
                                 <label for="estatus">Estatus:</label>
                                 <select id="estatus" name="estatus" required>
-                                    <?php foreach ($options as $key => $text) { ?>
+                                    <?php
+                                    /** @var array $options */
+                                    /** @var int $selected */
+                                    foreach ($options as $key => $text) { ?>
                                         <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
                                     <?php } ?>
                                 </select>
@@ -197,7 +200,7 @@ $colonias = obtenerColonias($dbh);
     </div>
 
     <div id="editar-modal" class="modal" style="display: none;">
-        <div class="modal-content-lg">
+        <div class="modal-content" style="width: 90%; max-width: 1000px; padding: 25px;">
             <span title="Cerrar" class="close" onclick="cerrarModal('editar-modal')">&times;</span>
             <h2 class="tittle">Editar Taller</h2>
 

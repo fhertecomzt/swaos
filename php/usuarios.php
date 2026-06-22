@@ -85,216 +85,249 @@ $usuarios = obtenerUsuarios($dbh);
         <p class="mensajevacio" id="mensaje-vacio" style="display: none; color: red;">No se encontraron resultados.</p>
 
 
-        <!-- Modal para crear Usuario -->
         <div id="crear-modalUser" class="modal" style="display: none;">
-            <div class="modal-contentUsuarios" style="height: 700px;">
+            <div class="modal-contentUsuarios" style="width: 90%; max-width: 1000px; padding: 25px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalUser('crear-modalUser')">&times;</span>
                 <h2 class="tittle">Crear Usuario</h2>
+
                 <form id="form-crearUser" enctype="multipart/form-data" novalidate>
+                    <div class="form-grid-3">
 
-                    <div class="form-group">
-                        <label for="crear-usuario">Usuario:</label>
-                        <input type="text" id="crear-usuario" name="usuario" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                        <div class="seccion-form">
+                            <h4>1. Información Personal</h4>
+
+                            <div class="form-group">
+                                <label for="crear-nombre">Nombre:</label>
+                                <input type="text" id="crear-nombre" name="nombre" autocomplete="off"
+                                    pattern="[a-zA-ZÀ-ÿ0-9\s]+" title="Solo se permiten letras, números y espacios."
+                                    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="crear-papellido">Primer apellido:</label>
+                                <input type="text" id="crear-papellido" name="papellido" autocomplete="off"
+                                    pattern="[a-zA-ZÀ-ÿ0-9\s]+" title="Solo se permiten letras, números y espacios."
+                                    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="crear-sapellido">Segundo apellido:</label>
+                                <input type="text" id="crear-sapellido" name="sapellido" autocomplete="off"
+                                    pattern="[a-zA-ZÀ-ÿ0-9\s]+" title="Solo se permiten letras, números y espacios."
+                                    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="crear-imagen">Imagen de perfil:</label>
+                                <input type="file" id="crear-imagen" name="imagen" accept="image/*">
+                            </div>
+                        </div>
+
+                        <div class="seccion-form">
+                            <h4>2. Cuenta y Acceso</h4>
+
+                            <div class="form-group">
+                                <label for="crear-usuario">Usuario:</label>
+                                <input type="text" id="crear-usuario" name="usuario" autocomplete="off"
+                                    pattern="[a-zA-ZÀ-ÿ0-9\s]+" title="Solo se permiten letras, números y espacios."
+                                    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="crear-email">Email:</label>
+                                <input type="email" id="crear-email" name="email" autocomplete="off" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="crear-password1">Contraseña:</label>
+                                <input type="password" id="crear-password1" name="password1" autocomplete="off" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="crear-password2">Confirma Contraseña:</label>
+                                <input type="password" id="crear-password2" name="password2" autocomplete="off" required>
+                            </div>
+                        </div>
+
+                        <div class="seccion-form">
+                            <h4>3. Asignación y Estatus</h4>
+
+                            <div class="form-group">
+                                <label for="crear-rol">Rol:</label>
+                                <select id="crear-rol" name="rol" required>
+                                    <option value="">[Selecciona un rol]</option>
+                                    <?php 
+                                    //DocBlock para que confie en que ya viene el arreglo $lista_roles
+                                    /** @var array $lista_roles */
+                                    /** @var int $selected */
+                                    foreach ($lista_roles as $rol): ?>
+                                        <option value="<?php echo htmlspecialchars($rol['id_rol']); ?>" <?php echo (isset($usuario) && $usuario['id_rol'] == $rol['id_rol']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($rol['nom_rol']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="crear-tienda">Taller:</label>
+                                <select id="crear-tienda" name="tienda" required>
+                                    <option value="">[Selecciona un taller]</option>
+                                    <?php 
+                                    //DocBlock para que confie en que ya viene el arreglo $lista_tiendas
+                                    /** @var array $lista_tiendas */
+                                    /** @var int $selected */
+                                    foreach ($lista_tiendas as $tienda): ?>
+                                        <option value="<?php echo htmlspecialchars($tienda['id_taller']); ?>" <?php echo (isset($usuario) && $usuario['taller_id'] == $tienda['id_taller']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($tienda['nombre_t']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="estatus">Estatus:</label>
+                                <select id="estatus" name="estatus">
+                                    <?php
+                                    /** @var array $options */
+                                    /** @var int $selected */
+                                    foreach ($options as $key => $text) {
+                                    ?>
+                                        <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+
                     </div>
-
-                    <div class="form-group">
-                        <label for="crear-nombre">Nombre:</label>
-                        <input type="text" id="crear-nombre" name="nombre" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                    <div style="margin-top: 20px; text-align: right; border-top: 1px solid #ddd; padding-top: 15px;">
+                        <button type="submit" class="boton-guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar Usuario</button>
+                        <span class="cancelarModal" onclick="cerrarModalUser('crear-modalUser')">Cancelar</span>
                     </div>
-
-                    <div class="form-group">
-                        <label for="crear-papellido">Primer apellido:</label>
-                        <input type="text" id="crear-papellido" name="papellido" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="crear-sapellido">Segundo apellido :</label>
-                        <input type="text" id="crear-sapellido" name="sapellido" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="crear-email">Email:</label>
-                        <input type="email" id="crear-email" name="email" autocomplete="off" required>
-                    </div>
-
-                    <!-- Selección del rol -->
-                    <div class="form-group">
-                        <label for="crear-rol">Rol:</label>
-                        <select id="crear-rol" name="rol" required>
-                            <option value="">[Selecciona un rol]</option>
-                            <?php
-                            // Asumiendo que $lista_roles es un array de roles
-                            foreach ($lista_roles as $rol): ?>
-                                <option value="<?php echo htmlspecialchars($rol['id_rol']); ?>" <?php echo (isset($usuario) && $usuario['id_rol'] == $rol['id_rol']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($rol['nom_rol']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="crear-password1">Contraseña:</label>
-                        <input type="password" id="crear-password1" name="password1" autocomplete="off" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="crear-password2">Confirma Contraseña:</label>
-                        <input type="password" id="crear-password2" name="password2" autocomplete="off" required>
-                    </div>
-
-                    <!-- Selección de la taller -->
-                    <div class="form-group">
-                        <label for="crear-tienda">Taller:</label>
-                        <select id="crear-tienda" name="tienda" required>
-                            <option value="">[Selecciona un taller]</option>
-                            <?php
-                            foreach ($lista_tiendas as $tienda): ?>
-                                <option value="<?php echo htmlspecialchars($tienda['id_taller']); ?>" <?php echo (isset($usuario) && $usuario['taller_id'] == $tienda['id_taller']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($tienda['nombre_t']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="crear-imagen">Imagen de perfil:</label>
-                        <input type="file" id="crear-imagen" name="imagen" accept="image/*">
-                    </div>
-
-                    <!-- Selección de Estatus -->
-                    <div class="form-group">
-                        <label for="estatus">Estatus:</label>
-                        <select id="estatus" name="estatus">
-                            <?php foreach ($options as $key => $text) { ?>
-                                <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-
-                    <button type="submit">Guardar</button>
-                    <span class="cancelarModal" onclick="cerrarModal('crear-modalUser')" type=" submit">Cancelar</span>
 
                 </form>
             </div>
         </div>
 
-        <!-- Modal para editar Usuario *****************************************-->
         <div id="editar-modalUser" class="modal" style="display: none;">
-            <div class="modal-contentUsuarios">
+            <div class="modal-contentUsuarios" style="width: 90%; max-width: 1000px; padding: 25px;">
                 <span title="Cerrar" class="close" onclick="cerrarModalUser('editar-modalUser')">&times;</span>
                 <h2 class="tittle">Editar Usuario</h2>
 
                 <form id="form-editarUser" enctype="multipart/form-data" method="post" novalidate>
                     <input type="hidden" id="editar-idusuario" name="editar-idusuario" value="" />
 
-                    <div class="form-group">
-                        <label for="editar-usuario">Usuario:</label>
-                        <input type="text" id="editar-usuario" name="usuario" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                    <div class="form-grid-3">
+
+                        <div class="seccion-form">
+                            <h4>1. Información Personal</h4>
+
+                            <div class="form-group">
+                                <label for="editar-nombre">Nombre:</label>
+                                <input type="text" id="editar-nombre" name="nombre" autocomplete="off"
+                                    pattern="[a-zA-ZÀ-ÿ0-9\s]+" title="Solo se permiten letras, números y espacios."
+                                    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editar-papellido">Primer apellido:</label>
+                                <input type="text" id="editar-papellido" name="papellido" autocomplete="off"
+                                    pattern="[a-zA-ZÀ-ÿ0-9\s]+" title="Solo se permiten letras, números y espacios."
+                                    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editar-sapellido">Segundo apellido:</label>
+                                <input type="text" id="editar-sapellido" name="sapellido" autocomplete="off"
+                                    pattern="[a-zA-ZÀ-ÿ0-9\s]+" title="Solo se permiten letras, números y espacios."
+                                    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="imagen">Imagen de perfil:</label>
+                                <input type="file" id="imagen" name="imagen" accept="image/*">
+                            </div>
+                        </div>
+
+                        <div class="seccion-form">
+                            <h4>2. Cuenta y Acceso</h4>
+
+                            <div class="form-group">
+                                <label for="editar-usuario">Usuario:</label>
+                                <input type="text" id="editar-usuario" name="usuario" autocomplete="off"
+                                    pattern="[a-zA-ZÀ-ÿ0-9\s]+" title="Solo se permiten letras, números y espacios."
+                                    oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editar-email">Email:</label>
+                                <input type="email" id="editar-email" name="email" autocomplete="off" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editar-password1">Contraseña <small>(dejar en blanco para mantener actual)</small>:</label>
+                                <input type="password" id="editar-password1" name="password1" autocomplete="off">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editar-password2">Confirma Contraseña:</label>
+                                <input type="password" id="editar-password2" name="password2" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="seccion-form">
+                            <h4>3. Asignación y Estatus</h4>
+
+                            <div class="form-group">
+                                <label for="editar-rol">Rol:</label>
+                                <select id="editar-rol" name="rol" required>
+                                    <option value="">[Selecciona un rol]</option>
+                                    <?php foreach ($lista_roles as $rol): ?>
+                                        <option value="<?php echo htmlspecialchars($rol['nom_rol']); ?>"
+                                            data-nomrol="<?php echo htmlspecialchars($rol['nom_rol']); ?>"
+                                            <?php echo (isset($usuario) && $usuario['id_rol'] == $rol['id_rol']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($rol['nom_rol']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editar-tienda">Taller:</label>
+                                <select id="editar-tienda" name="tienda" required>
+                                    <option value="">[Selecciona un taller]</option>
+                                    <?php foreach ($lista_tiendas as $tienda): ?>
+                                        <option value="<?php echo htmlspecialchars($tienda['nombre_t']); ?>"
+                                            data-nomrol="<?php echo htmlspecialchars($tienda['nombre_t']); ?>"
+                                            <?php echo (isset($usuario) && $usuario['nombre_t'] == $tienda['id_taller']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($tienda['nombre_t']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editar-estatus">Estatus:</label>
+                                <select id="editar-estatus" name="estatus">
+                                    <?php
+                                    /** @var array $options */
+                                    /** @var int $selected */
+                                    foreach ($options as $key => $text) {
+                                    ?>
+                                        <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div style="margin-top: 20px; text-align: right; border-top: 1px solid #ddd; padding-top: 15px;">
+                        <button type="submit" class="boton-guardar"><i class="fa-solid fa-floppy-disk"></i> Actualizar</button>
+                        <span class="cancelarModal" onclick="cerrarModalUser('editar-modalUser')">Cancelar</span>
                     </div>
 
-                    <div class="form-group">
-                        <label for="editar-nombre">Nombre:</label>
-                        <input type="text" id="editar-nombre" name="nombre" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editar-papellido">Primer apellido:</label>
-                        <input type="text" id="editar-papellido" name="papellido" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editar-sapellido">Segundo apellido :</label>
-                        <input type="text" id="editar-sapellido" name="sapellido" autocomplete="off"
-                            pattern="[a-zA-ZÀ-ÿ0-9\s]+"
-                            title="Solo se permiten letras, números y espacios."
-                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '')" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editar-email">Email:</label>
-                        <input type="email" id="editar-email" name="email" autocomplete="off" required>
-                    </div>
-
-                    <!-- Selección del rol -->
-                    <div class="form-group">
-                        <label for="editar-rol">Rol:</label>
-                        <select id="editar-rol" name="rol" required>
-                            <option value="">[Selecciona un rol]</option>
-                            <?php foreach ($lista_roles as $rol): ?>
-                                <option value="<?php echo htmlspecialchars($rol['nom_rol']); ?>"
-                                    data-nomrol="<?php echo htmlspecialchars($rol['nom_rol']); ?>"
-                                    <?php echo (isset($usuario) && $usuario['id_rol'] == $rol['id_rol']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($rol['nom_rol']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editar-password1">Contraseña:</label>
-                        <input type="password" id="editar-password1" name="password1" autocomplete="off">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editar-password2">Confirma Contraseña:</label>
-                        <input type="password" id="editar-password2" name="password2" autocomplete="off">
-                    </div>
-
-                    <!-- Selección de la taller -->
-                    <div class="form-group">
-                        <label for="editar-tienda">Taller:</label>
-                        <select id="editar-tienda" name="tienda" required>
-                            <option value="">[Selecciona un taller]</option>
-                            <?php foreach ($lista_tiendas as $tienda): ?>
-                                <option value="<?php echo htmlspecialchars($tienda['nombre_t']); ?>"
-                                    data-nomrol="<?php echo htmlspecialchars($tienda['nombre_t']); ?>"
-                                    <?php echo (isset($usuario) && $usuario['nombre_t'] == $tienda['id_taller']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($tienda['nombre_t']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="imagen">Imagen de perfil:</label>
-                        <input type="file" id="imagen" name="imagen" accept="image/*">
-                    </div>
-
-                    <!-- Selección de Estatus -->
-                    <div class="form-group">
-                        <label for="editar-estatus">Estatus:</label>
-                        <select id="editar-estatus" name="estatus">
-                            <?php foreach ($options as $key => $text) { ?>
-                                <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-
-                    <button type="submit">Actualizar</button>
-                    <span class="cancelarModal" onclick="cerrarModalUser('editar-modalUser')" type=" submit">Cancelar</span>
                 </form>
             </div>
         </div>
     </div>
+</div>```
 </div><!--End container -->

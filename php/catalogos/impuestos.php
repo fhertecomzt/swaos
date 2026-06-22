@@ -84,7 +84,13 @@ $impuestos = obtenerRegistros($dbh, "impuestos", "idimpuesto, nomimpuesto, tasa,
                     <div class="form-group">
                         <label for="estatus">Estatus:</label>
                         <select id="estatus" name="estatus">
-                            <?php foreach ($options as $key => $text) { ?>
+                            <?php
+                //DocBlock para que confie en que ya viene el arreglo $options
+
+                            /** @var array $options */
+                            /** @var int $selected */
+                            foreach ($options as $key => $text) {
+                            ?>
                                 <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
                             <?php } ?>
                         </select>
@@ -117,7 +123,12 @@ $impuestos = obtenerRegistros($dbh, "impuestos", "idimpuesto, nomimpuesto, tasa,
                     <div class="form-group">
                         <label for="editar-estatus">Estatus:</label>
                         <select id="editar-estatus" name="estatus">
-                            <?php foreach ($options as $key => $text) { ?>
+                            <?php
+                //DocBlock para que confie en que ya viene el arreglo $options
+                            /** @var array $options */
+                            /** @var int $selected */
+                            foreach ($options as $key => $text) {
+                            ?>
                                 <option value="<?= $key ?>" <?= $key === $selected ? 'selected' : '' ?>><?= $text ?></option>
                             <?php } ?>
                         </select>
