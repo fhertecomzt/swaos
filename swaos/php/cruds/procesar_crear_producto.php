@@ -25,6 +25,8 @@ try {
   $stock_minimo = $_POST['stock_minimo'] ?? '';
   $rutaImagen = $_POST['imagen'] ?? '';
   $estatus = trim($_POST['estatus'] ?? '');
+  $cant_promo = $_POST['cant_promo'] ?? 0;
+  $precio_promo = $_POST['precio_promo'] ?? 0;
 
   // Validación de campos obligatorios
   if (empty($codebar) || empty($nombre) || empty($descprod) || empty($categoria)) {
@@ -74,8 +76,8 @@ try {
   // Insertar en la base de datos
   $stmt = $dbh->prepare("
         INSERT INTO productos (
-            codebar_prod, nombre_prod, desc_prod, id_cat, id_marca, id_prov, id_unidad, id_impuesto, costo_prod, ganancia_prod, precio, stock_minimo, imagen, estatus
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            codebar_prod, nombre_prod, desc_prod, id_cat, id_marca, id_prov, id_unidad, id_impuesto, costo_prod, ganancia_prod, precio, stock_minimo, imagen, estatus, cant_promo, precio_promo
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
   $stmt->execute([
@@ -92,7 +94,9 @@ try {
     $precio1,
     $stock_minimo,
     $rutaImagen,
-    $estatus
+    $estatus,
+    $cant_promo,
+    $precio_promo
   ]);
 
   $lastId = $dbh->lastInsertId();
@@ -115,7 +119,9 @@ try {
     "precio1" => $precio1,
     "stock_minimo" => $stock_minimo,
     "imagen" => $rutaImagen,
-    "estatus" => $estatus
+    "estatus" => $estatus,
+    "cant_promo" => $cant_promo,
+    "precio_promo" => $precio_promo
   ];
 
 } catch (Exception $e) {

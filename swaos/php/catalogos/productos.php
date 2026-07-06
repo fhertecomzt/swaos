@@ -209,6 +209,17 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
             </div>
 
             <div class="form-containernum">
+              <label style="margin-top: 10px; color: #0d6efd; font-weight: bold;">Configurar Precio Especial (Opcional):</label>
+              <div class="form-containernum">
+                <div class="form-group ladoble">
+                  <label for="crear-cant-promo">A partir de (Cantidad):</label>
+                  <input type="number" id="crear-cant-promo" name="cant_promo" min="0" value="0" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+                <div class="form-group ladoble">
+                  <label for="crear-precio-promo">Precio del Paquete ($):</label>
+                  <input type="number" id="crear-precio-promo" name="precio_promo" step="0.01" min="0" value="0.00">
+                </div>
+              </div>
               <div class="form-group ladoble">
                 <label for="crear-costo_compra">Costo ($):</label>
                 <input type="number" id="crear-costo_compra" name="costo_compra" autocomplete="off"
@@ -258,7 +269,7 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
     </div>
   </div>
 
-
+<!-- Modal editar producto -->
   <div id="editar-modalProducto" class="modal" style="display: none;">
     <div class="modal-contentProductos" style="width: 90%; max-width: 1000px; padding: 25px;">
       <span title="Cerrar" class="close" onclick="cerrarModalProducto('editar-modalProducto')">&times;</span>
@@ -368,6 +379,17 @@ $productos = obtenerProductosStock($dbh, "productos", "p.id_prod, p.codebar_prod
             </div>
 
             <div class="form-containernum">
+              <label style="margin-top: 10px; color: #0d6efd; font-weight: bold;">Configurar Precio Especial (Opcional):</label>
+              <div class="form-containernum">
+                <div class="form-group ladoble">
+                  <label for="editar-cant-promo">A partir de (Cantidad):</label>
+                  <input type="number" id="editar-cant-promo" name="cant_promo" min="0" value="0" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+                <div class="form-group ladoble">
+                  <label for="editar-precio-promo">Precio del Paquete ($):</label>
+                  <input type="number" id="editar-precio-promo" name="precio_promo" step="0.01" min="0" value="0.00">
+                </div>
+              </div>
               <div class="form-group ladoble">
                 <label for="editar-costo_compra">Costo ($):</label>
                 <input type="number" id="editar-costo_compra" name="costo_compra" autocomplete="off"

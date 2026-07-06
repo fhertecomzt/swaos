@@ -1928,6 +1928,18 @@ function validarFormularioProducto(event) {
 
     // Números (Costos y Precios)
     {
+      id: "crear-cant-promo",
+      tipo: "numero",
+      minVal: 0,
+      mensaje: "La cantidad debe ser igual o mayor a cero",
+    },
+    {
+      id: "crear-precio-promo",
+      tipo: "numero",
+      minVal: 0,
+      mensaje: "El precio debe ser igual o mayor a cero",
+    },
+    {
       id: "crear-costo_compra",
       tipo: "numero",
       minVal: 0.01,
@@ -2102,6 +2114,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 "precio1",
                 "stock_minimo",
                 "estatus",
+                "cant-promo",
+                "precio-promo",
               ];
               //console.log(`Asignando ${campos}:`, data.producto[campos]);
               campos.forEach((campo) => {
@@ -6703,7 +6717,7 @@ window.cargarTablaKardex = function () {
         pageLength: parseInt($("#kardex-length").val()) || 8,
         scrollY: "40vh",
         scrollCollapse: true,
-        order: [[1, "asc"]], // ⚠️ Se asegura de ordenar por ID
+        order: [[1, "asc"]], // Se asegura de ordenar por ID
         language: {
           url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
           // Dejamos que DataTables ponga el mensaje elegante cuando esté vacío
@@ -9534,6 +9548,8 @@ function agregarAlCarrito(producto) {
       precio: parseFloat(producto.p_venta),
       cantidad: 1,
       stock_max: stockReal, // Guardado como número real puro
+      cant_promo: parseInt(producto.cant_promo) || 0,
+      precio_promo: parseFloat(producto.precio_promo) || 0,
     });
   }
   actualizarCarritoUI();
@@ -9609,7 +9625,21 @@ function actualizarCarritoUI() {
   }
 
   carritoPOS.forEach((item) => {
-    let subtotal = item.precio * item.cantidad;
+    // ---LÓGICA DE CÁLCULO CON PROMOCIONES---
+    let subtotal = 0;
+    if (
+      item.cant_promo > 0 &&
+      item.precio_promo > 0 &&
+      item.cantidad >= item.cant_promo
+    ) {
+      let paquetes = Math.floor(item.cantidad / item.cant_promo);
+      let sueltos = item.cantidad % item.cant_promo;
+      subtotal = paquetes * item.precio_promo + sueltos * item.precio;
+    } else {
+      subtotal = item.precio * item.cantidad;
+    }
+    // -------------------------------
+
     granTotal += subtotal;
     totalArticulos += item.cantidad;
 

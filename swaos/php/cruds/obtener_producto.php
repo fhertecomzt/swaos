@@ -32,6 +32,9 @@ if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
         "stock_minimo" => htmlspecialchars($producto["stock_minimo"]),
         "imagen" => htmlspecialchars($producto["imagen"]),
         "estatus" => htmlspecialchars($producto["estatus"]),
+        "cant-promo" => htmlspecialchars($producto["cant_promo"]),
+        "precio-promo" => htmlspecialchars($producto["precio_promo"]),
+
 
       ];
     } else {
