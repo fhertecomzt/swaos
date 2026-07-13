@@ -37,7 +37,7 @@ $_SESSION['captcha_result'] = $num1 + $num2;
     <meta name="robots" content="noindex" />
     <title>SWAOS: Sistema Web de Administración para Órdenes de Servicio </title>
 
-    <!-- <link rel="stylesheet" type="text/css" href="css/estilologin.css"> -->
+    <link rel="stylesheet" type="text/css" href="css/estilologin.css">
 
     <!-- CDn Font Awesome link Fuente iconos-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

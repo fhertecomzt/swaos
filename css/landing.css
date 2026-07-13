@@ -1,0 +1,712 @@
+:root {
+  --bg-dark: #34495e;
+  --primary: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --success: #28a745;
+  --whats: #25d366;
+  --bg-light: #f4f6f9;
+  --text-main: #333333;
+  --text-muted: #666666;
+  --border-color: #e2e8f0;
+}
+
+/* SCROLL SUAVE Y MARGEN PARA LA BARRA PEGAJOSA */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* Evita que el navbar tape el título al llegar a la sección */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* NAVEGACIÓN */
+.navbar {
+  background-color: var(--bg-dark);
+  color: #ffffff;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+}
+
+.logo i {
+  color: var(--primary);
+}
+
+/* LÍNEA AMARILLA ANIMADA EN EL MENÚ */
+.nav-links a {
+    color: #ffffff;
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: 500;
+    position: relative; /* Necesario para posicionar la línea debajo */
+    padding-bottom: 6px; /* Espacio entre el texto y la línea */
+    transition: color 0.3s;
+}
+
+/* Creamos la línea invisible por defecto (ancho 0) */
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 3px;
+    bottom: 0;
+    left: 0;
+    background-color: #ffc107; /* Amarillo corporativo (mismo del badge de promo) */
+    border-radius: 2px;
+    transition: width 0.3s ease-in-out;
+}
+
+/* Al pasar el mouse O cuando tiene la clase activa, la línea crece al 100% */
+.nav-links a:hover::after,
+.nav-links a.active::after {
+    width: 100%;
+}
+
+/* Opcional: El texto activo también cambia a amarillo */
+.nav-links a:hover,
+.nav-links a.active {
+    color: #ffc107;
+}
+/* HERO SECTION */
+.hero {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #1a252f 100%);
+  color: #ffffff;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #cbd5e1;
+  margin-bottom: 40px;
+}
+
+/* CAJA DE RASTREO SWAOS */
+.search-box-container {
+  background: #ffffff;
+  color: var(--text-main);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-align: left;
+}
+
+.search-box-container h3 {
+  color: var(--bg-dark);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-subtext {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 20px !important;
+}
+
+.search-form {
+  display: flex;
+  gap: 10px;
+}
+
+.search-form input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.search-form input:focus {
+  border-color: var(--primary);
+}
+
+.search-form button {
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-form button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* TARJETA DE RESULTADO SWAOS */
+.resultado-box {
+  margin-top: 25px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: var(--bg-light);
+  border-left: 5px solid var(--primary);
+  animation: fadeIn 0.4s ease;
+}
+
+/* SECCIONES Y GRIDS */
+.features,
+.services,
+.contact {
+  padding: 80px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.services {
+  background-color: var(--bg-light);
+  max-width: 100%;
+}
+.services .grid-3 {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-title h2 {
+  font-size: 2.2rem;
+  color: var(--bg-dark);
+}
+.section-title p {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.feature-card,
+.service-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  border: 1px solid var(--border-color);
+  transition: transform 0.3s;
+}
+
+.feature-card:hover,
+.service-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-card i {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+.service-icon {
+  font-size: 2.5rem;
+  color: var(--bg-dark);
+  margin-bottom: 20px;
+}
+.feature-card h4,
+.service-card h4 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  color: var(--bg-dark);
+}
+.feature-card p,
+.service-card p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* BANNER PROMOCIONAL */
+.promo-banner {
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  color: #ffffff;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.promo-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.badge-promo {
+  background: #ffc107;
+  color: #000;
+  font-weight: bold;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+.promo-content h2 {
+  font-size: 2.2rem;
+  margin: 15px 0;
+}
+.promo-content p {
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+.btn-promo {
+  display: inline-block;
+  background: var(--whats);
+  color: #ffffff;
+  padding: 12px 30px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+.btn-promo:hover {
+  transform: scale(1.05);
+  color: #fff;
+}
+
+/* CONTACTO */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 40px;
+  align-items: center;
+}
+
+.info-item {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.info-item i {
+  font-size: 1.8rem;
+  color: var(--primary);
+  width: 40px;
+}
+.info-item h5 {
+  font-size: 1.2rem;
+  color: var(--bg-dark);
+  margin-bottom: 5px;
+}
+.info-item p {
+  color: var(--text-muted);
+}
+
+.contact-map {
+  background: var(--bg-light);
+  height: 300px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #cbd5e1;
+}
+.map-placeholder {
+  text-align: center;
+  color: var(--text-muted);
+}
+.map-placeholder i {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+/* FOOTER */
+footer {
+  background: var(--bg-dark);
+  color: #ffffff;
+  text-align: center;
+  padding: 40px 20px;
+  border-top: 4px solid var(--primary);
+}
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.system-credit {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 10px 0;
+}
+.staff-link {
+  display: inline-block;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin-top: 15px;
+  padding: 5px 15px;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+.staff-link:hover {
+  background: #475569;
+  color: #ffffff;
+}
+
+/* BOTÓN FLOTANTE WHATSAPP */
+.whatsapp-float {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background-color: var(--whats);
+  color: #ffffff;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  text-decoration: none;
+  transition: transform 0.3s;
+}
+.whatsapp-float:hover {
+  transform: scale(1.1);
+  color: #ffffff;
+}
+
+/* =========================================================
+   SECCIONES DE PANTALLA COMPLETA (FULL VIEWPORT)
+   ========================================================= */
+.seccion-pantalla {
+    min-height: calc(100vh - 70px); /* 100% de la pantalla menos el alto del navbar */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra el contenido verticalmente */
+    align-items: center;     /* Centra el contenido horizontalmente */
+    padding: 60px 20px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Estilo para el botón de bajar en el Hero */
+.btn-primary-hero {
+    display: inline-block;
+    margin-top: 25px;
+    background-color: var(--primary);
+    color: #ffffff;
+    padding: 12px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s;
+}
+.btn-primary-hero:hover { background-color: var(--primary-hover); transform: translateY(-3px); color: #fff; }
+
+/* Fondo y contenedor especial para la sección de Rastreo */
+.rastreo-section {
+    background-color: #eef2f6;
+}
+.rastreo-section .search-box-container {
+    width: 100%;
+    max-width: 750px;
+}
+
+/* Asegurar que el contenedor de servicios no se desborde */
+.content-wrapper {
+    width: 100%;
+    max-width: 1200px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   ESTILOS DE LA LÍNEA DE TIEMPO (CÓMO TRABAJAMOS)
+   ========================================================= */
+.timeline-section {
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
+}
+
+.timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.timeline-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    border-top: 4px solid #cbd5e1;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Efecto de encendido (Active / Hover) */
+.timeline-card:hover,
+.timeline-card.active {
+    transform: translateY(-8px);
+    border-top-color: var(--primary);
+    box-shadow: 0 12px 25px rgba(13, 110, 253, 0.15);
+}
+
+.step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.step-number {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #cbd5e1;
+    transition: color 0.3s;
+}
+
+.timeline-card:hover .step-number,
+.timeline-card.active .step-number {
+    color: var(--primary);
+}
+
+.step-icon {
+    font-size: 1.8rem;
+    color: var(--bg-dark);
+    width: 50px;
+    height: 50px;
+    background: var(--bg-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.timeline-card:hover .step-icon,
+.timeline-card.active .step-icon {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.timeline-card h4 {
+    font-size: 1.25rem;
+    color: var(--bg-dark);
+    margin-bottom: 10px;
+}
+
+.timeline-card p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    flex-grow: 1;
+}
+
+.step-detail {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border-color);
+    font-size: 0.85rem;
+    color: var(--bg-dark);
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.step-detail i {
+    color: var(--success);
+}
+
+/* FOOTER DEL TIMELINE (LLAMADO A LA ACCIÓN WHATSAPP) */
+.timeline-footer-cta {
+    margin-top: 40px;
+    background: #ffffff;
+    padding: 20px 30px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.timeline-footer-cta p {
+    color: var(--bg-dark);
+    font-weight: bold;
+    margin: 0;
+}
+
+.timeline-footer-cta small {
+    color: var(--text-muted);
+    font-weight: normal;
+}
+
+/* BOTÓN DE ACCESO AL PORTAL DEL CLIENTE (AZUL CORPORATIVO) */
+.btn-portal-inline {
+    background-color: var(--primary); /* Azul de confianza #0d6efd */
+    color: #ffffff;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+    transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-portal-inline:hover {
+    background-color: var(--primary-hover);
+    transform: scale(1.05);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.45);
+}
+
+/* Ajuste para que en celular el botón abarque el ancho completo y sea fácil de tocar */
+@media (max-width: 850px) {
+    .btn-portal-inline {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* =========================================================
+   DISEÑO RESPONSIVO Y MENÚ MÓVIL (HAMBURGUESA)
+   ========================================================= */
+
+/* Por defecto, ocultamos el botón hamburguesa en computadoras */
+.menu-toggle {
+    display: none;
+    font-size: 1.8rem;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.menu-toggle:hover {
+    color: var(--primary);
+}
+
+/* REGLAS PARA MÓVILES Y TABLETS (Pantallas menores a 850px) */
+@media (max-width: 850px) {
+    /* 1. Mostramos el botón hamburguesa */
+    .menu-toggle {
+        display: block;
+    }
+
+    /* 2. Transformamos el menú en una barra desplegable vertical */
+    .nav-links {
+        position: absolute;
+        top: 100%; /* Justo debajo de la barra negra */
+        left: 0;
+        width: 100%;
+        background-color: var(--bg-dark);
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        max-height: 0; /* Oculto por defecto con altura 0 */
+        overflow: hidden;
+        box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+        transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+    }
+
+    /* 3. Clase que JS le pondrá para abrir el menú */
+    .nav-links.nav-active {
+        max-height: 350px; /* Altura suficiente para mostrar los enlaces */
+        padding: 20px 0;
+        border-top: 1px solid #475569;
+    }
+
+    .nav-links a {
+        margin: 15px 0;
+        font-size: 1.1rem;
+        width: 100%;
+        text-align: center;
+        display: block;
+    }
+
+    /* Ajuste de la línea amarilla para móvil (se centra debajo del texto) */
+    .nav-links a::after {
+        left: 35%;
+        width: 0;
+    }
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+        width: 30%; /* Línea más corta y centrada en celular */
+    }
+
+    /* 4. Ajustes generales de texto y tarjetas para celular */
+    .hero h1 { font-size: 2rem; }
+    .hero p { font-size: 1rem; }
+    .section-title h2 { font-size: 1.8rem; }
+    
+    /* En celular, el buscador de folios se pone en columna para que quepa bien el botón */
+    .search-form { flex-direction: column; }
+    .search-form button { justify-content: center; width: 100%; }
+    
+    /* Quitar padding excesivo en móviles */
+    .seccion-pantalla { padding: 40px 15px; min-height: auto; }
+}

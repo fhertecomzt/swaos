@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SWAOS | Tu taller</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+    <!-- FontAwesome para Iconos -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/landing.css" />
+  </head>
+  <body>
+    <!-- NAVEGACIÓN -->
+    <header class="navbar">
+      <div class="nav-container">
+        <div class="logo">
+          <i class="fa-solid fa-laptop-medical"></i>
+          <span>Tu-<strong>Taller</strong></span>
+        </div>
+
+        <div class="menu-toggle" id="mobile-menu">
+          <i class="fa-solid fa-bars"></i>
+        </div>
+
+        <nav class="nav-links" id="nav-links">
+          <a href="#inicio" class="active">Inicio</a>
+          <a href="#rastreo">Trazabilidad</a>
+          <a href="#servicios">Servicios</a>
+          <a href="#promociones">Promociones</a>
+          <a href="#contacto">Contacto</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 1. HERO SECTION (INICIO - 100% PANTALLA) -->
+    <section id="inicio" class="seccion-pantalla hero">
+      <div class="hero-content">
+        <h1>Expertos en Reparación y Mantenimiento de Equipos</h1>
+        <p>
+          Trazabilidad digital en tiempo real para tu tranquilidad. Respaldo
+          profesional con el poder y seguridad de SWAOS.
+        </p>
+        <a href="#rastreo" class="btn-primary-hero"
+          ><i class="fa-solid fa-arrow-down"></i> Ve cómo trabajamos?</a
+        >
+      </div>
+    </section>
+
+    <section id="rastreo" class="seccion-pantalla timeline-section">
+      <div class="content-wrapper">
+        <div class="section-title">
+          <span
+            class="badge-promo"
+            style="background: var(--primary); color: white"
+            ><i class="fa-solid fa-shield-halved"></i> TRAZABILIDAD SWAOS</span
+          >
+          <h2 style="margin-top: 10px">Nuestro Proceso de Trabajo</h2>
+          <p>
+            Conoce cómo digitalizamos y protegemos tu equipo en cada etapa del
+            servicio técnico.
+          </p>
+        </div>
+
+        <div class="timeline-grid">
+          <div class="timeline-card active" data-step="1">
+            <div class="step-header">
+              <span class="step-number">01</span>
+              <div class="step-icon"><i class="fa-solid fa-qrcode"></i></div>
+            </div>
+            <h4>Recepción y Ticket QR</h4>
+            <p>
+              Registramos tu equipo en sistema y te entregamos un recibo con
+              identidad digital única y código QR infalsificable.
+            </p>
+            <div class="step-detail">
+              <i class="fa-solid fa-check-circle"></i>
+              <strong>Garantía SWAOS:</strong> Evita extravíos y vincula tu
+              número de serie al expediente.
+            </div>
+          </div>
+
+          <div class="timeline-card" data-step="2">
+            <div class="step-header">
+              <span class="step-number">02</span>
+              <div class="step-icon"><i class="fa-solid fa-user-gear"></i></div>
+            </div>
+            <h4>Diagnóstico Técnico</h4>
+            <p>
+              Nuestro cuerpo técnico especializado analiza el dispositivo e
+              inicia la bitácora de componentes en el servidor.
+            </p>
+            <div class="step-detail">
+              <i class="fa-solid fa-check-circle"></i>
+              <strong>Garantía SWAOS:</strong> Cotización clara y cotización por
+              volumen en refacciones.
+            </div>
+          </div>
+
+          <div class="timeline-card" data-step="3">
+            <div class="step-header">
+              <span class="step-number">03</span>
+              <div class="step-icon">
+                <i class="fa-solid fa-camera-retro"></i>
+              </div>
+            </div>
+            <h4>Evidencia Fotográfica</h4>
+            <p>
+              Capturamos imágenes del estado real de las piezas instaladas y el
+              trabajo de soldadura o limpieza realizado.
+            </p>
+            <div class="step-detail">
+              <i class="fa-solid fa-check-circle"></i>
+              <strong>Garantía SWAOS:</strong> Transparencia absoluta; sabes
+              exactamente por qué estás pagando.
+            </div>
+          </div>
+
+          <div class="timeline-card" data-step="4">
+            <div class="step-header">
+              <span class="step-number">04</span>
+              <div class="step-icon">
+                <i class="fa-brands fa-whatsapp" style="color: #25d366"></i>
+              </div>
+            </div>
+            <h4>Entrega y WhatsApp</h4>
+            <p>
+              El sistema sella tu orden y te enviamos una notificación
+              instantánea con tu nota de entrega al celular.
+            </p>
+            <div class="step-detail">
+              <i class="fa-solid fa-check-circle"></i>
+              <strong>Garantía SWAOS:</strong> Expediente 360° acumulado para
+              futuras revisiones.
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-footer-cta">
+          <p>
+            <i class="fa-solid fa-user-lock"></i> ¿Ya tienes un equipo en taller
+            y deseas conocer su avance? <br />
+            <small
+              >Ingresa a nuestro portal seguro con el usuario y contraseña que
+              recibiste al registrar tu equipo:</small
+            >
+          </p>
+          <!-- Redirección directa al módulo de acceso al portal del cliente -->
+          <a href="swaos/portal_cliente.php" class="btn-portal-inline">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Acceder al Portal
+            del Cliente
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CATÁLOGO DE SERVICIOS Y DIFERENCIADORES (SERVICIOS - 100% PANTALLA) -->
+    <section id="servicios" class="seccion-pantalla services">
+      <div class="content-wrapper">
+        <div class="section-title">
+          <h2>Nuestros Servicios</h2>
+          <p>
+            Soluciones integrales con evidencia fotográfica y expediente digital
+            360°.
+          </p>
+        </div>
+        <div class="grid-3">
+          <div class="service-card">
+            <div class="service-icon"><i class="fa-solid fa-desktop"></i></div>
+            <h4>Mantenimiento Preventivo</h4>
+            <p>
+              Limpieza profunda, cambio de pasta térmica de alto rendimiento y
+              optimización del sistema.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fa-solid fa-microchip"></i>
+            </div>
+            <h4>Reparación de Hardware</h4>
+            <p>
+              Diagnóstico electrónico, reemplazo de pantallas, baterías,
+              teclados y componentes dañados.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fa-solid fa-hard-drive"></i>
+            </div>
+            <h4>Upgrades y Rendimiento</h4>
+            <p>
+              Instalación de unidades de estado sólido (SSD NVMe) y ampliación
+              de memoria RAM garantizada.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. PROMOCIONES (PROMOCIONES - 100% PANTALLA) -->
+    <section id="promociones" class="seccion-pantalla promo-banner">
+      <div class="promo-content">
+        <span class="badge-promo">PROMO EXCLUSIVA</span>
+        <h2>¡Precios Especiales por Volumen!</h2>
+        <p>
+          Aprovecha nuestro esquema de mayoreo en tienda: adquiere
+          <strong>3 piezas o accesorios seleccionados</strong> (cables,
+          cargadores, periféricos) y obtén un precio especial preferencial con
+          descuento directo en caja.
+        </p>
+        <a
+          href="https://wa.me/526691263945?text=Hola,%20quisiera%20más%20información%20sobre%20las%20promociones%20por%20volumen..."
+          target="_blank"
+          class="btn-promo"
+        >
+          <i class="fa-brands fa-whatsapp"></i> Preguntar por Catálogo
+        </a>
+      </div>
+    </section>
+
+    <!-- UBICACIÓN Y CONTACTO -->
+    <section id="contacto" class="contact">
+      <div class="section-title">
+        <h2>Visita Nuestro Taller</h2>
+        <p>
+          Estamos listos para ayudarte a resolver cualquier problema técnico.
+        </p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="info-item">
+            <i class="fa-solid fa-location-dot"></i>
+            <div>
+              <h5>Ubicación</h5>
+              <p>Calle Principal #123, Col. Centro, Mazatlán, Sinaloa.</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <i class="fa-solid fa-clock"></i>
+            <div>
+              <h5>Horarios de Atención</h5>
+              <p>
+                Lunes a Viernes: 9:00 AM - 7:00 PM<br />Sábados: 9:00 AM - 2:00
+                PM
+              </p>
+            </div>
+          </div>
+          <div class="info-item">
+            <i class="fa-solid fa-phone"></i>
+            <div>
+              <h5>Contacto Directo</h5>
+              <p>Tel: (669) 000-0000<br />Email: contacto@tutaller.mx</p>
+            </div>
+          </div>
+        </div>
+        <!-- Mapa interactivo opcional o imagen de sucursal -->
+        <div class="contact-map">
+          <div class="map-placeholder">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <p>Google Maps / Ubicación del Taller</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-container">
+        <p>
+          &copy; 2026 Tu-Taller / Tu contacto. Todos los derechos reservados.
+        </p>
+        <p class="system-credit">
+          Plataforma impulsada por <strong>SWAOS</strong>.
+        </p>
+        <div class="footer-links">
+          <a href="swaos/index.php" class="staff-link"
+            ><i class="fa-solid fa-user-lock"></i> Acceso al Portal / Staff</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <!-- BOTÓN FLOTANTE DE WHATSAPP -->
+    <a
+      href="https://wa.me/526691263945?text=Hola,%20necesito%20soporte%20técnico%20para%20mi%20equipo..."
+      class="whatsapp-float"
+      target="_blank"
+      title="Chatea con nosotros"
+    >
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <script src="js/landing.js"></script>
+  </body>
+</html>
